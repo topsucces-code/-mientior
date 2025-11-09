@@ -1,0 +1,273 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PRISMA_DATABASE_URL")
+}
+
+model Analytics {
+  id        String   @id @default(cuid())
+  page      String
+  views     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("analytics")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  userId    String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+enum ProductStatus {
+  ACTIVE
+  DRAFT
+  ARCHIVED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum LoyaltyLevel {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Product {
+  id              String            @id @default(cuid())
+  name            String
+  slug            String            @unique
+  description     String?           @db.Text
+  price           Float
+  compareAtPrice  Float?
+  stock           Int               @default(0)
+  rating          Float             @default(0)
+  reviewCount     Int               @default(0)
+  badge           String?
+  featured        Boolean           @default(false)
+  onSale          Boolean           @default(false)
+  status          ProductStatus     @default(ACTIVE)
+  specifications  Json?
+  seo             Json?
+  categoryId      String
+  category        Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  images          ProductImage[]
+  variants        ProductVariant[]
+  tags            ProductTag[]
+  reviews         Review[]
+  orderItems      OrderItem[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([status])
+  @@index([featured])
+  @@index([onSale])
+  @@index([createdAt])
+  @@map("products")
+}
+
+model Category {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  description String?     @db.Text
+  image       String?
+  parentId    String?
+  parent      Category?   @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: Restrict)
+  children    Category[]  @relation("CategoryToCategory")
+  products    Product[]
+  order       Int         @default(0)
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([slug])
+  @@index([parentId])
+  @@index([isActive])
+  @@map("categories")
+}
+
+model Tag {
+  id        String       @id @default(cuid())
+  name      String
+  slug      String       @unique
+  products  ProductTag[]
+  createdAt DateTime     @default(now())
+
+  @@map("tags")
+}
+
+model ProductTag {
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId     String
+  createdAt DateTime @default(now())
+
+  @@id([productId, tagId])
+  @@map("product_tags")
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String
+  type      String   @default("IMAGE")
+  order     Int      @default(0)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+model ProductVariant {
+  id            String   @id @default(cuid())
+  sku           String   @unique
+  size          String?
+  color         String?
+  stock         Int      @default(0)
+  priceModifier Float    @default(0)
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([productId])
+  @@map("product_variants")
+}
+
+model Review {
+  id        String       @id @default(cuid())
+  rating    Int
+  title     String?
+  comment   String?      @db.Text
+  status    ReviewStatus @default(PENDING)
+  productId String
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([productId])
+  @@index([userId])
+  @@index([status])
+  @@map("reviews")
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  orderNumber   String        @unique
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  subtotal      Float
+  tax           Float         @default(0)
+  shipping      Float         @default(0)
+  total         Float
+  notes         String?       @db.Text
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  items         OrderItem[]
+  shippingAddress Json?
+  billingAddress Json?
+  paymentIntentId String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  quantity  Int
+  price     Float
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model User {
+  id            String       @id @default(cuid())
+  email         String       @unique
+  firstName     String?
+  lastName      String?
+  loyaltyLevel  LoyaltyLevel @default(BRONZE)
+  loyaltyPoints Int          @default(0)
+  totalOrders   Int          @default(0)
+  totalSpent    Float        @default(0)
+  orders        Order[]
+  reviews       Review[]
+  addresses     Json?
+  recentlyViewed Json?
+  wishlist      Json?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([email])
+  @@index([loyaltyLevel])
+  @@map("users")
+}
+
+model FAQ {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String   @db.Text
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("faqs")
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String?
+  type      String
+  createdAt DateTime @default(now())
+
+  @@map("media")
+}

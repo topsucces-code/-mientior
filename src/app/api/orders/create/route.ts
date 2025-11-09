@@ -1,0 +1,305 @@
+/**
+ * API endpoint for creating orders after successful payment
+ */
+
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { requireAuth } from '@/lib/auth-server'
+import { stripe } from '@/lib/stripe'
+import { sendEmail } from '@/lib/email'
+import {
+  acquireMultipleStockLocks,
+  releaseMultipleStockLocks,
+  decrementStockAtomic,
+  isOrderProcessed,
+  markOrderProcessed,
+} from '@/lib/stock-lock'
+import type { Address } from '@/types'
+
+// Generate unique order number
+function generateOrderNumber(): string {
+  const year = new Date().getFullYear()
+  const random = Math.floor(Math.random() * 1000000)
+    .toString()
+    .padStart(6, '0')
+  return `ORD-${year}-${random}`
+}
+
+// Calculate estimated delivery date
+function calculateEstimatedDelivery(shippingDays: number): { min: Date; max: Date } {
+  const today = new Date()
+  const minDate = new Date(today)
+  const maxDate = new Date(today)
+
+  minDate.setDate(minDate.getDate() + shippingDays)
+  maxDate.setDate(maxDate.getDate() + shippingDays + 2)
+
+  return { min: minDate, max: maxDate }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    // Verify authentication
+    const session = await requireAuth()
+    const userId = session.user.id
+
+    const body = await request.json()
+    const {
+      items,
+      shippingAddress,
+      billingAddress,
+      shippingOption,
+      paymentIntentId,
+      promoCode,
+    }: {
+      items: Array<{ productId: string; variantId?: string; quantity: number }>
+      shippingAddress: Address
+      billingAddress?: Address
+      shippingOption: string
+      paymentIntentId: string
+      promoCode?: string
+    } = body
+
+    // Validate required fields
+    if (!items || items.length === 0 || !shippingAddress || !paymentIntentId) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    // Idempotency check - prevent duplicate order creation on retries
+    const alreadyProcessed = await isOrderProcessed(paymentIntentId)
+    if (alreadyProcessed) {
+      return NextResponse.json(
+        { error: 'Order already created for this payment', success: false },
+        { status: 409 }
+      )
+    }
+
+    // Verify Payment Intent is confirmed
+    try {
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+      if (paymentIntent.status !== 'succeeded') {
+        return NextResponse.json({ error: 'Payment not confirmed' }, { status: 400 })
+      }
+    } catch (error) {
+      return NextResponse.json({ error: 'Invalid payment intent' }, { status: 400 })
+    }
+
+    // TRANSACTIONAL STOCK MANAGEMENT
+    // Using Redis-based distributed locks to prevent race conditions
+    // This ensures atomic stock decrements even under high concurrency
+
+    let subtotal = 0 // in cents
+    const orderItems: any[] = []
+    const productIds = items.map(item => item.productId)
+
+    // Step 1: Acquire distributed locks for all products in the order
+    console.log(`Acquiring locks for products: ${productIds.join(', ')}`)
+    const { success: locksAcquired, lockedIds } = await acquireMultipleStockLocks(productIds)
+
+    if (!locksAcquired) {
+      console.error('Failed to acquire locks for all products')
+      return NextResponse.json(
+        { error: 'Unable to process order due to high demand. Please try again.', success: false },
+        { status: 503 }
+      )
+    }
+
+    try {
+      // Step 2: Fetch products and validate stock (with locks held)
+      for (const item of items) {
+        const product = await prisma.product.findUnique({
+          where: { id: item.productId },
+          include: {
+            images: {
+              orderBy: { order: 'asc' },
+              take: 1
+            }
+          }
+        })
+
+        if (!product) {
+          throw new Error(`Product ${item.productId} not found`)
+        }
+
+        // Calculate item price (convert from euros to cents)
+        const itemPrice = Math.round(product.price * 100)
+        const itemSubtotal = itemPrice * item.quantity
+
+        subtotal += itemSubtotal
+
+        orderItems.push({
+          productId: product.id,
+          productName: product.name,
+          productImage: product.images[0]?.url || '',
+          variantId: item.variantId,
+          quantity: item.quantity,
+          price: itemPrice,
+          subtotal: itemSubtotal
+        })
+      }
+
+      // Step 3: Atomically decrement stock for all items
+      // If any item fails, all locks will be released and no stock is decremented
+      for (const item of items) {
+        const result = await decrementStockAtomic(item.productId, item.quantity)
+
+        if (!result.success) {
+          // Stock validation failed - release locks and abort
+          await releaseMultipleStockLocks(lockedIds)
+          return NextResponse.json(
+            { error: result.error || 'Insufficient stock', success: false },
+            { status: 409 }
+          )
+        }
+
+        console.log(`Stock decremented for product ${item.productId}: ${result.currentStock} remaining`)
+      }
+
+      // Step 4: Release locks after successful stock updates
+      await releaseMultipleStockLocks(lockedIds)
+      console.log('All locks released successfully')
+    } catch (error: any) {
+      // Error occurred - release all locks
+      await releaseMultipleStockLocks(lockedIds)
+      console.error('Error during stock decrement:', error)
+
+      if (error.message?.includes('not found')) {
+        return NextResponse.json({ error: error.message, success: false }, { status: 404 })
+      }
+
+      return NextResponse.json(
+        { error: 'Failed to process order', success: false },
+        { status: 500 }
+      )
+    }
+
+    // Calculate shipping cost (in cents)
+    const FREE_SHIPPING_THRESHOLD = 2500 // 25€ in cents
+    const shippingCosts: Record<string, number> = {
+      standard: subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 490,
+      express: 990,
+      relay: 390,
+      pickup: 0,
+    }
+    const shippingCost = shippingCosts[shippingOption] || 0
+
+    // Calculate tax (20% VAT for France) - in cents
+    const tax = Math.round((subtotal + shippingCost) * 0.2)
+
+    // Calculate discount (in cents)
+    let discount = 0
+    if (promoCode) {
+      // Validate promo code (placeholder)
+      // In production, query promo codes collection
+      discount = 0
+    }
+
+    // Calculate total (in cents)
+    const total = subtotal + shippingCost + tax - discount
+
+    // Generate order number
+    const orderNumber = generateOrderNumber()
+
+    // Calculate estimated delivery
+    const shippingDays: Record<string, number> = {
+      standard: 5,
+      express: 2,
+      relay: 4,
+      pickup: 1,
+    }
+    const estimatedDelivery = calculateEstimatedDelivery(shippingDays[shippingOption] || 5)
+
+    // Create order in Prisma with nested order items
+    const order = await prisma.order.create({
+      data: {
+        orderNumber,
+        userId,
+        status: 'PROCESSING',
+        paymentStatus: 'PAID',
+        subtotal: subtotal / 100, // Convert cents to euros for storage
+        shippingCost: shippingCost / 100,
+        tax: tax / 100,
+        discount: discount / 100,
+        total: total / 100,
+        shippingAddress,
+        billingAddress: billingAddress || shippingAddress,
+        estimatedDeliveryMin: estimatedDelivery.min,
+        estimatedDeliveryMax: estimatedDelivery.max,
+        paymentIntentId,
+        items: {
+          create: orderItems
+        }
+      },
+      include: {
+        items: true
+      }
+    })
+
+    // Mark order as processed for idempotency (prevents duplicate orders on retries)
+    await markOrderProcessed(paymentIntentId, order.id)
+    console.log(`Order ${orderNumber} marked as processed for payment intent ${paymentIntentId}`)
+
+    // Update user stats
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId }
+      })
+
+      if (user) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            totalOrders: user.totalOrders + 1,
+            totalSpent: user.totalSpent + (total / 100), // Convert cents to euros
+            loyaltyPoints: user.loyaltyPoints + Math.floor(total / 100) // 1 point per euro
+          }
+        })
+      }
+    } catch (error) {
+      console.error('Error updating user stats:', error)
+    }
+
+    // Send confirmation email
+    try {
+      await sendEmail({
+        to: shippingAddress.email || session.user.email,
+        subject: `Confirmation de commande ${orderNumber}`,
+        html: `
+          <h1>Merci pour votre commande!</h1>
+          <p>Numéro de commande: <strong>${orderNumber}</strong></p>
+          <p>Total: <strong>${(total / 100).toFixed(2)}€</strong></p>
+          <p>Livraison estimée: ${estimatedDelivery.min.toLocaleDateString('fr-FR')} - ${estimatedDelivery.max.toLocaleDateString('fr-FR')}</p>
+        `,
+      })
+    } catch (error) {
+      console.error('Error sending confirmation email:', error)
+    }
+
+    // Fix Date serialization (Comment 7): Return ISO strings instead of Date objects
+    return NextResponse.json({
+      orderId: order.id,
+      orderNumber,
+      estimatedDelivery: {
+        min: estimatedDelivery.min.toISOString(),
+        max: estimatedDelivery.max.toISOString(),
+      },
+      success: true,
+    })
+  } catch (error: any) {
+    console.error('Order creation error:', error)
+
+    // Handle authentication errors
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+    }
+
+    return NextResponse.json(
+      {
+        error: 'Failed to create order',
+        details: error.message,
+        success: false,
+      },
+      { status: 500 }
+    )
+  }
+}
