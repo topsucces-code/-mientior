@@ -54,9 +54,8 @@ export default function OrderShow({ params }: { params: { id: string } }) {
     },
     {
       title: "Subtotal",
-      dataIndex: "subtotal",
       key: "subtotal",
-      render: (subtotal: number) => `$${subtotal.toFixed(2)}`,
+      render: (_: any, record: any) => `$${(record.quantity * record.price).toFixed(2)}`,
     },
     {
       title: "Variant",
@@ -127,7 +126,7 @@ export default function OrderShow({ params }: { params: { id: string } }) {
         <>
           <strong>Shipped</strong>
           <br />
-          {record.trackingNumber ? `Tracking: ${record.trackingNumber}` : "In transit"}
+          In transit
         </>
       ),
     });
@@ -179,20 +178,15 @@ export default function OrderShow({ params }: { params: { id: string } }) {
           </Tag>
         </Descriptions.Item>
         <Descriptions.Item label="Subtotal">${record?.subtotal?.toFixed(2)}</Descriptions.Item>
-        <Descriptions.Item label="Shipping Cost">${record?.shippingCost?.toFixed(2)}</Descriptions.Item>
+        <Descriptions.Item label="Shipping">${record?.shipping?.toFixed(2)}</Descriptions.Item>
         <Descriptions.Item label="Tax">${record?.tax?.toFixed(2)}</Descriptions.Item>
         <Descriptions.Item label="Discount">${record?.discount?.toFixed(2)}</Descriptions.Item>
         <Descriptions.Item label="Total" span={2}>
           <strong style={{ fontSize: "1.2em" }}>${record?.total?.toFixed(2)}</strong>
         </Descriptions.Item>
-        {record?.trackingNumber && (
-          <Descriptions.Item label="Tracking Number" span={2}>
-            {record.trackingNumber}
-          </Descriptions.Item>
-        )}
-        {record?.estimatedDelivery && (
-          <Descriptions.Item label="Estimated Delivery" span={2}>
-            {new Date(record.estimatedDelivery.min).toLocaleDateString()} - {new Date(record.estimatedDelivery.max).toLocaleDateString()}
+        {record?.notes && (
+          <Descriptions.Item label="Notes" span={2}>
+            {record.notes}
           </Descriptions.Item>
         )}
       </Descriptions>

@@ -4,9 +4,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { Prisma } from '@prisma/client'
+import { Prisma, Permission } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import type { Product as ProductType } from '@/types'
+import { withPermission } from '@/middleware/admin-auth'
+import { logCreate } from '@/lib/audit-logger'
 
 interface ImageInput {
   url: string
@@ -24,7 +26,17 @@ interface VariantInput {
   image?: string
 }
 
-export async function GET(request: NextRequest) {
+interface AdminSession {
+  adminUser: {
+    id: string
+    email: string
+    firstName: string
+    lastName: string
+    role: string
+  }
+}
+
+async function handleGET(request: NextRequest, { adminSession: _adminSession }: { params?: unknown; adminSession?: AdminSession }) {
   try {
     const { searchParams } = new URL(request.url)
 
@@ -106,7 +118,7 @@ export async function GET(request: NextRequest) {
     ])
 
     // Transform to match frontend Product type
-    const transformedProducts = products.map(product => ({
+    const transformedProducts = products.map((product) => ({
       id: product.id,
       name: product.name,
       slug: product.slug,
@@ -131,12 +143,12 @@ export async function GET(request: NextRequest) {
         isActive: product.category.isActive,
         order: product.category.order
       },
-      images: product.images.map(img => ({
+      images: product.images.map((img) => ({
         url: img.url,
         alt: img.alt,
         type: img.type === 'THREE_SIXTY' ? '360' : img.type.toLowerCase() as 'image' | 'video' | '360'
       })),
-      variants: product.variants.map(v => ({
+      variants: product.variants.map((v) => ({
         id: v.id,
         size: v.size || undefined,
         color: v.color || undefined,
@@ -144,7 +156,7 @@ export async function GET(request: NextRequest) {
         stock: v.stock,
         priceModifier: v.priceModifier || undefined
       })),
-      tags: product.tags.map(pt => ({
+      tags: product.tags.map((pt) => ({
         id: pt.tag.id,
         name: pt.tag.name,
         slug: pt.tag.slug
@@ -164,7 +176,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest, { adminSession }: { params?: unknown; adminSession?: AdminSession }) {
   try {
     const body = await request.json()
 
@@ -277,9 +289,23 @@ export async function POST(request: NextRequest) {
       updatedAt: product.updatedAt,
     }
 
+    // Log product creation
+    if (adminSession?.adminUser) {
+      await logCreate(
+        'product',
+        transformedProduct,
+        adminSession.adminUser as unknown as import('@prisma/client').AdminUser,
+        request
+      )
+    }
+
     return NextResponse.json(transformedProduct, { status: 201 })
   } catch (error) {
     console.error('Product creation error:', error)
     return NextResponse.json({ error: 'Failed to create product' }, { status: 500 })
   }
 }
+
+// Export wrapped handlers
+export const GET = withPermission(Permission.PRODUCTS_READ, handleGET)
+export const POST = withPermission(Permission.PRODUCTS_WRITE, handlePOST)

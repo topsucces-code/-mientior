@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
+import { useQuickView } from '@/contexts/quick-view-context'
 
 export interface CollectionData {
   id: string
@@ -46,15 +47,14 @@ export default function CuratedCollection({
 }: CuratedCollectionProps) {
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
+  const { openQuickView } = useQuickView()
 
   const displayProducts = showAllProducts
     ? collection.products
     : collection.products.slice(0, maxProducts)
 
-  // TODO: Implement quick view modal
   const handleQuickView = (productId: string) => {
-    console.log('Quick view:', productId)
-    // This would open a modal with product details
+    openQuickView(productId)
   }
 
   if (!collection || !collection.products || collection.products.length === 0) {
@@ -78,14 +78,14 @@ export default function CuratedCollection({
   return (
     <section
       ref={sectionRef}
-      className={cn('py-16 md:py-24', className)}
+      className={cn('py-10 md:py-14', className)}
       {...props}
     >
-      <div className="container mx-auto px-4 md:px-6 lg:px-8">
+      <div className="container mx-auto px-3 md:px-4 lg:px-6">
         {/* Header */}
         <div
           className={cn(
-            'mb-12 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end',
+            'mb-8 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end',
             isVisible && !prefersReducedMotion && 'animate-fade-in-up'
           )}
         >
@@ -114,9 +114,25 @@ export default function CuratedCollection({
           </Link>
         </div>
 
-        {/* Products Grid */}
+        {/* Products Grid - Asymmetric Masonry Layout */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {displayProducts.map((product, index) => (
+          {displayProducts.slice(0, 1).map((product, index) => (
+            // Hero product - larger card
+            <div key={product.id} className="sm:col-span-2 lg:row-span-2">
+              <ProductCard
+                {...product}
+                onQuickView={handleQuickView}
+                className={cn(
+                  'h-full',
+                  !prefersReducedMotion && isVisible && 'animate-fade-in-up'
+                )}
+                style={{
+                  animationDelay: !prefersReducedMotion ? `${index * 50}ms` : undefined,
+                } as React.CSSProperties}
+              />
+            </div>
+          ))}
+          {displayProducts.slice(1).map((product, index) => (
             <ProductCard
               key={product.id}
               {...product}
@@ -125,7 +141,7 @@ export default function CuratedCollection({
                 !prefersReducedMotion && isVisible && 'animate-fade-in-up'
               )}
               style={{
-                animationDelay: !prefersReducedMotion ? `${index * 50}ms` : undefined,
+                animationDelay: !prefersReducedMotion ? `${(index + 1) * 50}ms` : undefined,
               } as React.CSSProperties}
             />
           ))}
@@ -163,21 +179,22 @@ function HeroLayout({
   const isDark = theme.textColor === 'light'
 
   return (
-    <section className={cn('py-16 md:py-24', className)} {...props}>
-      <div className="container mx-auto px-4 md:px-6 lg:px-8">
+    <section className={cn('py-10 md:py-14', className)} {...props}>
+      <div className="container mx-auto px-3 md:px-4 lg:px-6">
         {/* Hero Banner */}
         <div
           className={cn(
-            'relative mb-12 overflow-hidden rounded-2xl',
+            'relative mb-8 overflow-hidden rounded-2xl',
             isVisible && !prefersReducedMotion && 'animate-fade-in-up'
           )}
         >
           <div className="relative h-[400px] md:h-[500px]">
             {/* Background Image */}
             <Image
-              src={collection.image || '/placeholder-collection.jpg'}
+              src={collection.image || '/placeholder-collection.svg'}
               alt={collection.name}
               fill
+              unoptimized={!collection.image} // SVG placeholder needs unoptimized
               className={cn(
                 'object-cover transition-all duration-700',
                 !isImageLoaded && 'blur-sm',

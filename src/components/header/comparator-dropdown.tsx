@@ -3,7 +3,7 @@
 import { GitCompare, X, Eye } from 'lucide-react'
 import { useComparatorStore } from '@/stores/comparator.store'
 import { useHeader } from '@/contexts/header-context'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { COMPARATOR_CONFIG } from '@/lib/constants'
@@ -12,8 +12,14 @@ export function ComparatorDropdown() {
     const { items, removeItem, clearAll } = useComparatorStore()
     const { activeDropdown, setActiveDropdown } = useHeader()
     const dropdownRef = useRef<HTMLDivElement>(null)
+    const [mounted, setMounted] = useState(false)
 
     const isOpen = activeDropdown === 'comparator'
+
+    // Handle hydration - only show comparator data after mount
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -29,7 +35,8 @@ export function ComparatorDropdown() {
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [isOpen, setActiveDropdown])
 
-    const totalItems = items.length
+    const totalItems = mounted ? items.length : 0
+    const displayItems = mounted ? items : []
 
     return (
         <div className="relative" ref={dropdownRef}>
@@ -68,9 +75,9 @@ export function ComparatorDropdown() {
                     </div>
 
                     <div className="max-h-96 overflow-y-auto">
-                        {items.length > 0 ? (
+                        {displayItems.length > 0 ? (
                             <>
-                                {items.map((item) => (
+                                {displayItems.map((item) => (
                                     <div
                                         key={item.id}
                                         className="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
@@ -94,7 +101,7 @@ export function ComparatorDropdown() {
                                                 </Link>
                                                 <p className="text-xs text-gray-500 mt-1">{item.category}</p>
                                                 <p className="text-sm text-gray-600 mt-1 font-semibold">
-                                                    {item.price.toFixed(2)} €
+                                                    {(item.price / 100).toFixed(2)} €
                                                 </p>
                                             </div>
 
@@ -109,7 +116,7 @@ export function ComparatorDropdown() {
                                     </div>
                                 ))}
 
-                                {items.length > 0 && (
+                                {displayItems.length > 0 && (
                                     <div className="p-3 border-t border-gray-200">
                                         <button
                                             onClick={clearAll}

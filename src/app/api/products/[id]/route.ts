@@ -1,3 +1,4 @@
+
 /**
  * REST API endpoint for individual product operations (Refine admin)
  * GET: Fetch single product by ID
@@ -6,8 +7,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { Permission } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import type { Product as ProductType } from '@/types'
+import { withPermission } from '@/middleware/admin-auth'
+import { logUpdate, logDelete } from '@/lib/audit-logger'
 
 interface ImageInput {
   url: string
@@ -23,13 +27,29 @@ interface VariantInput {
   priceModifier?: number
 }
 
-export async function GET(
+interface AdminSession {
+  adminUser: {
+    id: string
+    email: string
+    firstName: string
+    lastName: string
+    role: string
+  }
+}
+
+async function handleGET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params, adminSession: _adminSession }: { params: Record<string, string>, adminSession: AdminSession }
 ) {
+  const { id } = params;
+  
+  if (!id) {
+    return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
+  }
+  
   try {
     const product = await prisma.product.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         category: true,
         images: {
@@ -121,16 +141,22 @@ export async function GET(
   }
 }
 
-export async function PUT(
+async function handlePUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params, adminSession }: { params: Record<string, string>, adminSession: AdminSession }
 ) {
+  const { id } = params;
+  
+  if (!id) {
+    return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
+  }
+  
   try {
     const body = await request.json()
 
     // Check if product exists
     const existing = await prisma.product.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         images: true,
         variants: true,
@@ -156,6 +182,9 @@ export async function PUT(
         )
       }
     }
+
+    // Capture before state for audit logging
+    const before = existing
 
     // Update product with nested updates
     const product = await prisma.$transaction(async (tx) => {
@@ -235,21 +264,87 @@ export async function PUT(
       })
     })
 
-    return NextResponse.json(product)
+    // Transform the updated product to match frontend Product type (same as GET)
+    const transformedProduct = {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      description: product.description || undefined,
+      price: product.price,
+      compareAtPrice: product.compareAtPrice || undefined,
+      stock: product.stock,
+      rating: product.rating,
+      reviewCount: product.reviewCount,
+      badge: product.badge || undefined,
+      featured: product.featured,
+      onSale: product.onSale,
+      status: product.status,
+      specifications: product.specifications as Record<string, string> | undefined,
+      seo: product.seo as ProductType['seo'] | undefined,
+      category: {
+        id: product.category.id,
+        name: product.category.name,
+        slug: product.category.slug,
+        description: product.category.description || undefined,
+        image: product.category.image || undefined,
+        isActive: product.category.isActive,
+        order: product.category.order
+      },
+      images: product.images.map(img => ({
+        url: img.url,
+        alt: img.alt,
+        type: img.type === 'THREE_SIXTY' ? '360' : img.type.toLowerCase() as 'image' | 'video' | '360'
+      })),
+      variants: product.variants.map(v => ({
+        id: v.id,
+        size: v.size || undefined,
+        color: v.color || undefined,
+        sku: v.sku,
+        stock: v.stock,
+        priceModifier: v.priceModifier || undefined
+      })),
+      tags: product.tags.map(pt => ({
+        id: pt.tag.id,
+        name: pt.tag.name,
+        slug: pt.tag.slug
+      })),
+      createdAt: product.createdAt,
+      updatedAt: product.updatedAt
+    }
+
+    // Audit log the update
+    if (adminSession?.adminUser) {
+      await logUpdate(
+        'product',
+        id,
+        before,
+        transformedProduct,
+        adminSession.adminUser as unknown as import('@prisma/client').AdminUser,
+        request
+      )
+    }
+
+    return NextResponse.json(transformedProduct)
   } catch (error) {
     console.error('Product update error:', error)
     return NextResponse.json({ error: 'Failed to update product' }, { status: 500 })
   }
 }
 
-export async function DELETE(
+async function handleDELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params, adminSession }: { params: Record<string, string>, adminSession: AdminSession }
 ) {
+  const { id } = params;
+  
+  if (!id) {
+    return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
+  }
+  
   try {
     // Check if product exists
     const product = await prisma.product.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         orderItems: {
           take: 1
@@ -264,10 +359,23 @@ export async function DELETE(
     // Check if product has orders
     if (product.orderItems.length > 0) {
       // Soft delete by setting status to ARCHIVED
-      await prisma.product.update({
-        where: { id: params.id },
+      const updatedProduct = await prisma.product.update({
+        where: { id },
         data: { status: 'ARCHIVED' }
       })
+
+      // Audit log the soft delete (archive)
+      if (adminSession?.adminUser) {
+        await logUpdate(
+          'product',
+          id,
+          product,
+          updatedProduct,
+          adminSession.adminUser as unknown as import('@prisma/client').AdminUser,
+          request
+        )
+      }
+
       return NextResponse.json({
         message: 'Product archived (has existing orders)',
         archived: true
@@ -276,8 +384,19 @@ export async function DELETE(
 
     // Hard delete if no orders
     await prisma.product.delete({
-      where: { id: params.id }
+      where: { id }
     })
+
+    // Audit log the deletion
+    if (adminSession?.adminUser) {
+      await logDelete(
+        'product',
+        id,
+        product,
+        adminSession.adminUser as unknown as import('@prisma/client').AdminUser,
+        request
+      )
+    }
 
     return NextResponse.json({ message: 'Product deleted successfully' })
   } catch (error) {
@@ -285,3 +404,8 @@ export async function DELETE(
     return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 })
   }
 }
+
+// Export wrapped handlers with permission checks
+export const GET = withPermission(Permission.PRODUCTS_READ, handleGET)
+export const PUT = withPermission(Permission.PRODUCTS_WRITE, handlePUT)
+export const DELETE = withPermission(Permission.PRODUCTS_DELETE, handleDELETE)

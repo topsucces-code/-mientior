@@ -4,12 +4,13 @@ Modern Next.js e-commerce store with Prisma database, Refine admin panel, Stripe
 
 ## Tech Stack
 
-- **Frontend:** Next.js 14 (App Router), TypeScript, Tailwind CSS, Ant Design (admin)
-- **Admin Panel:** Refine with @refinedev/antd, simple-rest data provider (/api endpoints)
-- **Database:** Prisma ORM (PostgreSQL) - models for Product, Category, Order, User, Review, etc.
-- **Auth:** Better Auth (sessions, RBAC)
+- **Frontend:** Next.js 15 (App Router), TypeScript, Tailwind CSS, Ant Design (admin)
+- **Admin Panel:** Refine v5 with @refinedev/antd, simple-rest data provider, RBAC, audit logging, i18n
+- **Database:** Prisma ORM (PostgreSQL) - 20+ models (Product, Category, Order, User, Vendor, Campaign, PromoCode, etc.)
+- **Auth:** Better Auth (sessions, roles, permissions)
 - **Payments:** Stripe (Payment Intents, webhooks)
-- **Other:** Redis (stock locks, caching), Resend (emails), Zod (validation)
+- **Marketing:** Email campaigns, SMS, push notifications, promo codes
+- **Other:** Redis (stock locks, caching), Resend (emails), Pusher (real-time), Zod (validation), Recharts (analytics)
 
 ## Quick Start
 
@@ -24,8 +25,11 @@ Modern Next.js e-commerce store with Prisma database, Refine admin panel, Stripe
 ## Features
 
 - **Frontend:** Responsive product pages, search/autocomplete, cart/checkout with Stripe, user dashboard (orders, wishlist), FAQ
+- **Quick View Modal:** Lightning-fast product preview without page navigation - view images, variants, prices, and add to cart instantly
+- **Instagram Integration:** Live Instagram feed with API caching, automatic refresh, and fallback strategies
+- **Newsletter System:** Double opt-in subscriptions with email confirmations, GDPR compliance, and marketing platform integration
 - **Admin (Refine):** Full CRUD for Products (variants/images/tags), Categories (hierarchy), Orders (status updates), Users (loyalty management)
-- **API:** REST endpoints (/api/products, /api/categories, etc.) with Refine-compatible pagination/filtering/sorting
+- **API:** REST endpoints (/api/products, /api/categories, /api/newsletter, /api/instagram) with Refine-compatible pagination/filtering/sorting
 - **Business Logic:** Atomic stock decrement (Redis locks), verified reviews (purchase check), promo codes, shipping options, loyalty tiers
 
 ## Structure
@@ -42,9 +46,224 @@ Modern Next.js e-commerce store with Prisma database, Refine admin panel, Stripe
 
 Single Prisma schema manages all data. Run `prisma migrate dev --name <desc>` for changes; `prisma generate` for types. Better Auth uses separate users table/connection. Indexes on slugs, foreign keys, status for perf.
 
-## Admin Panel
+## Admin Dashboard
 
-Access at `/admin`. Resources: products, categories, orders, users. Uses Refine hooks (useTable/useForm) + Antd. Auth via Better Auth provider in layout.tsx. Custom data provider points to /api endpoints.
+### Access & Authentication
+
+Access the admin dashboard at `/admin`. Login with Better Auth credentials via `/auth/login`.
+
+**Default Admin Account** (from seed script):
+- Email: `admin@mientior.com`
+- Role: `SUPER_ADMIN`
+- Create via: `npm run db:seed` or `npx prisma db seed`
+
+### Key Features
+
+**✅ Professional Layout & Navigation**
+- Collapsible sidebar with hierarchical menu structure
+- Persistent sidebar state (localStorage)
+- Breadcrumb navigation
+- Global search (Cmd+K / Ctrl+K)
+- Real-time notifications bell
+- Language selector (FR/EN)
+- User account dropdown with activity log
+
+**✅ Role-Based Access Control (RBAC)**
+- 5 roles: SUPER_ADMIN, ADMIN, MANAGER, SUPPORT, VIEWER
+- 22 granular permissions (products, orders, users, vendors, marketing, etc.)
+- Permission-based UI rendering
+- Audit logging for all actions
+
+**✅ Core Resource Management**
+1. **Dashboard**
+   - KPI cards (revenue, orders, conversion rate, AOV)
+   - Charts (Recharts): revenue trends, sales, traffic sources
+   - Recent orders table with quick actions
+   - Alerts & notifications (low stock, pending vendors, failed payments)
+   - Real-time updates via Pusher
+
+2. **Products**
+   - Full CRUD with Refine hooks (useTable, useForm, useShow)
+   - Advanced filters (status, category, price range, stock level, search)
+   - Column selector with drag-and-drop reordering
+   - Saved views (save/load filter configurations)
+   - Bulk actions (export, status change, delete)
+   - Comprehensive product form (planned):
+     * Tabs: General, Media, Variants, SEO, Shipping
+     * Rich text editor (Tiptap) for descriptions
+     * Image gallery with drag-and-drop upload/reorder
+     * Variant matrix generator (size x color combinations)
+     * SEO optimization with preview
+
+3. **Orders**
+   - List view with status filters and customer search
+   - Detailed order view:
+     * Order timeline (pending → processing → shipped → delivered)
+     * Customer information card
+     * Payment details (method, transaction ID, refunds)
+     * Shipping/billing addresses
+     * Order items table
+     * Status update actions (ship, cancel, refund)
+     * Internal notes section
+     * Audit log
+
+4. **Customers**
+   - Customer list with loyalty level filters
+   - Segment tabs (All, VIP, New, Inactive, Cart Abandoners)
+   - Customer profile page:
+     * Statistics (orders, spent, AOV, lifetime value)
+     * Orders history
+     * Saved addresses
+     * Wishlist
+     * Reviews
+     * Loyalty points management
+     * Tags and notes
+
+**✅ Multi-Vendor System**
+- Vendor registration & approval workflow
+- Vendor list with status filters (Pending, Active, Suspended, Banned)
+- Vendor detail page:
+  * Profile information & documents
+  * Products & orders
+  * Commission tracking
+  * Payout history
+  * Activity log
+- Commission rate configuration
+- API endpoints: `/api/vendors`, `/api/vendors/[id]`
+
+**✅ Marketing Module**
+1. **Campaigns**
+   - Email, SMS, and Push notification campaigns
+   - Campaign wizard: details → content → audience → schedule → review
+   - Rich content editor with personalization tags
+   - Segment-based targeting
+   - Schedule or send immediately
+   - Campaign stats (opens, clicks, conversions)
+   - API endpoints: `/api/campaigns`, `/api/campaigns/[id]/send`
+
+2. **Promo Codes**
+   - Code types: Percentage, Fixed Amount, Free Shipping
+   - Usage limits (total & per customer)
+   - Validity period (validFrom/validTo)
+   - Conditions (min order amount, max discount)
+   - Usage tracking
+   - API endpoints: `/api/promo-codes`
+
+3. **Customer Segments** (planned)
+   - Dynamic customer segmentation
+   - Filter-based segment creation
+   - Segment size calculation
+   - Use in campaigns and promo codes
+
+**✅ Analytics** (planned)
+- Comprehensive analytics dashboard
+- Conversion funnel visualization
+- Traffic source breakdown
+- Top products & categories reports
+- Geographic sales map
+- Export reports as PDF
+
+**✅ Settings** (planned)
+1. **General**: Site info, logo, contact details, localization, SEO defaults
+2. **Payments**: Stripe, PayPal, Apple Pay, Google Pay configuration
+3. **Shipping**: Zones, methods, rates, free shipping rules, carrier integrations
+4. **Taxes**: Tax rates by region
+5. **Admin Users**: Create/manage admin accounts with role assignment
+6. **Audit Logs**: Complete audit trail with filters
+
+**✅ Advanced Features**
+- **Import/Export**: Bulk data operations for products, orders, customers (CSV/XLSX)
+- **Saved Views**: Save and restore filter/column configurations
+- **Bulk Actions**: Multi-select operations (delete, export, status change)
+- **Column Selector**: Customize table columns per resource
+- **Advanced Filters**: Complex filter builder with multiple conditions
+- **Real-time Notifications**: Pusher integration for live updates
+- **Internationalization**: Full i18n support (French/English)
+
+### Admin Resources (Refine Configuration)
+
+```typescript
+resources: [
+  { name: "products", list/create/edit/show },
+  { name: "categories", list/create/edit/show },
+  { name: "orders", list/show },
+  { name: "users", list/show },
+  { name: "vendors", list/create/edit/show },
+  { name: "campaigns", list/create/edit/show },
+  { name: "promo-codes", list/create/edit },
+  { name: "segments", list/create/edit },
+  { name: "media", list },
+  { name: "audit-logs", list/show },
+  { name: "admin-users", list/create/edit/show },
+  { name: "roles", list/show },
+  { name: "feature-flags", list },
+]
+```
+
+### Admin Development Guide
+
+**Adding a New Admin Page**
+
+1. Create API endpoint in `/src/app/api/[resource]/route.ts`:
+   ```typescript
+   // Support Refine query params: _start, _end, _sort, _order
+   // Return X-Total-Count header for pagination
+   export const GET = withPermission(Permission.RESOURCE_READ, async (req) => {
+     const total = await prisma.resource.count();
+     const items = await prisma.resource.findMany({ skip, take });
+     return NextResponse.json(items, {
+       headers: { 'X-Total-Count': total.toString() }
+     });
+   });
+   ```
+
+2. Create Refine page in `/src/app/admin/[resource]/page.tsx`:
+   ```typescript
+   'use client';
+   import { useTable } from '@refinedev/antd';
+
+   export default function ResourceList() {
+     const { tableProps } = useTable({ resource: 'resource' });
+     return <Table {...tableProps} />;
+   }
+   ```
+
+3. Register resource in `/src/app/admin/layout.tsx`
+
+4. Add menu item to `/src/components/admin/admin-sidebar.tsx`
+
+5. Add permissions to `/src/lib/rbac.ts`
+
+6. Add translations to `/public/locales/{en,fr}/admin.json`
+
+**Adding a New Permission**
+
+1. Add enum to `prisma/schema.prisma`: `enum Permission { ... NEW_PERMISSION }`
+2. Run `npx prisma generate`
+3. Update `ROLE_PERMISSIONS` in `src/lib/rbac.ts`
+4. Add to `RESOURCE_PERMISSIONS` if resource-specific
+5. Add description in `getPermissionDescription`
+
+**Customizing Refine Resources**
+
+- Use `useTable` for lists (pagination, sorting, filtering)
+- Use `useForm` for create/edit (validation, submission)
+- Use `useShow` for detail views
+- Use `useUpdate` for inline updates
+- Use `useDelete` for deletions
+- All hooks integrate with Refine's data provider
+
+### Admin Tech Stack
+
+- **Framework**: Refine.dev v5 with Ant Design
+- **UI Components**: Ant Design (tables, forms, modals, etc.)
+- **Charts**: Recharts for analytics
+- **Rich Text**: Tiptap (planned)
+- **File Upload**: Ant Design Upload + custom handlers
+- **Drag & Drop**: @dnd-kit (column reordering, image sorting)
+- **State Management**: Refine hooks + React Query
+- **Internationalization**: i18next
+- **Real-time**: Pusher
 
 ## API
 
@@ -215,12 +434,144 @@ Protects routes in `middleware.ts`:
 ## Accessibility
 
 - Skip-to-content link
-- ARIA labels
+- ARIA labels and live regions
 - Semantic HTML
-- Keyboard navigation
-- Focus management
+- Keyboard navigation (arrow keys, tab order)
+- Focus management (trapped in modals)
 - Reduced motion support
-- WCAG AA color contrast
+- WCAG 2.2 AAA color contrast
+- Screen reader announcements
+
+## Advanced Features
+
+### Quick View Modal
+
+The Quick View feature allows users to preview products in a modal overlay without navigating away from the current page.
+
+**Features:**
+- Instant product details loading with SWR
+- Image gallery with thumbnail navigation
+- Variant selection (size, color, etc.)
+- Add to cart/wishlist directly from modal
+- Share functionality
+- Skeleton loading states
+- Error handling with retry
+- Keyboard navigation (ESC to close)
+
+**Usage:**
+```tsx
+import { useQuickView } from '@/contexts/quick-view-context'
+
+function ProductCard({ product }) {
+  const { openQuickView } = useQuickView()
+  
+  return (
+    <button onClick={() => openQuickView(product.id)}>
+      Quick View
+    </button>
+  )
+}
+```
+
+The `QuickViewProvider` is automatically available in the app layout. Components can use the `useQuickView` hook to trigger modals.
+
+### Instagram Integration
+
+Displays live Instagram posts from your business account with automatic caching and fallback strategies.
+
+**Setup:**
+1. Create a Facebook App at https://developers.facebook.com/
+2. Add Instagram Graph API product
+3. Get a User Access Token with `instagram_basic` permission
+4. Exchange for a Long-Lived Access Token (valid for 60 days)
+5. Add credentials to `.env.local`:
+   ```bash
+   INSTAGRAM_ACCESS_TOKEN=your_long_lived_token
+   INSTAGRAM_USER_ID=your_business_account_id
+   ```
+
+**Features:**
+- 1-hour server-side cache (Next.js + in-memory)
+- Automatic fallback to cached data on API errors
+- Graceful degradation with placeholder posts
+- Rate limit handling
+- Responsive grid layout with hover effects
+
+**API Endpoint:**
+- `GET /api/instagram` - Returns 12 most recent posts with likes and comments
+
+**Token Refresh:**
+Long-lived tokens expire after 60 days. Use the `refreshAccessToken` utility in `/src/lib/instagram.ts` to refresh before expiration.
+
+### Newsletter Subscription
+
+Full-featured newsletter system with backend validation, database storage, and email confirmations.
+
+**Features:**
+- Email validation with Zod
+- Duplicate email detection
+- GDPR-compliant consent tracking
+- IP address logging for compliance
+- Rate limiting (5 requests per minute per IP)
+- Confirmation emails via Resend
+- Marketing platform integration ready
+
+**API Endpoint:**
+- `POST /api/newsletter` - Subscribe with email and consent
+- `GET /api/newsletter?email=user@example.com` - Check subscription status
+
+**Database Model:**
+Add to your Prisma schema:
+```prisma
+model NewsletterSubscription {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  acceptMarketing Boolean @default(false)
+  subscribedAt   DateTime @default(now())
+  ipAddress      String?
+  source         String   @default("website")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+```
+
+Then run: `npx prisma db push && npx prisma generate`
+
+**Email Setup:**
+Configure Resend API key in `.env.local`:
+```bash
+RESEND_API_KEY=re_your_api_key
+EMAIL_FROM=noreply@yourdomain.com
+```
+
+### Performance Optimizations
+
+**Image Optimization:**
+- Next.js Image component with automatic AVIF/WebP conversion
+- Responsive srcset with 6 device sizes
+- Lazy loading for below-the-fold images
+- Priority loading for hero images
+- 24-hour CDN caching
+- Blur placeholders for smooth loading
+
+**Code Optimization:**
+- SWC minification for faster builds
+- Tree shaking with ES modules
+- Route-based code splitting
+- Dynamic imports for heavy components
+- Console.log removal in production
+
+**Caching Strategy:**
+- Instagram API: 1-hour cache
+- Static assets: 1-year immutable cache
+- Font files: Immutable cache with preload hints
+- API responses: Configurable revalidation
+
+**Monitoring:**
+Add performance monitoring with environment variable:
+```bash
+NEXT_PUBLIC_ANALYTICS_ID=your_analytics_id
+```
 
 ## License
 

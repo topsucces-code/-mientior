@@ -266,9 +266,213 @@
   .custom-scrollbar-horizontal::-webkit-scrollbar {
     height: 4px;
   }
+
+  /* Border glow animation for flash deals */
+  @keyframes border-glow {
+    0%, 100% {
+      box-shadow: 0 0 15px rgba(255, 107, 0, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 25px rgba(255, 107, 0, 0.4);
+    }
+  }
+
+  .animate-border-glow {
+    animation: border-glow 2s ease-in-out infinite;
+  }
+
+  /* PLP-specific utilities */
+  .filter-section-transition {
+    transition: max-height 300ms cubic-bezier(0.4, 0.0, 0.2, 1),
+                opacity 200ms ease;
+  }
+
+  .color-swatch {
+    position: relative;
+    transition: all 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+
+  .color-swatch:hover {
+    transform: scale(1.15);
+  }
+
+  .color-swatch.selected {
+    box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.2);
+  }
+
+  .color-swatch.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .size-button-unavailable::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -10%;
+    width: 120%;
+    height: 2px;
+    background: currentColor;
+    transform: translateY(-50%) rotate(-45deg);
+    opacity: 0.5;
+  }
+
+  .parallax-hero {
+    will-change: transform;
+    transition: transform 0.1s ease-out;
+  }
+
+  .filter-pill-enter {
+    animation: slideInRight 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+
+  .filter-pill-exit {
+    animation: slideOutRight 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideOutRight {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(10px);
+    }
+  }
+
+  /* PDP-specific animations */
+  @keyframes rotate-360 {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes pulse-subtle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+  }
+
+  @keyframes scale-in {
+    0% { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .rotating {
+    animation: rotate-360 2s linear infinite;
+  }
+
+  .pulse-subtle {
+    animation: pulse-subtle 2s ease-in-out infinite;
+  }
+
+  .scale-in {
+    animation: scale-in 200ms ease-out;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .hide-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Custom scrollbar for thumbnails */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e0 #f7f8fa;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #f7f8fa;
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+  }
+
+  /* Responsive video container */
+  .video-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  }
+
+  .video-container video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 @layer utilities {
+  /* Screen reader only class for accessibility */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Skip to main content link */
+  .skip-to-main {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: hsl(var(--orange-dynamic));
+    color: white;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    z-index: 10000;
+  }
+
+  .skip-to-main:focus {
+    top: 0;
+  }
+
+  /* Safe area for mobile devices */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -293,8 +497,126 @@
     .animate-slide-up,
     .animate-fade-slide-horizontal,
     .animate-bounce-subtle,
-    .animate-pulse-ring {
+    .animate-pulse-ring,
+    .animate-float,
+    .animate-scale-in,
+    .animate-ring-expand,
+    .animate-fade-in-up,
+    .animate-checkmark-draw {
       animation: none !important;
     }
+  }
+}
+
+/* ==================== CHECKOUT ANIMATIONS ==================== */
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes ringExpand {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes checkmarkDraw {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@layer utilities {
+  .animate-scale-in {
+    animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .animate-ring-expand {
+    animation: ringExpand 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-checkmark-draw {
+    animation: checkmarkDraw 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+  }
+
+  /* Checkout specific utility classes */
+  .checkout-header-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  .order-summary-sticky {
+    position: sticky;
+    top: 6rem;
+  }
+
+  .payment-security-badge {
+    @apply inline-flex items-center gap-2 rounded-full bg-success/10 px-4 py-2 text-sm font-medium text-success;
+  }
+
+  .safe-area-padding-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Enhanced animation delays for staggered effects */
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animation-delay-500 {
+    animation-delay: 500ms;
   }
 }

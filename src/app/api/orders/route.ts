@@ -4,10 +4,15 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { Prisma } from '@prisma/client'
+import { Prisma, Permission, AdminUser } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
+import { withPermission } from '@/middleware/admin-auth'
 
-export async function GET(request: NextRequest) {
+interface AdminSession {
+  adminUser: AdminUser | null;
+}
+
+async function handleGET(request: NextRequest, { adminSession: _adminSession }: { adminSession: AdminSession }) {
   try {
     const { searchParams } = new URL(request.url)
 
@@ -84,8 +89,10 @@ export async function GET(request: NextRequest) {
       id: order.id,
       orderNumber: order.orderNumber,
       userId: order.userId,
-      status: order.status.toLowerCase(),
-      paymentStatus: order.paymentStatus.toLowerCase(),
+      // Return uppercase enum values as-is (PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED)
+      status: order.status,
+      // Return uppercase enum values as-is (PENDING, PAID, FAILED, REFUNDED)
+      paymentStatus: order.paymentStatus,
       subtotal: order.subtotal,
       shipping: order.shipping,
       tax: order.tax,
@@ -114,3 +121,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 })
   }
 }
+
+// Export wrapped handler with permission check
+export const GET = withPermission(Permission.ORDERS_READ, handleGET)

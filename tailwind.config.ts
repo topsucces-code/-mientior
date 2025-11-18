@@ -1,9 +1,29 @@
 import type { Config } from 'tailwindcss'
+import tailwindcssAnimate from 'tailwindcss-animate'
+import tailwindcssForm from '@tailwindcss/forms'
+import tailwindcssTypography from '@tailwindcss/typography'
+import tailwindcssAspectRatio from '@tailwindcss/aspect-ratio'
+import tailwindcssContainerQueries from '@tailwindcss/container-queries'
 
 export default {
     content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
     darkMode: ['class'],
     theme: {
+        container: {
+            center: true,
+            padding: {
+                DEFAULT: '0.75rem',
+                sm: '1rem',
+                lg: '1.5rem',
+            },
+            screens: {
+                sm: '100%',
+                md: '100%',
+                lg: '1280px',
+                xl: '1440px',
+                '2xl': '1600px',
+            },
+        },
         extend: {
             colors: {
                 border: 'hsl(var(--border))',
@@ -278,6 +298,10 @@ export default {
                         transform: 'scale(0.95)',
                     },
                 },
+                'float': {
+                    '0%, 100%': { transform: 'translateY(0) scale(1)' },
+                    '50%': { transform: 'translateY(-20px) scale(1.05)' },
+                },
             },
             animation: {
                 'fade-in': 'fade-in 300ms cubic-bezier(0.4, 0.0, 0.2, 1)',
@@ -294,6 +318,7 @@ export default {
                 'fade-slide-horizontal': 'fade-slide-horizontal 300ms cubic-bezier(0.4, 0.0, 0.2, 1)',
                 'bounce-subtle': 'bounce-subtle 1.5s ease-in-out infinite',
                 'pulse-ring': 'pulse-ring 2s cubic-bezier(0.4, 0.0, 0.2, 1) infinite',
+                'float': 'float 3s ease-in-out infinite',
             },
             transitionDuration: {
                 'fast': '200ms',
@@ -313,10 +338,10 @@ export default {
         },
     },
     plugins: [
-        require('@tailwindcss/forms'),
-        require('@tailwindcss/typography'),
-        require('@tailwindcss/aspect-ratio'),
-        require('@tailwindcss/container-queries'),
-        require('tailwindcss-animate'),
+        tailwindcssForm,
+        tailwindcssTypography,
+        tailwindcssAspectRatio,
+        tailwindcssContainerQueries,
+        tailwindcssAnimate,
     ],
 } satisfies Config

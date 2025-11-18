@@ -7,6 +7,7 @@ import { Heart, ShoppingCart, Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { StarRating } from '@/components/ui/star-rating'
 import { RippleButton } from '@/components/ui/ripple-button'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { useCartStore } from '@/stores/cart.store'
 import { useWishlistStore } from '@/stores/wishlist.store'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
@@ -26,6 +27,7 @@ export interface ProductCardProps {
     variant: 'new' | 'sale' | 'featured' | 'limited'
   }
   stock?: number
+  showCartButtonInInfo?: boolean
   onQuickView?: (id: string) => void
   className?: string
 }
@@ -47,15 +49,15 @@ export function ProductCard({
   rating = 0,
   reviewCount = 0,
   badge,
-  stock = 999,
+  stock = 0,
+  showCartButtonInInfo = false,
   onQuickView,
   className,
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = React.useState(false)
   const [imageLoaded, setImageLoaded] = React.useState(false)
   const prefersReducedMotion = useReducedMotion()
-  const cardRef = React.useRef<HTMLDivElement>(null)
-  const isVisible = useIntersectionObserver(cardRef, { threshold: 0.1 })
+  const { ref: cardRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
 
   const addToCart = useCartStore((state) => state.addItem)
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
@@ -74,10 +76,13 @@ export function ProductCard({
 
     addToCart({
       id,
-      name,
+      productId: id,
+      productName: name,
+      productSlug: slug,
+      productImage: image || '/placeholder-product.jpg',
       price,
       quantity: 1,
-      image,
+      stock,
     })
   }
 
@@ -193,16 +198,25 @@ export function ProductCard({
             isHovered && !prefersReducedMotion ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
           )}
         >
-          <RippleButton
-            size="sm"
-            variant="gradient"
-            className="flex-1 text-sm"
-            onClick={handleAddToCart}
-            disabled={isOutOfStock}
-          >
-            <ShoppingCart className="mr-1.5 h-4 w-4" />
-            {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
-          </RippleButton>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex">
+                <RippleButton
+                  size="sm"
+                  variant="gradient"
+                  className="h-9 w-9 p-0"
+                  onClick={handleAddToCart}
+                  disabled={isOutOfStock}
+                  aria-label={isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                </RippleButton>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{isOutOfStock ? 'Out of Stock' : 'Add to Cart'}</p>
+            </TooltipContent>
+          </Tooltip>
 
           {onQuickView && (
             <button
@@ -239,15 +253,43 @@ export function ProductCard({
           </h3>
         </Link>
 
-        {/* Price */}
-        <div className="mt-auto flex items-baseline gap-2">
-          <span className="text-lg font-bold text-orange-500">
-            ${(price / 100).toFixed(2)}
-          </span>
-          {hasDiscount && (
-            <span className="text-sm text-nuanced-500 line-through">
-              ${(compareAtPrice / 100).toFixed(2)}
+        {/* Price and Add to Cart Button */}
+        <div className={cn(
+          "mt-auto",
+          showCartButtonInInfo ? "flex items-center justify-between gap-2" : "flex items-baseline gap-2"
+        )}>
+          <div className="flex items-baseline gap-2">
+            <span className="text-lg font-bold text-orange-500">
+              ${(price / 100).toFixed(2)}
             </span>
+            {hasDiscount && (
+              <span className="text-sm text-nuanced-500 line-through">
+                ${(compareAtPrice / 100).toFixed(2)}
+              </span>
+            )}
+          </div>
+
+          {/* Add to Cart Button in Info Section */}
+          {showCartButtonInInfo && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="inline-flex">
+                  <RippleButton
+                    size="sm"
+                    variant="gradient"
+                    className="h-10 w-10 p-0"
+                    onClick={handleAddToCart}
+                    disabled={isOutOfStock}
+                    aria-label={isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                  </RippleButton>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{isOutOfStock ? 'Out of Stock' : 'Add to Cart'}</p>
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
 

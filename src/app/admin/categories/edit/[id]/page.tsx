@@ -4,18 +4,25 @@ import { useForm } from "@refinedev/antd";
 import { Form, Input, InputNumber, Select, Checkbox, Button, Space, Popconfirm } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useDelete } from "@refinedev/core";
 
 const { TextArea } = Input;
 
-export default function CategoryEdit({ params }: { params: { id: string } }) {
-  const router = useRouter();
-  const [categories, setCategories] = useState<any[]>([]);
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
 
-  const { formProps, saveButtonProps, form, queryResult } = useForm({
+export default function CategoryEdit({ params }: { params: Promise<{ id: string }> }) {
+  const router = useRouter();
+  const { id } = use(params);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  const { formProps, saveButtonProps, form, query } = useForm({
     resource: "categories",
-    id: params.id,
+    id: id,
     redirect: "list",
   });
 
@@ -25,9 +32,9 @@ export default function CategoryEdit({ params }: { params: { id: string } }) {
   useEffect(() => {
     fetch("http://localhost:3000/api/categories")
       .then((res) => res.json())
-      .then((data) => setCategories(data.filter((cat: any) => cat.id !== params.id)))
+      .then((data) => setCategories(data.filter((cat: Category) => cat.id !== id)))
       .catch((err) => console.error("Failed to fetch categories:", err));
-  }, [params.id]);
+  }, [id]);
 
   // Auto-generate slug from name
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,7 +50,7 @@ export default function CategoryEdit({ params }: { params: { id: string } }) {
     deleteCategory(
       {
         resource: "categories",
-        id: params.id,
+        id: id,
       },
       {
         onSuccess: () => {
@@ -53,7 +60,7 @@ export default function CategoryEdit({ params }: { params: { id: string } }) {
     );
   };
 
-  const { isLoading } = queryResult || {};
+  const isLoading = query?.isLoading;
 
   if (isLoading) {
     return <div style={{ padding: "24px" }}>Loading...</div>;

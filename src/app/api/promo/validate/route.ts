@@ -3,14 +3,16 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import type { CouponCode } from '@/types'
+import { formatCurrency } from '@/lib/currency'
 
-// In production, this would query a PromoCodes collection in Payload
+// In production, this would query a PromoCodes collection in Prisma
 // For now, using hardcoded promo codes
-const PROMO_CODES: Record<string, { discount: number; discountType: 'percentage' | 'fixed'; minAmount?: number; maxDiscount?: number }> = {
-  'WELCOME10': { discount: 10, discountType: 'percentage', minAmount: 0 },
-  'SAVE20': { discount: 20, discountType: 'percentage', minAmount: 50 },
-  'FREESHIP': { discount: 490, discountType: 'fixed', minAmount: 0 }, // 4.90€ in cents
-  'SUMMER25': { discount: 25, discountType: 'percentage', minAmount: 100, maxDiscount: 5000 }, // Max 50€
+const PROMO_CODES: Record<string, { discount: number; type: 'percentage' | 'fixed'; scope: 'cart' | 'shipping'; minPurchase?: number; expiresAt?: Date }> = {
+  'WELCOME10': { discount: 10, type: 'percentage', scope: 'cart', minPurchase: 0 },
+  'SAVE20': { discount: 20, type: 'percentage', scope: 'cart', minPurchase: 5000 }, // $50 in cents
+  'FREESHIP': { discount: 599, type: 'fixed', scope: 'shipping', minPurchase: 0 }, // $5.99 shipping cost
+  'SUMMER25': { discount: 25, type: 'percentage', scope: 'cart', minPurchase: 10000 }, // $100 in cents
 }
 
 export async function POST(request: NextRequest) {
@@ -20,8 +22,6 @@ export async function POST(request: NextRequest) {
     if (!code) {
       return NextResponse.json({
         valid: false,
-        discount: 0,
-        discountType: 'fixed' as const,
         message: 'Code promo requis',
       })
     }
@@ -35,56 +35,46 @@ export async function POST(request: NextRequest) {
     if (!promoConfig) {
       return NextResponse.json({
         valid: false,
-        discount: 0,
-        discountType: 'fixed' as const,
         message: 'Code promo invalide',
       })
     }
 
-    // Check minimum amount
-    if (promoConfig.minAmount && cartTotal < promoConfig.minAmount) {
+    // Check expiration
+    if (promoConfig.expiresAt && new Date() > promoConfig.expiresAt) {
       return NextResponse.json({
         valid: false,
-        discount: 0,
-        discountType: promoConfig.discountType,
-        message: `Montant minimum de ${promoConfig.minAmount.toFixed(2)}€ requis`,
+        message: 'Code promo expiré',
       })
     }
 
-    // Calculate discount
-    let discount = promoConfig.discount
+    // Check minimum purchase (cartTotal is in cents)
+    if (promoConfig.minPurchase && cartTotal < promoConfig.minPurchase) {
+      return NextResponse.json({
+        valid: false,
+        message: `Montant minimum de ${formatCurrency(promoConfig.minPurchase)} requis`,
+      })
+    }
 
-    if (promoConfig.discountType === 'percentage') {
-      // Convert percentage to actual amount (in cents if cartTotal is in cents)
-      const isInCents = cartTotal > 1000 // Heuristic: if > 1000, likely in cents
-      const totalInEuros = isInCents ? cartTotal / 100 : cartTotal
-      discount = (totalInEuros * promoConfig.discount) / 100
-      
-      // Apply max discount if set
-      if (promoConfig.maxDiscount) {
-        const maxInEuros = isInCents ? promoConfig.maxDiscount / 100 : promoConfig.maxDiscount
-        discount = Math.min(discount, maxInEuros)
-      }
-      
-      // Convert back to cents if needed
-      if (isInCents) {
-        discount = Math.round(discount * 100)
-      }
+    // Build coupon response
+    const coupon: CouponCode = {
+      code: normalizedCode,
+      discount: promoConfig.discount,
+      type: promoConfig.type,
+      scope: promoConfig.scope,
+      minPurchase: promoConfig.minPurchase,
+      expiresAt: promoConfig.expiresAt
     }
 
     return NextResponse.json({
       valid: true,
-      discount,
-      discountType: promoConfig.discountType,
-      message: `Code promo appliqué: -${promoConfig.discountType === 'percentage' ? promoConfig.discount + '%' : (discount / 100).toFixed(2) + '€'}`,
+      coupon,
+      message: `Code promo appliqué avec succès`,
     })
   } catch (error) {
     console.error('Promo validation error:', error)
     return NextResponse.json(
       {
         valid: false,
-        discount: 0,
-        discountType: 'fixed' as const,
         message: 'Erreur lors de la validation du code promo',
       },
       { status: 500 }

@@ -4,9 +4,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { Permission } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
+import { withPermission } from '@/middleware/admin-auth'
 
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest, { adminSession }: { adminSession: any }) {
   try {
     const { searchParams } = new URL(request.url)
 
@@ -77,12 +79,11 @@ export async function GET(request: NextRequest) {
       firstName: user.firstName || undefined,
       lastName: user.lastName || undefined,
       loyaltyPoints: user.loyaltyPoints,
-      // Map Prisma enum (BRONZE) to frontend type (Bronze)
-      loyaltyLevel: user.loyaltyLevel.charAt(0) + user.loyaltyLevel.slice(1).toLowerCase(),
-      totals: {
-        orders: user.totalOrders,
-        spent: user.totalSpent
-      },
+      // Return uppercase enum value as-is (BRONZE, SILVER, GOLD, PLATINUM)
+      loyaltyLevel: user.loyaltyLevel,
+      // Top-level fields for admin UI compatibility
+      totalOrders: user.totalOrders,
+      totalSpent: user.totalSpent,
       reviewCount: user._count.reviews,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt
@@ -98,3 +99,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 })
   }
 }
+
+// Export wrapped handler with permission check
+export const GET = withPermission(Permission.USERS_READ, handleGET)

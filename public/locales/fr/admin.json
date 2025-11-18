@@ -1,0 +1,612 @@
+{
+  "resources": {
+    "products": "Produits",
+    "product": "Produit",
+    "categories": "Catégories",
+    "category": "Catégorie",
+    "orders": "Commandes",
+    "order": "Commande",
+    "users": "Utilisateurs",
+    "user": "Utilisateur",
+    "customers": "Clients",
+    "customer": "Client",
+    "vendors": "Vendeurs",
+    "vendor": "Vendeur",
+    "campaigns": "Campagnes",
+    "campaign": "Campagne",
+    "promoCodes": "Codes promo",
+    "promoCode": "Code promo",
+    "segments": "Segments",
+    "segment": "Segment",
+    "auditLogs": "Journaux d'audit",
+    "auditLog": "Journal d'audit",
+    "roles": "Rôles",
+    "role": "Rôle",
+    "featureFlags": "Drapeaux de fonctionnalités",
+    "featureFlag": "Drapeau de fonctionnalité",
+    "settings": "Paramètres",
+    "dashboard": "Tableau de bord",
+    "analytics": "Analytique"
+  },
+  "actions": {
+    "list": "Liste",
+    "create": "Créer",
+    "edit": "Modifier",
+    "show": "Afficher",
+    "delete": "Supprimer",
+    "export": "Exporter",
+    "import": "Importer",
+    "clone": "Dupliquer",
+    "bulkDelete": "Suppression groupée",
+    "bulkEdit": "Modification groupée",
+    "refresh": "Actualiser"
+  },
+  "products": {
+    "fields": {
+      "id": "ID",
+      "name": "Nom du produit",
+      "slug": "Slug",
+      "description": "Description",
+      "price": "Prix",
+      "compareAtPrice": "Prix comparé",
+      "cost": "Coût",
+      "stock": "Stock",
+      "sku": "SKU",
+      "barcode": "Code-barres",
+      "weight": "Poids",
+      "dimensions": "Dimensions",
+      "category": "Catégorie",
+      "tags": "Étiquettes",
+      "images": "Images",
+      "variants": "Variantes",
+      "status": "Statut",
+      "featured": "En vedette",
+      "onSale": "En promotion",
+      "badge": "Badge",
+      "rating": "Note",
+      "reviewCount": "Nombre d'avis",
+      "seoTitle": "Titre SEO",
+      "seoDescription": "Description SEO",
+      "metafields": "Métachamps"
+    },
+    "status": {
+      "ACTIVE": "Actif",
+      "DRAFT": "Brouillon",
+      "ARCHIVED": "Archivé"
+    },
+    "messages": {
+      "createSuccess": "Produit créé avec succès",
+      "updateSuccess": "Produit mis à jour avec succès",
+      "deleteSuccess": "Produit supprimé avec succès",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce produit ?"
+    }
+  },
+  "categories": {
+    "fields": {
+      "name": "Nom de la catégorie",
+      "slug": "Slug",
+      "description": "Description",
+      "image": "Image",
+      "parent": "Catégorie parente",
+      "children": "Sous-catégories",
+      "productCount": "Nombre de produits",
+      "order": "Ordre d'affichage",
+      "isActive": "Active",
+      "seoTitle": "Titre SEO",
+      "seoDescription": "Description SEO"
+    },
+    "messages": {
+      "createSuccess": "Catégorie créée avec succès",
+      "updateSuccess": "Catégorie mise à jour avec succès",
+      "deleteSuccess": "Catégorie supprimée avec succès",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette catégorie ?",
+      "hasChildren": "Impossible de supprimer une catégorie avec des sous-catégories",
+      "hasProducts": "Cette catégorie contient des produits"
+    }
+  },
+  "orders": {
+    "fields": {
+      "orderId": "ID de commande",
+      "orderNumber": "Numéro de commande",
+      "customer": "Client",
+      "status": "Statut de la commande",
+      "paymentStatus": "Statut du paiement",
+      "items": "Articles",
+      "subtotal": "Sous-total",
+      "tax": "Taxe",
+      "shipping": "Livraison",
+      "discount": "Réduction",
+      "total": "Total",
+      "shippingAddress": "Adresse de livraison",
+      "billingAddress": "Adresse de facturation",
+      "notes": "Notes",
+      "trackingNumber": "Numéro de suivi",
+      "estimatedDelivery": "Livraison estimée",
+      "metadata": "Métadonnées",
+      "createdAt": "Créé le"
+    },
+    "status": {
+      "PENDING": "En attente",
+      "PROCESSING": "En cours",
+      "SHIPPED": "Expédié",
+      "DELIVERED": "Livré",
+      "CANCELLED": "Annulé",
+      "REFUNDED": "Remboursé"
+    },
+    "paymentStatus": {
+      "PENDING": "En attente",
+      "PAID": "Payé",
+      "FAILED": "Échoué",
+      "REFUNDED": "Remboursé"
+    },
+    "messages": {
+      "updateSuccess": "Commande mise à jour avec succès",
+      "statusChanged": "Statut de la commande changé en {{status}}",
+      "cancelConfirm": "Êtes-vous sûr de vouloir annuler cette commande ?",
+      "refundConfirm": "Êtes-vous sûr de vouloir rembourser cette commande ?"
+    }
+  },
+  "users": {
+    "fields": {
+      "name": "Nom",
+      "firstName": "Prénom",
+      "lastName": "Nom de famille",
+      "email": "Email",
+      "phone": "Téléphone",
+      "role": "Rôle",
+      "status": "Statut",
+      "emailVerified": "Email vérifié",
+      "loyaltyPoints": "Points de fidélité",
+      "loyaltyLevel": "Niveau de fidélité",
+      "totalOrders": "Total des commandes",
+      "totalSpent": "Total dépensé",
+      "lastLoginAt": "Dernière connexion",
+      "addresses": "Adresses",
+      "orders": "Commandes",
+      "wishlist": "Liste de souhaits"
+    },
+    "loyaltyLevel": {
+      "BRONZE": "Bronze",
+      "SILVER": "Argent",
+      "GOLD": "Or",
+      "PLATINUM": "Platine"
+    },
+    "messages": {
+      "updateSuccess": "Utilisateur mis à jour avec succès",
+      "deleteSuccess": "Utilisateur supprimé avec succès",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cet utilisateur ?",
+      "pointsAdded": "Points de fidélité ajoutés avec succès",
+      "levelChanged": "Niveau de fidélité changé en {{level}}"
+    }
+  },
+  "auditLogs": {
+    "title": "Journaux d'audit",
+    "fields": {
+      "action": "Action",
+      "resource": "Ressource",
+      "resourceId": "ID de la ressource",
+      "adminUser": "Administrateur",
+      "adminEmail": "Email de l'administrateur",
+      "changes": "Modifications",
+      "metadata": "Métadonnées",
+      "timestamp": "Horodatage",
+      "ipAddress": "Adresse IP",
+      "userAgent": "Agent utilisateur"
+    },
+    "actions": {
+      "CREATE": "Créer",
+      "UPDATE": "Mettre à jour",
+      "DELETE": "Supprimer",
+      "LOGIN": "Connexion",
+      "LOGOUT": "Déconnexion",
+      "EXPORT": "Exporter",
+      "IMPORT": "Importer"
+    }
+  },
+  "roles": {
+    "fields": {
+      "name": "Nom du rôle",
+      "permissions": "Permissions",
+      "description": "Description",
+      "userCount": "Utilisateurs"
+    },
+    "types": {
+      "SUPER_ADMIN": "Super Administrateur",
+      "ADMIN": "Administrateur",
+      "MANAGER": "Gestionnaire",
+      "SUPPORT": "Support",
+      "VIEWER": "Observateur"
+    },
+    "permissions": {
+      "DASHBOARD_READ": "Voir le tableau de bord",
+      "PRODUCTS_READ": "Voir les produits",
+      "PRODUCTS_WRITE": "Modifier les produits",
+      "PRODUCTS_DELETE": "Supprimer les produits",
+      "CATEGORIES_READ": "Voir les catégories",
+      "CATEGORIES_WRITE": "Modifier les catégories",
+      "CATEGORIES_DELETE": "Supprimer les catégories",
+      "ORDERS_READ": "Voir les commandes",
+      "ORDERS_WRITE": "Modifier les commandes",
+      "USERS_READ": "Voir les utilisateurs",
+      "USERS_WRITE": "Modifier les utilisateurs",
+      "AUDIT_LOGS_READ": "Voir les journaux d'audit",
+      "SETTINGS_WRITE": "Gérer les paramètres"
+    }
+  },
+  "adminUsers": {
+    "title": "Utilisateurs Administrateurs",
+    "create": "Créer un utilisateur admin",
+    "fields": {
+      "name": "Nom",
+      "email": "Email",
+      "role": "Rôle",
+      "status": "Statut",
+      "createdAt": "Créé le",
+      "lastLogin": "Dernière connexion"
+    },
+    "status": {
+      "ACTIVE": "Actif",
+      "INACTIVE": "Inactif",
+      "SUSPENDED": "Suspendu"
+    },
+    "messages": {
+      "createSuccess": "Utilisateur admin créé avec succès",
+      "updateSuccess": "Utilisateur admin mis à jour avec succès",
+      "deleteSuccess": "Utilisateur admin supprimé avec succès",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cet utilisateur admin ?"
+    }
+  },
+  "featureFlags": {
+    "fields": {
+      "key": "Clé du drapeau",
+      "name": "Nom",
+      "description": "Description",
+      "enabled": "Activé",
+      "rolloutPercentage": "Pourcentage de déploiement",
+      "environment": "Environnement"
+    },
+    "messages": {
+      "updateSuccess": "Drapeau de fonctionnalité mis à jour avec succès",
+      "enabledSuccess": "Drapeau de fonctionnalité activé",
+      "disabledSuccess": "Drapeau de fonctionnalité désactivé"
+    }
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "overview": "Vue d'ensemble",
+    "statistics": "Statistiques",
+    "recentOrders": "Commandes récentes",
+    "topProducts": "Meilleurs produits",
+    "revenue": "Revenus",
+    "sales": "Ventes",
+    "customers": "Clients",
+    "avgOrderValue": "Valeur moyenne des commandes",
+    "conversionRate": "Taux de conversion",
+    "period": {
+      "today": "Aujourd'hui",
+      "week": "Cette semaine",
+      "month": "Ce mois",
+      "year": "Cette année",
+      "custom": "Période personnalisée"
+    }
+  },
+  "settings": {
+    "general": "Paramètres généraux",
+    "store": "Paramètres de la boutique",
+    "payment": "Paramètres de paiement",
+    "shipping": "Paramètres de livraison",
+    "email": "Paramètres d'email",
+    "tax": "Paramètres de taxe",
+    "appearance": "Apparence",
+    "advanced": "Paramètres avancés",
+    "messages": {
+      "updateSuccess": "Paramètres mis à jour avec succès",
+      "updateError": "Échec de la mise à jour des paramètres"
+    }
+  },
+  "bulk": {
+    "actions": "Actions groupées",
+    "selected": "{{count}} sélectionné(s)",
+    "selectAll": "Tout sélectionner",
+    "deselectAll": "Tout désélectionner",
+    "delete": "Supprimer la sélection",
+    "export": "Exporter la sélection",
+    "updateStatus": "Mettre à jour le statut",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer {{count}} éléments ?"
+  },
+  "savedViews": {
+    "title": "Vues enregistrées",
+    "save": "Enregistrer la vue",
+    "default": "Vue par défaut",
+    "custom": "Vues personnalisées",
+    "name": "Nom de la vue",
+    "saveSuccess": "Vue enregistrée avec succès",
+    "deleteSuccess": "Vue supprimée avec succès"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAsRead": "Marquer comme lu",
+    "markAllAsRead": "Tout marquer comme lu",
+    "newOrder": "Nouvelle commande",
+    "orderUpdated": "Commande mise à jour",
+    "lowStock": "Alerte stock faible",
+    "systemUpdate": "Mise à jour système"
+  },
+  "filters": {
+    "apply": "Appliquer les filtres",
+    "reset": "Réinitialiser les filtres",
+    "clear": "Tout effacer",
+    "advanced": "Filtres avancés"
+  },
+  "menu": {
+    "dashboard": "Tableau de bord",
+    "commerce": "Commerce",
+    "products": "Produits",
+    "productsList": "Tous les produits",
+    "addProduct": "Ajouter un produit",
+    "categories": "Catégories",
+    "orders": "Commandes",
+    "allOrders": "Toutes les commandes",
+    "pendingOrders": "En attente",
+    "processingOrders": "En cours",
+    "deliveredOrders": "Livrées",
+    "customers": "Clients",
+    "allCustomers": "Tous les clients",
+    "segments": "Segments",
+    "vendors": "Vendeurs",
+    "allVendors": "Tous les vendeurs",
+    "pendingVendors": "En attente d'approbation",
+    "commissions": "Commissions",
+    "marketing": "Marketing",
+    "campaigns": "Campagnes",
+    "promoCodes": "Codes promo",
+    "analytics": "Analytique",
+    "reports": "Rapports",
+    "settings": "Paramètres",
+    "configuration": "Configuration",
+    "general": "Général",
+    "payments": "Paiements",
+    "shipping": "Livraison",
+    "adminUsers": "Utilisateurs admin",
+    "auditLogs": "Journaux d'audit",
+    "docs": "Documentation",
+    "support": "Support",
+    "profile": "Profil",
+    "activityLog": "Journal d'activité",
+    "logout": "Déconnexion"
+  },
+  "search": {
+    "placeholder": "Rechercher..."
+  },
+  "logout": {
+    "confirm": "Êtes-vous sûr de vouloir vous déconnecter ?",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "vendors": {
+    "tabs": {
+      "all": "Tous les vendeurs",
+      "pending": "En attente",
+      "active": "Actifs",
+      "suspended": "Suspendus"
+    },
+    "actions": {
+      "create": "Créer un vendeur",
+      "invite": "Inviter un vendeur",
+      "approve": "Approuver",
+      "suspend": "Suspendre"
+    },
+    "fields": {
+      "businessName": "Nom commercial",
+      "slug": "Slug",
+      "email": "Email",
+      "phone": "Téléphone",
+      "logo": "Logo",
+      "description": "Description",
+      "status": "Statut",
+      "commissionRate": "Commission",
+      "documents": "Documents",
+      "bankDetails": "Détails bancaires",
+      "rating": "Note",
+      "totalSales": "Ventes totales",
+      "totalProducts": "Produits totaux",
+      "products": "Produits",
+      "createdAt": "Créé le"
+    },
+    "status": {
+      "PENDING": "En attente",
+      "ACTIVE": "Actif",
+      "SUSPENDED": "Suspendu",
+      "BANNED": "Banni"
+    },
+    "messages": {
+      "createSuccess": "Vendeur créé avec succès",
+      "updateSuccess": "Vendeur mis à jour avec succès",
+      "deleteSuccess": "Vendeur supprimé avec succès",
+      "approveSuccess": "Vendeur approuvé avec succès",
+      "suspendSuccess": "Vendeur suspendu avec succès",
+      "suspendConfirm": "Êtes-vous sûr de vouloir suspendre ce vendeur ?",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce vendeur ?",
+      "inviteSuccess": "Invitation envoyée avec succès",
+      "inviteError": "Échec de l'envoi de l'invitation",
+      "businessNameRequired": "Veuillez entrer le nom commercial",
+      "businessNamePlaceholder": "Entrez le nom commercial",
+      "emailRequired": "Veuillez entrer l'email",
+      "emailInvalid": "Veuillez entrer un email valide"
+    }
+  },
+  "campaigns": {
+    "title": "Campagnes",
+    "create": "Créer une campagne",
+    "segments": {
+      "all": "Tous les clients",
+      "platinum": "Membres Platine",
+      "inactive": "Inactifs (90+ jours)",
+      "highValue": "Haute valeur (1000$+)"
+    },
+    "fields": {
+      "name": "Nom de la campagne",
+      "type": "Type",
+      "status": "Statut",
+      "audience": "Audience",
+      "recipients": "destinataires",
+      "subject": "Sujet",
+      "content": "Contenu",
+      "segmentFilters": "Filtres de segment",
+      "scheduled": "Programmée",
+      "scheduledAt": "Programmée pour",
+      "sent": "Envoyée",
+      "sentAt": "Envoyée le",
+      "stats": "Statistiques"
+    },
+    "types": {
+      "EMAIL": "Email",
+      "SMS": "SMS",
+      "PUSH": "Notification push"
+    },
+    "status": {
+      "DRAFT": "Brouillon",
+      "SCHEDULED": "Programmée",
+      "ACTIVE": "Active",
+      "COMPLETED": "Terminée",
+      "CANCELLED": "Annulée"
+    },
+    "stats": {
+      "openRate": "Taux d'ouverture",
+      "clickRate": "Taux de clics",
+      "conversions": "Conversions",
+      "revenue": "Revenus"
+    },
+    "messages": {
+      "createSuccess": "Campagne créée avec succès",
+      "updateSuccess": "Campagne mise à jour avec succès",
+      "deleteSuccess": "Campagne supprimée avec succès",
+      "sendSuccess": "Campagne envoyée avec succès",
+      "draftSaved": "Brouillon enregistré avec succès",
+      "scheduled": "Campagne programmée avec succès",
+      "sent": "Campagne envoyée avec succès",
+      "duplicated": "Campagne dupliquée avec succès",
+      "cancelConfirm": "Êtes-vous sûr de vouloir annuler cette campagne ?",
+      "cancelSuccess": "Campagnes annulées avec succès !",
+      "exporting": "Export des campagnes sélectionnées...",
+      "duplicating": "Duplication des campagnes...",
+      "bulkDeleteSuccess": "Campagnes supprimées avec succès !"
+    },
+    "bulkActions": {
+      "cancel": "Annuler les campagnes",
+      "cancelConfirm": "Êtes-vous sûr de vouloir annuler {{count}} campagnes ?",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer {{count}} campagnes ?"
+    }
+  },
+  "promoCodes": {
+    "fields": {
+      "code": "Code",
+      "type": "Type",
+      "value": "Valeur",
+      "minOrderAmount": "Montant minimum de commande",
+      "maxDiscount": "Réduction maximale",
+      "usageLimit": "Limite d'utilisation",
+      "usageCount": "Nombre d'utilisations",
+      "validFrom": "Valide à partir de",
+      "validTo": "Valide jusqu'à",
+      "conditions": "Conditions",
+      "isActive": "Actif"
+    },
+    "types": {
+      "PERCENTAGE": "Pourcentage",
+      "FIXED_AMOUNT": "Montant fixe",
+      "FREE_SHIPPING": "Livraison gratuite"
+    },
+    "messages": {
+      "createSuccess": "Code promo créé avec succès",
+      "updateSuccess": "Code promo mis à jour avec succès",
+      "deleteSuccess": "Code promo supprimé avec succès",
+      "disableSuccess": "Code promo désactivé avec succès",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce code promo ?"
+    }
+  },
+  "segments": {
+    "fields": {
+      "name": "Nom du segment",
+      "description": "Description",
+      "filters": "Filtres",
+      "customerCount": "Nombre de clients"
+    },
+    "messages": {
+      "createSuccess": "Segment créé avec succès",
+      "updateSuccess": "Segment mis à jour avec succès",
+      "deleteSuccess": "Segment supprimé avec succès"
+    }
+  },
+  "analytics": {
+    "title": "Tableau de bord analytique",
+    "subtitle": "Surveillez les performances de votre entreprise et les indicateurs clés",
+    "kpis": {
+      "totalRevenue": "Revenu total",
+      "totalOrders": "Commandes totales",
+      "newCustomers": "Nouveaux clients",
+      "avgOrderValue": "Valeur moyenne commande"
+    },
+    "charts": {
+      "revenue": "Revenus",
+      "orders": "Commandes",
+      "salesByCategory": "Ventes par catégorie"
+    },
+    "topProducts": {
+      "product": "Produit",
+      "category": "Catégorie",
+      "sales": "Ventes",
+      "revenue": "Revenus",
+      "growth": "Croissance"
+    },
+    "compare": {
+      "previousPeriod": "vs Période précédente",
+      "previousYear": "vs Année précédente"
+    },
+    "actions": {
+      "exportPDF": "Exporter PDF",
+      "exportExcel": "Exporter Excel"
+    },
+    "funnel": {
+      "visitors": "Visiteurs",
+      "productViews": "Vues de produits",
+      "addToCart": "Ajouts au panier",
+      "checkout": "Passages en caisse",
+      "orders": "Commandes"
+    },
+    "trafficSources": {
+      "organic": "Organique",
+      "direct": "Direct",
+      "social": "Réseaux sociaux",
+      "paid": "Publicité payante",
+      "referral": "Référence"
+    },
+    "metrics": {
+      "conversionRate": "Taux de conversion",
+      "avgOrderValue": "Valeur moyenne des commandes",
+      "revenue": "Revenus",
+      "profit": "Profit"
+    }
+  },
+  "import": {
+    "title": "Importer des données",
+    "selectFile": "Sélectionner un fichier",
+    "processing": "Traitement en cours...",
+    "summary": "Résumé de l'importation",
+    "totalRows": "Total de lignes",
+    "successful": "Réussi",
+    "failed": "Échoué",
+    "downloadErrors": "Télécharger le rapport d'erreurs"
+  },
+  "export": {
+    "title": "Exporter des données",
+    "format": "Format",
+    "columns": "Colonnes",
+    "allColumns": "Toutes les colonnes",
+    "selectedColumns": "Colonnes sélectionnées"
+  },
+  "common": {
+    "all": "Tout",
+    "actions": "Actions"
+  }
+}

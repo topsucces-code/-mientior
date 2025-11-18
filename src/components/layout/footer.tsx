@@ -2,9 +2,8 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin, CreditCard, Lock, Truck, RefreshCw } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { RippleButton } from '@/components/ui/ripple-button'
+import { Facebook, X, Instagram, Youtube, Mail, Phone, MapPin, CreditCard, Lock, Truck, RefreshCw } from 'lucide-react'
+import NewsletterSubscription from '@/components/home/newsletter-subscription'
 
 const footerLinks = {
   shop: [
@@ -38,7 +37,7 @@ const footerLinks = {
 
 const socialLinks = [
   { href: 'https://facebook.com', label: 'Facebook', icon: Facebook },
-  { href: 'https://twitter.com', label: 'Twitter', icon: Twitter },
+  { href: 'https://x.com', label: 'X (formerly Twitter)', icon: X },
   { href: 'https://instagram.com', label: 'Instagram', icon: Instagram },
   { href: 'https://youtube.com', label: 'YouTube', icon: Youtube },
 ]
@@ -51,34 +50,15 @@ const trustBadges = [
 ]
 
 export default function Footer() {
-  const [email, setEmail] = React.useState('')
-  const [subscribeStatus, setSubscribeStatus] = React.useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-
-  const handleNewsletterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email) return
-
-    setSubscribeStatus('loading')
-
-    // TODO: Implement newsletter subscription
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      setSubscribeStatus('success')
-      setEmail('')
-      setTimeout(() => setSubscribeStatus('idle'), 3000)
-    } catch (error) {
-      setSubscribeStatus('error')
-      setTimeout(() => setSubscribeStatus('idle'), 3000)
-    }
-  }
-
   return (
     <footer className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 text-white">
+      {/* Newsletter Section - Before Footer Content */}
+      <NewsletterSubscription className="border-b border-white/10" />
+
       {/* Main Content Grid */}
       <div className="border-b border-white/10">
-        <div className="container mx-auto px-4 py-12 md:px-6 md:py-16 lg:px-8">
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
+        <div className="container mx-auto px-3 py-10 md:px-4 md:py-14 lg:px-6">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
             {/* Brand Section */}
             <div className="lg:col-span-2">
               <Link href="/" className="mb-4 inline-block font-display text-3xl font-bold text-white">
@@ -89,7 +69,7 @@ export default function Footer() {
               </p>
 
               {/* Contact Info */}
-              <div className="space-y-3 text-sm">
+              <div className="space-y-2 text-sm">
                 <a
                   href="mailto:support@mientior.com"
                   className="flex items-center gap-3 text-blue-100 transition-colors hover:text-white"
@@ -114,7 +94,7 @@ export default function Footer() {
             {/* Shop Links */}
             <div>
               <h3 className="mb-4 font-semibold text-white">Shop</h3>
-              <ul className="space-y-2.5">
+              <ul className="space-y-2">
                 {footerLinks.shop.map((link) => (
                   <li key={link.href}>
                     <Link
@@ -131,7 +111,7 @@ export default function Footer() {
             {/* Company Links */}
             <div>
               <h3 className="mb-4 font-semibold text-white">Company</h3>
-              <ul className="space-y-2.5">
+              <ul className="space-y-2">
                 {footerLinks.company.map((link) => (
                   <li key={link.href}>
                     <Link
@@ -148,7 +128,7 @@ export default function Footer() {
             {/* Support Links */}
             <div>
               <h3 className="mb-4 font-semibold text-white">Support</h3>
-              <ul className="space-y-2.5">
+              <ul className="space-y-2">
                 {footerLinks.support.map((link) => (
                   <li key={link.href}>
                     <Link
@@ -165,57 +145,6 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Newsletter Section */}
-      <div className="border-b border-white/10 bg-white/5">
-        <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
-          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-            <div className="text-center md:text-left">
-              <h3 className="mb-2 text-lg font-semibold text-white">
-                Subscribe to Our Newsletter
-              </h3>
-              <p className="text-sm text-blue-100">
-                Get exclusive deals, new product launches, and insider tips
-              </p>
-            </div>
-
-            <form onSubmit={handleNewsletterSubmit} className="flex w-full max-w-md gap-2">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-                className={cn(
-                  'flex-1 rounded-lg border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white placeholder:text-blue-200',
-                  'focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20',
-                  'backdrop-blur-sm transition-all'
-                )}
-                disabled={subscribeStatus === 'loading'}
-              />
-              <RippleButton
-                type="submit"
-                variant="gradient"
-                disabled={subscribeStatus === 'loading'}
-                className="px-6"
-              >
-                {subscribeStatus === 'loading' ? 'Subscribing...' : 'Subscribe'}
-              </RippleButton>
-            </form>
-          </div>
-
-          {/* Subscribe Status Messages */}
-          {subscribeStatus === 'success' && (
-            <p className="mt-3 text-center text-sm text-green-300">
-              Thanks for subscribing! Check your email for confirmation.
-            </p>
-          )}
-          {subscribeStatus === 'error' && (
-            <p className="mt-3 text-center text-sm text-red-300">
-              Something went wrong. Please try again.
-            </p>
-          )}
-        </div>
-      </div>
 
       {/* Trust Badges */}
       <div className="border-b border-white/10">

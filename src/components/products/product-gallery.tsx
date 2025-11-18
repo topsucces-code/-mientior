@@ -4,10 +4,14 @@
  * Sophisticated product gallery with lightbox, zoom, and 360° view support
  */
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Play } from 'lucide-react'
+import useEmblaCarousel from 'embla-carousel-react'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
+import { Product360Viewer } from '@/components/products/product-360-viewer'
+import { ProductVideoPlayer } from '@/components/products/product-video-player'
+import { ARPreviewButton } from '@/components/products/ar-preview-button'
 import type { ProductImage } from '@/types'
 
 interface ProductGalleryProps {
@@ -16,6 +20,7 @@ interface ProductGalleryProps {
   has360View?: boolean
   hasVideo?: boolean
   userPhotos?: Array<{ url: string; userName: string }>
+  arModelUrl?: string
 }
 
 export function ProductGallery({
@@ -24,6 +29,7 @@ export function ProductGallery({
   has360View = false,
   hasVideo = false,
   userPhotos = [],
+  arModelUrl,
 }: ProductGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
@@ -31,26 +37,40 @@ export function ProductGallery({
   const [panPosition, setPanPosition] = useState({ x: 0, y: 0 })
   const [isHovering, setIsHovering] = useState(false)
 
+  // Mobile carousel state
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: 'center' })
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>([])
+  const [selectedEmblaIndex, setSelectedEmblaIndex] = useState(0)
+
   const imageRef = useRef<HTMLDivElement>(null)
   const prefersReducedMotion = useReducedMotion()
 
-  const currentImage = images[selectedIndex]
+  // After guard, we know images.length > 0, so currentImage is safe (unless empty which is handled below)
+  const currentImage = images.length > 0 ? images[selectedIndex]! : null
+
+  // Embla carousel effect
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return
+    setSelectedEmblaIndex(emblaApi.selectedScrollSnap())
+    setSelectedIndex(emblaApi.selectedScrollSnap())
+  }, [emblaApi])
+
+  useEffect(() => {
+    if (!emblaApi) return
+    
+    setScrollSnaps(emblaApi.scrollSnapList())
+    onSelect()
+    emblaApi.on('select', onSelect)
+    
+    return () => {
+      emblaApi.off('select', onSelect)
+    }
+  }, [emblaApi, onSelect])
 
   // Reset pan when zoom changes
   useEffect(() => {
     setPanPosition({ x: 0, y: 0 })
   }, [zoomLevel, selectedIndex])
-
-  // Handle mouse move for zoom pan
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (zoomLevel === 1 || !imageRef.current) return
-
-    const rect = imageRef.current.getBoundingClientRect()
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2
-
-    setPanPosition({ x: -x * 50, y: -y * 50 })
-  }
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -73,6 +93,33 @@ export function ProductGallery({
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isLightboxOpen, images.length])
+
+  // Early guard: handle empty images case
+  if (images.length === 0 || !currentImage) {
+    return (
+      <div className="flex flex-col lg:flex-row gap-4">
+        <div className="flex-1">
+          <div className="relative aspect-square bg-platinum-100 rounded-lg overflow-hidden flex items-center justify-center">
+            <div className="text-center text-nuanced-500">
+              <p className="text-lg font-medium mb-2">Aucune image disponible</p>
+              <p className="text-sm">Les images de ce produit seront bientôt disponibles</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Handle mouse move for zoom pan
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (zoomLevel === 1 || !imageRef.current) return
+
+    const rect = imageRef.current.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2
+
+    setPanPosition({ x: -x * 50, y: -y * 50 })
+  }
 
   const handleThumbnailClick = (index: number) => {
     setSelectedIndex(index)
@@ -103,8 +150,8 @@ export function ProductGallery({
 
   return (
     <div className="flex flex-col lg:flex-row gap-4">
-      {/* Thumbnails */}
-      <div className="order-2 lg:order-1 flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto lg:max-h-[600px] scrollbar-thin">
+      {/* Thumbnails - Hidden on mobile */}
+      <div className="hidden md:flex order-2 lg:order-1 lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto lg:max-h-[600px] scrollbar-thin">
         {images.map((image, index) => (
           <button
             key={index}
@@ -156,28 +203,44 @@ export function ProductGallery({
 
       {/* Main Image */}
       <div className="order-1 lg:order-2 flex-1">
+        {/* Desktop view with zoom functionality */}
         <div
           ref={imageRef}
-          className="relative aspect-square bg-platinum-100 rounded-lg overflow-hidden cursor-zoom-in group"
-          onMouseEnter={() => setIsHovering(true)}
+          className={`hidden md:block relative aspect-square bg-platinum-100 rounded-lg overflow-hidden group ${
+            currentImage.type === 'image' ? 'cursor-zoom-in' : ''
+          }`}
+          onMouseEnter={() => currentImage.type === 'image' && setIsHovering(true)}
           onMouseLeave={() => {
-            setIsHovering(false)
-            setZoomLevel(1)
+            if (currentImage.type === 'image') {
+              setIsHovering(false)
+              setZoomLevel(1)
+            }
           }}
-          onMouseMove={handleMouseMove}
-          onClick={handleMainImageClick}
+          onMouseMove={currentImage.type === 'image' ? handleMouseMove : undefined}
+          onClick={currentImage.type === 'image' ? handleMainImageClick : undefined}
         >
-          <Image
-            src={currentImage.url}
-            alt={currentImage.alt || productName}
-            fill
-            className="object-contain transition-transform duration-300"
-            style={{
-              transform: `scale(${zoomLevel}) translate(${panPosition.x}%, ${panPosition.y}%)`,
-            }}
-            sizes="(max-width: 768px) 100vw, 60vw"
-            priority
-          />
+          {/* Render component based on media type */}
+          {currentImage.type === '360' && currentImage.frames ? (
+            <Product360Viewer images={currentImage.frames} productName={productName} />
+          ) : currentImage.type === 'video' && currentImage.videoUrl ? (
+            <ProductVideoPlayer
+              videoUrl={currentImage.videoUrl}
+              posterUrl={currentImage.thumbnail || currentImage.url}
+              productName={productName}
+            />
+          ) : (
+            <Image
+              src={currentImage.url}
+              alt={currentImage.alt || productName}
+              fill
+              className="object-contain transition-transform duration-300"
+              style={{
+                transform: `scale(${zoomLevel}) translate(${panPosition.x}%, ${panPosition.y}%)`,
+              }}
+              sizes="(max-width: 768px) 100vw, 60vw"
+              priority
+            />
+          )}
 
           {/* Badges Overlay */}
           <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -192,8 +255,8 @@ export function ProductGallery({
             )}
           </div>
 
-          {/* Zoom Controls (visible on hover) */}
-          {isHovering && (
+          {/* Zoom Controls (visible on hover, only for static images) */}
+          {isHovering && currentImage.type === 'image' && (
             <div className="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={(e) => {
@@ -208,30 +271,100 @@ export function ProductGallery({
             </div>
           )}
 
-          {/* Navigation Arrows */}
+          {/* AR Preview Button (bottom-left overlay) */}
+          {arModelUrl && (
+            <div className="absolute bottom-4 left-4 z-10">
+              <ARPreviewButton modelUrl={arModelUrl} productName={productName} />
+            </div>
+          )}
+
+          {/* Navigation Arrows (desktop) */}
           {images.length > 1 && (
             <>
               <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  prevImage()
-                }}
-                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-elevation-2 opacity-0 group-hover:opacity-100 transition-all"
+                onClick={prevImage}
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-elevation-2 opacity-0 group-hover:opacity-100 transition-opacity"
                 aria-label="Previous image"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="w-6 h-6" />
               </button>
               <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  nextImage()
-                }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-elevation-2 opacity-0 group-hover:opacity-100 transition-all"
+                onClick={nextImage}
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-elevation-2 opacity-0 group-hover:opacity-100 transition-opacity"
                 aria-label="Next image"
               >
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-6 h-6" />
               </button>
             </>
+          )}
+        </div>
+
+        {/* Mobile carousel */}
+        <div className="md:hidden">
+          <div className="overflow-hidden rounded-lg" ref={emblaRef}>
+            <div className="flex">
+              {images.map((image, index) => (
+                <div key={index} className="flex-shrink-0 w-full">
+                  <div className="relative aspect-square bg-platinum-100">
+                    {image.type === '360' && image.frames ? (
+                      <Product360Viewer images={image.frames} productName={productName} />
+                    ) : image.type === 'video' && image.videoUrl ? (
+                      <ProductVideoPlayer
+                        videoUrl={image.videoUrl}
+                        posterUrl={image.thumbnail || image.url}
+                        productName={productName}
+                      />
+                    ) : (
+                      <Image
+                        src={image.url}
+                        alt={image.alt || productName}
+                        fill
+                        className="object-contain"
+                        sizes="100vw"
+                        priority={index === 0}
+                        onClick={() => setIsLightboxOpen(true)}
+                      />
+                    )}
+
+                    {/* Badges for mobile */}
+                    <div className="absolute top-4 left-4 flex flex-col gap-2">
+                      {hasVideo && index === 0 && (
+                        <div className="bg-black/70 text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
+                          <Play className="w-4 h-4" />
+                          Vidéo
+                        </div>
+                      )}
+                      {has360View && index === 0 && (
+                        <div className="bg-black/70 text-white px-3 py-1 rounded-full text-sm">Vue 360°</div>
+                      )}
+                    </div>
+
+                    {/* AR Preview for mobile */}
+                    {arModelUrl && index === 0 && (
+                      <div className="absolute bottom-4 left-4 z-10">
+                        <ARPreviewButton modelUrl={arModelUrl} productName={productName} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Pagination dots */}
+          {images.length > 1 && (
+            <div className="flex justify-center gap-2 mt-4">
+              {scrollSnaps.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => emblaApi?.scrollTo(index)}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    index === selectedEmblaIndex ? 'bg-orange-500 w-6' : 'bg-platinum-300'
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
           )}
         </div>
 

@@ -1,0 +1,612 @@
+{
+  "resources": {
+    "products": "Products",
+    "product": "Product",
+    "categories": "Categories",
+    "category": "Category",
+    "orders": "Orders",
+    "order": "Order",
+    "users": "Users",
+    "user": "User",
+    "customers": "Customers",
+    "customer": "Customer",
+    "vendors": "Vendors",
+    "vendor": "Vendor",
+    "campaigns": "Campaigns",
+    "campaign": "Campaign",
+    "promoCodes": "Promo Codes",
+    "promoCode": "Promo Code",
+    "segments": "Segments",
+    "segment": "Segment",
+    "auditLogs": "Audit Logs",
+    "auditLog": "Audit Log",
+    "roles": "Roles",
+    "role": "Role",
+    "featureFlags": "Feature Flags",
+    "featureFlag": "Feature Flag",
+    "settings": "Settings",
+    "dashboard": "Dashboard",
+    "analytics": "Analytics"
+  },
+  "actions": {
+    "list": "List",
+    "create": "Create",
+    "edit": "Edit",
+    "show": "Show",
+    "delete": "Delete",
+    "export": "Export",
+    "import": "Import",
+    "clone": "Clone",
+    "bulkDelete": "Bulk Delete",
+    "bulkEdit": "Bulk Edit",
+    "refresh": "Refresh"
+  },
+  "products": {
+    "fields": {
+      "id": "ID",
+      "name": "Product Name",
+      "slug": "Slug",
+      "description": "Description",
+      "price": "Price",
+      "compareAtPrice": "Compare At Price",
+      "cost": "Cost",
+      "stock": "Stock",
+      "sku": "SKU",
+      "barcode": "Barcode",
+      "weight": "Weight",
+      "dimensions": "Dimensions",
+      "category": "Category",
+      "tags": "Tags",
+      "images": "Images",
+      "variants": "Variants",
+      "status": "Status",
+      "featured": "Featured",
+      "onSale": "On Sale",
+      "badge": "Badge",
+      "rating": "Rating",
+      "reviewCount": "Review Count",
+      "seoTitle": "SEO Title",
+      "seoDescription": "SEO Description",
+      "metafields": "Metafields"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "DRAFT": "Draft",
+      "ARCHIVED": "Archived"
+    },
+    "messages": {
+      "createSuccess": "Product created successfully",
+      "updateSuccess": "Product updated successfully",
+      "deleteSuccess": "Product deleted successfully",
+      "deleteConfirm": "Are you sure you want to delete this product?"
+    }
+  },
+  "categories": {
+    "fields": {
+      "name": "Category Name",
+      "slug": "Slug",
+      "description": "Description",
+      "image": "Image",
+      "parent": "Parent Category",
+      "children": "Subcategories",
+      "productCount": "Product Count",
+      "order": "Display Order",
+      "isActive": "Active",
+      "seoTitle": "SEO Title",
+      "seoDescription": "SEO Description"
+    },
+    "messages": {
+      "createSuccess": "Category created successfully",
+      "updateSuccess": "Category updated successfully",
+      "deleteSuccess": "Category deleted successfully",
+      "deleteConfirm": "Are you sure you want to delete this category?",
+      "hasChildren": "Cannot delete category with subcategories",
+      "hasProducts": "This category contains products"
+    }
+  },
+  "orders": {
+    "fields": {
+      "orderId": "Order ID",
+      "orderNumber": "Order Number",
+      "customer": "Customer",
+      "status": "Order Status",
+      "paymentStatus": "Payment Status",
+      "items": "Items",
+      "subtotal": "Subtotal",
+      "tax": "Tax",
+      "shipping": "Shipping",
+      "discount": "Discount",
+      "total": "Total",
+      "shippingAddress": "Shipping Address",
+      "billingAddress": "Billing Address",
+      "notes": "Notes",
+      "trackingNumber": "Tracking Number",
+      "estimatedDelivery": "Estimated Delivery",
+      "metadata": "Metadata",
+      "createdAt": "Created At"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "PROCESSING": "Processing",
+      "SHIPPED": "Shipped",
+      "DELIVERED": "Delivered",
+      "CANCELLED": "Cancelled",
+      "REFUNDED": "Refunded"
+    },
+    "paymentStatus": {
+      "PENDING": "Pending",
+      "PAID": "Paid",
+      "FAILED": "Failed",
+      "REFUNDED": "Refunded"
+    },
+    "messages": {
+      "updateSuccess": "Order updated successfully",
+      "statusChanged": "Order status changed to {{status}}",
+      "cancelConfirm": "Are you sure you want to cancel this order?",
+      "refundConfirm": "Are you sure you want to refund this order?"
+    }
+  },
+  "users": {
+    "fields": {
+      "name": "Name",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "role": "Role",
+      "status": "Status",
+      "emailVerified": "Email Verified",
+      "loyaltyPoints": "Loyalty Points",
+      "loyaltyLevel": "Loyalty Level",
+      "totalOrders": "Total Orders",
+      "totalSpent": "Total Spent",
+      "lastLoginAt": "Last Login",
+      "addresses": "Addresses",
+      "orders": "Orders",
+      "wishlist": "Wishlist"
+    },
+    "loyaltyLevel": {
+      "BRONZE": "Bronze",
+      "SILVER": "Silver",
+      "GOLD": "Gold",
+      "PLATINUM": "Platinum"
+    },
+    "messages": {
+      "updateSuccess": "User updated successfully",
+      "deleteSuccess": "User deleted successfully",
+      "deleteConfirm": "Are you sure you want to delete this user?",
+      "pointsAdded": "Loyalty points added successfully",
+      "levelChanged": "Loyalty level changed to {{level}}"
+    }
+  },
+  "auditLogs": {
+    "title": "Audit Logs",
+    "fields": {
+      "action": "Action",
+      "resource": "Resource",
+      "resourceId": "Resource ID",
+      "adminUser": "Admin User",
+      "adminEmail": "Admin Email",
+      "changes": "Changes",
+      "metadata": "Metadata",
+      "timestamp": "Timestamp",
+      "ipAddress": "IP Address",
+      "userAgent": "User Agent"
+    },
+    "actions": {
+      "CREATE": "Create",
+      "UPDATE": "Update",
+      "DELETE": "Delete",
+      "LOGIN": "Login",
+      "LOGOUT": "Logout",
+      "EXPORT": "Export",
+      "IMPORT": "Import"
+    }
+  },
+  "roles": {
+    "fields": {
+      "name": "Role Name",
+      "permissions": "Permissions",
+      "description": "Description",
+      "userCount": "Users"
+    },
+    "types": {
+      "SUPER_ADMIN": "Super Admin",
+      "ADMIN": "Admin",
+      "MANAGER": "Manager",
+      "SUPPORT": "Support",
+      "VIEWER": "Viewer"
+    },
+    "permissions": {
+      "DASHBOARD_READ": "View Dashboard",
+      "PRODUCTS_READ": "View Products",
+      "PRODUCTS_WRITE": "Edit Products",
+      "PRODUCTS_DELETE": "Delete Products",
+      "CATEGORIES_READ": "View Categories",
+      "CATEGORIES_WRITE": "Edit Categories",
+      "CATEGORIES_DELETE": "Delete Categories",
+      "ORDERS_READ": "View Orders",
+      "ORDERS_WRITE": "Edit Orders",
+      "USERS_READ": "View Users",
+      "USERS_WRITE": "Edit Users",
+      "AUDIT_LOGS_READ": "View Audit Logs",
+      "SETTINGS_WRITE": "Manage Settings"
+    }
+  },
+  "adminUsers": {
+    "title": "Admin Users",
+    "create": "Create Admin User",
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "createdAt": "Created At",
+      "lastLogin": "Last Login"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "SUSPENDED": "Suspended"
+    },
+    "messages": {
+      "createSuccess": "Admin user created successfully",
+      "updateSuccess": "Admin user updated successfully",
+      "deleteSuccess": "Admin user deleted successfully",
+      "deleteConfirm": "Are you sure you want to delete this admin user?"
+    }
+  },
+  "featureFlags": {
+    "fields": {
+      "key": "Flag Key",
+      "name": "Name",
+      "description": "Description",
+      "enabled": "Enabled",
+      "rolloutPercentage": "Rollout Percentage",
+      "environment": "Environment"
+    },
+    "messages": {
+      "updateSuccess": "Feature flag updated successfully",
+      "enabledSuccess": "Feature flag enabled",
+      "disabledSuccess": "Feature flag disabled"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Overview",
+    "statistics": "Statistics",
+    "recentOrders": "Recent Orders",
+    "topProducts": "Top Products",
+    "revenue": "Revenue",
+    "sales": "Sales",
+    "customers": "Customers",
+    "avgOrderValue": "Average Order Value",
+    "conversionRate": "Conversion Rate",
+    "period": {
+      "today": "Today",
+      "week": "This Week",
+      "month": "This Month",
+      "year": "This Year",
+      "custom": "Custom Period"
+    }
+  },
+  "settings": {
+    "general": "General Settings",
+    "store": "Store Settings",
+    "payment": "Payment Settings",
+    "shipping": "Shipping Settings",
+    "email": "Email Settings",
+    "tax": "Tax Settings",
+    "appearance": "Appearance",
+    "advanced": "Advanced Settings",
+    "messages": {
+      "updateSuccess": "Settings updated successfully",
+      "updateError": "Failed to update settings"
+    }
+  },
+  "bulk": {
+    "actions": "Bulk Actions",
+    "selected": "{{count}} selected",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "delete": "Delete Selected",
+    "export": "Export Selected",
+    "updateStatus": "Update Status",
+    "confirmDelete": "Are you sure you want to delete {{count}} items?"
+  },
+  "savedViews": {
+    "title": "Saved Views",
+    "save": "Save View",
+    "default": "Default View",
+    "custom": "Custom Views",
+    "name": "View Name",
+    "saveSuccess": "View saved successfully",
+    "deleteSuccess": "View deleted successfully"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAsRead": "Mark as Read",
+    "markAllAsRead": "Mark All as Read",
+    "newOrder": "New Order",
+    "orderUpdated": "Order Updated",
+    "lowStock": "Low Stock Alert",
+    "systemUpdate": "System Update"
+  },
+  "filters": {
+    "apply": "Apply Filters",
+    "reset": "Reset Filters",
+    "clear": "Clear All",
+    "advanced": "Advanced Filters"
+  },
+  "menu": {
+    "dashboard": "Dashboard",
+    "commerce": "Commerce",
+    "products": "Products",
+    "productsList": "All Products",
+    "addProduct": "Add Product",
+    "categories": "Categories",
+    "orders": "Orders",
+    "allOrders": "All Orders",
+    "pendingOrders": "Pending",
+    "processingOrders": "In Progress",
+    "deliveredOrders": "Delivered",
+    "customers": "Customers",
+    "allCustomers": "All Customers",
+    "segments": "Segments",
+    "vendors": "Vendors",
+    "allVendors": "All Vendors",
+    "pendingVendors": "Pending Approval",
+    "commissions": "Commissions",
+    "marketing": "Marketing",
+    "campaigns": "Campaigns",
+    "promoCodes": "Promo Codes",
+    "analytics": "Analytics",
+    "reports": "Reports",
+    "settings": "Settings",
+    "configuration": "Configuration",
+    "general": "General",
+    "payments": "Payments",
+    "shipping": "Shipping",
+    "adminUsers": "Admin Users",
+    "auditLogs": "Audit Logs",
+    "docs": "Documentation",
+    "support": "Support",
+    "profile": "Profile",
+    "activityLog": "Activity Log",
+    "logout": "Logout"
+  },
+  "search": {
+    "placeholder": "Search..."
+  },
+  "logout": {
+    "confirm": "Are you sure you want to logout?",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "vendors": {
+    "tabs": {
+      "all": "All Vendors",
+      "pending": "Pending",
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "actions": {
+      "create": "Create Vendor",
+      "invite": "Invite Vendor",
+      "approve": "Approve",
+      "suspend": "Suspend"
+    },
+    "fields": {
+      "businessName": "Business Name",
+      "slug": "Slug",
+      "email": "Email",
+      "phone": "Phone",
+      "logo": "Logo",
+      "description": "Description",
+      "status": "Status",
+      "commissionRate": "Commission",
+      "documents": "Documents",
+      "bankDetails": "Bank Details",
+      "rating": "Rating",
+      "totalSales": "Total Sales",
+      "totalProducts": "Total Products",
+      "products": "Products",
+      "createdAt": "Created At"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended",
+      "BANNED": "Banned"
+    },
+    "messages": {
+      "createSuccess": "Vendor created successfully",
+      "updateSuccess": "Vendor updated successfully",
+      "deleteSuccess": "Vendor deleted successfully",
+      "approveSuccess": "Vendor approved successfully",
+      "suspendSuccess": "Vendor suspended successfully",
+      "suspendConfirm": "Are you sure you want to suspend this vendor?",
+      "deleteConfirm": "Are you sure you want to delete this vendor?",
+      "inviteSuccess": "Vendor invitation sent successfully",
+      "inviteError": "Failed to send invitation",
+      "businessNameRequired": "Please enter business name",
+      "businessNamePlaceholder": "Enter business name",
+      "emailRequired": "Please enter email",
+      "emailInvalid": "Please enter a valid email"
+    }
+  },
+  "campaigns": {
+    "title": "Campaigns",
+    "create": "Create Campaign",
+    "segments": {
+      "all": "All Customers",
+      "platinum": "Platinum Members",
+      "inactive": "Inactive (90+ days)",
+      "highValue": "High Value ($1000+)"
+    },
+    "fields": {
+      "name": "Campaign Name",
+      "type": "Type",
+      "status": "Status",
+      "audience": "Audience",
+      "recipients": "recipients",
+      "subject": "Subject",
+      "content": "Content",
+      "segmentFilters": "Segment Filters",
+      "scheduled": "Scheduled",
+      "scheduledAt": "Scheduled For",
+      "sent": "Sent",
+      "sentAt": "Sent At",
+      "stats": "Statistics"
+    },
+    "types": {
+      "EMAIL": "Email",
+      "SMS": "SMS",
+      "PUSH": "Push Notification"
+    },
+    "status": {
+      "DRAFT": "Draft",
+      "SCHEDULED": "Scheduled",
+      "ACTIVE": "Active",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "stats": {
+      "openRate": "Open Rate",
+      "clickRate": "Click Rate",
+      "conversions": "Conversions",
+      "revenue": "Revenue"
+    },
+    "messages": {
+      "createSuccess": "Campaign created successfully",
+      "updateSuccess": "Campaign updated successfully",
+      "deleteSuccess": "Campaign deleted successfully",
+      "sendSuccess": "Campaign sent successfully",
+      "draftSaved": "Draft saved successfully",
+      "scheduled": "Campaign scheduled successfully",
+      "sent": "Campaign sent successfully",
+      "duplicated": "Campaign duplicated successfully",
+      "cancelConfirm": "Are you sure you want to cancel this campaign?",
+      "cancelSuccess": "Campaigns cancelled successfully!",
+      "exporting": "Exporting selected campaigns...",
+      "duplicating": "Duplicating campaigns...",
+      "bulkDeleteSuccess": "Campaigns deleted successfully!"
+    },
+    "bulkActions": {
+      "cancel": "Cancel Campaigns",
+      "cancelConfirm": "Are you sure you want to cancel {{count}} campaigns?",
+      "deleteConfirm": "Are you sure you want to delete {{count}} campaigns?"
+    }
+  },
+  "promoCodes": {
+    "fields": {
+      "code": "Code",
+      "type": "Type",
+      "value": "Value",
+      "minOrderAmount": "Minimum Order Amount",
+      "maxDiscount": "Maximum Discount",
+      "usageLimit": "Usage Limit",
+      "usageCount": "Usage Count",
+      "validFrom": "Valid From",
+      "validTo": "Valid To",
+      "conditions": "Conditions",
+      "isActive": "Active"
+    },
+    "types": {
+      "PERCENTAGE": "Percentage",
+      "FIXED_AMOUNT": "Fixed Amount",
+      "FREE_SHIPPING": "Free Shipping"
+    },
+    "messages": {
+      "createSuccess": "Promo code created successfully",
+      "updateSuccess": "Promo code updated successfully",
+      "deleteSuccess": "Promo code deleted successfully",
+      "disableSuccess": "Promo code disabled successfully",
+      "deleteConfirm": "Are you sure you want to delete this promo code?"
+    }
+  },
+  "segments": {
+    "fields": {
+      "name": "Segment Name",
+      "description": "Description",
+      "filters": "Filters",
+      "customerCount": "Customer Count"
+    },
+    "messages": {
+      "createSuccess": "Segment created successfully",
+      "updateSuccess": "Segment updated successfully",
+      "deleteSuccess": "Segment deleted successfully"
+    }
+  },
+  "analytics": {
+    "title": "Analytics Dashboard",
+    "subtitle": "Monitor your business performance and key metrics",
+    "kpis": {
+      "totalRevenue": "Total Revenue",
+      "totalOrders": "Total Orders",
+      "newCustomers": "New Customers",
+      "avgOrderValue": "Avg Order Value"
+    },
+    "charts": {
+      "revenue": "Revenue",
+      "orders": "Orders",
+      "salesByCategory": "Sales by Category"
+    },
+    "topProducts": {
+      "product": "Product",
+      "category": "Category",
+      "sales": "Sales",
+      "revenue": "Revenue",
+      "growth": "Growth"
+    },
+    "compare": {
+      "previousPeriod": "vs Previous Period",
+      "previousYear": "vs Previous Year"
+    },
+    "actions": {
+      "exportPDF": "Export PDF",
+      "exportExcel": "Export Excel"
+    },
+    "funnel": {
+      "visitors": "Visitors",
+      "productViews": "Product Views",
+      "addToCart": "Add to Cart",
+      "checkout": "Checkout",
+      "orders": "Orders"
+    },
+    "trafficSources": {
+      "organic": "Organic",
+      "direct": "Direct",
+      "social": "Social Media",
+      "paid": "Paid Advertising",
+      "referral": "Referral"
+    },
+    "metrics": {
+      "conversionRate": "Conversion Rate",
+      "avgOrderValue": "Average Order Value",
+      "revenue": "Revenue",
+      "profit": "Profit"
+    }
+  },
+  "import": {
+    "title": "Import Data",
+    "selectFile": "Select File",
+    "processing": "Processing...",
+    "summary": "Import Summary",
+    "totalRows": "Total Rows",
+    "successful": "Successful",
+    "failed": "Failed",
+    "downloadErrors": "Download Error Report"
+  },
+  "export": {
+    "title": "Export Data",
+    "format": "Format",
+    "columns": "Columns",
+    "allColumns": "All Columns",
+    "selectedColumns": "Selected Columns"
+  },
+  "common": {
+    "all": "All",
+    "actions": "Actions"
+  }
+}

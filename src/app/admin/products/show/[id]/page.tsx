@@ -4,13 +4,15 @@ import { useShow } from "@refinedev/core";
 import { Show } from "@refinedev/antd";
 import { Typography, Descriptions, Table, Tag, Image, Space } from "antd";
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import { use } from "react";
 
 const { Title } = Typography;
 
-export default function ProductShow({ params }: { params: { id: string } }) {
+export default function ProductShow({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { query } = useShow({
     resource: "products",
-    id: params.id,
+    id: id,
   });
 
   const { data, isLoading } = query;

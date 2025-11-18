@@ -4,7 +4,6 @@
  */
 
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth-server'
 import { CheckoutPageClient } from './checkout-client'
 
@@ -17,9 +16,11 @@ export default async function CheckoutPage() {
   // Check authentication
   const session = await getSession()
 
-  if (!session) {
-    redirect('/login?redirect=/checkout')
-  }
+  // TEMPORARY: Allow guest checkout for testing Stripe integration
+  // TODO: Uncomment this once /login page is created
+  // if (!session) {
+  //   redirect('/login?redirect=/checkout')
+  // }
 
   return (
     <div className="min-h-screen bg-platinum-50">
@@ -35,7 +36,7 @@ export default async function CheckoutPage() {
         </div>
 
         {/* Checkout Flow */}
-        <CheckoutPageClient userEmail={session.user.email} />
+        <CheckoutPageClient userEmail={session?.user?.email || undefined} />
       </div>
     </div>
   )

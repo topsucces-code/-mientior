@@ -1,33 +1,25 @@
 /**
- * Shopping Cart Page
- * Displays cart items and allows users to update quantities and proceed to checkout
+ * Shopping Cart Page - Enhanced with conversion optimization features
+ * Displays cart items, saved for later, recommendations, and checkout flow
  */
 
 import { Metadata } from 'next'
+import { getSession } from '@/lib/auth-server'
 import { CartPageClient } from './cart-client'
 
 export const metadata: Metadata = {
-  title: 'Shopping Cart | Mientior',
-  description: 'Review your cart and proceed to checkout',
+  title: 'Mon Panier | Mientior',
+  description: 'Consultez votre panier et procédez au paiement sécurisé',
 }
 
-export default function CartPage() {
+export default async function CartPage() {
+  // Get authentication status
+  const session = await getSession()
+  const isAuthenticated = !!session?.user
+
   return (
     <div className="min-h-screen bg-platinum-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-anthracite-700 mb-2">
-            Shopping Cart
-          </h1>
-          <p className="text-nuanced-600">
-            Review your items and proceed to checkout
-          </p>
-        </div>
-
-        {/* Cart Content */}
-        <CartPageClient />
-      </div>
+      <CartPageClient isAuthenticated={isAuthenticated} />
     </div>
   )
 }

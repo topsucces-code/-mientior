@@ -13,6 +13,7 @@ export interface CategoryCardData {
   name: string
   slug: string
   image?: string
+  icon?: React.ReactNode
   productCount?: number
   description?: string
 }
@@ -21,14 +22,14 @@ interface CategoriesNavProps extends React.HTMLAttributes<HTMLElement> {
   categories: CategoryCardData[]
   title?: string
   subtitle?: string
-  columns?: 2 | 3 | 4 | 6
+  columns?: 2 | 3 | 4 | 6 | 8
 }
 
 export default function CategoriesNav({
   categories,
   title = 'Explorez nos catégories',
   subtitle = 'Trouvez exactement ce que vous cherchez',
-  columns = 4,
+  columns = 8,
   className,
   ...props
 }: CategoriesNavProps) {
@@ -39,24 +40,66 @@ export default function CategoriesNav({
     return null
   }
 
+  // Keyboard navigation handler
+  const handleKeyDown = (e: React.KeyboardEvent, currentIndex: number) => {
+    let nextIndex = currentIndex
+    const cols = columns
+
+    switch (e.key) {
+      case 'ArrowRight':
+        e.preventDefault()
+        nextIndex = Math.min(currentIndex + 1, categories.length - 1)
+        break
+      case 'ArrowLeft':
+        e.preventDefault()
+        nextIndex = Math.max(currentIndex - 1, 0)
+        break
+      case 'ArrowDown':
+        e.preventDefault()
+        nextIndex = Math.min(currentIndex + cols, categories.length - 1)
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        nextIndex = Math.max(currentIndex - cols, 0)
+        break
+      case 'Home':
+        e.preventDefault()
+        nextIndex = 0
+        break
+      case 'End':
+        e.preventDefault()
+        nextIndex = categories.length - 1
+        break
+      default:
+        return
+    }
+
+    // Focus the next card
+    const nextCard = document.querySelector(
+      `[data-category-index="${nextIndex}"]`
+    ) as HTMLAnchorElement
+    nextCard?.focus()
+  }
+
   const gridColsClass = {
     2: 'grid-cols-2',
     3: 'sm:grid-cols-3',
     4: 'sm:grid-cols-2 lg:grid-cols-4',
     6: 'sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6',
+    8: 'grid-cols-2 md:grid-cols-4 lg:grid-cols-8',
   }[columns]
 
   return (
     <section
       ref={sectionRef}
-      className={cn('py-16 md:py-24 bg-platinum-50', className)}
+      className={cn('py-10 md:py-14 bg-platinum-50', className)}
       {...props}
     >
-      <div className="container mx-auto px-4 md:px-6 lg:px-8">
+      <div className="container mx-auto px-3 md:px-4 lg:px-6">
         {/* Header */}
         <div
           className={cn(
-            'mb-12 text-center',
+            'mb-8',
             isVisible && !prefersReducedMotion && 'animate-fade-in-up'
           )}
         >
@@ -72,12 +115,16 @@ export default function CategoriesNav({
             <CategoryCard
               key={category.id}
               category={category}
+              index={index}
+              onKeyDown={(e) => handleKeyDown(e, index)}
               className={cn(
                 !prefersReducedMotion && isVisible && 'animate-fade-in-up'
               )}
-              style={{
-                animationDelay: !prefersReducedMotion ? `${index * 75}ms` : undefined,
-              }}
+              style={
+                !prefersReducedMotion
+                  ? { animationDelay: `${index * 75}ms` }
+                  : undefined
+              }
             />
           ))}
         </div>
@@ -86,45 +133,71 @@ export default function CategoriesNav({
   )
 }
 
-interface CategoryCardProps extends React.HTMLAttributes<HTMLDivElement> {
+type CategoryCardProps = {
   category: CategoryCardData
+  index: number
+  onKeyDown: (e: React.KeyboardEvent) => void
+  className?: string
+  style?: React.CSSProperties
 }
 
-function CategoryCard({ category, className, style, ...props }: CategoryCardProps) {
+const CategoryCard = ({ category, index, onKeyDown, className, style }: CategoryCardProps) => {
   const [isImageLoaded, setIsImageLoaded] = React.useState(false)
+
+  // Format product count with thousands separator
+  const formatCount = (count: number) => {
+    return new Intl.NumberFormat('fr-FR').format(count)
+  }
 
   return (
     <Link
       href={`/categories/${category.slug}`}
+      data-category-index={index}
+      onKeyDown={onKeyDown}
       className={cn(
-        'group relative overflow-hidden rounded-lg border border-platinum-300 bg-white transition-all duration-300',
-        'hover:shadow-elevation-3 hover:-translate-y-1',
+        'group relative overflow-hidden rounded-2xl border-2 border-transparent bg-white transition-all duration-250',
+        'hover:shadow-[0_12px_32px_rgba(255,107,0,0.15)] hover:-translate-y-1 hover:scale-[1.02]',
+        'hover:border-orange-500',
+        'focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2',
         className
       )}
       style={style}
-      {...props}
+      aria-label={`${category.name}${category.productCount ? ` - ${formatCount(category.productCount)} produits` : ''}`}
     >
-      {/* Image Container */}
+      {/* Icon or Image Container */}
       <div className="relative aspect-[4/3] overflow-hidden bg-platinum-100">
-        <Image
-          src={category.image || '/placeholder-category.jpg'}
-          alt={category.name}
-          fill
-          className={cn(
-            'object-cover transition-all duration-500 group-hover:scale-110',
-            !isImageLoaded && 'blur-sm',
-            isImageLoaded && 'blur-0'
-          )}
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          onLoad={() => setIsImageLoaded(true)}
-          onError={(e) => {
-            // Fallback gradient if image fails to load
-            e.currentTarget.style.display = 'none'
-          }}
-        />
+        {category.icon ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-orange-100 via-orange-50 to-blue-50">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 shadow-lg">
+              <div className="text-orange-500 transition-all duration-300 group-hover:scale-125" style={{ width: '48px', height: '48px' }}>
+                {category.icon}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <Image
+              src={category.image || '/placeholder-category.svg'}
+              alt={category.name}
+              fill
+              unoptimized={!category.image} // SVG placeholder needs unoptimized
+              className={cn(
+                'object-cover transition-all duration-500 group-hover:scale-110',
+                !isImageLoaded && 'blur-sm',
+                isImageLoaded && 'blur-0'
+              )}
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              onLoad={() => setIsImageLoaded(true)}
+              onError={(e) => {
+                // Fallback gradient if image fails to load
+                e.currentTarget.style.display = 'none'
+              }}
+            />
 
-        {/* Fallback Gradient (if image fails to load) */}
-        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-orange-200 via-orange-300 to-blue-300" />
+            {/* Fallback Gradient (if image fails to load) */}
+            <div className="absolute inset-0 -z-10 bg-gradient-to-br from-orange-200 via-orange-300 to-blue-300" />
+          </>
+        )}
 
         {/* Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
@@ -136,8 +209,8 @@ function CategoryCard({ category, className, style, ...props }: CategoryCardProp
           </h3>
 
           {category.productCount !== undefined && (
-            <p className="text-sm text-platinum-200">
-              {category.productCount} {category.productCount > 1 ? 'produits' : 'produit'}
+            <p className="text-sm text-platinum-200 font-semibold">
+              {formatCount(category.productCount)} {category.productCount > 1 ? 'produits' : 'produit'}
             </p>
           )}
 

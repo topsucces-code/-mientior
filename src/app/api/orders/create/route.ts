@@ -5,8 +5,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth-server'
-import { stripe } from '@/lib/stripe'
+import { verifyPaystackTransaction } from '@/lib/paystack'
+import { verifyFlutterwaveTransaction } from '@/lib/flutterwave'
 import { sendEmail } from '@/lib/email'
+import { triggerNewOrder } from '@/lib/pusher'
 import {
   acquireMultipleStockLocks,
   releaseMultipleStockLocks,
@@ -14,28 +16,9 @@ import {
   isOrderProcessed,
   markOrderProcessed,
 } from '@/lib/stock-lock'
+import { generateOrderNumber, calculateEstimatedDelivery } from '@/lib/checkout-utils'
+import { addBusinessDays } from 'date-fns'
 import type { Address } from '@/types'
-
-// Generate unique order number
-function generateOrderNumber(): string {
-  const year = new Date().getFullYear()
-  const random = Math.floor(Math.random() * 1000000)
-    .toString()
-    .padStart(6, '0')
-  return `ORD-${year}-${random}`
-}
-
-// Calculate estimated delivery date
-function calculateEstimatedDelivery(shippingDays: number): { min: Date; max: Date } {
-  const today = new Date()
-  const minDate = new Date(today)
-  const maxDate = new Date(today)
-
-  minDate.setDate(minDate.getDate() + shippingDays)
-  maxDate.setDate(maxDate.getDate() + shippingDays + 2)
-
-  return { min: minDate, max: maxDate }
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,24 +32,24 @@ export async function POST(request: NextRequest) {
       shippingAddress,
       billingAddress,
       shippingOption,
-      paymentIntentId,
-      promoCode,
+      paymentReference,
+      paymentGateway,
     }: {
       items: Array<{ productId: string; variantId?: string; quantity: number }>
       shippingAddress: Address
       billingAddress?: Address
       shippingOption: string
-      paymentIntentId: string
-      promoCode?: string
+      paymentReference?: string
+      paymentGateway?: 'PAYSTACK' | 'FLUTTERWAVE'
     } = body
 
     // Validate required fields
-    if (!items || items.length === 0 || !shippingAddress || !paymentIntentId) {
+    if (!items || items.length === 0 || !shippingAddress || !paymentReference) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
     // Idempotency check - prevent duplicate order creation on retries
-    const alreadyProcessed = await isOrderProcessed(paymentIntentId)
+    const alreadyProcessed = await isOrderProcessed(paymentReference)
     if (alreadyProcessed) {
       return NextResponse.json(
         { error: 'Order already created for this payment', success: false },
@@ -74,14 +57,27 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verify Payment Intent is confirmed
-    try {
-      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
-      if (paymentIntent.status !== 'succeeded') {
-        return NextResponse.json({ error: 'Payment not confirmed' }, { status: 400 })
+    // Verify payment based on gateway
+    if (paymentGateway === 'PAYSTACK') {
+      try {
+        const verification = await verifyPaystackTransaction(paymentReference)
+        if (verification.status !== 'success') {
+          return NextResponse.json({ error: 'Payment not confirmed' }, { status: 400 })
+        }
+      } catch (error) {
+        console.error('Paystack verification error:', error)
+        return NextResponse.json({ error: 'Invalid payment reference' }, { status: 400 })
       }
-    } catch (error) {
-      return NextResponse.json({ error: 'Invalid payment intent' }, { status: 400 })
+    } else if (paymentGateway === 'FLUTTERWAVE') {
+      try {
+        const verification = await verifyFlutterwaveTransaction(paymentReference)
+        if (verification.status !== 'successful') {
+          return NextResponse.json({ error: 'Payment not confirmed' }, { status: 400 })
+        }
+      } catch (error) {
+        console.error('Flutterwave verification error:', error)
+        return NextResponse.json({ error: 'Invalid payment reference' }, { status: 400 })
+      }
     }
 
     // TRANSACTIONAL STOCK MANAGEMENT
@@ -201,13 +197,11 @@ export async function POST(request: NextRequest) {
     const orderNumber = generateOrderNumber()
 
     // Calculate estimated delivery
-    const shippingDays: Record<string, number> = {
-      standard: 5,
-      express: 2,
-      relay: 4,
-      pickup: 1,
+    const estimatedDeliveryDate = calculateEstimatedDelivery(shippingOption)
+    const estimatedDelivery = {
+      min: estimatedDeliveryDate,
+      max: addBusinessDays(estimatedDeliveryDate, 2),
     }
-    const estimatedDelivery = calculateEstimatedDelivery(shippingDays[shippingOption] || 5)
 
     // Create order in Prisma with nested order items
     const order = await prisma.order.create({
@@ -225,7 +219,8 @@ export async function POST(request: NextRequest) {
         billingAddress: billingAddress || shippingAddress,
         estimatedDeliveryMin: estimatedDelivery.min,
         estimatedDeliveryMax: estimatedDelivery.max,
-        paymentIntentId,
+        paymentReference,
+        paymentGateway,
         items: {
           create: orderItems
         }
@@ -236,8 +231,16 @@ export async function POST(request: NextRequest) {
     })
 
     // Mark order as processed for idempotency (prevents duplicate orders on retries)
-    await markOrderProcessed(paymentIntentId, order.id)
-    console.log(`Order ${orderNumber} marked as processed for payment intent ${paymentIntentId}`)
+    await markOrderProcessed(paymentReference, order.id)
+    console.log(`Order ${orderNumber} marked as processed for payment reference ${paymentReference}`)
+
+    // Trigger real-time notification via Pusher to notify admins of new order
+    await triggerNewOrder({
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      total: order.total,
+      customerEmail: session.user.email || shippingAddress.email || ''
+    })
 
     // Update user stats
     try {

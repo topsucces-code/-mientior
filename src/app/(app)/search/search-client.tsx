@@ -13,7 +13,6 @@ export function SearchPageClient({ initialQuery, initialResults }: SearchPageCli
   const router = useRouter()
   const searchParams = useSearchParams()
   const [results, setResults] = React.useState<SearchResultsData>(initialResults)
-  const [isSearching, setIsSearching] = React.useState(false)
 
   const handleQueryChange = React.useCallback(
     async (newQuery: string) => {
@@ -21,8 +20,6 @@ export function SearchPageClient({ initialQuery, initialResults }: SearchPageCli
       const params = new URLSearchParams(searchParams.toString())
       params.set('q', newQuery)
       router.push(`/search?${params.toString()}`)
-
-      setIsSearching(true)
 
       try {
         // In a real app, you'd fetch new results here
@@ -32,8 +29,6 @@ export function SearchPageClient({ initialQuery, initialResults }: SearchPageCli
         // setResults(data)
       } catch (error) {
         console.error('Error searching:', error)
-      } finally {
-        setIsSearching(false)
       }
     },
     [router, searchParams]

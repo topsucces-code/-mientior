@@ -1,0 +1,770 @@
+[
+  {
+    "id": "TC001",
+    "title": "Homepage Load and Element Visibility",
+    "description": "Verify the homepage loads successfully and all key elements (hero carousel, category navigation, flash deals, trending products, testimonials, newsletter subscription) are visible and functional.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the homepage URL"
+      },
+      {
+        "type": "assertion",
+        "description": "Check the hero carousel is displayed and cycles through images"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify category navigation links are visible and clickable"
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure flash deals section is visible with correct products"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm trending and curated product sections display products correctly"
+      },
+      {
+        "type": "assertion",
+        "description": "Check testimonials carousel shows user reviews"
+      },
+      {
+        "type": "assertion",
+        "description": "Validate newsletter subscription input and submit button are present"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Product Catalog Filtering and Pagination",
+    "description": "Validate product listing supports filters, sorting, and pagination, and that filtered results update accordingly.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the product catalog page"
+      },
+      {
+        "type": "action",
+        "description": "Apply a category filter and verify products shown belong to that category"
+      },
+      {
+        "type": "action",
+        "description": "Apply a price range filter and verify product prices fall within it"
+      },
+      {
+        "type": "action",
+        "description": "Use sorting options (e.g., price ascending, popularity) and verify order changes accordingly"
+      },
+      {
+        "type": "action",
+        "description": "Navigate through pagination controls and confirm product lists update"
+      },
+      {
+        "type": "assertion",
+        "description": "Check product count matches filtered criteria and pagination info is accurate"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Product Detail View and Variant Selection",
+    "description": "Ensure product detail pages display images, descriptions, variants, reviews with verified badges, and recommendations. Adding variants to cart works correctly.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open a product detail page via product catalog"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify image gallery loads with all product images"
+      },
+      {
+        "type": "assertion",
+        "description": "Check product information (title, description, price) is correctly displayed"
+      },
+      {
+        "type": "action",
+        "description": "Select different product variants (e.g., color, size)"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm variant-specific information and price updates"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify product reviews display, including 'verified purchase' badges"
+      },
+      {
+        "type": "assertion",
+        "description": "Check recommended products section shows related items"
+      },
+      {
+        "type": "action",
+        "description": "Add selected variant to shopping cart"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm item is added to cart with correct variant and quantity"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "User Registration and Login with Better Auth",
+    "description": "Test user registration and login flows including email/password and Google OAuth with session management using Better Auth and Redis caching.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to user registration page"
+      },
+      {
+        "type": "action",
+        "description": "Register a new user with valid email and password"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify registration confirmation is displayed and email verification sent"
+      },
+      {
+        "type": "action",
+        "description": "Log out if logged in"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to login page"
+      },
+      {
+        "type": "action",
+        "description": "Login with valid credentials"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm user is successfully logged in and redirected to appropriate page"
+      },
+      {
+        "type": "action",
+        "description": "Logout user"
+      },
+      {
+        "type": "action",
+        "description": "Login using Google OAuth option"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify successful OAuth login and session creation"
+      },
+      {
+        "type": "assertion",
+        "description": "Check session persistence across pages and expiration after logout"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Add to Cart, Update Quantity, and Remove Items",
+    "description": "Verify users can add products to cart, update quantities, remove items, and that cart state is persisted and consistent using Zustand store.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "From product detail, add a product to cart"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm cart icon increments item count"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to shopping cart page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify added product details and quantity display"
+      },
+      {
+        "type": "action",
+        "description": "Update quantity to a new valid value"
+      },
+      {
+        "type": "assertion",
+        "description": "Check price calculations update accordingly"
+      },
+      {
+        "type": "action",
+        "description": "Remove an item from the cart"
+      },
+      {
+        "type": "assertion",
+        "description": "Validate cart updates and removal reflected in UI and state"
+      },
+      {
+        "type": "action",
+        "description": "Reload or revisit site and verify cart state persists"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Multi-step Checkout Flow with Stripe Payment",
+    "description": "Test full checkout workflow including shipping info input, shipping option selection, payment via Stripe, order confirmation, and webhook processing for status updates.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to checkout page with items in cart"
+      },
+      {
+        "type": "action",
+        "description": "Fill in shipping address form with valid data"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify shipping options load and default selection appears"
+      },
+      {
+        "type": "action",
+        "description": "Select a shipping option"
+      },
+      {
+        "type": "action",
+        "description": "Enter payment details using test Stripe cards"
+      },
+      {
+        "type": "action",
+        "description": "Submit payment and place order"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm order confirmation screen with order summary is displayed"
+      },
+      {
+        "type": "action",
+        "description": "Simulate Stripe webhook event for payment confirmation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify order status updates to 'paid' and user receives notification"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "User Account Dashboard Management",
+    "description": "Verify authenticated users can access account dashboard to view order history, update profile, manage addresses, wishlist, and logout.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as a registered user"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to user account dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Check order history lists previous orders with details"
+      },
+      {
+        "type": "action",
+        "description": "Edit profile information and save changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm profile updates persist after reload"
+      },
+      {
+        "type": "action",
+        "description": "Add and remove addresses in the address management section"
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure addresses update correctly in user profile"
+      },
+      {
+        "type": "action",
+        "description": "Add items to wishlist and remove them"
+      },
+      {
+        "type": "assertion",
+        "description": "Validate wishlist state updates and persists across sessions"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Global Search with Autocomplete and Multi-tab Results",
+    "description": "Validate that global search with autocomplete returns relevant product and category results, supports multi-tab viewing, and handles no matches gracefully.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Focus on the global search bar in header"
+      },
+      {
+        "type": "action",
+        "description": "Type partial product name and observe autocomplete suggestions"
+      },
+      {
+        "type": "assertion",
+        "description": "Check product and category suggestions appear correctly with highlighting"
+      },
+      {
+        "type": "action",
+        "description": "Select autocomplete suggestion to navigate to detail page"
+      },
+      {
+        "type": "action",
+        "description": "Perform search and verify results show in multi-tab layout for products and categories"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that results in each tab are relevant and sortable"
+      },
+      {
+        "type": "action",
+        "description": "Input gibberish to test no-match scenario"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm user-friendly message displays for no results"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Admin Panel Product CRUD and Role-based Access",
+    "description": "Test that admin users with appropriate permissions can create, read, update, and delete products; and verify unauthorized users are blocked.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as admin user with product management permissions"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to Products section in admin panel"
+      },
+      {
+        "type": "action",
+        "description": "Create a new product with all required fields and submit"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm product appears in product listing with correct details"
+      },
+      {
+        "type": "action",
+        "description": "Edit an existing product's details and save changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify changes reflect in product details and listings"
+      },
+      {
+        "type": "action",
+        "description": "Delete a product and confirm removal from list"
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure deletion is logged in audit trail"
+      },
+      {
+        "type": "action",
+        "description": "Login as a non-admin or a user with no product permissions"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to access product management routes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access is denied and proper error message is shown"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Cache Invalidation and ISR Revalidation on Data Changes",
+    "description": "Verify that changes to product, category, or promotional data trigger appropriate Redis cache invalidation and Incremental Static Regeneration (ISR) to update frontend content.",
+    "category": "performance",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Make a change to product details via admin API or panel"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm Redis cache keys related to the product are invalidated"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that ISR revalidation triggers and updated data appears on subsequent frontend requests"
+      },
+      {
+        "type": "action",
+        "description": "Update category hierarchy or promotions"
+      },
+      {
+        "type": "assertion",
+        "description": "Validate cache invalidation and ISR revalidation for affected pages"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Promo Codes Application and Validation",
+    "description": "Test creation, application, and validation of promo codes during checkout including edge cases for expiry, usage limits, and incompatible discounts.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Create promo code in admin panel with specific discount and constraints"
+      },
+      {
+        "type": "action",
+        "description": "Add products to cart and proceed to checkout"
+      },
+      {
+        "type": "action",
+        "description": "Apply the promo code in checkout payment step"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that discount is applied correctly to order summary"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to apply an expired promo code"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm appropriate error message is shown and discount not applied"
+      },
+      {
+        "type": "action",
+        "description": "Apply promo code exceeding usage limits or incompatible with current cart"
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure promo code application is rejected with meaningful feedback"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Real-time Notifications in Admin Panel",
+    "description": "Verify that admin users receive real-time notifications for order updates, critical system alerts, and marketing campaign metrics.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as an admin user"
+      },
+      {
+        "type": "action",
+        "description": "Trigger events that emit notifications (e.g., order placed, payment confirmed)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify notifications appear in admin UI in real-time without page refresh"
+      },
+      {
+        "type": "action",
+        "description": "Acknowledge/dismiss a notification"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm notification is removed or marked as read"
+      },
+      {
+        "type": "action",
+        "description": "Trigger email/SMS marketing campaign event"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that related notification with campaign metrics is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Accessibility Compliance for Key UI Elements",
+    "description": "Validate that homepage, product catalog, product detail, and checkout UI components meet WCAG AA accessibility standards including keyboard navigation and screen reader compatibility.",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to homepage, product catalog, product detail, and checkout pages"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify all interactive elements are reachable and operable via keyboard only"
+      },
+      {
+        "type": "assertion",
+        "description": "Check presence of appropriate ARIA roles and labels"
+      },
+      {
+        "type": "assertion",
+        "description": "Use screen reader to confirm meaningful descriptions and navigation flow"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm color contrast ratios meet WCAG AA requirements across UI"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "API Endpoint Pagination, Filtering, and Sorting",
+    "description": "Test REST API endpoints for products, categories, and orders support pagination, filtering, and sorting according to specification with correct responses and error handling.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Send GET requests to products API with pagination parameters and validate page size and total counts"
+      },
+      {
+        "type": "action",
+        "description": "Apply filters (e.g., category, price range) and verify filtered results"
+      },
+      {
+        "type": "action",
+        "description": "Use sorting parameters (e.g., price ascending) and validate order in response"
+      },
+      {
+        "type": "action",
+        "description": "Send invalid or malformed query parameters"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm API returns appropriate error codes and messages"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Audit Logging for Admin Actions",
+    "description": "Verify that all significant admin operations (create, update, delete) are recorded in audit logs with accurate timestamps, user identity, and action details.",
+    "category": "security",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as admin user and perform product creation"
+      },
+      {
+        "type": "action",
+        "description": "Make updates to categories and users"
+      },
+      {
+        "type": "action",
+        "description": "Delete orders and promo codes"
+      },
+      {
+        "type": "assertion",
+        "description": "Check audit log entries exist for each action with correct metadata"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify unauthorized users cannot access audit logs"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Wishlist Add and Remove with Persistence",
+    "description": "Ensure users can add products to the wishlist, remove them, and that the wishlist persists across sessions using Zustand state management.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as authenticated user"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to product detail and add product to wishlist"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm wishlist count and item presence updated in UI"
+      },
+      {
+        "type": "action",
+        "description": "Remove product from wishlist"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify product is removed and UI updates accordingly"
+      },
+      {
+        "type": "action",
+        "description": "Logout and login again"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm wishlist contents persist correctly"
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Product Review Submission and Verification",
+    "description": "Test product review functionality including review submission from verified purchasers, display of verified badges, and review listing on product pages.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as a user who purchased a product"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to product detail page and submit a new review with rating and comment"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify review appears in reviews section with 'verified purchase' badge"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to submit a review as unverified user"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm submission is blocked or review unverified badge is shown"
+      },
+      {
+        "type": "assertion",
+        "description": "Check review sorting and pagination on product detail page"
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "Responsive UI Across Desktop and Mobile Devices",
+    "description": "Verify key UI components including homepage, catalog, product detail, cart, checkout, and admin panel render correctly and remain usable on various viewport sizes including mobile, tablet, and desktop.",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open website on desktop resolution"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm layout elements align and all content is visible"
+      },
+      {
+        "type": "action",
+        "description": "Resize viewport or open site on tablet resolution"
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure navigation menus adapt to touch and smaller widths"
+      },
+      {
+        "type": "action",
+        "description": "Open site on mobile viewport/device"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify hamburger menu, collapsible sections, and full functionality with no clipping or overflow"
+      }
+    ]
+  },
+  {
+    "id": "TC019",
+    "title": "Order Creation and Status Update via API and Webhooks",
+    "description": "Verify orders are created successfully via checkout API, payment status updates via Stripe webhooks, and resulting state updates propagate in admin and user views.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Submit order creation request through checkout API with valid payment method"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm order is created with status pending"
+      },
+      {
+        "type": "action",
+        "description": "Simulate Stripe payment success webhook call"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify order status changes to paid in database and UI"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm notification sent to user and visible in admin panel"
+      },
+      {
+        "type": "action",
+        "description": "Simulate payment failure webhook and verify order status changes accordingly"
+      }
+    ]
+  },
+  {
+    "id": "TC020",
+    "title": "Security Enforcement on Protected Routes and APIs",
+    "description": "Test all protected frontend routes and backend API endpoints enforce authentication and authorization according to user role and permissions, and reject unauthorized access.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Access admin panel routes without login"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify redirection to login or access denied"
+      },
+      {
+        "type": "action",
+        "description": "Login as user without admin privileges and access admin routes"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm access is denied or forbidden message shown"
+      },
+      {
+        "type": "action",
+        "description": "Access protected API endpoints without token or invalid token"
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure 401 Unauthorized or 403 Forbidden responses received"
+      },
+      {
+        "type": "action",
+        "description": "Login with valid user and access permitted endpoints"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm successful data access and operations permitted by role"
+      }
+    ]
+  }
+]

@@ -17,12 +17,13 @@ export const metadata: Metadata = {
 async function getProductsData() {
   try {
     // Fetch all products with Prisma
-    const [products, categories] = await Promise.all([
+    const [products, categories, vendors] = await Promise.all([
       prisma.product.findMany({
         take: 100,
         orderBy: { createdAt: 'desc' },
         include: {
           category: true,
+          vendor: true,
           images: {
             orderBy: { order: 'asc' },
           },
@@ -38,6 +39,10 @@ async function getProductsData() {
         take: 100,
         orderBy: { order: 'asc' },
       }),
+      prisma.vendor.findMany({
+        where: { status: 'ACTIVE' },
+        orderBy: { businessName: 'asc' },
+      }),
     ])
 
     // Transform products
@@ -51,7 +56,6 @@ async function getProductsData() {
         url: img.url,
         alt: img.alt,
         type: img.type === 'THREE_SIXTY' ? '360' : img.type.toLowerCase() as 'image' | 'video' | '360',
-        thumbnail: img.thumbnail || undefined,
       })),
       variants: product.variants.map((v) => ({
         id: v.id,
@@ -60,7 +64,6 @@ async function getProductsData() {
         sku: v.sku,
         stock: v.stock,
         priceModifier: v.priceModifier || undefined,
-        image: v.image || undefined,
       })),
       category: {
         id: product.category.id,
@@ -73,6 +76,10 @@ async function getProductsData() {
         name: pt.tag.name,
         slug: pt.tag.slug,
       })),
+      vendor: product.vendor ? {
+        id: product.vendor.id,
+        name: product.vendor.businessName, // For filter display
+      } : undefined,
       rating: product.rating,
       reviewCount: product.reviewCount,
       stock: product.stock,
@@ -93,6 +100,34 @@ async function getProductsData() {
       categoryCount[catId] = (categoryCount[catId] || 0) + 1
     })
 
+    // Build brand counts from vendors
+    const brandCount: Record<string, number> = {}
+    products.forEach((product) => {
+      if (product.vendorId) {
+        brandCount[product.vendorId] = (brandCount[product.vendorId] || 0) + 1
+      }
+    })
+
+    // Build color counts from variants
+    const colorCount: Record<string, number> = {}
+    transformedProducts.forEach((product) => {
+      product.variants?.forEach((variant) => {
+        if (variant.color) {
+          colorCount[variant.color] = (colorCount[variant.color] || 0) + 1
+        }
+      })
+    })
+
+    // Build size counts from variants
+    const sizeCount: Record<string, number> = {}
+    transformedProducts.forEach((product) => {
+      product.variants?.forEach((variant) => {
+        if (variant.size) {
+          sizeCount[variant.size] = (sizeCount[variant.size] || 0) + 1
+        }
+      })
+    })
+
     const availableFilters: AvailableFilters = {
       priceRange: {
         min: minPrice,
@@ -103,31 +138,34 @@ async function getProductsData() {
         name: cat.name,
         count: categoryCount[cat.id] || 0,
       })),
-      brands: [],
-      colors: [],
-      sizes: [],
+      brands: vendors
+        .filter((vendor) => vendor.id && brandCount[vendor.id] && brandCount[vendor.id]! > 0)
+        .map((vendor) => ({
+          id: vendor.id!,
+          name: vendor.businessName,
+          count: brandCount[vendor.id!]!,
+        }))
+        .sort((a, b) => b.count - a.count),
+      colors: Object.entries(colorCount)
+        .map(([color, count]) => ({
+          value: color,
+          name: color,
+          count,
+        }))
+        .sort((a, b) => b.count - a.count),
+      sizes: Object.entries(sizeCount)
+        .map(([size, count]) => ({
+          value: size,
+          count,
+        }))
+        .sort((a, b) => {
+          // Sort sizes in logical order: XS, S, M, L, XL, XXL, etc.
+          const sizeOrder: Record<string, number> = {
+            'XXS': 1, 'XS': 2, 'S': 3, 'M': 4, 'L': 5, 'XL': 6, 'XXL': 7, 'XXXL': 8
+          }
+          return (sizeOrder[a.value] || 99) - (sizeOrder[b.value] || 99)
+        }),
     }
-
-    // Extract colors and sizes from variants
-    const colorSet = new Set<string>()
-    const sizeSet = new Set<string>()
-    transformedProducts.forEach((product) => {
-      product.variants?.forEach((variant) => {
-        if (variant.color) colorSet.add(variant.color)
-        if (variant.size) sizeSet.add(variant.size)
-      })
-    })
-
-    availableFilters.colors = Array.from(colorSet).map((color) => ({
-      value: color,
-      name: color,
-      count: 0,
-    }))
-
-    availableFilters.sizes = Array.from(sizeSet).map((size) => ({
-      value: size,
-      count: 0,
-    }))
 
     return {
       products: transformedProducts,
@@ -151,33 +189,60 @@ async function getProductsData() {
 export default async function ProductsPage() {
   const { products, availableFilters } = await getProductsData()
 
+  // Build breadcrumb data
+  const breadcrumbs = [
+    { label: 'Accueil', href: '/' },
+    { label: 'Produits' }
+  ]
+
+  // Build category hero data
+  const categoryHeroData = {
+    title: 'Tous les Produits',
+    description: 'Découvrez notre collection complète de produits premium',
+    productCount: products.length,
+    quickFilters: [
+      { id: 'new', label: 'Nouveautés', value: 'newest' },
+      { id: 'sale', label: 'En promotion', value: 'onSale' },
+      { id: 'bestseller', label: 'Bestsellers', value: 'bestseller' }
+    ]
+  }
+
+  // SEO content data
+  const seoContent = {
+    title: 'À propos de notre collection',
+    content: `
+      <h2>Découvrez Notre Collection Premium</h2>
+      <p>Explorez notre sélection complète de produits soigneusement choisis pour leur qualité exceptionnelle.
+      Nous travaillons avec les meilleurs vendeurs pour vous offrir une expérience d'achat incomparable.</p>
+
+      <h3>Qualité Garantie</h3>
+      <p>Tous nos produits sont vérifiés et approuvés par notre équipe avant d'être mis en vente.
+      Nous garantissons la satisfaction de nos clients avec une politique de retour flexible.</p>
+
+      <h3>Livraison Rapide</h3>
+      <p>Profitez de notre service de livraison rapide partout en France.
+      La livraison est gratuite pour toute commande supérieure à 50€.</p>
+    `
+  }
+
   return (
     <div className="min-h-screen bg-platinum-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-anthracite-700 mb-2">
-            All Products
-          </h1>
-          <p className="text-nuanced-600">
-            Discover our complete collection of premium products
-          </p>
-        </div>
-
-        {/* Products Content - Client Component */}
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
-            </div>
-          }
-        >
-          <ProductsPageClient
-            initialProducts={products}
-            availableFilters={availableFilters}
-          />
-        </Suspense>
-      </div>
+      {/* Products Content - Client Component */}
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center py-12">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
+          </div>
+        }
+      >
+        <ProductsPageClient
+          initialProducts={products}
+          availableFilters={availableFilters}
+          breadcrumbs={breadcrumbs}
+          categoryHeroData={categoryHeroData}
+          seoContent={seoContent}
+        />
+      </Suspense>
     </div>
   )
 }

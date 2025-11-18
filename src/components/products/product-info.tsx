@@ -6,29 +6,54 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Heart, Share2, Truck, RotateCcw, Shield, CreditCard, Check } from 'lucide-react'
+import { Heart, Truck, RotateCcw, Shield, CreditCard, ShoppingCart } from 'lucide-react'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { RippleButton } from '@/components/ui/ripple-button'
 import { StarRating } from '@/components/ui/star-rating'
 import { Badge } from '@/components/ui/badge'
 import { useCartStore } from '@/stores/cart.store'
 import { useWishlistStore } from '@/stores/wishlist.store'
 import { useToast } from '@/hooks/use-toast'
+import { EnhancedColorSelector } from '@/components/products/enhanced-color-selector'
+import { EnhancedSizeSelector } from '@/components/products/enhanced-size-selector'
+import { EnhancedQuantitySelector } from '@/components/products/enhanced-quantity-selector'
+import { EnhancedStockIndicator } from '@/components/products/enhanced-stock-indicator'
+import { SizeGuideModal } from '@/components/products/size-guide-modal'
+import { TrustBadges } from '@/components/products/trust-badges'
+import { PaymentMethods } from '@/components/products/payment-methods'
+import { SocialShare } from '@/components/products/social-share'
+import { ProductMeta } from '@/components/products/product-meta'
+import { COLOR_HEX_MAP, PDP_CONFIG } from '@/lib/constants'
+import { createCartItem } from '@/lib/cart-utils'
 import type { Product, ProductVariant } from '@/types'
 
 interface ProductInfoProps {
   product: Product
   selectedVariant: ProductVariant | null
   onVariantChange: (variant: ProductVariant) => void
+  quantity?: number
+  onQuantityChange?: (quantity: number) => void
 }
 
-export function ProductInfo({ product, selectedVariant, onVariantChange }: ProductInfoProps) {
+export function ProductInfo({
+  product,
+  selectedVariant,
+  onVariantChange,
+  quantity: externalQuantity,
+  onQuantityChange,
+}: ProductInfoProps) {
   const [selectedColor, setSelectedColor] = useState<string>('')
   const [selectedSize, setSelectedSize] = useState<string>('')
-  const [quantity, setQuantity] = useState(1)
+  const [internalQuantity, setInternalQuantity] = useState(1)
   const [isAddingToCart, setIsAddingToCart] = useState(false)
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false)
+
+  // Use external quantity if provided, otherwise use internal
+  const quantity = externalQuantity ?? internalQuantity
+  const setQuantity = onQuantityChange ?? setInternalQuantity
 
   const { addItem } = useCartStore()
-  const { addItem: addToWishlist, hasItem: isInWishlist } = useWishlistStore()
+  const { addItem: addToWishlist, isInWishlist } = useWishlistStore()
   const { toast } = useToast()
 
   // Derive variant from color/size selection and call onVariantChange
@@ -40,15 +65,16 @@ export function ProductInfo({ product, selectedVariant, onVariantChange }: Produ
         return colorMatch && sizeMatch
       })
 
-      if (matchingVariant) {
+      if (matchingVariant && matchingVariant.id !== selectedVariant?.id) {
         onVariantChange(matchingVariant)
       }
-    } else if (!selectedColor && !selectedSize) {
-      onVariantChange(null)
     }
-  }, [selectedColor, selectedSize, product.variants, onVariantChange])
+    // Don't call onVariantChange(null) as it expects ProductVariant, not null
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedColor, selectedSize, product.variants])
 
   // Sync internal selections from selectedVariant to prevent drift
+  // Sync selectedColor and selectedSize when variant changes
   useEffect(() => {
     if (selectedVariant) {
       if (selectedVariant.color && selectedVariant.color !== selectedColor) {
@@ -58,7 +84,7 @@ export function ProductInfo({ product, selectedVariant, onVariantChange }: Produ
         setSelectedSize(selectedVariant.size)
       }
     }
-  }, [selectedVariant])
+  }, [selectedVariant, selectedColor, selectedSize])
 
   const finalPrice = selectedVariant?.priceModifier
     ? product.price + selectedVariant.priceModifier
@@ -75,8 +101,8 @@ export function ProductInfo({ product, selectedVariant, onVariantChange }: Produ
   const handleAddToCart = async () => {
     // Check if variant selection is required
     const hasVariants = product.variants && product.variants.length > 0
-    const requiresSize = hasVariants && product.variants.some(v => v.size)
-    const requiresColor = hasVariants && product.variants.some(v => v.color)
+    const requiresSize = hasVariants && product.variants?.some(v => v.size)
+    const requiresColor = hasVariants && product.variants?.some(v => v.color)
 
     if (requiresSize && !selectedSize) {
       toast({
@@ -99,21 +125,13 @@ export function ProductInfo({ product, selectedVariant, onVariantChange }: Produ
     setIsAddingToCart(true)
 
     try {
-      addItem({
-        id: `${product.id}-${selectedVariant?.sku || ''}`,
-        productId: product.id,
-        productName: product.name,
-        productSlug: product.slug,
-        productImage: product.images[0]?.url || '',
-        price: finalPrice,
+      const cartItem = createCartItem({
+        product,
+        variant: selectedVariant || undefined,
         quantity,
-        variant: selectedVariant ? {
-          size: selectedSize,
-          color: selectedColor,
-          sku: selectedVariant.sku,
-        } : undefined,
-        stock: currentStock,
       })
+
+      addItem(cartItem)
 
       toast({
         title: '✓ Ajouté au panier',
@@ -125,34 +143,23 @@ export function ProductInfo({ product, selectedVariant, onVariantChange }: Produ
   }
 
   const handleAddToWishlist = () => {
-    addToWishlist(product.id)
+    addToWishlist({
+      productId: product.id,
+      name: product.name,
+      price: finalPrice,
+      image: product.images[0]?.url,
+      addedAt: new Date().toISOString(),
+    })
     toast({
       title: '♡ Ajouté aux favoris',
       description: `${product.name} a été ajouté à vos favoris`,
     })
   }
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      await navigator.share({
-        title: product.name,
-        text: product.description,
-        url: window.location.href,
-      })
-    } else {
-      await navigator.clipboard.writeText(window.location.href)
-      toast({ title: 'Lien copié!', description: 'Le lien a été copié dans le presse-papier' })
-    }
-  }
-
-  // Calculate stock percentage for low stock warning
-  const lowStockThreshold = 10
-  const stockPercentage = Math.min((currentStock / lowStockThreshold) * 100, 100)
-
   // Check if variant selection is complete
   const hasVariants = product.variants && product.variants.length > 0
-  const requiresSize = hasVariants && product.variants.some(v => v.size)
-  const requiresColor = hasVariants && product.variants.some(v => v.color)
+  const requiresSize = hasVariants && product.variants?.some(v => v.size)
+  const requiresColor = hasVariants && product.variants?.some(v => v.color)
   const isVariantSelectionComplete = (!requiresSize || !!selectedSize) && (!requiresColor || !!selectedColor)
 
   return (
@@ -210,126 +217,75 @@ export function ProductInfo({ product, selectedVariant, onVariantChange }: Produ
 
       {/* Color Selection */}
       {product.variants && product.variants.some(v => v.color) && (
-        <div>
-          <label className="block text-sm font-medium text-anthracite-900 mb-2">
-            Couleur: <span className="text-nuanced-600">{selectedColor || 'Choisir'}</span>
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {[...new Set(product.variants.map(v => v.color))].filter(Boolean).map((color) => (
-              <button
-                key={color}
-                onClick={() => setSelectedColor(color!)}
-                className={`w-10 h-10 rounded-full border-2 transition-all ${selectedColor === color
-                  ? 'border-orange-500 ring-2 ring-orange-500/20'
-                  : 'border-platinum-300 hover:border-orange-300'
-                  }`}
-                style={{ backgroundColor: color }}
-                title={color}
-                aria-label={`Select color ${color}`}
-              />
-            ))}
-          </div>
-        </div>
+        <EnhancedColorSelector
+          colors={[...new Set(product.variants.map(v => v.color))].filter(Boolean).map((color) => ({
+            id: color!,
+            name: color!,
+            hex: COLOR_HEX_MAP[color!] || '#CCCCCC',
+          }))}
+          selected={selectedColor}
+          onChange={setSelectedColor}
+        />
       )}
 
       {/* Size Selection */}
       {product.variants && product.variants.some(v => v.size) && (
-        <div>
-          <div className="flex justify-between items-center mb-2">
-            <label className="text-sm font-medium text-anthracite-900">
-              Taille: <span className="text-nuanced-600">{selectedSize || 'Choisir'}</span>
-            </label>
-            <button className="text-sm text-orange-500 hover:underline">
-              Guide des tailles
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {[...new Set(product.variants.map(v => v.size))].filter(Boolean).map((size) => {
-              const variant = product.variants!.find(v => v.size === size)
-              const isOutOfStock = variant && variant.stock === 0
-              const isLowStock = variant && variant.stock > 0 && variant.stock < 5
-
-              return (
-                <button
-                  key={size}
-                  onClick={() => !isOutOfStock && setSelectedSize(size!)}
-                  disabled={isOutOfStock}
-                  className={`min-w-[60px] px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${selectedSize === size
-                    ? 'border-orange-500 bg-orange-50 text-orange-700'
-                    : isOutOfStock
-                      ? 'border-platinum-200 bg-platinum-100 text-nuanced-400 cursor-not-allowed'
-                      : 'border-platinum-300 hover:border-orange-300'
-                    }`}
-                >
-                  {size}
-                  {isLowStock && <span className="block text-xs text-red-500">Bientôt épuisé</span>}
-                </button>
-              )
-            })}
-          </div>
-        </div>
+        <EnhancedSizeSelector
+          sizes={[...new Set(product.variants.map(v => v.size))].filter(Boolean).map((size) => {
+            const variant = product.variants!.find(v => v.size === size)
+            return {
+              value: size!,
+              available: variant ? variant.stock > 0 : false,
+              stock: variant?.stock,
+            }
+          })}
+          selected={selectedSize}
+          onChange={setSelectedSize}
+          onGuideClick={() => setIsSizeGuideOpen(true)}
+        />
       )}
 
       {/* Quantity */}
-      <div>
-        <label className="block text-sm font-medium text-anthracite-900 mb-2">Quantité</label>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center border-2 border-platinum-300 rounded-lg">
-            <button
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="px-4 py-2 hover:bg-platinum-100 transition-colors"
-              aria-label="Decrease quantity"
-            >
-              −
-            </button>
-            <input
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, Math.min(maxQuantity, parseInt(e.target.value) || 1)))}
-              className="w-16 text-center border-x-2 border-platinum-300 py-2"
-              min="1"
-              max={maxQuantity}
-            />
-            <button
-              onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
-              className="px-4 py-2 hover:bg-platinum-100 transition-colors"
-              aria-label="Increase quantity"
-            >
-              +
-            </button>
-          </div>
-          <span className="text-sm text-nuanced-600">
-            Prix total: <strong className="text-anthracite-900">{(finalPrice * quantity).toFixed(2)}€</strong>
-          </span>
-        </div>
+      <div className="flex items-center gap-4">
+        <EnhancedQuantitySelector
+          value={quantity}
+          min={1}
+          max={maxQuantity}
+          onChange={setQuantity}
+        />
+        <span className="text-sm text-nuanced-600">
+          Prix total: <strong className="text-anthracite-900">{(finalPrice * quantity).toFixed(2)}€</strong>
+        </span>
       </div>
 
       {/* Stock Indicator */}
-      {currentStock > 0 && currentStock <= lowStockThreshold && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-700 font-medium">
-            ⚠️ Il ne reste que {currentStock} article(s) en stock
-          </p>
-          <div className="mt-2 h-2 bg-red-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-red-500 transition-all"
-              style={{ width: `${stockPercentage}%` }}
-            />
-          </div>
-        </div>
-      )}
+      <EnhancedStockIndicator 
+        stock={currentStock}
+        threshold={PDP_CONFIG.stockWarningThreshold}
+        lowStockThreshold={PDP_CONFIG.lowStockThreshold}
+      />
 
       {/* CTAs */}
       <div className="space-y-3">
-        <RippleButton
-          onClick={handleAddToCart}
-          disabled={isAddingToCart || !isVariantSelectionComplete || currentStock === 0}
-          className="w-full h-14 text-lg font-bold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {currentStock === 0 ? 'RUPTURE DE STOCK' : isAddingToCart ? 'Ajout en cours...' : 'AJOUTER AU PANIER'}
-        </RippleButton>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex">
+              <RippleButton
+                onClick={handleAddToCart}
+                disabled={isAddingToCart || !isVariantSelectionComplete || currentStock === 0}
+                className="w-14 h-14 p-0 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                aria-label={currentStock === 0 ? 'RUPTURE DE STOCK' : isAddingToCart ? 'Ajout en cours...' : 'AJOUTER AU PANIER'}
+              >
+                <ShoppingCart className="w-6 h-6" />
+              </RippleButton>
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{currentStock === 0 ? 'RUPTURE DE STOCK' : isAddingToCart ? 'Ajout en cours...' : 'AJOUTER AU PANIER'}</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3">
           <button
             onClick={handleAddToWishlist}
             className="flex items-center justify-center gap-2 h-12 border-2 border-platinum-300 hover:border-orange-500 rounded-lg transition-all"
@@ -337,47 +293,57 @@ export function ProductInfo({ product, selectedVariant, onVariantChange }: Produ
             <Heart className={`w-5 h-5 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
             <span className="font-medium">Favoris</span>
           </button>
-
-          <button
-            onClick={handleShare}
-            className="flex items-center justify-center gap-2 h-12 border-2 border-platinum-300 hover:border-orange-500 rounded-lg transition-all"
-          >
-            <Share2 className="w-5 h-5" />
-            <span className="font-medium">Partager</span>
-          </button>
         </div>
       </div>
 
-      {/* Trust Indicators */}
-      <div className="space-y-2 pt-4 border-t border-platinum-200">
-        {[
-          { icon: Truck, text: 'Livraison gratuite dès 25€' },
-          { icon: RotateCcw, text: 'Retour gratuit sous 30 jours' },
-          { icon: Shield, text: 'Garantie 2 ans' },
-          { icon: CreditCard, text: 'Paiement 100% sécurisé' },
-        ].map(({ icon: Icon, text }, index) => (
-          <div key={index} className="flex items-center gap-3 text-sm text-nuanced-700">
-            <Icon className="w-5 h-5 text-green-600 flex-shrink-0" />
-            <span>{text}</span>
-          </div>
-        ))}
-      </div>
+      {/* Trust Badges */}
+      <TrustBadges
+        features={[
+          { icon: <Truck className="w-5 h-5" />, text: 'Livraison gratuite dès 25€', highlight: true },
+          { icon: <RotateCcw className="w-5 h-5" />, text: 'Retour gratuit sous 30 jours' },
+          { icon: <Shield className="w-5 h-5" />, text: 'Garantie 2 ans constructeur' },
+          { icon: <CreditCard className="w-5 h-5" />, text: 'Paiement 100% sécurisé' },
+        ]}
+        estimatedDelivery={{
+          min: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
+          max: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000),
+        }}
+        shippingOrigin="France"
+        internationalShipping={true}
+      />
 
-      {/* Delivery Estimate */}
-      <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-        <div className="flex items-start gap-3">
-          <Truck className="w-5 h-5 text-green-600 mt-0.5" />
-          <div>
-            <p className="font-medium text-green-900">Livraison estimée</p>
-            <p className="text-sm text-green-700">
-              Entre le {new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR')}
-              {' et le '}
-              {new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR')}
-            </p>
-            <p className="text-xs text-green-600 mt-1">Expédié depuis France</p>
-          </div>
-        </div>
-      </div>
+      {/* Payment Methods */}
+      <PaymentMethods
+        methods={['visa', 'mastercard', 'paypal', 'apple-pay']}
+        showSecurity={true}
+      />
+
+      {/* Social Share */}
+      <SocialShare
+        productName={product.name}
+        productUrl={`${process.env.NEXT_PUBLIC_BASE_URL || 'https://mientior.com'}/products/${product.slug}`}
+        description={product.description}
+      />
+
+      {/* Product Meta */}
+      <ProductMeta
+        sku={selectedVariant?.sku || product.id}
+        category={{
+          id: product.category.id,
+          name: product.category.name,
+          slug: product.category.slug,
+          parent: product.category.parent,
+        }}
+        vendor={product.vendor}
+        tags={product.tags}
+      />
+
+      {/* Size Guide Modal */}
+      <SizeGuideModal
+        isOpen={isSizeGuideOpen}
+        onClose={() => setIsSizeGuideOpen(false)}
+        category={product.category.name}
+      />
     </div>
   )
 }

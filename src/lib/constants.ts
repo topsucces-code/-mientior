@@ -177,3 +177,101 @@ export const BREAKPOINTS = {
     xl: 1280,
     '2xl': 1536
 }
+
+// ==================== COLOR HEX MAPPING ====================
+export const COLOR_HEX_MAP: Record<string, string> = {
+  'Noir': '#000000',
+  'Blanc': '#FFFFFF',
+  'Rouge': '#EF4444',
+  'Bleu': '#3B82F6',
+  'Vert': '#10B981',
+  'Jaune': '#F59E0B',
+  'Orange': '#FF6B00',
+  'Rose': '#EC4899',
+  'Violet': '#8B5CF6',
+  'Gris': '#6B7280',
+  'Marron': '#92400E',
+  'Beige': '#D4C5B9',
+  'Turquoise': '#14B8A6',
+  'Bordeaux': '#991B1B'
+}
+
+// ==================== PLP CONFIGURATION ====================
+export const PLP_CONFIG = {
+  defaultItemsPerPage: 24,
+  itemsPerPageOptions: [24, 48, 96],
+  loadMoreIncrement: 24,
+  maxFiltersShown: 5, // Show "+ X more" after this
+  priceHistogramBins: 10,
+  recentlyViewedLimit: 20,
+  stickyOffsetDesktop: 120, // Header compact height
+  stickyOffsetMobile: 80
+}
+
+// ==================== PDP CONFIGURATION ====================
+export const PDP_CONFIG = {
+  // Gallery
+  maxImages: 10,
+  thumbnailSize: 80, // px
+  lightboxEnabled: true,
+
+  // 360 Viewer
+  view360Sensitivity: 2, // pixels per frame
+  view360MinFrames: 24,
+
+  // Stock
+  lowStockThreshold: 10,
+  stockWarningThreshold: 20,
+
+  // Quantity
+  minQuantity: 1,
+  maxQuantity: 10,
+
+  // Reviews
+  reviewsPerPage: 10,
+  reviewImageMaxSize: 5, // MB
+  reviewMaxImages: 5,
+
+  // Q&A
+  qaPerPage: 10,
+  qaSearchMinLength: 2,
+  qaMaxQuestionLength: 500,
+  qaMaxAnswerLength: 1000,
+
+  // Bundle
+  maxBundleProducts: 3,
+  bundleDiscount: 5, // percentage
+
+  // Recommendations
+  maxRecommendations: 12,
+
+  // Sticky Panel
+  stickyPanelOffset: 400, // px scroll before showing
+
+  // Returns
+  defaultReturnDays: 30, // Default return period in days
+}
+
+// ==================== SIZE GUIDES ====================
+export const SIZE_GUIDES = {
+  shoes: [
+    { eu: 36, us: 5.5, uk: 3.5, cm: 23.0 },
+    { eu: 37, us: 6, uk: 4, cm: 23.5 },
+    { eu: 38, us: 7, uk: 5, cm: 24.0 },
+    { eu: 39, us: 7.5, uk: 5.5, cm: 24.5 },
+    { eu: 40, us: 8, uk: 6, cm: 25.0 },
+    { eu: 41, us: 8.5, uk: 7, cm: 25.5 },
+    { eu: 42, us: 9, uk: 7.5, cm: 26.0 },
+    { eu: 43, us: 10, uk: 8.5, cm: 26.5 },
+    { eu: 44, us: 10.5, uk: 9, cm: 27.0 },
+    { eu: 45, us: 11, uk: 10, cm: 27.5 },
+  ],
+  clothing: [
+    { size: 'XS', chest: '86-91', waist: '71-76', hips: '91-96' },
+    { size: 'S', chest: '92-97', waist: '77-82', hips: '97-102' },
+    { size: 'M', chest: '98-103', waist: '83-88', hips: '103-108' },
+    { size: 'L', chest: '104-109', waist: '89-94', hips: '109-114' },
+    { size: 'XL', chest: '110-115', waist: '95-100', hips: '115-120' },
+    { size: 'XXL', chest: '116-121', waist: '101-106', hips: '121-126' },
+  ],
+}

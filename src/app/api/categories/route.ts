@@ -4,10 +4,16 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { Prisma } from '@prisma/client'
+import { Prisma, Permission, AdminUser } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
+import { withPermission } from '@/middleware/admin-auth'
+import { logCreate } from '@/lib/audit-logger'
 
-export async function GET(request: NextRequest) {
+interface AdminSession {
+  adminUser: AdminUser | null;
+}
+
+async function handleGET(request: NextRequest, { adminSession: _adminSession }: { adminSession: AdminSession }) {
   try {
     const { searchParams } = new URL(request.url)
 
@@ -101,7 +107,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest, { adminSession }: { adminSession: AdminSession }) {
   try {
     const body = await request.json()
 
@@ -144,9 +150,18 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // Audit log the creation
+    if (adminSession.adminUser) {
+      await logCreate('category', category, adminSession.adminUser as AdminUser, request)
+    }
+
     return NextResponse.json(category, { status: 201 })
   } catch (error) {
     console.error('Category creation error:', error)
     return NextResponse.json({ error: 'Failed to create category' }, { status: 500 })
   }
 }
+
+// Export wrapped handlers with permission checks
+export const GET = withPermission(Permission.CATEGORIES_READ, handleGET)
+export const POST = withPermission(Permission.CATEGORIES_WRITE, handlePOST)

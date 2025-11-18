@@ -1,0 +1,131 @@
+'use client'
+
+/**
+ * Client-side wrapper for PDP with centralized variant/quantity state management
+ */
+
+import { useState, useEffect, useCallback } from 'react'
+import { ProductGallery } from '@/components/products/product-gallery'
+import { ProductInfo } from '@/components/products/product-info'
+import { StickyPurchasePanel } from '@/components/products/sticky-purchase-panel'
+import { DesktopStickySidebar } from '@/components/products/desktop-sticky-sidebar'
+import { FrequentlyBoughtTogether } from '@/components/products/frequently-bought-together'
+import { ProductTabs } from '@/components/products/product-tabs'
+import type { Product, ProductVariant, ProductImage, Review, ReviewStats, QA, ShippingInfo, BundleProduct } from '@/types'
+
+interface PDPClientProps {
+  product: Product
+  images: ProductImage[]
+  has360View: boolean
+  hasVideo: boolean
+  bundleProducts?: BundleProduct[]
+  reviews?: Review[]
+  reviewStats?: ReviewStats
+  qa?: QA[]
+  shippingInfo?: ShippingInfo
+}
+
+export function PDPClient({
+  product,
+  images,
+  has360View,
+  hasVideo,
+  bundleProducts = [],
+  reviews = [],
+  reviewStats,
+  qa,
+  shippingInfo,
+}: PDPClientProps) {
+  // Centralized state for variant selection and quantity
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null)
+  const [quantity, setQuantity] = useState(1)
+
+  // Initialize first variant if available
+  useEffect(() => {
+    if (product.variants && product.variants.length > 0 && !selectedVariant) {
+      const firstVariant = product.variants[0]
+      if (firstVariant) {
+        setSelectedVariant(firstVariant)
+      }
+    }
+  }, [product.variants, selectedVariant])
+
+  // Handle variant change - updates all related state
+  const handleVariantChange = useCallback((variant: ProductVariant) => {
+    setSelectedVariant(variant)
+    // Reset quantity to 1 when variant changes
+    setQuantity(1)
+  }, [])
+
+  // Handle quantity change
+  const handleQuantityChange = useCallback((newQuantity: number) => {
+    const maxStock = selectedVariant?.stock || product.stock
+    setQuantity(Math.max(1, Math.min(maxStock, newQuantity)))
+  }, [selectedVariant, product.stock])
+
+  return (
+    <>
+      <div className="grid lg:grid-cols-[1fr_400px] gap-8 mb-12">
+        {/* Left Column: Gallery and Product Info */}
+        <div className="space-y-8">
+          {/* Gallery */}
+          <ProductGallery
+            images={images}
+            productName={product.name}
+            has360View={has360View}
+            hasVideo={hasVideo}
+          />
+
+          {/* Product Info (visible on all screens) */}
+          <ProductInfo
+            product={product}
+            selectedVariant={selectedVariant}
+            onVariantChange={handleVariantChange}
+            quantity={quantity}
+            onQuantityChange={handleQuantityChange}
+          />
+        </div>
+
+        {/* Right Column: Desktop Sticky Sidebar */}
+        <DesktopStickySidebar
+          product={product}
+          selectedVariant={selectedVariant}
+          onVariantChange={handleVariantChange}
+          quantity={quantity}
+          onQuantityChange={handleQuantityChange}
+          shippingInfo={shippingInfo}
+        />
+      </div>
+
+      {/* Frequently Bought Together */}
+      {bundleProducts.length > 0 && (
+        <div className="mb-12">
+          <FrequentlyBoughtTogether
+            mainProduct={product}
+            bundleProducts={bundleProducts}
+          />
+        </div>
+      )}
+
+      {/* Product Tabs (Description, Specs, Reviews) */}
+      <div className="mb-12">
+        <ProductTabs 
+          product={product} 
+          reviews={reviews} 
+          reviewStats={reviewStats}
+          qa={qa}
+          shippingInfo={shippingInfo}
+        />
+      </div>
+
+      {/* Sticky Purchase Panel */}
+      <StickyPurchasePanel
+        product={product}
+        selectedVariant={selectedVariant}
+        onVariantChange={handleVariantChange}
+        quantity={quantity}
+        onQuantityChange={handleQuantityChange}
+      />
+    </>
+  )
+}

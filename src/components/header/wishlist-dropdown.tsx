@@ -3,7 +3,7 @@
 import { Heart, X, ShoppingCart } from 'lucide-react'
 import { useWishlistStore } from '@/stores/wishlist.store'
 import { useHeader } from '@/contexts/header-context'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -11,8 +11,14 @@ export function WishlistDropdown() {
     const { items, removeItem } = useWishlistStore()
     const { activeDropdown, setActiveDropdown } = useHeader()
     const dropdownRef = useRef<HTMLDivElement>(null)
+    const [mounted, setMounted] = useState(false)
 
     const isOpen = activeDropdown === 'wishlist'
+
+    // Handle hydration - only show wishlist data after mount
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -28,8 +34,8 @@ export function WishlistDropdown() {
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [isOpen, setActiveDropdown])
 
-    const totalItems = items.length
-    const recentItems = items.slice(0, 5)
+    const totalItems = mounted ? items.length : 0
+    const recentItems = mounted ? items.slice(0, 5) : []
 
     return (
         <div className="relative" ref={dropdownRef}>
@@ -79,7 +85,7 @@ export function WishlistDropdown() {
                                                 </h4>
                                             </Link>
                                             <p className="text-sm text-gray-600 mt-1">
-                                                {item.price ? `${item.price.toFixed(2)} €` : 'Prix non disponible'}
+                                                {item.price ? `${(item.price / 100).toFixed(2)} €` : 'Prix non disponible'}
                                             </p>
 
                                             <div className="flex items-center gap-2 mt-2">

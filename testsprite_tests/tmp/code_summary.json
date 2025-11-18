@@ -1,0 +1,214 @@
+{
+  "tech_stack": [
+    "TypeScript",
+    "Next.js 15 (App Router)",
+    "React 19",
+    "Prisma ORM",
+    "PostgreSQL",
+    "Redis (ioredis)",
+    "Better Auth",
+    "Refine Admin Framework",
+    "Ant Design",
+    "Tailwind CSS",
+    "shadcn/ui",
+    "Zustand",
+    "React Query",
+    "Paystack",
+    "Flutterwave",
+    "Resend (Email)",
+    "Pusher (Real-time)"
+  ],
+  "features": [
+    {
+      "name": "Product Management",
+      "description": "Complete product CRUD with variants, images, tags, pricing, stock management, and bundle support",
+      "files": [
+        "src/app/api/products/route.ts",
+        "src/app/api/products/[id]/route.ts",
+        "src/app/admin/products/page.tsx",
+        "src/app/(app)/products/page.tsx",
+        "src/app/(app)/products/[slug]/page.tsx"
+      ]
+    },
+    {
+      "name": "Category Management",
+      "description": "Hierarchical category system with parent-child relationships and product associations",
+      "files": [
+        "src/app/api/categories/route.ts",
+        "src/app/api/categories/[id]/route.ts",
+        "src/app/admin/categories/page.tsx",
+        "src/app/(app)/categories/[slug]/page.tsx"
+      ]
+    },
+    {
+      "name": "Shopping Cart",
+      "description": "Persistent shopping cart with Zustand state management and recommendations",
+      "files": [
+        "src/stores/cart.store.ts",
+        "src/app/(app)/cart/page.tsx",
+        "src/components/cart/cart-item.tsx",
+        "src/lib/cart-utils.ts"
+      ]
+    },
+    {
+      "name": "Checkout System",
+      "description": "Multi-step checkout with Paystack/Flutterwave payment integration",
+      "files": [
+        "src/app/(app)/checkout/page.tsx",
+        "src/app/api/checkout/initialize-payment/route.ts",
+        "src/components/checkout/payment-form.tsx",
+        "src/lib/checkout-utils.ts"
+      ]
+    },
+    {
+      "name": "Order Management",
+      "description": "Complete order lifecycle with status tracking and payment verification",
+      "files": [
+        "src/app/api/orders/route.ts",
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/admin/orders/page.tsx"
+      ]
+    },
+    {
+      "name": "Authentication",
+      "description": "Better Auth with email/password and OAuth, Redis session caching",
+      "files": [
+        "src/lib/auth.ts",
+        "src/lib/auth-server.ts",
+        "src/app/api/auth/session/route.ts"
+      ]
+    },
+    {
+      "name": "User Management",
+      "description": "User CRUD, loyalty points, addresses, and customer analytics",
+      "files": [
+        "src/app/api/users/route.ts",
+        "src/app/admin/users/page.tsx",
+        "src/app/(app)/account/page.tsx"
+      ]
+    },
+    {
+      "name": "Admin Dashboard",
+      "description": "Refine-powered admin with stats, charts, and resource management",
+      "files": [
+        "src/app/admin/page.tsx",
+        "src/app/api/admin/dashboard/stats/route.ts",
+        "src/components/admin/dashboard-stats.tsx"
+      ]
+    },
+    {
+      "name": "Payment Integration",
+      "description": "Dual gateway support (Paystack/Flutterwave) with webhooks",
+      "files": [
+        "src/lib/paystack.ts",
+        "src/lib/flutterwave.ts",
+        "src/app/api/webhooks/paystack/route.ts"
+      ]
+    },
+    {
+      "name": "Search & Filtering",
+      "description": "Advanced search with visual search and product filtering",
+      "files": [
+        "src/app/api/search/route.ts",
+        "src/app/(app)/search/page.tsx",
+        "src/components/header/advanced-search-bar.tsx"
+      ]
+    },
+    {
+      "name": "Marketing Campaigns",
+      "description": "Email campaigns with promo codes and banners",
+      "files": [
+        "src/app/api/campaigns/route.ts",
+        "src/app/api/promo-codes/route.ts",
+        "src/app/admin/marketing/campaigns/page.tsx"
+      ]
+    },
+    {
+      "name": "Vendor Management",
+      "description": "Multi-vendor support with commission tracking",
+      "files": [
+        "src/app/api/vendors/route.ts",
+        "src/app/admin/vendors/page.tsx"
+      ]
+    },
+    {
+      "name": "Analytics",
+      "description": "Funnel tracking and conversion metrics",
+      "files": [
+        "src/app/api/admin/analytics/funnel/route.ts",
+        "src/lib/analytics.ts"
+      ]
+    },
+    {
+      "name": "Audit Logging",
+      "description": "System-wide audit trail for tracking actions",
+      "files": [
+        "src/lib/audit-logger.ts",
+        "src/app/api/admin/audit-logs/route.ts"
+      ]
+    },
+    {
+      "name": "RBAC",
+      "description": "Role-based access control with granular permissions",
+      "files": [
+        "src/lib/rbac.ts",
+        "src/app/api/admin/roles/route.ts"
+      ]
+    },
+    {
+      "name": "Feature Flags",
+      "description": "Dynamic feature toggling for A/B testing",
+      "files": [
+        "src/app/api/admin/feature-flags/route.ts"
+      ]
+    },
+    {
+      "name": "Wishlist",
+      "description": "User wishlist with sync capabilities",
+      "files": [
+        "src/stores/wishlist.store.ts",
+        "src/components/header/wishlist-dropdown.tsx"
+      ]
+    },
+    {
+      "name": "Newsletter",
+      "description": "Email newsletter subscription",
+      "files": [
+        "src/app/api/newsletter/route.ts",
+        "src/components/home/newsletter-subscription.tsx"
+      ]
+    },
+    {
+      "name": "Instagram Integration",
+      "description": "Instagram feed display using Graph API",
+      "files": [
+        "src/lib/instagram.ts",
+        "src/components/home/instagram-feed.tsx"
+      ]
+    },
+    {
+      "name": "Gamification",
+      "description": "Loyalty points with challenges and fortune wheel",
+      "files": [
+        "src/components/gamification/loyalty-progress.tsx",
+        "src/components/gamification/fortune-wheel.tsx"
+      ]
+    },
+    {
+      "name": "Real-time Notifications",
+      "description": "Pusher integration for admin notifications",
+      "files": [
+        "src/lib/pusher.ts",
+        "src/components/header/notifications-dropdown.tsx"
+      ]
+    },
+    {
+      "name": "Internationalization",
+      "description": "Multi-language support with i18next",
+      "files": [
+        "src/lib/i18n.ts",
+        "src/components/header/language-currency-selector.tsx"
+      ]
+    }
+  ]
+}

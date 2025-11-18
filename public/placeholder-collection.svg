@@ -1,0 +1,23 @@
+<svg width="1600" height="1000" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="collectionGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667EEA;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#764BA2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F093FB;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#collectionGradient)"/>
+  <g opacity="0.1">
+    <circle cx="300" cy="300" r="200" fill="#FFFFFF"/>
+    <circle cx="1300" cy="700" r="250" fill="#FFFFFF"/>
+    <circle cx="800" cy="500" r="150" fill="#FFFFFF"/>
+    <circle cx="1400" cy="200" r="180" fill="#FFFFFF"/>
+  </g>
+  <g>
+    <!-- Stars decoration -->
+    <path d="M 400 400 L 420 460 L 480 460 L 430 495 L 450 555 L 400 520 L 350 555 L 370 495 L 320 460 L 380 460 Z" fill="#FFFFFF" opacity="0.6"/>
+    <path d="M 1200 300 L 1220 360 L 1280 360 L 1230 395 L 1250 455 L 1200 420 L 1150 455 L 1170 395 L 1120 360 L 1180 360 Z" fill="#FFFFFF" opacity="0.6"/>
+  </g>
+  <text x="800" y="480" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Collection</text>
+  <text x="800" y="560" font-family="Arial, sans-serif" font-size="36" fill="#FFFFFF" text-anchor="middle" opacity="0.9">Découvrez nos produits sélectionnés</text>
+</svg>

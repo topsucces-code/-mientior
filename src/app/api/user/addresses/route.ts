@@ -1,11 +1,46 @@
 /**
- * API endpoint for saving user addresses
+ * API endpoint for managing user saved addresses
+ * Uses the SavedAddress model for relational data management
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth-server'
-import type { Address, ApiResponse } from '@/types'
+import type { ApiResponse } from '@/types'
+import type { SavedAddress } from '@prisma/client'
+
+export async function GET() {
+  try {
+    // Require authentication
+    const session = await requireAuth()
+    const userId = session.user.id
+
+    // Fetch user's saved addresses sorted by isDefault desc, then createdAt desc
+    const addresses = await prisma.savedAddress.findMany({
+      where: { userId },
+      orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
+    })
+
+    return NextResponse.json({
+      data: addresses,
+      success: true,
+    })
+  } catch (error: any) {
+    console.error('Fetch addresses error:', error)
+
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json(
+        { error: 'Authentication required', success: false },
+        { status: 401 }
+      )
+    }
+
+    return NextResponse.json(
+      { error: 'Failed to fetch addresses', success: false },
+      { status: 500 }
+    )
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,42 +48,67 @@ export async function POST(request: NextRequest) {
     const session = await requireAuth()
     const userId = session.user.id
 
-    const address: Address = await request.json()
+    const body = await request.json()
+    const { firstName, lastName, line1, line2, city, postalCode, country, phone, isDefault } = body
 
     // Basic validation
-    if (!address.firstName || !address.lastName || !address.line1 || !address.city || !address.postalCode || !address.country) {
+    if (!firstName || !lastName || !line1 || !city || !postalCode || !country || !phone) {
       return NextResponse.json(
         { error: 'Missing required address fields', success: false },
         { status: 400 }
       )
     }
 
-    // Fetch current user
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { addresses: true }
+    // Check if user has reached the limit (5 addresses max)
+    const addressCount = await prisma.savedAddress.count({
+      where: { userId },
     })
 
-    // Update user's addresses
-    const addresses = (user?.addresses as Address[]) || []
-    addresses.push(address)
+    if (addressCount >= 5) {
+      return NextResponse.json(
+        { error: 'Maximum 5 addresses allowed per user', success: false },
+        { status: 400 }
+      )
+    }
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: { addresses }
+    // If this address should be default, unset other default addresses
+    if (isDefault) {
+      await prisma.savedAddress.updateMany({
+        where: { userId, isDefault: true },
+        data: { isDefault: false },
+      })
+    }
+
+    // Create the new address
+    const newAddress = await prisma.savedAddress.create({
+      data: {
+        userId,
+        firstName,
+        lastName,
+        line1,
+        line2: line2 || null,
+        city,
+        postalCode,
+        country: country || 'FR',
+        phone,
+        isDefault: isDefault || false,
+      },
     })
 
-    const response: ApiResponse<Address> = {
-      data: address,
+    const response: ApiResponse<SavedAddress> = {
+      data: newAddress,
       success: true,
     }
 
-    return NextResponse.json(response)
+    return NextResponse.json(response, { status: 201 })
   } catch (error: any) {
     console.error('Save address error:', error)
 
     if (error.message === 'Unauthorized') {
-      return NextResponse.json({ error: 'Authentication required', success: false }, { status: 401 })
+      return NextResponse.json(
+        { error: 'Authentication required', success: false },
+        { status: 401 }
+      )
     }
 
     return NextResponse.json(
@@ -57,4 +117,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-

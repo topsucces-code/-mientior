@@ -4,6 +4,35 @@ import { Bell, Package, Gift, MessageCircle, AlertCircle } from 'lucide-react'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useHeader } from '@/contexts/header-context'
 import { useEffect, useRef } from 'react'
+import Pusher from 'pusher-js'
+import type { Notification } from '@/types'
+
+interface OrderCreatedData {
+    orderId: string;
+    orderNumber: string;
+    customerEmail: string;
+    total: number;
+}
+
+interface OrderUpdatedData {
+    orderId: string;
+    orderNumber: string;
+    status: string;
+    paymentStatus: string;
+}
+
+interface LowStockAlertData {
+    productId: string;
+    productName: string;
+    stock: number;
+}
+
+interface BulkActionCompleteData {
+    resource: string;
+    action: string;
+    count: number;
+    success: boolean;
+}
 
 const ICON_MAP = {
     order: Package,
@@ -13,12 +42,99 @@ const ICON_MAP = {
 } as const
 
 export function NotificationsDropdown() {
-    const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotificationsStore()
+    const { notifications, unreadCount, markAsRead, markAllAsRead, addNotification } = useNotificationsStore()
     const { activeDropdown, setActiveDropdown } = useHeader()
     const dropdownRef = useRef<HTMLDivElement>(null)
     const triggerRef = useRef<HTMLButtonElement>(null)
+    const pusherRef = useRef<Pusher | null>(null)
 
     const isOpen = activeDropdown === 'notifications'
+
+    // Initialize Pusher connection and subscribe to real-time notifications
+    useEffect(() => {
+        // Only initialize Pusher if environment variables are available
+        if (!process.env.NEXT_PUBLIC_PUSHER_KEY || !process.env.NEXT_PUBLIC_PUSHER_CLUSTER) {
+            console.warn('Pusher environment variables not configured. Real-time notifications disabled.')
+            return
+        }
+
+        // Initialize Pusher client
+        if (!pusherRef.current) {
+            pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
+                cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
+                forceTLS: true,
+            })
+        }
+
+        const pusher = pusherRef.current
+
+        // Subscribe to the admin notifications channel
+        const channel = pusher.subscribe('admin-notifications')
+
+        // Handle new order notifications
+        channel.bind('order-created', (data: OrderCreatedData) => {
+            const notification: Notification = {
+                id: `order-created-${data.orderId}-${Date.now()}`,
+                type: 'order',
+                title: `Nouvelle commande: ${data.orderNumber}`,
+                message: `Commande de ${data.customerEmail} pour ${(data.total / 100).toFixed(2)}€`,
+                timestamp: new Date(),
+                read: false,
+                link: `/admin/orders/show/${data.orderId}`
+            }
+            addNotification(notification)
+        })
+
+        // Handle order update notifications
+        channel.bind('order-updated', (data: OrderUpdatedData) => {
+            const notification: Notification = {
+                id: `order-updated-${data.orderId}-${Date.now()}`,
+                type: 'order',
+                title: `Mise à jour de commande: ${data.orderNumber}`,
+                message: `Statut: ${data.status} | Paiement: ${data.paymentStatus}`,
+                timestamp: new Date(),
+                read: false,
+                link: `/admin/orders/show/${data.orderId}`
+            }
+            addNotification(notification)
+        })
+
+        // Handle low stock alerts
+        channel.bind('low-stock-alert', (data: LowStockAlertData) => {
+            const notification: Notification = {
+                id: `low-stock-${data.productId}-${Date.now()}`,
+                type: 'system',
+                title: `Alerte stock faible: ${data.productName}`,
+                message: `Stock restant: ${data.stock} unité(s)`,
+                timestamp: new Date(),
+                read: false,
+                link: `/admin/products/edit/${data.productId}`
+            }
+            addNotification(notification)
+        })
+
+        // Handle bulk action completion notifications
+        channel.bind('bulk-action-complete', (data: BulkActionCompleteData) => {
+            const notification: Notification = {
+                id: `bulk-action-${data.resource}-${Date.now()}`,
+                type: 'system',
+                title: `Action en masse terminée: ${data.action}`,
+                message: `${data.count} ${data.resource}(s) - ${data.success ? 'Succès' : 'Avec erreurs'}`,
+                timestamp: new Date(),
+                read: false
+            }
+            addNotification(notification)
+        })
+
+        // Cleanup function
+        return () => {
+            channel.unbind('order-created')
+            channel.unbind('order-updated')
+            channel.unbind('low-stock-alert')
+            channel.unbind('bulk-action-complete')
+            pusher.unsubscribe('admin-notifications')
+        }
+    }, [addNotification])
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {

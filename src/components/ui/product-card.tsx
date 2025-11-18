@@ -7,6 +7,7 @@ import { Heart, ShoppingCart, Eye, Star, Truck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from './badge'
 import { Button } from './button'
+import { Tooltip, TooltipTrigger, TooltipContent } from './tooltip'
 
 export interface ProductCardProps extends React.HTMLAttributes<HTMLDivElement> {
   id: string
@@ -14,6 +15,7 @@ export interface ProductCardProps extends React.HTMLAttributes<HTMLDivElement> {
   slug: string
   price: number
   compareAtPrice?: number
+  originalPrice?: number // Legacy prop - use compareAtPrice instead
   image?: string
   images?: string[]
   rating?: number
@@ -21,9 +23,11 @@ export interface ProductCardProps extends React.HTMLAttributes<HTMLDivElement> {
   badge?: {
     text: string
     variant: 'flash' | 'urgent' | 'bestseller' | 'trending' | 'new'
-  }
+  } | string
+  onSale?: boolean
   inStock?: boolean
   freeShipping?: boolean
+  compact?: boolean
   onAddToCart?: (id: string) => void
   onQuickView?: (id: string) => void
   onWishlistToggle?: (id: string) => void
@@ -37,6 +41,7 @@ export function ProductCard({
   slug,
   price,
   compareAtPrice,
+  originalPrice: _originalPrice, // Destructure to prevent DOM warning (unused)
   image,
   images = [],
   rating = 0,
@@ -62,6 +67,16 @@ export function ProductCard({
   const discountPercentage = hasDiscount
     ? Math.round(((compareAtPrice - price) / compareAtPrice) * 100)
     : 0
+
+  // Convert string badge to object format
+  const getBadgeObject = (
+    badge: string | { text: string; variant: 'flash' | 'urgent' | 'bestseller' | 'trending' | 'new' } | undefined
+  ): { text: string; variant: 'flash' | 'urgent' | 'bestseller' | 'trending' | 'new' } | undefined => {
+    if (!badge) return undefined
+    if (typeof badge === 'string') return { text: badge, variant: 'new' }
+    return badge
+  }
+  const badgeObject = getBadgeObject(badge)
 
   // Rotate images on hover
   React.useEffect(() => {
@@ -111,9 +126,9 @@ export function ProductCard({
       <Link href={`/products/${slug}`} className="relative aspect-[4/5] overflow-hidden bg-platinum-100">
         {/* Badges */}
         <div className="absolute left-2 top-2 z-10 flex flex-col gap-2">
-          {badge && (
-            <Badge variant={badge.variant} size="sm">
-              {badge.text}
+          {badgeObject && (
+            <Badge variant={badgeObject.variant} size="sm">
+              {badgeObject.text}
             </Badge>
           )}
           {hasDiscount && (
@@ -178,7 +193,7 @@ export function ProductCard({
       </Link>
 
       {/* Product Info */}
-      <div className="flex flex-1 flex-col gap-2 p-4">
+      <div className="flex flex-1 flex-col gap-2 p-3">
         {/* Rating */}
         {rating > 0 && (
           <div className="flex items-center gap-2 text-sm">
@@ -208,18 +223,6 @@ export function ProductCard({
           </h3>
         </Link>
 
-        {/* Price */}
-        <div className="flex items-baseline gap-2">
-          {hasDiscount && (
-            <span className="text-sm text-nuanced-500 line-through decoration-2" style={{ fontFeatureSettings: '"tnum"' }}>
-              {compareAtPrice.toFixed(2)}€
-            </span>
-          )}
-          <span className="font-display text-2xl font-extrabold text-orange-500" style={{ fontFeatureSettings: '"tnum"' }}>
-            {price.toFixed(2)}€
-          </span>
-        </div>
-
         {/* Free Shipping Badge */}
         {freeShipping && (
           <div className="flex items-center gap-1.5 text-xs text-success">
@@ -228,19 +231,46 @@ export function ProductCard({
           </div>
         )}
 
-        {/* Add to Cart Button */}
-        <Button
-          onClick={handleAddToCart}
-          disabled={!inStock}
-          className={cn(
-            'mt-auto w-full gap-2 transition-all duration-300',
-            isHovered && 'shadow-elevation-2'
-          )}
-          variant={inStock ? 'default' : 'outline'}
-        >
-          <ShoppingCart className="h-4 w-4" />
-          {inStock ? 'Ajouter au panier' : 'Rupture de stock'}
-        </Button>
+        {/* Price and Add to Cart Button */}
+        <div className="flex items-center justify-between gap-2">
+          {/* Price */}
+          <div className="flex items-baseline gap-2">
+            {hasDiscount && (
+              <span className="text-sm text-nuanced-500 line-through decoration-2" style={{ fontFeatureSettings: '"tnum"' }}>
+                {(compareAtPrice / 100).toFixed(2)}€
+              </span>
+            )}
+            <span className="font-display text-2xl font-extrabold text-orange-500" style={{ fontFeatureSettings: '"tnum"' }}>
+              {(price / 100).toFixed(2)}€
+            </span>
+          </div>
+
+          {/* Add to Cart Button */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex">
+                <Button
+                  onClick={handleAddToCart}
+                  disabled={!inStock}
+                  className={cn(
+                    'w-10 h-10 p-0 md:w-auto md:h-10 md:px-4 md:gap-2 flex items-center justify-center transition-all duration-300',
+                    isHovered && 'shadow-elevation-2'
+                  )}
+                  variant={inStock ? 'default' : 'outline'}
+                  aria-label={inStock ? 'Ajouter au panier' : 'Rupture de stock'}
+                >
+                  <ShoppingCart className="h-4 w-4 flex-shrink-0" />
+                  <span className="hidden md:inline whitespace-nowrap">
+                    {inStock ? 'Ajouter au panier' : 'Rupture de stock'}
+                  </span>
+                </Button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{inStock ? 'Ajouter au panier' : 'Rupture de stock'}</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </div>
     </div>
   )

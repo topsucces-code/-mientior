@@ -5,10 +5,13 @@
  */
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { ShoppingCart, Heart, Share2, ChevronUp } from 'lucide-react'
 import { RippleButton } from '@/components/ui/ripple-button'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { PDP_CONFIG } from '@/lib/constants'
 import type { Product, ProductVariant } from '@/types'
 import { useCartStore } from '@/stores/cart.store'
 import { useWishlistStore } from '@/stores/wishlist.store'
@@ -18,6 +21,8 @@ interface StickyPurchasePanelProps {
   product: Product
   selectedVariant: ProductVariant | null
   onVariantChange?: (variant: ProductVariant) => void
+  quantity?: number
+  onQuantityChange?: (quantity: number) => void
   className?: string
 }
 
@@ -25,20 +30,26 @@ export function StickyPurchasePanel({
   product,
   selectedVariant,
   onVariantChange,
+  quantity: externalQuantity,
+  onQuantityChange,
   className,
 }: StickyPurchasePanelProps) {
   const [isVisible, setIsVisible] = useState(false)
-  const [quantity, setQuantity] = useState(1)
+  const [internalQuantity, setInternalQuantity] = useState(1)
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const { addItem: addToCart } = useCartStore()
-  const { addItem: addToWishlist, hasItem: isInWishlist } = useWishlistStore()
+  const { addItem: addToWishlist, isInWishlist } = useWishlistStore()
   const { toast } = useToast()
+
+  // Use external quantity if provided, otherwise use internal
+  const quantity = externalQuantity ?? internalQuantity
+  const setQuantity = onQuantityChange ?? setInternalQuantity
 
   // Show/hide panel based on scroll position
   useEffect(() => {
     const handleScroll = () => {
-      // Show panel when user scrolls past 400px
-      setIsVisible(window.scrollY > 400)
+      // Use PDP_CONFIG for scroll threshold
+      setIsVisible(window.scrollY > PDP_CONFIG.stickyPanelOffset)
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -85,7 +96,13 @@ export function StickyPurchasePanel({
   }
 
   const handleAddToWishlist = () => {
-    addToWishlist(product.id)
+    addToWishlist({
+      productId: product.id,
+      name: product.name,
+      price: finalPrice,
+      image: product.images[0]?.url,
+      addedAt: new Date().toISOString(),
+    })
     toast({
       title: 'Ajouté aux favoris',
       description: `${product.name} a été ajouté à vos favoris`,
@@ -124,11 +141,13 @@ export function StickyPurchasePanel({
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-4 py-3">
             {/* Product Image */}
-            <div className="hidden md:block w-16 h-16 rounded-lg overflow-hidden border border-platinum-200 flex-shrink-0">
-              <img
+            <div className="hidden md:block w-16 h-16 rounded-lg overflow-hidden border border-platinum-200 flex-shrink-0 relative">
+              <Image
                 src={product.images[0]?.url || '/placeholder-product.jpg'}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                fill
+                sizes="64px"
+                className="object-cover"
               />
             </div>
 
@@ -262,20 +281,23 @@ export function StickyPurchasePanel({
               </button>
 
               {/* Add to Cart Button */}
-              <RippleButton
-                onClick={handleAddToCart}
-                disabled={isAddingToCart || product.stock === 0}
-                className={cn(
-                  'h-12 px-6 md:px-8 gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold',
-                  'whitespace-nowrap'
-                )}
-              >
-                <ShoppingCart className="w-5 h-5" />
-                <span className="hidden sm:inline">
-                  {isAddingToCart ? 'Ajout...' : 'Ajouter au panier'}
-                </span>
-                <span className="sm:hidden">Ajouter</span>
-              </RippleButton>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex">
+                    <RippleButton
+                      onClick={handleAddToCart}
+                      disabled={isAddingToCart || product.stock === 0}
+                      className="h-12 px-6 md:px-8 gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold whitespace-nowrap flex items-center justify-center"
+                      aria-label={product.stock === 0 ? 'Rupture de stock' : isAddingToCart ? 'Ajout en cours...' : 'Ajouter au panier'}
+                    >
+                      <ShoppingCart className="w-5 h-5" />
+                    </RippleButton>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{product.stock === 0 ? 'Rupture de stock' : isAddingToCart ? 'Ajout en cours...' : 'Ajouter au panier'}</p>
+                </TooltipContent>
+              </Tooltip>
 
               {/* Scroll to Top Button */}
               <button

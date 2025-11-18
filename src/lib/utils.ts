@@ -41,6 +41,30 @@ export function getInitials(name?: string) {
     .toUpperCase()
 }
 
+/**
+ * Extract the number of days from a return policy string.
+ * Supports French and English formats.
+ * @param policy - Return policy string (e.g., "Retours gratuits sous 30 jours", "60 days return")
+ * @returns Number of days, defaults to 30 if no match found
+ * @example
+ * extractReturnDays('Retours gratuits sous 30 jours') // 30
+ * extractReturnDays('45 business days') // 45
+ * extractReturnDays('Invalid text') // 30
+ */
+export function extractReturnDays(policy?: string): number {
+  if (!policy) return 30
+  
+  // Match number followed by 'jour(s)' or 'day(s)', case insensitive
+  const match = policy.match(/(\d+)\s*(?:jours?|days?)/i)
+  
+  if (match && match[1]) {
+    const days = parseInt(match[1], 10)
+    return isNaN(days) ? 30 : days
+  }
+  
+  return 30
+}
+
 // New utility functions for sophisticated design
 
 export function formatNumberAbbreviated(num: number): string {

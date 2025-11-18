@@ -1,0 +1,10 @@
+<svg width="800" height="800" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="800" fill="#F5F5F5"/>
+  <g>
+    <!-- Simple image icon -->
+    <rect x="250" y="250" width="300" height="300" fill="#E0E0E0" rx="20"/>
+    <circle cx="320" cy="340" r="30" fill="#BDBDBD"/>
+    <polygon points="250,480 320,380 400,450 500,350 550,480" fill="#BDBDBD"/>
+  </g>
+  <text x="400" y="620" font-family="Arial, sans-serif" font-size="24" fill="#9E9E9E" text-anchor="middle">Pas d'image</text>
+</svg>

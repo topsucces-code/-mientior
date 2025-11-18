@@ -4,16 +4,18 @@ import { useShow } from "@refinedev/core";
 import { Show } from "@refinedev/antd";
 import { Typography, Descriptions, Tag, Image, Table } from "antd";
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import { use } from "react";
 
 const { Title } = Typography;
 
-export default function CategoryShow({ params }: { params: { id: string } }) {
-  const { queryResult } = useShow({
+export default function CategoryShow({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const { query } = useShow({
     resource: "categories",
-    id: params.id,
+    id: id,
   });
 
-  const { data, isLoading } = queryResult;
+  const { data, isLoading } = query;
   const record = data?.data;
 
   const childrenColumns = [

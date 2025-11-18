@@ -15,18 +15,18 @@ interface Step {
 const steps: Step[] = [
   {
     id: 'shipping',
-    label: 'Shipping',
-    description: 'Address & delivery',
+    label: 'Livraison',
+    description: 'Adresse & mode de livraison',
   },
   {
     id: 'payment',
-    label: 'Payment',
-    description: 'Payment method',
+    label: 'Paiement',
+    description: 'Informations bancaires',
   },
   {
     id: 'review',
-    label: 'Review',
-    description: 'Confirm order',
+    label: 'Confirmation',
+    description: 'Vérification finale',
   },
 ]
 
@@ -44,6 +44,7 @@ export function ProgressStepper({
   className,
 }: ProgressStepperProps) {
   const currentStepIndex = steps.findIndex((step) => step.id === currentStep)
+  const progressPercentage = (currentStepIndex / (steps.length - 1)) * 100
 
   const getStepStatus = (stepId: CheckoutStep) => {
     if (completedSteps.includes(stepId)) return 'completed'
@@ -53,7 +54,14 @@ export function ProgressStepper({
 
   return (
     <div className={cn('w-full', className)}>
-      <nav aria-label="Checkout progress">
+      {/* Progress Indicator */}
+      <div className="mb-4 flex items-center justify-between text-sm text-nuanced-600">
+        <span className="font-medium">
+          Étape {currentStepIndex + 1} sur {steps.length}
+        </span>
+      </div>
+
+      <nav aria-label="Progression du paiement">
         <ol className="flex items-center justify-between">
           {steps.map((step, index) => {
             const status = getStepStatus(step.id)
@@ -73,7 +81,7 @@ export function ProgressStepper({
                 {index !== steps.length - 1 && (
                   <div
                     className={cn(
-                      'absolute left-[calc(50%+1rem)] top-4 hidden h-0.5 w-full sm:block',
+                      'absolute left-[calc(50%+1rem)] top-5 hidden h-0.5 w-full transition-colors duration-300 sm:block',
                       isCompleted
                         ? 'bg-orange-500'
                         : 'bg-platinum-300'
@@ -88,9 +96,9 @@ export function ProgressStepper({
                   onClick={() => isClickable && onStepClick(step.id)}
                   disabled={!isClickable}
                   className={cn(
-                    'group relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all',
+                    'group relative z-10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300 sm:h-12 sm:w-12',
                     isCompleted && 'border-orange-500 bg-orange-500 hover:bg-orange-600',
-                    isCurrent && 'border-orange-500 bg-white',
+                    isCurrent && 'animate-pulse-ring border-orange-500 bg-white',
                     !isCompleted && !isCurrent && 'border-platinum-300 bg-white',
                     isClickable && 'cursor-pointer hover:scale-110',
                     !isClickable && 'cursor-default'
@@ -98,11 +106,11 @@ export function ProgressStepper({
                   aria-current={isCurrent ? 'step' : undefined}
                 >
                   {isCompleted ? (
-                    <Check className="h-4 w-4 text-white" aria-hidden="true" />
+                    <Check className="h-5 w-5 text-white sm:h-6 sm:w-6" aria-hidden="true" />
                   ) : (
                     <span
                       className={cn(
-                        'text-xs font-semibold',
+                        'text-sm font-semibold sm:text-base',
                         isCurrent ? 'text-orange-500' : 'text-nuanced-500'
                       )}
                     >
@@ -112,7 +120,7 @@ export function ProgressStepper({
                 </button>
 
                 {/* Step Label */}
-                <div className="mt-2 flex flex-col items-center text-center">
+                <div className="mt-3 flex flex-col items-center text-center">
                   <span
                     className={cn(
                       'text-xs font-semibold sm:text-sm',
@@ -139,6 +147,18 @@ export function ProgressStepper({
           })}
         </ol>
       </nav>
+
+      {/* Linear Progress Bar */}
+      <div className="mt-6 h-1 w-full overflow-hidden rounded-full bg-platinum-200">
+        <div
+          className="h-full bg-gradient-to-r from-orange-400 to-orange-600 transition-all duration-500 ease-out"
+          style={{ width: `${progressPercentage}%` }}
+          role="progressbar"
+          aria-valuenow={progressPercentage}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        />
+      </div>
     </div>
   )
 }

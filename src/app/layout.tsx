@@ -1,6 +1,6 @@
-// @ts-expect-error - CSS import without type declarations
 import './globals.css'
 import React from 'react'
+import type { Metadata } from 'next'
 import { Inter, Poppins } from 'next/font/google'
 import Providers from './providers'
 import { cn } from '@/lib/utils'
@@ -18,7 +18,7 @@ const poppins = Poppins({
   display: 'swap',
 })
 
-export const metadata = {
+export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'),
   title: {
     default: 'Mientior - Premium E-commerce Marketplace',

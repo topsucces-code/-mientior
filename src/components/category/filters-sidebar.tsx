@@ -1,12 +1,15 @@
 'use client'
 
-import * as React from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { Search, RotateCcw, X, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { useDebounce } from '@/hooks/use-debounce'
+import { useLocalStorage } from '@/hooks/use-local-storage'
+import { COLOR_HEX_MAP, PLP_CONFIG } from '@/lib/constants'
 import { Slider } from '@/components/ui/slider'
-import { Badge } from '@/components/ui/badge'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Input } from '@/components/ui/input'
 import type { Filter, AvailableFilters } from '@/types'
 
 export interface FiltersSidebarProps {
@@ -14,7 +17,6 @@ export interface FiltersSidebarProps {
   availableFilters: AvailableFilters
   onFilterChange: (filters: Filter) => void
   onClearFilters: () => void
-  className?: string
   isMobile?: boolean
 }
 
@@ -23,407 +25,500 @@ export function FiltersSidebar({
   availableFilters,
   onFilterChange,
   onClearFilters,
-  className,
-  isMobile = false,
+  isMobile = false
 }: FiltersSidebarProps) {
-  const [priceRange, setPriceRange] = React.useState([
-    filters.priceRange?.min ?? availableFilters.priceRange.min,
-    filters.priceRange?.max ?? availableFilters.priceRange.max,
+  // Internal search state (currently for UI only - search filtering not implemented)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Brand search state
+  const [brandSearch, setBrandSearch] = useState('')
+
+  // Expand/collapse states
+  const [openSections, setOpenSections] = useLocalStorage<string[]>('filter-sections-open', [
+    'price',
+    'category',
+    'brand',
+    'color'
   ])
 
-  const handlePriceChange = (value: number[]) => {
-    setPriceRange(value)
-  }
+  // Show more states
+  const [showAllCategories, setShowAllCategories] = useState(false)
+  const [showAllBrands, setShowAllBrands] = useState(false)
+  const [showUnavailableSizes, setShowUnavailableSizes] = useState(false)
 
-  const handlePriceCommit = (value: number[]) => {
-    onFilterChange({
-      ...filters,
-      priceRange: { min: value[0], max: value[1] },
-    })
-  }
+  // Price range local state (for slider)
+  const [priceRange, setPriceRange] = useState<[number, number]>([
+    filters.priceRange?.min ?? availableFilters.priceRange.min,
+    filters.priceRange?.max ?? availableFilters.priceRange.max
+  ])
+  const debouncedPriceRange = useDebounce<[number, number]>(priceRange, 300)
 
-  const handleCategoryToggle = (categoryId: string) => {
-    const currentCategories = filters.categories ?? []
-    const newCategories = currentCategories.includes(categoryId)
-      ? currentCategories.filter((id) => id !== categoryId)
-      : [...currentCategories, categoryId]
+  // Sync local state when external filters change (e.g., from clear filters)
+  useEffect(() => {
+    const externalMin = filters.priceRange?.min ?? availableFilters.priceRange.min
+    const externalMax = filters.priceRange?.max ?? availableFilters.priceRange.max
 
-    onFilterChange({
-      ...filters,
-      categories: newCategories.length > 0 ? newCategories : undefined,
-    })
-  }
+    if (priceRange[0] !== externalMin || priceRange[1] !== externalMax) {
+      setPriceRange([externalMin, externalMax])
+    }
+  }, [filters.priceRange, availableFilters.priceRange]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleBrandToggle = (brandId: string) => {
-    const currentBrands = filters.brands ?? []
-    const newBrands = currentBrands.includes(brandId)
-      ? currentBrands.filter((id) => id !== brandId)
-      : [...currentBrands, brandId]
+  // Update filters when debounced price changes
+  useEffect(() => {
+    // Guard against undefined or invalid array
+    if (!debouncedPriceRange || debouncedPriceRange.length !== 2) return
 
-    onFilterChange({
-      ...filters,
-      brands: newBrands.length > 0 ? newBrands : undefined,
-    })
-  }
+    // Swap values if min > max
+    let [min, max] = debouncedPriceRange
+    if (min > max) {
+      [min, max] = [max, min]
+      setPriceRange([min, max])
+      return
+    }
 
-  const handleColorToggle = (color: string) => {
-    const currentColors = filters.colors ?? []
-    const newColors = currentColors.includes(color)
-      ? currentColors.filter((c) => c !== color)
-      : [...currentColors, color]
+    if (
+      min !== filters.priceRange?.min ||
+      max !== filters.priceRange?.max
+    ) {
+      onFilterChange({
+        ...filters,
+        priceRange: { min, max }
+      })
+    }
+  }, [debouncedPriceRange, filters, onFilterChange])
 
-    onFilterChange({
-      ...filters,
-      colors: newColors.length > 0 ? newColors : undefined,
-    })
-  }
+  // Filter brands by search
+  const filteredBrands = useMemo(() => {
+    if (!brandSearch) return availableFilters.brands
+    const query = brandSearch.toLowerCase()
+    return availableFilters.brands.filter(brand =>
+      brand.name.toLowerCase().includes(query)
+    )
+  }, [brandSearch, availableFilters.brands])
 
-  const handleSizeToggle = (size: string) => {
-    const currentSizes = filters.sizes ?? []
-    const newSizes = currentSizes.includes(size)
-      ? currentSizes.filter((s) => s !== size)
-      : [...currentSizes, size]
+  // Display brands (top 5 or all)
+  const displayBrands = showAllBrands
+    ? filteredBrands
+    : filteredBrands.slice(0, PLP_CONFIG.maxFiltersShown)
 
-    onFilterChange({
-      ...filters,
-      sizes: newSizes.length > 0 ? newSizes : undefined,
-    })
-  }
+  // Display categories
+  const displayCategories = showAllCategories
+    ? availableFilters.categories
+    : availableFilters.categories.slice(0, PLP_CONFIG.maxFiltersShown)
 
-  const handleRatingChange = (rating: number) => {
-    onFilterChange({
-      ...filters,
-      rating: filters.rating === rating ? undefined : rating,
-    })
-  }
+  const hasActiveFilters =
+    filters.categories?.length ||
+    filters.brands?.length ||
+    filters.colors?.length ||
+    filters.sizes?.length ||
+    filters.rating ||
+    filters.inStock ||
+    filters.onSale ||
+    (filters.priceRange &&
+      (filters.priceRange.min !== availableFilters.priceRange.min ||
+        filters.priceRange.max !== availableFilters.priceRange.max))
 
-  const handleStockToggle = () => {
-    onFilterChange({
-      ...filters,
-      inStock: !filters.inStock,
-    })
-  }
-
-  const handleSaleToggle = () => {
-    onFilterChange({
-      ...filters,
-      onSale: !filters.onSale,
-    })
-  }
-
-  const activeFiltersCount = [
-    filters.categories?.length ?? 0,
-    filters.brands?.length ?? 0,
-    filters.colors?.length ?? 0,
-    filters.sizes?.length ?? 0,
-    filters.rating ? 1 : 0,
-    filters.inStock ? 1 : 0,
-    filters.onSale ? 1 : 0,
-    filters.priceRange ? 1 : 0,
-  ].reduce((sum, count) => sum + count, 0)
-
-  const FilterContent = (
-    <div className={cn('flex flex-col gap-6', className)}>
+  return (
+    <div
+      className={cn(
+        'bg-white border border-platinum-300 rounded-lg p-4',
+        !isMobile && 'sticky top-[140px] w-[300px] max-h-[calc(100vh-160px)] overflow-y-auto custom-scrollbar'
+      )}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold text-anthracite-700">Filters</h2>
-          {activeFiltersCount > 0 && (
-            <Badge variant="default" className="h-5 w-5 rounded-full p-0 flex items-center justify-center">
-              {activeFiltersCount}
-            </Badge>
-          )}
-        </div>
-        {activeFiltersCount > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClearFilters}
-            className="h-8 text-xs text-nuanced-500 hover:text-orange-500"
+      <div className="mb-4">
+        <h2 className="text-sm font-semibold uppercase text-anthracite-700 mb-3">
+          FILTRER PAR
+        </h2>
+        <div className="h-px bg-platinum-300" />
+      </div>
+
+      {/* Internal Search */}
+      <div className="mb-4 relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-nuanced-500" />
+        <Input
+          type="text"
+          placeholder="Rechercher dans les résultats..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9 pr-8 h-10 rounded-md border-platinum-300 focus:border-orange-500"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-nuanced-500 hover:text-anthracite-700"
           >
-            Clear all
-          </Button>
+            <X className="h-4 w-4" />
+          </button>
         )}
       </div>
 
-      {/* Filters Accordion */}
-      <Accordion type="multiple" defaultValue={['price', 'categories', 'brands', 'colors', 'sizes']} className="w-full">
-        {/* Price Range */}
+      {/* Collapsible Filter Sections */}
+      <Accordion type="multiple" value={openSections} onValueChange={setOpenSections}>
+        {/* 1. Price Range Filter */}
         <AccordionItem value="price">
-          <AccordionTrigger className="text-sm font-semibold text-anthracite-700">
-            Price Range
+          <AccordionTrigger className="hover:no-underline">
+            <span className="text-sm font-semibold">Prix</span>
           </AccordionTrigger>
           <AccordionContent>
-            <div className="space-y-4 py-2">
+            <div className="space-y-4 pt-2">
+              <div className="text-sm text-anthracite-700 font-medium text-center">
+                {priceRange[0]}€ - {priceRange[1]}€
+              </div>
+
               <Slider
                 min={availableFilters.priceRange.min}
                 max={availableFilters.priceRange.max}
-                step={100}
-                value={priceRange}
-                onValueChange={handlePriceChange}
-                onValueCommit={handlePriceCommit}
-                className="w-full"
+                step={1}
+                value={[priceRange[0], priceRange[1]]}
+                onValueChange={(value: number[]) => {
+                  if (value.length === 2) {
+                    setPriceRange([value[0], value[1]] as [number, number])
+                  }
+                }}
+                className="py-4"
               />
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium text-anthracite-600">
-                  ${(priceRange[0] / 100).toFixed(2)}
-                </span>
-                <span className="text-nuanced-500">to</span>
-                <span className="font-medium text-anthracite-600">
-                  ${(priceRange[1] / 100).toFixed(2)}
-                </span>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs text-nuanced-600 mb-1 block">Min</label>
+                  <Input
+                    type="number"
+                    value={priceRange[0]}
+                    onChange={(e) => {
+                      const newMin = Math.max(
+                        availableFilters.priceRange.min,
+                        Math.min(parseInt(e.target.value) || 0, priceRange[1])
+                      )
+                      setPriceRange([newMin, priceRange[1]])
+                    }}
+                    min={availableFilters.priceRange.min}
+                    max={priceRange[1]}
+                    className="h-9 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-nuanced-600 mb-1 block">Max</label>
+                  <Input
+                    type="number"
+                    value={priceRange[1]}
+                    onChange={(e) => {
+                      const newMax = Math.min(
+                        availableFilters.priceRange.max,
+                        Math.max(parseInt(e.target.value) || 0, priceRange[0])
+                      )
+                      setPriceRange([priceRange[0], newMax])
+                    }}
+                    min={priceRange[0]}
+                    max={availableFilters.priceRange.max}
+                    className="h-9 text-sm"
+                  />
+                </div>
               </div>
             </div>
           </AccordionContent>
         </AccordionItem>
 
-        {/* Categories */}
-        {availableFilters.categories.length > 0 && (
-          <AccordionItem value="categories">
-            <AccordionTrigger className="text-sm font-semibold text-anthracite-700">
-              Categories
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-2 py-2">
-                {availableFilters.categories.map((category) => (
-                  <label
-                    key={category.id}
-                    className="flex items-center justify-between cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={filters.categories?.includes(category.id) ?? false}
-                        onChange={() => handleCategoryToggle(category.id)}
-                        className="h-4 w-4 rounded border-platinum-400 text-orange-500 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-                      />
-                      <span className="text-sm text-anthracite-600 group-hover:text-orange-500 transition-colors">
-                        {category.name}
-                      </span>
-                    </div>
-                    <span className="text-xs text-nuanced-500">({category.count})</span>
-                  </label>
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        )}
-
-        {/* Brands */}
-        {availableFilters.brands.length > 0 && (
-          <AccordionItem value="brands">
-            <AccordionTrigger className="text-sm font-semibold text-anthracite-700">
-              Brands
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-2 py-2">
-                {availableFilters.brands.map((brand) => (
-                  <label
-                    key={brand.id}
-                    className="flex items-center justify-between cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={filters.brands?.includes(brand.id) ?? false}
-                        onChange={() => handleBrandToggle(brand.id)}
-                        className="h-4 w-4 rounded border-platinum-400 text-orange-500 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-                      />
-                      <span className="text-sm text-anthracite-600 group-hover:text-orange-500 transition-colors">
-                        {brand.name}
-                      </span>
-                    </div>
-                    <span className="text-xs text-nuanced-500">({brand.count})</span>
-                  </label>
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        )}
-
-        {/* Colors */}
-        {availableFilters.colors.length > 0 && (
-          <AccordionItem value="colors">
-            <AccordionTrigger className="text-sm font-semibold text-anthracite-700">
-              Colors
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-4 gap-3 py-2">
-                {availableFilters.colors.map((color) => (
-                  <button
-                    key={color.value}
-                    onClick={() => handleColorToggle(color.value)}
-                    className={cn(
-                      'relative h-10 w-10 rounded-full border-2 transition-all',
-                      filters.colors?.includes(color.value)
-                        ? 'border-orange-500 scale-110 shadow-md'
-                        : 'border-platinum-300 hover:border-platinum-400'
-                    )}
-                    style={{ backgroundColor: color.value }}
-                    title={color.name}
-                    aria-label={color.name}
-                  >
-                    {filters.colors?.includes(color.value) && (
-                      <span className="absolute inset-0 flex items-center justify-center">
-                        <svg
-                          className="h-5 w-5 text-white drop-shadow-md"
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="3"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path d="M5 13l4 4L19 7" />
-                        </svg>
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        )}
-
-        {/* Sizes */}
-        {availableFilters.sizes.length > 0 && (
-          <AccordionItem value="sizes">
-            <AccordionTrigger className="text-sm font-semibold text-anthracite-700">
-              Sizes
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-4 gap-2 py-2">
-                {availableFilters.sizes.map((size) => (
-                  <button
-                    key={size.value}
-                    onClick={() => handleSizeToggle(size.value)}
-                    className={cn(
-                      'flex h-10 items-center justify-center rounded-md border-2 text-sm font-medium transition-all',
-                      filters.sizes?.includes(size.value)
-                        ? 'border-orange-500 bg-orange-50 text-orange-600'
-                        : 'border-platinum-300 text-anthracite-600 hover:border-platinum-400 hover:bg-platinum-50'
-                    )}
-                  >
-                    {size.value}
-                  </button>
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        )}
-
-        {/* Rating */}
-        <AccordionItem value="rating">
-          <AccordionTrigger className="text-sm font-semibold text-anthracite-700">
-            Rating
+        {/* 2. Category Filter */}
+        <AccordionItem value="category">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="text-sm font-semibold">Catégories</span>
           </AccordionTrigger>
           <AccordionContent>
-            <div className="space-y-2 py-2">
-              {[5, 4, 3, 2, 1].map((rating) => (
+            <div className="space-y-2 pt-2">
+              {displayCategories.map((category) => {
+                const isChecked = filters.categories?.includes(category.id) ?? false
+
+                return (
+                  <label
+                    key={category.id}
+                    className="flex items-center justify-between py-2 px-2 rounded-md hover:bg-platinum-50 cursor-pointer transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => {
+                          const newCategories = e.target.checked
+                            ? [...(filters.categories || []), category.id]
+                            : filters.categories?.filter(c => c !== category.id) || []
+                          onFilterChange({ ...filters, categories: newCategories })
+                        }}
+                        className="w-4 h-4 rounded border-platinum-400 text-orange-500 focus:ring-orange-500"
+                      />
+                      <span className="text-sm text-anthracite-700">{category.name}</span>
+                    </div>
+                    <span className="text-sm text-nuanced-500">({category.count})</span>
+                  </label>
+                )
+              })}
+
+              {availableFilters.categories.length > PLP_CONFIG.maxFiltersShown && (
                 <button
-                  key={rating}
-                  onClick={() => handleRatingChange(rating)}
-                  className={cn(
-                    'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors',
-                    filters.rating === rating
-                      ? 'bg-orange-50 text-orange-600'
-                      : 'text-anthracite-600 hover:bg-platinum-50'
-                  )}
+                  onClick={() => setShowAllCategories(!showAllCategories)}
+                  className="text-sm text-orange-500 hover:text-orange-600 font-medium mt-2"
                 >
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <svg
-                        key={i}
-                        className={cn(
-                          'h-4 w-4',
-                          i < rating ? 'fill-orange-500 text-orange-500' : 'fill-platinum-300 text-platinum-300'
-                        )}
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
-                  </div>
-                  <span>& up</span>
+                  {showAllCategories
+                    ? '- Voir moins'
+                    : `+ ${availableFilters.categories.length - PLP_CONFIG.maxFiltersShown} autres`}
                 </button>
+              )}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* 3. Brand Filter */}
+        <AccordionItem value="brand">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="text-sm font-semibold">Marques</span>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-3 pt-2">
+              {/* Brand Search */}
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-nuanced-500" />
+                <Input
+                  type="text"
+                  placeholder="Rechercher..."
+                  value={brandSearch}
+                  onChange={(e) => setBrandSearch(e.target.value)}
+                  className="pl-8 h-8 text-sm"
+                />
+              </div>
+
+              {/* Brand List */}
+              <div className="space-y-2 max-h-[200px] overflow-y-auto custom-scrollbar">
+                {displayBrands.length > 0 ? (
+                  displayBrands.map((brand) => {
+                    const isChecked = filters.brands?.includes(brand.id) ?? false
+
+                    return (
+                      <label
+                        key={brand.id}
+                        className="flex items-center justify-between py-2 px-2 rounded-md hover:bg-platinum-50 cursor-pointer transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => {
+                              const newBrands = e.target.checked
+                                ? [...(filters.brands || []), brand.id]
+                                : filters.brands?.filter(b => b !== brand.id) || []
+                              onFilterChange({ ...filters, brands: newBrands })
+                            }}
+                            className="w-4 h-4 rounded border-platinum-400 text-orange-500 focus:ring-orange-500"
+                          />
+                          <span className="text-sm text-anthracite-700">{brand.name}</span>
+                        </div>
+                        <span className="text-sm text-nuanced-500">({brand.count})</span>
+                      </label>
+                    )
+                  })
+                ) : (
+                  <p className="text-sm text-nuanced-500 text-center py-4">
+                    Aucune marque trouvée
+                  </p>
+                )}
+              </div>
+
+              {!brandSearch && filteredBrands.length > PLP_CONFIG.maxFiltersShown && (
+                <button
+                  onClick={() => setShowAllBrands(!showAllBrands)}
+                  className="text-sm text-orange-500 hover:text-orange-600 font-medium"
+                >
+                  {showAllBrands
+                    ? '- Voir moins'
+                    : `+ ${filteredBrands.length - PLP_CONFIG.maxFiltersShown} autres`}
+                </button>
+              )}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* 4. Color Filter */}
+        <AccordionItem value="color">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="text-sm font-semibold">Couleurs</span>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="grid grid-cols-[repeat(auto-fill,36px)] gap-3 pt-2">
+              {availableFilters.colors.map((color) => {
+                const isSelected = filters.colors?.includes(color.value) ?? false
+                const hexColor = COLOR_HEX_MAP[color.value] || '#CCCCCC'
+                const isWhite = hexColor === '#FFFFFF'
+
+                return (
+                  <button
+                    key={color.value}
+                    onClick={() => {
+                      const newColors = isSelected
+                        ? filters.colors?.filter(c => c !== color.value) || []
+                        : [...(filters.colors || []), color.value]
+                      onFilterChange({ ...filters, colors: newColors })
+                    }}
+                    className={cn(
+                      'color-swatch w-8 h-8 rounded-full border-2 relative',
+                      isSelected ? 'selected border-orange-500' : isWhite ? 'border-platinum-300' : 'border-transparent',
+                      'hover:scale-110 transition-transform'
+                    )}
+                    style={{ backgroundColor: hexColor }}
+                    title={`${color.name} (${color.count})`}
+                    aria-label={`${color.name} - ${color.count} produits`}
+                  >
+                    {isSelected && (
+                      <Check
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4"
+                        style={{
+                          color: hexColor === '#FFFFFF' || hexColor === '#F59E0B' ? '#000' : '#FFF',
+                          filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))'
+                        }}
+                      />
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* 5. Size Filter */}
+        <AccordionItem value="size">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="text-sm font-semibold">Tailles</span>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-3 pt-2">
+              <div className="grid grid-cols-[repeat(auto-fill,48px)] gap-2">
+                {availableFilters.sizes
+                  .filter(size => showUnavailableSizes || size.count > 0)
+                  .map((size) => {
+                    const isSelected = filters.sizes?.includes(size.value) ?? false
+                    const isAvailable = size.count > 0
+
+                    return (
+                      <button
+                        key={size.value}
+                        onClick={() => {
+                          if (!isAvailable) return
+                          const newSizes = isSelected
+                            ? filters.sizes?.filter(s => s !== size.value) || []
+                            : [...(filters.sizes || []), size.value]
+                          onFilterChange({ ...filters, sizes: newSizes })
+                        }}
+                        disabled={!isAvailable}
+                        className={cn(
+                          'h-12 rounded-md border-2 text-sm font-medium transition-all relative',
+                          isSelected && 'bg-orange-500 text-white border-orange-500',
+                          !isSelected && isAvailable && 'border-platinum-300 hover:border-orange-500 hover:bg-orange-50',
+                          !isAvailable && 'size-button-unavailable bg-platinum-100 text-platinum-400 border-platinum-200 cursor-not-allowed'
+                        )}
+                      >
+                        {size.value}
+                      </button>
+                    )
+                  })}
+              </div>
+
+              <label className="flex items-center gap-2 text-sm text-nuanced-600 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showUnavailableSizes}
+                  onChange={(e) => setShowUnavailableSizes(e.target.checked)}
+                  className="w-4 h-4 rounded border-platinum-400 text-orange-500 focus:ring-orange-500"
+                />
+                Afficher uniquement tailles disponibles
+              </label>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* 6. Rating Filter */}
+        <AccordionItem value="rating">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="text-sm font-semibold">Note minimum</span>
+          </AccordionTrigger>
+          <AccordionContent>
+            <RadioGroup
+              value={filters.rating?.toString() || '0'}
+              onValueChange={(value) => onFilterChange({ ...filters, rating: parseInt(value) })}
+              className="space-y-2 pt-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="0" id="rating-all" />
+                <label htmlFor="rating-all" className="text-sm cursor-pointer flex-1">
+                  Toutes les notes
+                </label>
+              </div>
+              {[5, 4, 3, 2, 1].map((rating) => (
+                <div key={rating} className="flex items-center space-x-2">
+                  <RadioGroupItem value={rating.toString()} id={`rating-${rating}`} />
+                  <label htmlFor={`rating-${rating}`} className="text-sm cursor-pointer flex-1">
+                    <span className="text-aurore-500">{'★'.repeat(rating)}</span>
+                    <span className="text-platinum-400">{'★'.repeat(5 - rating)}</span>
+                    <span className="ml-2 text-nuanced-500">et plus</span>
+                  </label>
+                </div>
+              ))}
+            </RadioGroup>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* 7. Availability Filter */}
+        <AccordionItem value="availability">
+          <AccordionTrigger className="hover:no-underline">
+            <span className="text-sm font-semibold">Disponibilité</span>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-3 pt-2">
+              {[
+                { key: 'inStock' as const, label: 'En stock' },
+                { key: 'onSale' as const, label: 'En promotion' }
+              ].map(({ key, label }) => (
+                <label
+                  key={key}
+                  className="flex items-center justify-between cursor-pointer group"
+                >
+                  <span className="text-sm text-anthracite-700">{label}</span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={filters[key] ?? false}
+                    onClick={() => onFilterChange({ ...filters, [key]: !filters[key] })}
+                    className={cn(
+                      'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+                      filters[key] ? 'bg-orange-500' : 'bg-platinum-300'
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'inline-block h-5 w-5 transform rounded-full bg-white shadow-elevation-1 transition-transform',
+                        filters[key] ? 'translate-x-6' : 'translate-x-1'
+                      )}
+                    />
+                  </button>
+                </label>
               ))}
             </div>
           </AccordionContent>
         </AccordionItem>
-
-        {/* Availability & Special Offers */}
-        <AccordionItem value="other">
-          <AccordionTrigger className="text-sm font-semibold text-anthracite-700">
-            Availability
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-3 py-2">
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={filters.inStock ?? false}
-                  onChange={handleStockToggle}
-                  className="h-4 w-4 rounded border-platinum-400 text-orange-500 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-                />
-                <span className="text-sm text-anthracite-600 group-hover:text-orange-500 transition-colors">
-                  In Stock Only
-                </span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={filters.onSale ?? false}
-                  onChange={handleSaleToggle}
-                  className="h-4 w-4 rounded border-platinum-400 text-orange-500 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-                />
-                <span className="text-sm text-anthracite-600 group-hover:text-orange-500 transition-colors">
-                  On Sale
-                </span>
-              </label>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
       </Accordion>
-    </div>
-  )
 
-  if (isMobile) {
-    return (
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-2">
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path d="M3 4h18M3 10h18M3 16h18" />
-            </svg>
-            Filters
-            {activeFiltersCount > 0 && (
-              <Badge variant="default" className="h-5 w-5 rounded-full p-0 flex items-center justify-center">
-                {activeFiltersCount}
-              </Badge>
-            )}
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-80 overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Filters</SheetTitle>
-          </SheetHeader>
-          <div className="mt-6">{FilterContent}</div>
-        </SheetContent>
-      </Sheet>
-    )
-  }
-
-  return (
-    <div className="sticky top-24 h-fit rounded-lg border border-platinum-300 bg-white p-6 shadow-sm">
-      {FilterContent}
+      {/* Reset Button */}
+      <button
+        onClick={onClearFilters}
+        disabled={!hasActiveFilters}
+        className={cn(
+          'w-full mt-6 py-3 rounded-lg border-2 font-medium text-sm transition-all',
+          'flex items-center justify-center gap-2',
+          hasActiveFilters
+            ? 'border-platinum-300 hover:border-orange-500 hover:text-orange-500 text-anthracite-700'
+            : 'border-platinum-200 text-platinum-400 cursor-not-allowed'
+        )}
+      >
+        <RotateCcw className="h-4 w-4" />
+        Réinitialiser les filtres
+      </button>
     </div>
   )
 }

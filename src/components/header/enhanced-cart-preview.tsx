@@ -3,7 +3,7 @@
 import { ShoppingCart, X, ArrowRight } from 'lucide-react'
 import { useCartStore } from '@/stores/cart.store'
 import { useHeader } from '@/contexts/header-context'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -11,8 +11,14 @@ export function EnhancedCartPreview() {
     const { items, removeItem, getTotalPrice, getTotalItems } = useCartStore()
     const { activeDropdown, setActiveDropdown } = useHeader()
     const dropdownRef = useRef<HTMLDivElement>(null)
+    const [mounted, setMounted] = useState(false)
 
     const isOpen = activeDropdown === 'cart'
+
+    // Handle hydration - only show cart data after mount
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -28,9 +34,9 @@ export function EnhancedCartPreview() {
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [isOpen, setActiveDropdown])
 
-    const totalItems = getTotalItems()
-    const totalPrice = getTotalPrice()
-    const recentItems = items.slice(0, 5)
+    const totalItems = mounted ? getTotalItems() : 0
+    const totalPrice = mounted ? getTotalPrice() : 0
+    const recentItems = mounted ? items.slice(0, 5) : []
 
     return (
         <div className="relative" ref={dropdownRef}>
@@ -65,10 +71,10 @@ export function EnhancedCartPreview() {
                                     className="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
                                 >
                                     <div className="flex gap-3">
-                                        <Link href={`/products/${item.id}`} className="flex-shrink-0">
+                                        <Link href={`/products/${item.productSlug}`} className="flex-shrink-0">
                                             <Image
-                                                src={item.image || '/placeholder.png'}
-                                                alt={item.name}
+                                                src={item.productImage || '/placeholder.png'}
+                                                alt={item.productName}
                                                 width={80}
                                                 height={80}
                                                 className="rounded-lg object-cover"
@@ -76,9 +82,9 @@ export function EnhancedCartPreview() {
                                         </Link>
 
                                         <div className="flex-1 min-w-0">
-                                            <Link href={`/products/${item.id}`}>
+                                            <Link href={`/products/${item.productSlug}`}>
                                                 <h4 className="font-medium hover:text-blue-600 line-clamp-2">
-                                                    {item.name}
+                                                    {item.productName}
                                                 </h4>
                                             </Link>
 
@@ -93,7 +99,7 @@ export function EnhancedCartPreview() {
                                                     Qté: {item.quantity}
                                                 </span>
                                                 <span className="font-semibold text-blue-600">
-                                                    {(item.price * item.quantity).toFixed(2)} €
+                                                    {((item.price / 100) * item.quantity).toFixed(2)} €
                                                 </span>
                                             </div>
                                         </div>
@@ -117,12 +123,12 @@ export function EnhancedCartPreview() {
                         )}
                     </div>
 
-                    {items.length > 0 && (
+                    {mounted && items.length > 0 && (
                         <div className="p-4 border-t border-gray-200 bg-gray-50">
                             <div className="flex items-center justify-between mb-3">
                                 <span className="font-medium">Total</span>
                                 <span className="text-xl font-bold text-blue-600">
-                                    {totalPrice.toFixed(2)} €
+                                    {(totalPrice / 100).toFixed(2)} €
                                 </span>
                             </div>
 

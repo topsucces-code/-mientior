@@ -4,19 +4,32 @@ import { useForm } from "@refinedev/antd";
 import { Form, Input, InputNumber, Select, Button, Checkbox, Space, Popconfirm } from "antd";
 import { PlusOutlined, MinusCircleOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useDelete } from "@refinedev/core";
 
 const { TextArea } = Input;
 
-export default function ProductEdit({ params }: { params: { id: string } }) {
-  const router = useRouter();
-  const [categories, setCategories] = useState<any[]>([]);
-  const [tags, setTags] = useState<any[]>([]);
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
 
-  const { formProps, saveButtonProps, form, queryResult } = useForm({
+interface Tag {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export default function ProductEdit({ params }: { params: Promise<{ id: string }> }) {
+  const router = useRouter();
+  const { id } = use(params);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+
+  const { formProps, saveButtonProps, form, query } = useForm({
     resource: "products",
-    id: params.id,
+    id: id,
     redirect: "list",
   });
 
@@ -24,7 +37,7 @@ export default function ProductEdit({ params }: { params: { id: string } }) {
 
   // Fetch categories
   useEffect(() => {
-    fetch("http://localhost:3000/api/categories")
+    fetch("/api/categories")
       .then((res) => res.json())
       .then((data) => setCategories(data))
       .catch((err) => console.error("Failed to fetch categories:", err));
@@ -32,7 +45,7 @@ export default function ProductEdit({ params }: { params: { id: string } }) {
 
   // Fetch tags
   useEffect(() => {
-    fetch("http://localhost:3000/api/tags")
+    fetch("/api/tags")
       .then((res) => res.json())
       .then((data) => setTags(data))
       .catch((err) => console.error("Failed to fetch tags:", err));
@@ -52,7 +65,7 @@ export default function ProductEdit({ params }: { params: { id: string } }) {
     deleteProduct(
       {
         resource: "products",
-        id: params.id,
+        id: id,
       },
       {
         onSuccess: () => {
@@ -62,7 +75,7 @@ export default function ProductEdit({ params }: { params: { id: string } }) {
     );
   };
 
-  const { isLoading } = queryResult || {};
+  const isLoading = query?.isLoading;
 
   if (isLoading) {
     return <div style={{ padding: "24px" }}>Loading...</div>;
