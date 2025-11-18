@@ -16,7 +16,13 @@ src/app/(payload)/admin/importMap.js
 .DS_Store
 coverage/
 .turbo/
-.vscode/
+# VS Code - exclure les fichiers personnels, garder la config partagée
+.vscode/*.code-workspace
+.vscode/launch.json.user
+.vscode/.ropeproject
+.vscode/.history
+.vscode/sftp.json
+# Garder : settings.json, tasks.json, launch.json, extensions.json, GUIDE_VSCODE.md
 *.tsbuildinfo
 .pnpm-debug.log
 .vercelignore

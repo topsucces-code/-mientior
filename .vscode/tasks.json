@@ -1,0 +1,113 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "📖 Ouvrir Guide Roadmap",
+      "type": "shell",
+      "command": "code",
+      "args": [
+        "--reuse-window",
+        "ROADMAP.md:1"
+      ],
+      "presentation": {
+        "reveal": "never"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "📋 Ouvrir Cahier de Charge",
+      "type": "shell",
+      "command": "code",
+      "args": [
+        "--reuse-window",
+        "CAHIER_DE_CHARGE.md:1"
+      ],
+      "presentation": {
+        "reveal": "never"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "📊 Ouvrir Synthèse Exécutive",
+      "type": "shell",
+      "command": "code",
+      "args": [
+        "--reuse-window",
+        "ANALYSE_EXECUTIVE_SUMMARY.md:1"
+      ],
+      "presentation": {
+        "reveal": "never"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🚀 Start Dev Server",
+      "type": "npm",
+      "script": "dev",
+      "problemMatcher": [],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "🏗️ Build Project",
+      "type": "npm",
+      "script": "build",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "🧹 Lint Code",
+      "type": "npm",
+      "script": "lint",
+      "problemMatcher": ["$eslint-compact"]
+    },
+    {
+      "label": "💅 Format Code",
+      "type": "npm",
+      "script": "format",
+      "problemMatcher": []
+    },
+    {
+      "label": "🗄️ Prisma Studio",
+      "type": "npm",
+      "script": "db:studio",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "🔄 Push DB Schema",
+      "type": "npm",
+      "script": "db:push",
+      "problemMatcher": []
+    },
+    {
+      "label": "📧 Test Email",
+      "type": "npm",
+      "script": "email:dev",
+      "problemMatcher": []
+    },
+    {
+      "label": "🎯 Sprint 1.1 - Auth Pages",
+      "type": "shell",
+      "command": "echo",
+      "args": [
+        "📖 Voir ROADMAP.md Sprint 1.1 pour les tâches détaillées"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "recommendations": [
+    // Markdown
+    "yzhang.markdown-all-in-one",
+    "bierner.markdown-preview-github-styles",
+    "davidanson.vscode-markdownlint",
+
+    // Prisma
+    "prisma.prisma",
+
+    // Tailwind CSS
+    "bradlc.vscode-tailwindcss",
+
+    // ESLint & Prettier
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+
+    // TypeScript
+    "ms-vscode.vscode-typescript-next",
+
+    // Git
+    "eamodio.gitlens",
+    "github.vscode-pull-request-github",
+
+    // Productivité
+    "steoates.autoimport",
+    "christian-kohler.path-intellisense",
+    "visualstudioexptteam.vscodeintellicode",
+
+    // Testing
+    "orta.vscode-jest",
+
+    // API Testing
+    "rangav.vscode-thunder-client",
+
+    // Code Organization
+    "alefragnani.bookmarks",
+    "gruntfuggly.todo-tree",
+
+    // Utilities
+    "usernamehw.errorlens",
+    "naumovs.color-highlight",
+    "formulahendry.auto-rename-tag"
+  ],
+  "unwantedRecommendations": []
+}

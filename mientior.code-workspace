@@ -1,0 +1,66 @@
+{
+  "folders": [
+    {
+      "path": ".",
+      "name": "Mientior E-Commerce"
+    }
+  ],
+  "settings": {
+    // Markdown
+    "markdown.preview.fontSize": 14,
+    "markdown.preview.lineHeight": 1.6,
+
+    // Files à toujours afficher
+    "files.exclude": {
+      "node_modules": false
+    },
+
+    // Suggestions
+    "editor.quickSuggestions": {
+      "comments": true
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "yzhang.markdown-all-in-one",
+      "bierner.markdown-preview-github-styles",
+      "davidanson.vscode-markdownlint"
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Next.js: debug server-side",
+        "type": "node-terminal",
+        "request": "launch",
+        "command": "npm run dev"
+      }
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Dev Server",
+        "type": "npm",
+        "script": "dev",
+        "problemMatcher": [],
+        "presentation": {
+          "reveal": "always",
+          "panel": "new"
+        }
+      },
+      {
+        "label": "Build",
+        "type": "npm",
+        "script": "build",
+        "problemMatcher": [],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        }
+      }
+    ]
+  }
+}
