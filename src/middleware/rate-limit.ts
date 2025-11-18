@@ -115,7 +115,10 @@ export function rateLimitMiddleware(
     keyPrefix: 'checkout',
   }
 ) {
-  return (request: NextRequest, handler: Function) => {
+  return (
+    request: NextRequest,
+    handler: (req: NextRequest) => NextResponse | Promise<NextResponse>
+  ) => {
     const result = checkRateLimit(request, config)
 
     if (!result.allowed) {

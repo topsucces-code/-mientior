@@ -62,10 +62,11 @@ export function useCheckoutAnalytics({
     const timeSpent = Math.round((Date.now() - stepStartTime.current) / 1000)
     
     trackCheckoutStepCompleted(stepNumber, stepName);
-    
+
     // Track with additional metadata
     if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'checkout_progress', {
+      const gtag = window.gtag!;
+      gtag('event', 'checkout_progress', {
         checkout_step: stepNumber,
         step_name: stepName,
         time_spent: timeSpent,
@@ -81,7 +82,7 @@ export function useCheckoutAnalytics({
 
     // Reset step timer
     stepStartTime.current = Date.now()
-  }, [step, items, total]);
+  }, [step, items, total])
 
   // Track abandonment on page unload
   useEffect(() => {
@@ -107,10 +108,11 @@ export function useCheckoutAnalytics({
           
           navigator.sendBeacon('/api/analytics/track', data)
         }
-        
+
         // Also track with gtag if available
         if (typeof window !== 'undefined' && window.gtag) {
-          window.gtag('event', 'abandon_checkout', {
+          const gtag = window.gtag!;
+          gtag('event', 'abandon_checkout', {
             checkout_step: step === 'shipping' ? 1 : 2,
             step_name: step,
             time_spent: timeSpent,
@@ -125,7 +127,7 @@ export function useCheckoutAnalytics({
     }
 
     window.addEventListener('beforeunload', handleBeforeUnload)
-    
+
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
     }
@@ -134,28 +136,30 @@ export function useCheckoutAnalytics({
   // Track shipping method selected
   const trackShippingMethod = useCallback((method: string) => {
     trackShippingInfoEntered(method);
-    
+
     if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'add_shipping_info', {
+      const gtag = window.gtag!;
+      gtag('event', 'add_shipping_info', {
         shipping_tier: method,
         value: total,
         currency: 'EUR',
       })
     }
-  }, [total]);
+  }, [total])
 
   // Track payment method selected
   const trackPaymentMethod = useCallback((method: string) => {
     trackPaymentInfoEntered(method);
-    
+
     if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'add_payment_info', {
+      const gtag = window.gtag!;
+      gtag('event', 'add_payment_info', {
         payment_type: method,
         value: total,
         currency: 'EUR',
       })
     }
-  }, [total]);
+  }, [total])
 
   // Track errors with categories
   const trackError = useCallback((error: string, category?: string) => {
@@ -167,27 +171,29 @@ export function useCheckoutAnalytics({
           : "Confirmation";
     
     trackCheckoutError(stepName, error);
-    
+
     // Categorize errors
     const errorCategory = category || categorizeError(error)
-    
+
     if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'exception', {
+      const gtag = window.gtag!;
+      gtag('event', 'exception', {
         description: error,
         fatal: errorCategory === 'critical',
         checkout_step: stepName,
         error_category: errorCategory,
       })
     }
-  }, [step]);
+  }, [step])
 
   // Track coupon application
   const trackCoupon = useCallback(
     (couponCode: string, discountAmount: number) => {
       trackCouponApplied(couponCode, discountAmount);
-      
+
       if (typeof window !== 'undefined' && window.gtag) {
-        window.gtag('event', 'promotion_applied', {
+        const gtag = window.gtag!;
+        gtag('event', 'promotion_applied', {
           promotion_id: couponCode,
           promotion_name: couponCode,
           discount_amount: discountAmount,
@@ -196,23 +202,25 @@ export function useCheckoutAnalytics({
       }
     },
     []
-  );
+  )
 
   // Track relay point selection
   const trackRelayPoint = useCallback((relayPointId: string) => {
     trackRelayPointSelected(relayPointId);
-    
+
     if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'select_relay_point', {
+      const gtag = window.gtag!;
+      gtag('event', 'select_relay_point', {
         relay_point_id: relayPointId,
       })
     }
-  }, []);
+  }, [])
 
   // Track conversion (call this on successful checkout)
   const trackConversion = useCallback((orderId: string, revenue: number) => {
     if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'purchase', {
+      const gtag = window.gtag!;
+      gtag('event', 'purchase', {
         transaction_id: orderId,
         value: revenue,
         currency: 'EUR',
@@ -224,7 +232,7 @@ export function useCheckoutAnalytics({
         })),
       })
     }
-    
+
     // Mark abandonment as resolved
     abandonmentTracked.current = true
   }, [items])

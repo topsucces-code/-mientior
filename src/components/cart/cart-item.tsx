@@ -86,7 +86,7 @@ export function CartItem({ item, className, showActions = true }: CartItemProps)
         {item.productImage ? (
           <Image
             src={item.productImage}
-            alt={item.productName}
+            alt={item.productName ?? 'Product image'}
             fill
             className="object-cover transition-transform group-hover:scale-110"
             sizes="96px"
