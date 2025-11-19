@@ -6,14 +6,16 @@ export const metadata: Metadata = {
   description: 'Connectez-vous à votre compte Mientior',
 }
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { redirectTo?: string }
+  searchParams: Promise<{ redirectTo?: string }>
 }) {
+  const params = await searchParams
+
   return (
     <div className="container flex min-h-[calc(100vh-4rem)] items-center justify-center py-12">
-      <AuthForm mode="login" redirectTo={searchParams.redirectTo} />
+      <AuthForm mode="login" redirectTo={params.redirectTo} />
     </div>
   )
 }

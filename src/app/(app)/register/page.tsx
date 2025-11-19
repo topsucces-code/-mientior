@@ -6,14 +6,16 @@ export const metadata: Metadata = {
   description: 'Créez votre compte Mientior pour commencer vos achats',
 }
 
-export default function RegisterPage({
+export default async function RegisterPage({
   searchParams,
 }: {
-  searchParams: { redirectTo?: string }
+  searchParams: Promise<{ redirectTo?: string }>
 }) {
+  const params = await searchParams
+
   return (
     <div className="container flex min-h-[calc(100vh-4rem)] items-center justify-center py-12">
-      <AuthForm mode="register" redirectTo={searchParams.redirectTo} />
+      <AuthForm mode="register" redirectTo={params.redirectTo} />
     </div>
   )
 }

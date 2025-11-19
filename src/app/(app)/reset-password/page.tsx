@@ -6,14 +6,16 @@ export const metadata: Metadata = {
   description: 'Réinitialisez votre mot de passe Mientior',
 }
 
-export default function ResetPasswordPage({
+export default async function ResetPasswordPage({
   searchParams,
 }: {
-  searchParams: { token?: string }
+  searchParams: Promise<{ token?: string }>
 }) {
+  const params = await searchParams
+
   return (
     <div className="container flex min-h-[calc(100vh-4rem)] items-center justify-center py-12">
-      <ResetPasswordForm token={searchParams.token || ''} />
+      <ResetPasswordForm token={params.token || ''} />
     </div>
   )
 }
