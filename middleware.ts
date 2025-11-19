@@ -1,16 +1,26 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getSession } from './src/lib/auth-server'
+import { rateLimitApiMiddleware } from './src/middleware/rate-limit-api'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Skip middleware for static files, Next.js internals, and API routes
+  // Apply rate limiting to API routes first
+  if (pathname.startsWith('/api')) {
+    const rateLimitResponse = await rateLimitApiMiddleware(request)
+    if (rateLimitResponse) {
+      return rateLimitResponse
+    }
+    // Continue for other API route handling
+    return NextResponse.next()
+  }
+
+  // Skip middleware for static files, Next.js internals
   if (
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/api') ||
     pathname.startsWith('/graphql') ||
-    pathname.includes('/admin') || // Payload admin auth handled by @payload-auth/better-auth-plugin
+    pathname.includes('/admin') ||
     pathname.includes('.')  // static files
   ) {
     return NextResponse.next()
@@ -43,12 +53,9 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder files
+     * Match all paths including API routes for rate limiting
+     * Exclude: _next/static, _next/image, favicon, other static files
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\..*|api/|graphql).*)'
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.svg|.*\\.gif|.*\\.webp).*)'
   ]
 }
