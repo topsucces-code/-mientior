@@ -57,7 +57,7 @@ export function ProductCard({
   const [isHovered, setIsHovered] = React.useState(false)
   const [imageLoaded, setImageLoaded] = React.useState(false)
   const prefersReducedMotion = useReducedMotion()
-  const { ref: cardRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
+  const { ref: cardRef, isIntersecting: isVisible } = useIntersectionObserver<HTMLDivElement>({ threshold: 0.1 })
 
   const addToCart = useCartStore((state) => state.addItem)
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()

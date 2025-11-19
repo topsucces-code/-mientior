@@ -2,40 +2,16 @@
 
 import { User, LogOut, Package, Heart, Settings, CreditCard, MapPin } from 'lucide-react'
 import { useHeader } from '@/contexts/header-context'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import Link from 'next/link'
-
-interface Session {
-    user?: {
-        name?: string
-        email?: string
-        image?: string
-    }
-}
+import { useAuth } from '@/hooks/use-auth'
 
 export function UserAccountDropdown() {
     const { activeDropdown, setActiveDropdown } = useHeader()
-    const [session, setSession] = useState<Session | null>(null)
-    const [loading, setLoading] = useState(true)
+    const { session, isLoading, signOut } = useAuth()
     const dropdownRef = useRef<HTMLDivElement>(null)
 
     const isOpen = activeDropdown === 'account'
-
-    useEffect(() => {
-        const fetchSession = async () => {
-            try {
-                const response = await fetch('/api/auth/session')
-                const data = await response.json()
-                setSession(data.session)
-            } catch (error) {
-                console.error('Failed to fetch session:', error)
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        fetchSession()
-    }, [])
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -53,14 +29,14 @@ export function UserAccountDropdown() {
 
     const handleSignOut = async () => {
         try {
-            // Redirect to sign out endpoint
-            window.location.href = '/api/auth/sign-out'
+            await signOut()
+            setActiveDropdown(null)
         } catch (error) {
             console.error('Sign out failed:', error)
         }
     }
 
-    if (loading) {
+    if (isLoading) {
         return (
             <button className="p-2 hover:bg-gray-100 rounded-full transition-colors" aria-label="Compte">
                 <User className="w-6 h-6 animate-pulse" />

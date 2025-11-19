@@ -92,7 +92,10 @@ export function PostalCodeAutocomplete({
       case 'Enter':
         e.preventDefault()
         if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
-          handleCitySelect(suggestions[selectedIndex])
+          const selectedCity = suggestions[selectedIndex]
+          if (selectedCity) {
+            handleCitySelect(selectedCity)
+          }
         }
         break
       case 'Escape':

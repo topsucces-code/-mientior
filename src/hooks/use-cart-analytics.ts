@@ -7,8 +7,8 @@ import { getCurrencyCode } from '@/lib/currency'
 // Type definitions for global analytics objects
 declare global {
   interface Window {
-    gtag?: (command: string, eventName: string, params: Record<string, unknown>) => void
-    fbq?: (command: string, eventName: string, params: Record<string, unknown>) => void
+    gtag?: (type: string, event: string, params?: Record<string, unknown>) => void
+    fbq?: (type: string, event: string, params?: Record<string, unknown>) => void
     posthog?: {
       capture: (eventName: string, params: Record<string, unknown>) => void
     }

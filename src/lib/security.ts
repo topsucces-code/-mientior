@@ -43,12 +43,12 @@ export async function generateCSRFToken(): Promise<string> {
 /**
  * Get or create CSRF token from session storage
  */
-export function getCSRFToken(): string {
+export async function getCSRFToken(): Promise<string> {
   if (typeof window === 'undefined') return ''
 
   let token = sessionStorage.getItem('csrf_token')
   if (!token) {
-    token = generateCSRFToken()
+    token = await generateCSRFToken()
     sessionStorage.setItem('csrf_token', token)
   }
   return token
@@ -185,9 +185,9 @@ export function generateRequestId(): string {
 /**
  * Create security headers for API requests
  */
-export function createSecurityHeaders(): SecurityHeaders {
+export async function createSecurityHeaders(): Promise<SecurityHeaders> {
   return {
-    'X-CSRF-Token': getCSRFToken(),
+    'X-CSRF-Token': await getCSRFToken(),
     'X-Request-ID': generateRequestId(),
     'X-Client-Version': '1.0.0',
   }
