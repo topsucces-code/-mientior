@@ -23,10 +23,13 @@ export async function getAdminSession(): Promise<AdminSession | null> {
       return null;
     }
 
-    // Find admin user by email
-    const adminUser = await prisma.adminUser.findUnique({
+    // Find admin user by email or authUserId
+    const adminUser = await prisma.adminUser.findFirst({
       where: {
-        email: session.user.email,
+        OR: [
+          { email: session.user.email },
+          { authUserId: session.user.id },
+        ],
       },
     });
 

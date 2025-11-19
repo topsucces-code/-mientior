@@ -82,31 +82,6 @@ export function withPermission(
   options: WithAdminAuthOptions = { logAction: true }
 ): ApiHandler {
   return async (request: NextRequest, context: { params: Record<string, string> }) => {
-    // DEVELOPMENT MODE: Bypass authentication if Better Auth is not configured
-    if (process.env.NODE_ENV === 'development' && process.env.SKIP_AUTH === 'true') {
-      console.warn(`⚠️  DEV MODE: Bypassing auth for ${request.method} ${request.url}`);
-      // Create mock admin session for development
-      const mockAdminSession = {
-        adminUser: {
-          id: 'dev-admin-id',
-          email: 'dev@admin.local',
-          firstName: 'Dev',
-          lastName: 'Admin',
-          role: 'SUPER_ADMIN' as Role,
-          permissions: Object.values(Permission) as unknown as import('@prisma/client').Prisma.JsonValue,
-          isActive: true,
-          lastLoginAt: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      } as AdminSession;
-      
-      return await handler(request, {
-        ...context,
-        adminSession: mockAdminSession,
-      });
-    }
-
     try {
       const adminSession = await requirePermission(permission);
 

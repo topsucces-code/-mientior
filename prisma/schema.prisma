@@ -418,6 +418,8 @@ model Media {
 model AdminUser {
   id            String         @id @default(cuid())
   email         String         @unique
+  authUserId    String?        @unique @map("auth_user_id")
+  authUser      BetterAuthUser? @relation(fields: [authUserId], references: [id], onDelete: SetNull)
   firstName     String
   lastName      String
   role          Role           @default(VIEWER)
@@ -431,6 +433,7 @@ model AdminUser {
   updatedAt     DateTime       @updatedAt
 
   @@index([email])
+  @@index([authUserId])
   @@index([role])
   @@index([isActive])
   @@map("admin_users")
@@ -635,6 +638,7 @@ model BetterAuthUser {
   updatedAt     DateTime        @updatedAt
   accounts      Account[]
   sessions      Session[]
+  adminUser     AdminUser?
 
   @@map("better_auth_users")
 }
