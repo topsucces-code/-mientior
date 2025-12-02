@@ -1,13 +1,40 @@
 import Redis from 'ioredis'
 import { getSearchCacheTTL, getSuggestionsCacheTTL } from './cache-config'
 
-const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379'
-export const redis = new Redis(redisUrl)
+const redisUrl = process.env.REDIS_URL
+
+// Redis is optional - graceful degradation when not available (e.g., Vercel)
+let redis: Redis | null = null
+let redisAvailable = false
+
+if (redisUrl) {
+  try {
+    redis = new Redis(redisUrl, {
+      maxRetriesPerRequest: 1,
+      retryStrategy: () => null, // Don't retry on failure
+      lazyConnect: true,
+    })
+    
+    redis.on('error', () => {
+      redisAvailable = false
+    })
+    
+    redis.on('connect', () => {
+      redisAvailable = true
+    })
+  } catch {
+    redis = null
+    redisAvailable = false
+  }
+}
+
+export { redis }
 
 /**
  * Track cache hit metrics: increment hits counter, push latency to list (keep last 100), and set expiration.
  */
 async function trackCacheHit(keyPrefix: string, latency: number): Promise<void> {
+  if (!redis) return
   try {
     await redis.incr(`cache:metrics:hits:${keyPrefix}`)
     await redis.lpush(`cache:metrics:latency:${keyPrefix}`, latency.toString())
@@ -25,6 +52,7 @@ async function trackCacheHit(keyPrefix: string, latency: number): Promise<void> 
  * Track cache miss metrics: increment misses counter, push latency to list (keep last 100), and set expiration.
  */
 async function trackCacheMiss(keyPrefix: string, latency: number): Promise<void> {
+  if (!redis) return
   try {
     await redis.incr(`cache:metrics:misses:${keyPrefix}`)
     await redis.lpush(`cache:metrics:latency:${keyPrefix}`, latency.toString())
@@ -45,6 +73,11 @@ export async function getCachedData<T>(
   trackMetrics = true,
   keyPrefix?: string
 ): Promise<T> {
+  // If Redis is not available, just call the fetcher
+  if (!redis) {
+    return fetcher()
+  }
+  
   const startTime = Date.now()
   try {
     const cached = await redis.get(key)
@@ -71,6 +104,7 @@ export async function getCachedData<T>(
 }
 
 export async function invalidateCache(pattern: string) {
+  if (!redis) return
   try {
     // Use SCAN for better performance in production with large datasets
     const keys: string[] = [];
@@ -157,6 +191,9 @@ export async function invalidateSuggestionsCache(pattern: string): Promise<void>
  * Retrieve cache metrics (hits, misses, avg latency) for a key prefix.
  */
 export async function getCacheMetrics(keyPrefix: string): Promise<import('@/types').CacheMetrics> {
+  if (!redis) {
+    return { keyPrefix, hits: 0, misses: 0, hitRate: 0, avgLatency: 0, totalRequests: 0 }
+  }
   try {
     // Use exact keyPrefix as passed (no normalization)
     const [hits, misses, latencies] = await Promise.all([
@@ -198,6 +235,7 @@ export async function getCacheMetrics(keyPrefix: string): Promise<import('@/type
  * Reset cache metrics counters and latency lists for a key prefix (or all if none specified).
  */
 export async function resetCacheMetrics(keyPrefix?: string): Promise<void> {
+  if (!redis) return
   try {
     if (keyPrefix) {
       await redis.del(`cache:metrics:hits:${keyPrefix}`, `cache:metrics:misses:${keyPrefix}`, `cache:metrics:latency:${keyPrefix}`)
@@ -229,6 +267,8 @@ export async function getCachedSpellCorrection(
   query: string,
   fetcher: () => Promise<string | null>
 ): Promise<string | null> {
+  if (!redis) return fetcher()
+  
   const cacheKey = `search:correction:${query.toLowerCase()}`
   const ttl = 3600 // 1 hour
 
@@ -270,6 +310,7 @@ export async function getCachedFacets<T>(
  * Invalidate facets cache for a specific query/filter combination
  */
 export async function invalidateFacetsCache(pattern: string): Promise<void> {
+  if (!redis) return
   try {
     const keys = await redis.keys(`facets:${pattern}*`)
     if (keys.length > 0) {
@@ -291,6 +332,7 @@ const USER_PREFERENCES_TTL = 3600 // 1 hour
  * @returns Cached preferences or null if not found/expired
  */
 export async function getCachedUserPreferences(userId: string): Promise<import('@/types/personalization').UserPreferences | null> {
+  if (!redis) return null
   try {
     const cached = await redis.get(`user:preferences:${userId}`)
     if (cached) {
@@ -313,6 +355,7 @@ export async function setCachedUserPreferences(
   userId: string, 
   preferences: import('@/types/personalization').UserPreferences
 ): Promise<void> {
+  if (!redis) return
   try {
     await redis.setex(
       `user:preferences:${userId}`,
@@ -330,6 +373,7 @@ export async function setCachedUserPreferences(
  * @param userId - User ID
  */
 export async function invalidateUserPreferencesCache(userId: string): Promise<void> {
+  if (!redis) return
   try {
     await redis.del(`user:preferences:${userId}`)
   } catch (error) {
@@ -342,6 +386,7 @@ export async function invalidateUserPreferencesCache(userId: string): Promise<vo
  * Used after bulk recalculation
  */
 export async function invalidateAllUserPreferencesCache(): Promise<void> {
+  if (!redis) return
   try {
     const keys = await redis.keys('user:preferences:*')
     if (keys.length > 0) {

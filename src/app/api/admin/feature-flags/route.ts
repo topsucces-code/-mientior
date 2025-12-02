@@ -6,14 +6,21 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { Permission } from '@/lib/permissions';
-import { Prisma } from '@prisma/client';
+import { Prisma, AdminUser } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { withAdminAuth, withPermission } from '@/middleware/admin-auth';
 import { logCreate } from '@/lib/audit-logger';
 
+interface AdminContext {
+  params: Record<string, string>;
+  adminSession: {
+    adminUser: AdminUser;
+  };
+}
+
 async function handleGET(
   request: NextRequest,
-  { adminSession }: { params: any; adminSession: any }
+  _context: AdminContext
 ) {
   try {
     const { searchParams } = new URL(request.url);
@@ -88,7 +95,7 @@ async function handleGET(
 
 async function handlePOST(
   request: NextRequest,
-  { adminSession }: { params: any; adminSession: any }
+  { adminSession }: AdminContext
 ) {
   try {
     const body = await request.json();
@@ -135,7 +142,8 @@ async function handlePOST(
     console.error('Feature flag creation error:', error);
 
     // Handle unique constraint violation
-    if ((error as any).code === 'P2002') {
+    const prismaError = error as { code?: string };
+    if (prismaError.code === 'P2002') {
       return NextResponse.json(
         { error: 'A feature flag with this key already exists' },
         { status: 409 }
