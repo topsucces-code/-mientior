@@ -1,8 +1,8 @@
 # ROADMAP - MIENTIOR E-COMMERCE MARKETPLACE
 
-**Version**: 2.0 (Mise à jour du 18 novembre 2025)
-**Statut projet actuel**: 65% complété
-**Dernière analyse**: Analyse complète du codebase effectuée
+**Version**: 2.1 (Mise à jour du 19 novembre 2025)
+**Statut projet actuel**: 75% complété
+**Dernière analyse**: Vérification browser + codebase (19 nov 2025)
 
 ---
 
@@ -15,13 +15,13 @@
 │ ÉTAT D'AVANCEMENT PAR DOMAINE                               │
 ├─────────────────────────────────────────────────────────────┤
 │ Core Commerce:      █████████████████░░░  85%              │
-│ Admin Panel:        ████████████░░░░░░░░  60%              │
-│ Authentication:     ██████░░░░░░░░░░░░░░  30%              │
+│ Admin Panel:        ██████████████░░░░░░  70%              │
+│ Authentication:     ██████████████████░░  90%              │
 │ Payment Gateway:    ██████████████████░░  90%              │
 │ Database Design:    ███████████████████░  95%              │
 │ Code Quality:       ███████████████░░░░░  75%              │
 │                                                              │
-│ GLOBAL:             █████████████░░░░░░░  65/100           │
+│ GLOBAL:             ███████████████░░░░░  75/100           │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -38,27 +38,29 @@
 - Homepage avec featured products, flash deals, categories
 - Product listing avec filtres/tri
 - Product detail page avec variants
+- **Authentication UI complète** (login, register, forgot-password, reset-password)
+- **Better Auth intégration** avec Google OAuth support
 
 **🟡 Ce qui est FONCTIONNEL mais incomplet:**
 - Admin panel (list/show OK, mais CRUD manquants pour vendors, campaigns, promos)
-- Better Auth configuré mais aucune UI d'authentification
+- Authentication UI complète mais logout button manquant dans header
 - Checkout flow fonctionne mais pas de gestion d'erreurs avancée
 - Email system basique (Resend intégré, pas de templates)
 - Redis caching basique (pas de stratégie d'invalidation)
 
 **🔴 BLOQUEURS CRITIQUES:**
-1. **Aucune page de login/register** - Les utilisateurs ne peuvent pas s'authentifier
-2. **Admin auth bypassé en dev** (SKIP_AUTH=true) - Risque sécurité
-3. **Pages admin CRUD manquantes** (vendors, campaigns, promo codes, admin users)
-4. **Aucun test** - Pas de Jest/Vitest/Playwright
-5. **Pas de rate limiting** - Vulnérabilité sécurité
-6. **Stripe configuré mais non implémenté** - Seulement Paystack/Flutterwave
+1. **Admin auth bypassé en dev** (SKIP_AUTH=true) - Risque sécurité
+2. **Pages admin CRUD manquantes** (vendors, campaigns, promo codes, admin users)
+3. **Aucun test** - Pas de Jest/Vitest/Playwright
+4. **Pas de rate limiting** - Vulnérabilité sécurité
+5. **Stripe configuré mais non implémenté** - Seulement Paystack/Flutterwave
+6. **Logout button manquant** dans header pour utilisateurs connectés
 
 **📦 Inventaire des pages:**
 - **Publiques**: 9 pages (home, products, product detail, cart, checkout, search, faq, categories, design-showcase)
-- **Authentifiées**: 3 pages (account, checkout callback, confirmation)
-- **Admin**: 20 resources (products, categories, orders, users, vendors, campaigns, etc.)
-- **Manquantes**: /login, /register, /forgot-password, vendor CRUD admin, campaign edit, promo CRUD, media library
+- **Authentifiées**: 7 pages (login, register, forgot-password, reset-password, account, checkout callback, confirmation)
+- **Admin**: 11 sections (products, categories, orders, users, customers, vendors, marketing, analytics, settings, admin-users, audit-logs)
+- **Manquantes**: vendor payout management, campaign show/edit, promo CRUD, media library
 
 ---
 
@@ -69,22 +71,23 @@
 **Objectif**: Débloquer l'authentification et sécuriser l'admin
 **Priorité**: 🔴 CRITIQUE ABSOLU
 
-### Sprint 1.1: Authentification Frontend (5-7 jours) 🔴
+### Sprint 1.1: Authentification Frontend ✅ COMPLÉTÉ
 
-**Contexte**: Better Auth est configuré dans `/src/lib/auth.ts` avec PostgreSQL + Redis, mais aucune UI n'existe.
+**Contexte**: Better Auth est configuré dans `/src/lib/auth.ts` avec PostgreSQL + Redis. **TOUTES les pages d'authentification sont implémentées et fonctionnelles.**
 
 #### Tâches
 
-- [ ] **Page Login** `/src/app/(app)/login/page.tsx`
+- [x] **Page Login** `/src/app/(app)/login/page.tsx` ✅
   - Formulaire email/password avec react-hook-form + Zod
   - Appel à `auth.api.signInEmail({ email, password })`
   - Gestion erreurs: "Invalid credentials", "Too many attempts"
   - Lien "Mot de passe oublié" → `/forgot-password`
   - Bouton Google OAuth (si `GOOGLE_CLIENT_ID` configuré)
-  - Redirection intelligente: `?next=` param sinon `/account`
+  - Redirection intelligente: `?redirectTo=` param sinon `/account`
   - Design avec shadcn/ui components (Card, Input, Button)
+  - **Composant**: `AuthForm` mode="login"
 
-- [ ] **Page Register** `/src/app/(app)/register/page.tsx`
+- [x] **Page Register** `/src/app/(app)/register/page.tsx` ✅
   - Formulaire: email, password, confirmPassword, firstName, lastName
   - Validation Zod: email unique (check API), password >= 8 chars
   - Checkbox CGV obligatoire
@@ -92,28 +95,31 @@
   - Appel `auth.api.signUpEmail()`
   - Connexion automatique après inscription réussie
   - Redirection vers `/account`
+  - **Composant**: `AuthForm` mode="register"
 
-- [ ] **Page Forgot Password** `/src/app/(app)/forgot-password/page.tsx`
+- [x] **Page Forgot Password** `/src/app/(app)/forgot-password/page.tsx` ✅
   - Input email uniquement
   - Appel `auth.api.forgetPassword({ email })`
   - Génération token reset (Better Auth)
   - Envoi email avec lien `/reset-password?token=XXX` via Resend
   - Message de confirmation affiché même si email invalide (sécurité)
+  - **Composant**: `ForgotPasswordForm`
 
-- [ ] **Page Reset Password** `/src/app/(app)/reset-password/page.tsx`
+- [x] **Page Reset Password** `/src/app/(app)/reset-password/page.tsx` ✅
   - Récupération `token` depuis query params
   - Validation token avec Better Auth
   - Formulaire: password, confirmPassword
   - Appel `auth.api.resetPassword({ token, password })`
   - Redirection `/login` après succès
   - Gestion token expiré/invalide
+  - **Composant**: `ResetPasswordForm`
 
-- [ ] **Mettre à jour middleware.ts**
-  - Vérifier que routes protégées redirigent vers `/login?next=XXX`
-  - Actuellement: redirige vers `/auth/sign-in` qui n'existe pas
-  - Modifier ligne 18-20 de `middleware.ts`
+- [ ] **Mettre à jour middleware.ts** ⚠️ À VÉRIFIER
+  - Vérifier que routes protégées redirigent vers `/login?redirectTo=XXX`
+  - Vérifier qu'il ne redirige PAS vers `/auth/sign-in` (qui n'existe pas)
+  - Tester avec route protégée comme `/account`
 
-- [ ] **Logout functionality**
+- [ ] **Logout functionality** 🔴 MANQUANT
   - Ajouter bouton logout dans header (pour utilisateurs connectés)
   - Appel `auth.api.signOut()`
   - Clear session Redis
@@ -124,18 +130,24 @@
 - ✅ Utilisateur peut se connecter (email/password ET Google OAuth)
 - ✅ Utilisateur peut réinitialiser mot de passe
 - ✅ Session persistante (cookie + Redis cache)
-- ✅ Routes protégées redirigent correctement vers `/login?next=XXX`
-- ✅ Logout fonctionne et clear la session
+- ⚠️ Routes protégées redirigent correctement vers `/login?redirectTo=XXX` (À VÉRIFIER)
+- ❌ Logout fonctionne et clear la session (MANQUANT)
 
-#### Fichiers à modifier
-- Créer: `src/app/(app)/login/page.tsx`
-- Créer: `src/app/(app)/register/page.tsx`
-- Créer: `src/app/(app)/forgot-password/page.tsx`
-- Créer: `src/app/(app)/reset-password/page.tsx`
-- Modifier: `middleware.ts` (ligne 18-20)
-- Modifier: `src/components/layout/header.tsx` (ajouter logout button)
+#### Fichiers implémentés
+- ✅ `src/app/(app)/login/page.tsx` - EXISTE
+- ✅ `src/app/(app)/register/page.tsx` - EXISTE
+- ✅ `src/app/(app)/forgot-password/page.tsx` - EXISTE
+- ✅ `src/app/(app)/reset-password/page.tsx` - EXISTE
+- ✅ `src/components/auth/auth-form.tsx` - EXISTE
+- ✅ `src/components/auth/forgot-password-form.tsx` - EXISTE
+- ✅ `src/components/auth/reset-password-form.tsx` - EXISTE
+- ⚠️ `middleware.ts` - À vérifier redirection
+- ❌ `src/components/layout/header.tsx` - Logout button à ajouter
+
+**Statut**: ✅ 90% COMPLÉTÉ - Seul le logout button manque
 
 ---
+
 
 ### Sprint 1.2: Sécuriser l'Admin Panel (3-4 jours) 🔴
 
@@ -752,12 +764,14 @@
 ## 📋 RÉCAPITULATIF PRIORISATION
 
 ### Bloqueurs MVP (À faire IMMÉDIATEMENT) 🔴
-1. Sprint 1.1 - Authentification Frontend (5-7j)
-2. Sprint 1.2 - Sécuriser Admin (3-4j)
-3. Sprint 1.3 - Admin CRUD Pages (7-10j)
+1. ✅ ~~Sprint 1.1 - Authentification Frontend~~ **COMPLÉTÉ** (90%)
+   - Reste: Logout button dans header (1j)
+2. Sprint 1.2 - Sécuriser Admin (2-3j) - Scope réduit
+3. Sprint 1.3 - Admin CRUD Pages (5-7j) - Certaines pages existent déjà
 4. Sprint 1.4 - Testing & Sécurité (5-7j)
 
-**Total Phase 1: 20-28 jours (3-4 semaines)**
+**Total Phase 1: 12-17 jours (2-3 semaines)** ⬇️ Réduit de 20-28j
+
 
 ### Features Importantes (Post-MVP) 🟡
 - Sprint 2.1 à 2.4 (Compte user, Reviews, Shipping, Promos)
@@ -833,6 +847,68 @@
 
 ---
 
-**Document maintenu par**: Claude Code
-**Dernière mise à jour**: 18 novembre 2025
-**Version**: 2.0 (Analyse complète du codebase)
+## 🔍 DÉCOUVERTES - FONCTIONNALITÉS DÉJÀ IMPLÉMENTÉES
+
+**Vérification effectuée**: 19 novembre 2025 (Browser + Codebase)
+
+### ✅ Authentication Complète (Non documentée dans v2.0)
+
+**Pages Frontend**:
+- `/login` - Formulaire email/password + Google OAuth
+- `/register` - Inscription complète avec validation
+- `/forgot-password` - Réinitialisation mot de passe
+- `/reset-password` - Changement mot de passe avec token
+
+**Composants**:
+- `AuthForm` - Composant réutilisable pour login/register
+- `ForgotPasswordForm` - Formulaire mot de passe oublié
+- `ResetPasswordForm` - Formulaire reset avec token
+
+**Intégration**:
+- Better Auth configuré et fonctionnel
+- Google OAuth support
+- Redirection intelligente avec `?redirectTo=` param
+- Session persistante (cookie + Redis)
+
+**Manquant**:
+- ❌ Logout button dans header
+- ⚠️ Vérification middleware redirection
+
+### ✅ Admin Panel Structure (Partiellement documentée)
+
+**Sections existantes** (11 au total):
+1. Products - 4 fichiers (list, create, edit, show)
+2. Categories - 4 fichiers
+3. Orders - 2 fichiers
+4. Users - 2 fichiers
+5. Customers - 2 fichiers
+6. Vendors - 3 fichiers
+7. Marketing - 3 sous-sections
+8. Analytics - 1 fichier
+9. Settings - 2 sous-sections
+10. Admin Users - 1 fichier
+11. Audit Logs - 1 fichier
+
+**État actuel**:
+- ✅ Structure Refine complète
+- ✅ Dashboard page implémentée
+- ⚠️ SKIP_AUTH=true en dev (accessible sans login)
+- ❌ Certains CRUD incomplets (vendors payout, campaigns, promos)
+
+### Impact sur le Roadmap
+
+**Avant vérification**:
+- Authentication: 30% → **Réalité: 90%**
+- Admin Panel: 60% → **Réalité: 70%**
+- Global: 65% → **Réalité: 75%**
+
+**Gain de temps Phase 1**:
+- Estimé: 20-28 jours
+- Révisé: **12-17 jours** (-40% de temps)
+
+---
+
+**Document maintenu par**: Antigravity AI
+**Dernière mise à jour**: 19 novembre 2025
+**Version**: 2.1 (Vérification browser + codebase complète)
+

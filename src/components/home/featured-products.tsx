@@ -8,9 +8,11 @@ import { RippleButton } from '@/components/ui/ripple-button'
 import { cn } from '@/lib/utils'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
+import { useCartStore } from '@/stores/cart.store'
+import { useToast } from '@/hooks/use-toast'
 
 interface FeaturedProductsProps {
-  products: Omit<ProductCardProps, 'onQuickView'>[]
+  products: (Omit<ProductCardProps, 'onQuickView'> & { stock?: number })[]
   title?: string
   subtitle?: string
   viewAllHref?: string
@@ -26,11 +28,30 @@ export default function FeaturedProducts({
 }: FeaturedProductsProps) {
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
+  const addToCart = useCartStore((state) => state.addItem)
+  const { toast } = useToast()
 
   // TODO: Implement quick view modal
   const handleQuickView = (productId: string) => {
     console.log('Quick view:', productId)
     // This would open a modal with product details
+  }
+
+  const handleAddToCart = (product: any) => {
+     addToCart({
+       id: product.id,
+       productId: product.id,
+       productName: product.name,
+       productSlug: product.slug,
+       productImage: product.image || '/placeholder-product.jpg',
+       price: product.price,
+       quantity: 1,
+       stock: product.stock || 0,
+     })
+     toast({
+       title: "Ajouté au panier",
+       description: `${product.name} a été ajouté à votre panier.`,
+     })
   }
 
   if (!products || products.length === 0) {
@@ -76,7 +97,9 @@ export default function FeaturedProducts({
             <ProductCard
               key={product.id}
               {...product}
+              inStock={product.stock !== undefined ? product.stock > 0 : product.inStock}
               onQuickView={handleQuickView}
+              onAddToCart={() => handleAddToCart(product)}
               className={cn(
                 !prefersReducedMotion && isVisible && 'animate-fade-in-up',
               )}

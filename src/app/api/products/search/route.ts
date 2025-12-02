@@ -3,23 +3,40 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import type { Product, PaginatedResponse } from '@/types'
-import type { Prisma } from '@prisma/client'
-
-interface PriceFilter {
-  gte?: number
-  lte?: number
-}
+import { search } from '@/lib/search-service'
+import { facets } from '@/lib/search-service'
+import { logSearch } from '@/lib/search-analytics'
+import { redis } from '@/lib/redis'
+import { getSearchCacheTTL } from '@/lib/cache-config'
+import { detectLanguage, normalizeLocale } from '@/lib/i18n-search'
+import type { Product, PaginatedResponse, SortOption, AvailableFilters, SearchMetadata, SupportedLocale } from '@/types'
+import crypto from 'crypto'
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
 
-    const q = searchParams.get('q')
+    const q = searchParams.get('q') || ''
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '24')
-    const sort = searchParams.get('sort') || 'relevance'
+    const sort = (searchParams.get('sort') || 'relevance') as SortOption
+
+    // Get or generate session ID for A/B testing
+    let sessionId = request.cookies.get('search_session_id')?.value
+    if (!sessionId) {
+      sessionId = crypto.randomUUID()
+    }
+
+    // Get userId for personalization (from cookie or auth)
+    const userId = request.cookies.get('user_id')?.value || undefined
+
+    // Resolve locale
+    const rawLocale = searchParams.get('locale') as string | null
+    const resolvedLocale: SupportedLocale = rawLocale
+      ? normalizeLocale(rawLocale)
+      : q && q.length >= 3
+      ? await detectLanguage(q)
+      : 'fr'
 
     // Parse filters
     const priceMin = searchParams.get('price_min')
@@ -32,191 +49,183 @@ export async function GET(request: NextRequest) {
     const inStock = searchParams.get('inStock')
     const onSale = searchParams.get('onSale')
 
-    // Build where clause for Prisma
-    const andConditions: Prisma.ProductWhereInput[] = []
-
-    // Text search
-    if (q) {
-      andConditions.push({
-        OR: [
-          { name: { contains: q, mode: 'insensitive' } },
-          { description: { contains: q, mode: 'insensitive' } },
-        ],
-      })
+    // Build filters object
+    const filters = {
+      priceMin: priceMin ? parseFloat(priceMin) : undefined,
+      priceMax: priceMax ? parseFloat(priceMax) : undefined,
+      categories: categories.length > 0 ? categories : undefined,
+      brands: brands.length > 0 ? brands : undefined,
+      colors: colors.length > 0 ? colors : undefined,
+      sizes: sizes.length > 0 ? sizes : undefined,
+      rating: rating ? parseFloat(rating) : undefined,
+      inStock: inStock === 'true',
+      onSale: onSale === 'true',
     }
 
-    // Price range filter
-    if (priceMin || priceMax) {
-      const priceFilter: PriceFilter = {}
-      if (priceMin) priceFilter.gte = parseFloat(priceMin)
-      if (priceMax) priceFilter.lte = parseFloat(priceMax)
-      andConditions.push({ price: priceFilter })
-    }
+    // Create cache key based on all parameters, including locale
+    const cacheKeyData = JSON.stringify({ q, filters, sort, page, limit, locale: resolvedLocale })
+    const cacheHash = crypto.createHash('md5').update(cacheKeyData).digest('hex')
+    const cacheKey = `search:products:${resolvedLocale}:${cacheHash}`
 
-    // Category filter (by slug)
-    if (categories.length > 0) {
-      andConditions.push({
-        category: {
-          slug: { in: categories },
-        },
-      })
-    }
+    // HTTP cache strategy: Use half of Redis TTL for browser/CDN cache with stale-while-revalidate
+    // This complements Redis caching by allowing clients to serve stale data while revalidating in background
+    const httpCacheTTL = Math.floor(getSearchCacheTTL() / 2)
 
-    // Brand filter (tags contain brands)
-    if (brands.length > 0) {
-      andConditions.push({
-        tags: {
-          some: {
-            tag: {
-              slug: { in: brands },
-            },
+    // Check cache
+    try {
+      const cached = await redis.get(cacheKey)
+      if (cached) {
+        const cachedResponse = JSON.parse(cached)
+        return NextResponse.json({
+          ...cachedResponse,
+          searchMetadata: {
+            ...cachedResponse.searchMetadata,
+            cacheHit: true,
           },
+        }, {
+          headers: {
+            'Cache-Control': `public, s-maxage=${httpCacheTTL}, stale-while-revalidate=${httpCacheTTL}`,
+            'X-Cache-Status': 'HIT',
+            'X-Search-Engine': cachedResponse.searchMetadata?.searchEngine || 'unknown',
+            'X-Facets-Time': cachedResponse.searchMetadata?.facetsExecutionTime?.toString() || '0',
+            'X-Search-Locale': resolvedLocale
+          }
+        })
+      }
+    } catch (cacheError) {
+      console.warn('Redis cache read error:', cacheError)
+      // Continue without cache
+    }
+
+    // Search products using unified service - pass userId for personalization
+    const startTime = Date.now()
+    const { products, totalCount, searchEngine, executionTime: searchExecutionTime, abTestVariant } = await search({
+      query: q,
+      filters,
+      sort,
+      page,
+      limit,
+      locale: resolvedLocale,
+    }, sessionId, resolvedLocale, userId)
+    const executionTime = Date.now() - startTime
+
+    // Compute facets based on current search/filters
+    let availableFilters: AvailableFilters | undefined
+    let facetsExecutionTime = 0
+    try {
+      const facetsStartTime = Date.now()
+      availableFilters = await facets({
+        query: q,
+        filters: {
+          categoryId: undefined,
+          categories: filters.categories,
+          brands: filters.brands,
+          colors: filters.colors,
+          sizes: filters.sizes,
+          minPrice: filters.priceMin,
+          maxPrice: filters.priceMax,
+          onSale: filters.onSale,
+          featured: false,
+          inStock: filters.inStock,
+          rating: filters.rating,
         },
-      })
+        locale: resolvedLocale,
+      }, sessionId)
+      facetsExecutionTime = Date.now() - facetsStartTime
+    } catch (facetsError) {
+      console.warn('Facets computation error:', facetsError)
+      // Return default empty facets - don't fail the entire request
+      availableFilters = {
+        priceRange: { min: 0, max: 100000 },
+        categories: [],
+        brands: [],
+        colors: [],
+        sizes: [],
+      }
     }
 
-    // Color filter (check variants)
-    if (colors.length > 0) {
-      andConditions.push({
-        variants: {
-          some: {
-            color: { in: colors },
-          },
+    // Log search analytics (non-blocking)
+    try {
+      const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined
+      const userAgent = request.headers.get('user-agent') || undefined
+
+      // Log asynchronously without blocking response
+      logSearch({
+        query: q,
+        resultCount: totalCount,
+        sessionId,
+        filters: {
+          priceMin: filters.priceMin,
+          priceMax: filters.priceMax,
+          categories: filters.categories,
+          brands: filters.brands,
+          colors: filters.colors,
+          sizes: filters.sizes,
+          rating: filters.rating,
+          inStock: filters.inStock,
+          onSale: filters.onSale,
         },
-      })
+        sort,
+        executionTime,
+        ipAddress,
+        userAgent,
+        locale: resolvedLocale,
+      }).catch(err => console.error('Failed to log search:', err))
+    } catch (analyticsError) {
+      console.warn('Search analytics error:', analyticsError)
+      // Continue without analytics
     }
 
-    // Size filter (check variants)
-    if (sizes.length > 0) {
-      andConditions.push({
-        variants: {
-          some: {
-            size: { in: sizes },
-          },
-        },
-      })
-    }
-
-    // Rating filter
-    if (rating) {
-      andConditions.push({
-        rating: { gte: parseFloat(rating) },
-      })
-    }
-
-    // In stock filter
-    if (inStock === 'true') {
-      andConditions.push({
-        stock: { gt: 0 },
-      })
-    }
-
-    // On sale filter
-    if (onSale === 'true') {
-      andConditions.push({
-        compareAtPrice: { not: null },
-      })
-    }
-
-    const where: Prisma.ProductWhereInput = andConditions.length > 0 ? { AND: andConditions } : {}
-
-    // Build orderBy clause
-    let orderBy: Prisma.ProductOrderByWithRelationInput = { createdAt: 'desc' }
-    switch (sort) {
-      case 'price-asc':
-        orderBy = { price: 'asc' }
-        break
-      case 'price-desc':
-        orderBy = { price: 'desc' }
-        break
-      case 'rating':
-        orderBy = { rating: 'desc' }
-        break
-      case 'newest':
-        orderBy = { createdAt: 'desc' }
-        break
-      case 'bestseller':
-        orderBy = { reviewCount: 'desc' }
-        break
-    }
-
-    // Calculate skip for pagination
-    const skip = (page - 1) * limit
-
-    // Query products with Prisma
-    const [products, totalCount] = await Promise.all([
-      prisma.product.findMany({
-        where,
-        orderBy,
-        skip,
-        take: limit,
-        include: {
-          category: true,
-          images: {
-            orderBy: { order: 'asc' },
-          },
-          variants: true,
-          tags: {
-            include: {
-              tag: true,
-            },
-          },
-        },
-      }),
-      prisma.product.count({ where }),
-    ])
-
-    // Transform to frontend Product type
-    const transformedProducts: Product[] = products.map((product) => ({
-      id: product.id,
-      name: product.name,
-      slug: product.slug,
-      price: product.price,
-      compareAtPrice: product.compareAtPrice || undefined,
-      images: product.images.map((img) => ({
-        url: img.url,
-        alt: img.alt,
-        type: img.type === 'THREE_SIXTY' ? '360' : img.type.toLowerCase() as 'image' | 'video' | '360'
-      })),
-      variants: product.variants.map((v) => ({
-        id: v.id,
-        size: v.size || undefined,
-        color: v.color || undefined,
-        sku: v.sku,
-        stock: v.stock,
-        priceModifier: v.priceModifier || undefined
-      })),
-      category: {
-        id: product.category.id,
-        name: product.category.name,
-        slug: product.category.slug,
-        isActive: product.category.isActive,
-      },
-      tags: product.tags.map((pt) => ({
-        id: pt.tag.id,
-        name: pt.tag.name,
-        slug: pt.tag.slug,
-      })),
-      rating: product.rating,
-      reviewCount: product.reviewCount,
-      stock: product.stock,
-      badge: product.badge || undefined,
-      featured: product.featured,
-      onSale: !!product.compareAtPrice,
-      description: product.description || undefined,
-      specifications: product.specifications as Record<string, string> | undefined,
-      seo: product.seo as Product['seo'] | undefined,
-    }))
-
-    const response: PaginatedResponse<Product> = {
-      data: transformedProducts,
+    const responseData: PaginatedResponse<Product> & {
+      availableFilters?: AvailableFilters
+      searchMetadata?: SearchMetadata
+    } = {
+      data: products,
       totalCount,
       page,
       pageSize: limit,
-      hasMore: skip + limit < totalCount,
+      hasMore: (page - 1) * limit + limit < totalCount,
+      availableFilters,
+      searchMetadata: {
+        searchEngine,
+        executionTime: searchExecutionTime,
+        cacheHit: false,
+        abTestVariant,
+        facetsExecutionTime,
+      },
     }
 
-    return NextResponse.json(response)
+    // Cache results using shared TTL configuration (synced with facets TTL)
+    try {
+      const cacheTTL = getSearchCacheTTL()
+      await redis.setex(cacheKey, cacheTTL, JSON.stringify(responseData))
+    } catch (cacheError) {
+      console.warn('Redis cache write error:', cacheError)
+      // Continue without caching
+    }
+
+    // Create response
+    const response = NextResponse.json(responseData, {
+      headers: {
+        'Cache-Control': `public, s-maxage=${httpCacheTTL}, stale-while-revalidate=${httpCacheTTL}`,
+        'X-Cache-Status': 'MISS',
+        'X-Search-Engine': searchEngine,
+        'X-Facets-Time': facetsExecutionTime.toString(),
+        'X-Search-Locale': resolvedLocale
+      }
+    })
+
+    // Set session cookie if newly generated
+    if (!request.cookies.get('search_session_id')) {
+      response.cookies.set('search_session_id', sessionId, {
+        maxAge: 86400, // 24 hours
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+      })
+    }
+
+    return response
   } catch (error) {
     console.error('Product search error:', error)
     return NextResponse.json(
@@ -225,4 +234,3 @@ export async function GET(request: NextRequest) {
     )
   }
 }
-

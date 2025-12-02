@@ -7,11 +7,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { Permission } from '@prisma/client'
+import { Permission } from '@/lib/permissions'
 import { prisma } from '@/lib/prisma'
 import type { Product as ProductType } from '@/types'
 import { withPermission } from '@/middleware/admin-auth'
 import { logUpdate, logDelete } from '@/lib/audit-logger'
+import { enqueueIndexJob, enqueueDeleteJob } from '@/lib/search-queue'
+import { ENABLE_MEILISEARCH } from '@/lib/meilisearch-client'
 
 interface ImageInput {
   url: string
@@ -27,15 +29,38 @@ interface VariantInput {
   priceModifier?: number
 }
 
-interface AdminSession {
-  adminUser: {
-    id: string
-    email: string
-    firstName: string
-    lastName: string
-    role: string
+import { type AdminSession } from '@/lib/auth-admin'
+
+import { Prisma } from '@prisma/client'
+
+// Define the exact type returned by the Prisma query
+type ProductWithRelations = Prisma.ProductGetPayload<{
+  include: {
+    category: true
+    images: true
+    variants: true
+    tags: {
+      include: {
+        tag: true
+      }
+    }
+    reviews: {
+      include: {
+        user: {
+          select: {
+            id: true
+            email: true
+            firstName: true
+            lastName: true
+          }
+        }
+      }
+    }
+    _count: {
+      select: { reviews: true }
+    }
   }
-}
+}>
 
 async function handleGET(
   request: NextRequest,
@@ -80,7 +105,7 @@ async function handleGET(
           select: { reviews: true }
         }
       }
-    })
+    }) as ProductWithRelations | null
 
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 })
@@ -312,6 +337,13 @@ async function handlePUT(
       updatedAt: product.updatedAt
     }
 
+    // Update in MeiliSearch (non-blocking)
+    if (ENABLE_MEILISEARCH) {
+      enqueueIndexJob(product.id).catch((err) => {
+        console.error('[MeiliSearch] Failed to enqueue product for indexing:', err)
+      })
+    }
+
     // Audit log the update
     if (adminSession?.adminUser) {
       await logUpdate(
@@ -364,6 +396,13 @@ async function handleDELETE(
         data: { status: 'ARCHIVED' }
       })
 
+      // Update in MeiliSearch to reflect archived status
+      if (ENABLE_MEILISEARCH) {
+        enqueueIndexJob(id).catch((err) => {
+          console.error('[MeiliSearch] Failed to enqueue product for indexing:', err)
+        })
+      }
+
       // Audit log the soft delete (archive)
       if (adminSession?.adminUser) {
         await logUpdate(
@@ -386,6 +425,13 @@ async function handleDELETE(
     await prisma.product.delete({
       where: { id }
     })
+
+    // Remove from MeiliSearch (non-blocking)
+    if (ENABLE_MEILISEARCH) {
+      enqueueDeleteJob(id).catch((err) => {
+        console.error('[MeiliSearch] Failed to enqueue product for deletion:', err)
+      })
+    }
 
     // Audit log the deletion
     if (adminSession?.adminUser) {

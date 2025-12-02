@@ -49,6 +49,8 @@ export interface SearchResultsProps {
   onQueryChange?: (query: string) => void
   onClearQuery?: () => void
   className?: string
+  correctedQuery?: string
+  originalQuery?: string
 }
 
 export function SearchResults({
@@ -57,6 +59,8 @@ export function SearchResults({
   onQueryChange,
   onClearQuery,
   className,
+  correctedQuery,
+  originalQuery,
 }: SearchResultsProps) {
   const [searchInput, setSearchInput] = React.useState(query)
 
@@ -116,6 +120,25 @@ export function SearchResults({
           </div>
         )}
       </div>
+
+      {/* Spell Correction Message */}
+      {correctedQuery && originalQuery && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="py-3">
+            <p className="text-sm text-anthracite-700">
+              Résultats pour{' '}
+              <span className="font-semibold">&ldquo;{correctedQuery}&rdquo;</span>
+              {' '}·{' '}
+              <button
+                onClick={() => onQueryChange?.(originalQuery)}
+                className="text-blue-600 hover:text-blue-700 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded"
+              >
+                Rechercher plutôt &ldquo;{originalQuery}&rdquo;
+              </button>
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* No Results */}
       {!hasResults && query && (

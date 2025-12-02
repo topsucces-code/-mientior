@@ -7,8 +7,9 @@ import { prisma } from '@/lib/prisma'
 import { requireAuth } from '@/lib/auth-server'
 import { verifyPaystackTransaction } from '@/lib/paystack'
 import { verifyFlutterwaveTransaction } from '@/lib/flutterwave'
-import { sendEmail } from '@/lib/email'
+import { sendOrderConfirmationEmail } from '@/lib/email'
 import { triggerNewOrder } from '@/lib/pusher'
+import { triggerCustomerLoyaltyUpdate } from '@/lib/real-time-updates'
 import {
   acquireMultipleStockLocks,
   releaseMultipleStockLocks,
@@ -34,6 +35,8 @@ export async function POST(request: NextRequest) {
       shippingOption,
       paymentReference,
       paymentGateway,
+      promoCode,
+      orderNotes,
     }: {
       items: Array<{ productId: string; variantId?: string; quantity: number }>
       shippingAddress: Address
@@ -41,6 +44,8 @@ export async function POST(request: NextRequest) {
       shippingOption: string
       paymentReference?: string
       paymentGateway?: 'PAYSTACK' | 'FLUTTERWAVE'
+      promoCode?: string
+      orderNotes?: string
     } = body
 
     // Validate required fields
@@ -70,7 +75,7 @@ export async function POST(request: NextRequest) {
       }
     } else if (paymentGateway === 'FLUTTERWAVE') {
       try {
-        const verification = await verifyFlutterwaveTransaction(paymentReference)
+        const verification = await verifyFlutterwaveTransaction(paymentReference) as any
         if (verification.status !== 'successful') {
           return NextResponse.json({ error: 'Payment not confirmed' }, { status: 400 })
         }
@@ -215,10 +220,11 @@ export async function POST(request: NextRequest) {
         tax: tax / 100,
         discount: discount / 100,
         total: total / 100,
-        shippingAddress,
-        billingAddress: billingAddress || shippingAddress,
+        shippingAddress: shippingAddress as any,
+        billingAddress: (billingAddress || shippingAddress) as any,
         estimatedDeliveryMin: estimatedDelivery.min,
         estimatedDeliveryMax: estimatedDelivery.max,
+        notes: orderNotes || null,
         paymentReference,
         paymentGateway,
         items: {
@@ -249,33 +255,79 @@ export async function POST(request: NextRequest) {
       })
 
       if (user) {
+        const pointsEarned = Math.floor(total / 100) // 1 point per euro
+        const newBalance = user.loyaltyPoints + pointsEarned
+        
         await prisma.user.update({
           where: { id: userId },
           data: {
             totalOrders: user.totalOrders + 1,
             totalSpent: user.totalSpent + (total / 100), // Convert cents to euros
-            loyaltyPoints: user.loyaltyPoints + Math.floor(total / 100) // 1 point per euro
+            loyaltyPoints: newBalance
           }
         })
+
+        // Trigger Customer 360 real-time update for loyalty points
+        if (pointsEarned > 0) {
+          await triggerCustomerLoyaltyUpdate(userId, {
+            pointsChange: pointsEarned,
+            newBalance,
+            reason: 'Order purchase reward',
+            timestamp: new Date(),
+          })
+        }
       }
     } catch (error) {
       console.error('Error updating user stats:', error)
     }
 
-    // Send confirmation email
+    // Send order confirmation email with new template
     try {
-      await sendEmail({
-        to: shippingAddress.email || session.user.email,
-        subject: `Confirmation de commande ${orderNumber}`,
-        html: `
-          <h1>Merci pour votre commande!</h1>
-          <p>Numéro de commande: <strong>${orderNumber}</strong></p>
-          <p>Total: <strong>${(total / 100).toFixed(2)}€</strong></p>
-          <p>Livraison estimée: ${estimatedDelivery.min.toLocaleDateString('fr-FR')} - ${estimatedDelivery.max.toLocaleDateString('fr-FR')}</p>
-        `,
+      const customerEmail = order.email || session.user.email || shippingAddress.email || ''
+      const shippingAddr = typeof order.shippingAddress === 'string'
+        ? JSON.parse(order.shippingAddress)
+        : order.shippingAddress
+
+      await sendOrderConfirmationEmail({
+        orderNumber: order.orderNumber,
+        customerName: `${shippingAddr.firstName} ${shippingAddr.lastName}`,
+        email: customerEmail,
+        items: order.items.map((item: any) => ({
+          name: item.name || item.productName || '',
+          quantity: item.quantity,
+          price: Math.round(item.price * 100), // Convert to cents
+          image: item.productImage || '',
+        })),
+        subtotal: Math.round(order.subtotal * 100), // Convert to cents
+        shippingCost: Math.round(order.shippingCost * 100),
+        tax: Math.round(order.tax * 100),
+        discount: Math.round(order.discount * 100),
+        total: Math.round(order.total * 100),
+        shippingAddress: {
+          firstName: shippingAddr.firstName,
+          lastName: shippingAddr.lastName,
+          line1: shippingAddr.line1,
+          line2: shippingAddr.line2,
+          city: shippingAddr.city,
+          postalCode: shippingAddr.postalCode,
+          country: shippingAddr.country,
+          phone: shippingAddr.phone,
+        },
+        orderNotes: order.notes || undefined,
+        orderDate: new Date().toLocaleDateString('fr-FR', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }),
+        estimatedDelivery: estimatedDelivery.min.toLocaleDateString('fr-FR', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }),
       })
-    } catch (error) {
-      console.error('Error sending confirmation email:', error)
+    } catch (emailError) {
+      console.error('Failed to send order confirmation email:', emailError)
+      // Don't fail the request if email fails
     }
 
     // Fix Date serialization (Comment 7): Return ISO strings instead of Date objects

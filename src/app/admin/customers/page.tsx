@@ -36,6 +36,7 @@ import {
   DeleteOutlined,
   GiftOutlined,
   TeamOutlined,
+  DashboardOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
@@ -273,6 +274,11 @@ export default function CustomersList() {
           <Link href={`/admin/customers/show/${record.id}`}>
             <Button type="link" size="small" icon={<UserOutlined />}>
               {t("common.view")}
+            </Button>
+          </Link>
+          <Link href={`/admin/customers/360/${record.id}`}>
+            <Button type="link" size="small" icon={<DashboardOutlined />}>
+              360
             </Button>
           </Link>
         </Space>

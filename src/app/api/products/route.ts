@@ -4,11 +4,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { Prisma, Permission } from '@prisma/client'
+import { Prisma } from '@prisma/client'
+import { Permission } from '@/lib/permissions'
 import { prisma } from '@/lib/prisma'
 import type { Product as ProductType } from '@/types'
 import { withPermission } from '@/middleware/admin-auth'
 import { logCreate } from '@/lib/audit-logger'
+import { enqueueIndexJob } from '@/lib/search-queue'
+import { ENABLE_MEILISEARCH } from '@/lib/meilisearch-client'
 
 interface ImageInput {
   url: string
@@ -287,6 +290,14 @@ async function handlePOST(request: NextRequest, { adminSession }: { params?: unk
       })),
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
+    }
+
+    // Index in MeiliSearch (non-blocking)
+    if (ENABLE_MEILISEARCH) {
+      enqueueIndexJob(product.id).catch((err) => {
+        console.error('[MeiliSearch] Failed to enqueue product for indexing:', err)
+        // Don't fail the request if indexing fails
+      })
     }
 
     // Log product creation

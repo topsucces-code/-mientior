@@ -58,83 +58,170 @@ async function main() {
   ])
   console.log(`✅ Created ${users.length} users`)
 
-  // Create categories (hierarchical)
+  // Create categories (hierarchical) - French localization
   console.log('📁 Creating categories...')
-  const electronics = await prisma.category.create({
+  
+  // Main Category: Électronique
+  const electronique = await prisma.category.create({
     data: {
-      name: 'Electronics',
-      slug: 'electronics',
-      description: 'Electronic devices and accessories',
+      name: 'Électronique',
+      slug: 'electronique',
+      description: 'Tous vos appareils électroniques',
       order: 1,
       isActive: true,
     },
   })
 
-  const laptops = await prisma.category.create({
+  // Électronique > Ordinateurs
+  const ordinateurs = await prisma.category.create({
     data: {
-      name: 'Laptops',
-      slug: 'laptops',
-      description: 'Portable computers',
-      parentId: electronics.id,
+      name: 'Ordinateurs',
+      slug: 'ordinateurs',
+      description: 'PC portables, de bureau et tablettes',
+      parentId: electronique.id,
       order: 1,
       isActive: true,
     },
   })
 
-  const phones = await prisma.category.create({
+  // Électronique > Smartphones
+  const smartphones = await prisma.category.create({
     data: {
       name: 'Smartphones',
       slug: 'smartphones',
-      description: 'Mobile phones',
-      parentId: electronics.id,
+      description: 'Téléphones mobiles et accessoires',
+      parentId: electronique.id,
       order: 2,
       isActive: true,
     },
   })
 
-  const clothing = await prisma.category.create({
+  // Électronique > Accessoires
+  const accessoires = await prisma.category.create({
     data: {
-      name: 'Clothing',
-      slug: 'clothing',
-      description: 'Fashion and apparel',
-      order: 2,
-      isActive: true,
-    },
-  })
-
-  const menClothing = await prisma.category.create({
-    data: {
-      name: "Men's Clothing",
-      slug: 'mens-clothing',
-      description: 'Clothing for men',
-      parentId: clothing.id,
-      order: 1,
-      isActive: true,
-    },
-  })
-
-  const womenClothing = await prisma.category.create({
-    data: {
-      name: "Women's Clothing",
-      slug: 'womens-clothing',
-      description: 'Clothing for women',
-      parentId: clothing.id,
-      order: 2,
-      isActive: true,
-    },
-  })
-
-  const home = await prisma.category.create({
-    data: {
-      name: 'Home & Garden',
-      slug: 'home-garden',
-      description: 'Home improvement and garden supplies',
+      name: 'Accessoires',
+      slug: 'accessoires',
+      description: 'Écouteurs, chargeurs et coques',
+      parentId: electronique.id,
       order: 3,
       isActive: true,
     },
   })
 
-  console.log('✅ Created 7 categories')
+  // Main Category: Mode
+  const mode = await prisma.category.create({
+    data: {
+      name: 'Mode',
+      slug: 'mode',
+      description: 'Vêtements et accessoires de mode',
+      order: 2,
+      isActive: true,
+    },
+  })
+
+  // Mode > Homme
+  const homme = await prisma.category.create({
+    data: {
+      name: 'Homme',
+      slug: 'homme',
+      description: 'Vêtements pour homme',
+      parentId: mode.id,
+      order: 1,
+      isActive: true,
+    },
+  })
+
+  // Mode > Femme
+  const femme = await prisma.category.create({
+    data: {
+      name: 'Femme',
+      slug: 'femme',
+      description: 'Vêtements pour femme',
+      parentId: mode.id,
+      order: 2,
+      isActive: true,
+    },
+  })
+
+  // Main Category: Maison & Jardin
+  const maison = await prisma.category.create({
+    data: {
+      name: 'Maison & Jardin',
+      slug: 'maison',
+      description: 'Meubles, décoration et électroménager',
+      order: 3,
+      isActive: true,
+    },
+  })
+
+  // Maison > Électroménager
+  const electromenager = await prisma.category.create({
+    data: {
+      name: 'Électroménager',
+      slug: 'electromenager',
+      description: 'Appareils pour la maison',
+      parentId: maison.id,
+      order: 1,
+      isActive: true,
+    },
+  })
+
+  // Main Category: Sports & Loisirs
+  const sports = await prisma.category.create({
+    data: {
+      name: 'Sports & Loisirs',
+      slug: 'sports',
+      description: 'Équipements sportifs et loisirs',
+      order: 4,
+      isActive: true,
+    },
+  })
+
+  // Main Category: Beauté & Santé
+  const beaute = await prisma.category.create({
+    data: {
+      name: 'Beauté & Santé',
+      slug: 'beaute',
+      description: 'Produits de beauté et santé',
+      order: 5,
+      isActive: true,
+    },
+  })
+
+  // Main Category: Livres & Médias
+  const livres = await prisma.category.create({
+    data: {
+      name: 'Livres & Médias',
+      slug: 'livres',
+      description: 'Livres, musique et films',
+      order: 6,
+      isActive: true,
+    },
+  })
+
+  // Main Category: Jouets & Enfants
+  const jouets = await prisma.category.create({
+    data: {
+      name: 'Jouets & Enfants',
+      slug: 'jouets',
+      description: 'Jouets et articles pour enfants',
+      order: 7,
+      isActive: true,
+    },
+  })
+
+  // Main Category: Auto & Moto
+  const auto = await prisma.category.create({
+    data: {
+      name: 'Auto & Moto',
+      slug: 'auto',
+      description: 'Pièces et accessoires auto',
+      order: 8,
+      isActive: true,
+    },
+  })
+
+  console.log('✅ Created 14 categories (8 main + 6 subcategories)')
 
   // Create tags
   console.log('🏷️  Creating tags...')
@@ -165,7 +252,7 @@ async function main() {
       featured: true,
       onSale: true,
       status: 'ACTIVE',
-      categoryId: laptops.id,
+      categoryId: ordinateurs.id,
       images: {
         create: [
           { url: '/images/macbook-pro-1.jpg', alt: 'MacBook Pro front view', type: 'IMAGE', order: 0 },
@@ -204,7 +291,7 @@ async function main() {
       featured: true,
       onSale: false,
       status: 'ACTIVE',
-      categoryId: phones.id,
+      categoryId: smartphones.id,
       images: {
         create: [
           { url: '/images/iphone-15-pro-1.jpg', alt: 'iPhone 15 Pro Natural Titanium', type: 'IMAGE', order: 0 },
@@ -241,7 +328,7 @@ async function main() {
       featured: false,
       onSale: true,
       status: 'ACTIVE',
-      categoryId: menClothing.id,
+      categoryId: homme.id,
       images: {
         create: [
           { url: '/images/tshirt-white-1.jpg', alt: 'White organic cotton t-shirt', type: 'IMAGE', order: 0 },
@@ -278,7 +365,7 @@ async function main() {
       featured: true,
       onSale: false,
       status: 'ACTIVE',
-      categoryId: womenClothing.id,
+      categoryId: femme.id,
       images: {
         create: [
           { url: '/images/dress-floral-1.jpg', alt: 'Floral summer dress front', type: 'IMAGE', order: 0 },
@@ -316,7 +403,7 @@ async function main() {
       featured: false,
       onSale: true,
       status: 'ACTIVE',
-      categoryId: home.id,
+      categoryId: electromenager.id,
       images: {
         create: [
           { url: '/images/smart-speaker-1.jpg', alt: 'Smart speaker gray', type: 'IMAGE', order: 0 },
@@ -349,6 +436,7 @@ async function main() {
       status: 'APPROVED',
       productId: laptop1.id,
       userId: users[1].id,
+      userName: 'Jane Smith',
     },
   })
 
@@ -360,6 +448,7 @@ async function main() {
       status: 'APPROVED',
       productId: phone1.id,
       userId: users[0].id,
+      userName: 'John Doe',
     },
   })
 
@@ -371,6 +460,7 @@ async function main() {
       status: 'APPROVED',
       productId: tshirt1.id,
       userId: users[2].id,
+      userName: 'Bob Wilson',
     },
   })
 

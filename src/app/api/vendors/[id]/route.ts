@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Permission } from '@/lib/permissions';
 import { prisma } from '@/lib/prisma';
 import { withPermission } from '@/middleware/admin-auth';
-import { Permission } from '@prisma/client';
-import { logAuditAction } from '@/lib/audit-logger';
+import { logAction } from '@/lib/audit-logger';
 import { invalidateCache } from '@/lib/redis';
 
+import { type AdminSession } from '@/lib/auth-admin';
+
 // GET /api/vendors/[id] - Get single vendor
-const handleGET = async (req: NextRequest, { params }: any) => {
+const handleGET = async (req: NextRequest, { params }: { params: Record<string, string> }) => {
   const vendor = await prisma.vendor.findUnique({
     where: { id: params.id },
     include: {
@@ -40,7 +42,7 @@ const handleGET = async (req: NextRequest, { params }: any) => {
 export const GET = withPermission(Permission.VENDORS_READ, handleGET);
 
 // PATCH /api/vendors/[id] - Update vendor
-const handlePATCH = async (req: NextRequest, { params, adminSession }: any) => {
+const handlePATCH = async (req: NextRequest, { params, adminSession }: { params: Record<string, string>, adminSession: AdminSession }) => {
   const adminUser = adminSession.adminUser;
   const body = await req.json();
 
@@ -107,7 +109,7 @@ const handlePATCH = async (req: NextRequest, { params, adminSession }: any) => {
 export const PATCH = withPermission(Permission.VENDORS_WRITE, handlePATCH);
 
 // DELETE /api/vendors/[id] - Delete vendor (soft delete)
-const handleDELETE = async (req: NextRequest, { params, adminSession }: any) => {
+const handleDELETE = async (req: NextRequest, { params, adminSession }: { params: Record<string, string>, adminSession: AdminSession }) => {
   const adminUser = adminSession.adminUser;
   // Check if vendor has active orders
   const activeOrders = await prisma.order.count({
@@ -133,7 +135,7 @@ const handleDELETE = async (req: NextRequest, { params, adminSession }: any) => 
   });
 
   // Log audit action
-  await logAuditAction({
+  await logAction({
     action: 'DELETE',
     resource: 'vendors',
     resourceId: vendor.id,

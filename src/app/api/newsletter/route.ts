@@ -3,7 +3,8 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Only initialize Resend if API key is available
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 // Validation schema
 const newsletterSchema = z.object({
@@ -128,7 +129,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Send confirmation email using Resend
-    if (process.env.RESEND_API_KEY) {
+    if (resend) {
       try {
         await resend.emails.send({
           from: process.env.EMAIL_FROM || 'noreply@mientior.com',

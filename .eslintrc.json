@@ -10,5 +10,19 @@
   },
   "parserOptions": {
     "project": "./tsconfig.json"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["scripts/**/*.js"],
+      "parserOptions": {
+        "project": null
+      }
+    },
+    {
+      "files": ["scripts/**/*.ts"],
+      "parserOptions": {
+        "project": null
+      }
+    }
+  ]
 }

@@ -18,11 +18,16 @@ function CountdownTimer({
   className,
   ...props
 }: CountdownTimerProps) {
-  const [timeRemaining, setTimeRemaining] = React.useState(
-    calculateTimeRemaining(targetDate)
-  )
+  // Initialize with null to avoid hydration mismatch
+  // Time-based values differ between server and client
+  const [timeRemaining, setTimeRemaining] = React.useState<ReturnType<typeof calculateTimeRemaining> | null>(null)
+  const [isMounted, setIsMounted] = React.useState(false)
 
   React.useEffect(() => {
+    setIsMounted(true)
+    // Calculate initial value on client only
+    setTimeRemaining(calculateTimeRemaining(targetDate))
+
     const interval = setInterval(() => {
       const remaining = calculateTimeRemaining(targetDate)
       setTimeRemaining(remaining)
@@ -35,6 +40,18 @@ function CountdownTimer({
 
     return () => clearInterval(interval)
   }, [targetDate, onComplete])
+
+  // Show placeholder during SSR and initial hydration
+  if (!isMounted || !timeRemaining) {
+    return (
+      <div className={cn('flex gap-2', className)} {...props}>
+        <TimeCardSkeleton />
+        <TimeCardSkeleton />
+        <TimeCardSkeleton />
+        <TimeCardSkeleton />
+      </div>
+    )
+  }
 
   const { days, hours, minutes, seconds, total } = timeRemaining
 
@@ -103,6 +120,17 @@ function TimeCard({ value, label }: { value: number; label: string }) {
         {value.toString().padStart(2, '0')}
       </div>
       <span className="mt-1 text-xs text-nuanced-500">{label}</span>
+    </div>
+  )
+}
+
+function TimeCardSkeleton() {
+  return (
+    <div className="flex flex-col items-center">
+      <div className="flex h-16 w-14 items-center justify-center rounded-md bg-gradient-to-br from-orange-500/50 to-orange-600/50 text-white shadow-elevation-2 animate-pulse">
+        <span className="text-price-lg">--</span>
+      </div>
+      <span className="mt-1 text-xs text-nuanced-500">-</span>
     </div>
   )
 }

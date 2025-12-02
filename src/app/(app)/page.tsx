@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { prisma } from '@/lib/prisma'
+
 import HeroSection from '@/components/home/hero-section'
 import SocialProofBar from '@/components/home/social-proof-bar'
 import CategoriesNav from '@/components/home/categories-nav'

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Download, Package, Truck, Home, HelpCircle } from "lucide-react";
+import { Check, Download, Package, Truck, Home, HelpCircle, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
@@ -236,6 +236,21 @@ export function OrderConfirmation({ order }: OrderConfirmationProps) {
             </CardContent>
           </Card>
         </div>
+
+        {/* Order Notes */}
+        {order.notes && (
+          <Card className="mb-6 animate-fade-in-up animation-delay-500">
+            <CardContent className="p-6">
+              <h3 className="mb-3 flex items-center gap-2 font-semibold text-anthracite-700">
+                <FileText className="h-5 w-5 text-orange-500" />
+                Instructions de livraison
+              </h3>
+              <p className="whitespace-pre-wrap text-sm text-nuanced-700">
+                {order.notes}
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Timeline */}
         <Card className="mb-6 animate-fade-in-up animation-delay-600">

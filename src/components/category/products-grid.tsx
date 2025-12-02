@@ -1,7 +1,8 @@
 'use client'
 
-import React from 'react'
-import { ShoppingCart } from 'lucide-react'
+import React, { useState } from 'react'
+import Image from 'next/image'
+import { ShoppingCart, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ProductCard } from '@/components/ui/product-card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -11,6 +12,9 @@ import { EmptyState } from './empty-state'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
 import type { Product } from '@/types'
+import { useCartStore } from '@/stores/cart.store'
+import { toast } from 'sonner'
+import { useHeaderSafe } from '@/contexts/header-context'
 
 export interface ProductsGridProps {
   products: Product[]
@@ -38,6 +42,52 @@ export function ProductsGrid({
   totalCount
 }: ProductsGridProps) {
   const prefersReducedMotion = useReducedMotion()
+  const addToCart = useCartStore((state) => state.addItem)
+  const [addedProducts, setAddedProducts] = useState<Set<string>>(new Set())
+  const headerContext = useHeaderSafe()
+
+  const handleAddToCart = (product: Product) => {
+    if (product.stock === 0) {
+      toast.error("Rupture de stock", {
+        description: "Ce produit n'est plus disponible.",
+      })
+      return
+    }
+
+    addToCart({
+      id: product.id,
+      productId: product.id,
+      productName: product.name,
+      productSlug: product.slug,
+      productImage: product.images[0]?.url || '/placeholder-product.jpg',
+      price: product.price,
+      quantity: 1,
+      stock: product.stock,
+    })
+    
+    // Visual feedback for list view
+    setAddedProducts(prev => new Set(prev).add(product.id))
+    setTimeout(() => {
+      setAddedProducts(prev => {
+        const next = new Set(prev)
+        next.delete(product.id)
+        return next
+      })
+    }, 2000)
+    
+    toast.success("Ajouté au panier !", {
+      description: `${product.name} a été ajouté à votre panier.`,
+      action: {
+        label: "Voir le panier",
+        onClick: () => window.location.href = '/cart'
+      }
+    })
+    
+    // Open cart preview after adding item
+    if (headerContext?.openCart) {
+      setTimeout(() => headerContext.openCart(), 300)
+    }
+  }
 
   const { ref: loadMoreRef } = useIntersectionObserver<HTMLDivElement>({
     threshold: 0.1,
@@ -111,10 +161,12 @@ export function ProductsGrid({
               >
                 {/* Image */}
                 <div className="flex-shrink-0 w-[180px] h-[180px] relative rounded-lg overflow-hidden bg-platinum-100">
-                  <img
+                  <Image
                     src={product.images[0]?.url || '/placeholder-product.jpg'}
                     alt={product.name}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="180px"
                   />
                   {badgeObject && (
                     <div className="absolute top-2 left-2 z-10 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded">
@@ -168,15 +220,31 @@ export function ProductsGrid({
                       <TooltipTrigger asChild>
                         <span className="inline-flex">
                           <Button 
-                            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 h-10 w-10 p-0 flex items-center justify-center"
-                            aria-label="Ajouter au panier"
+                            className={cn(
+                              "h-10 w-10 p-0 flex items-center justify-center transition-all duration-300",
+                              addedProducts.has(product.id)
+                                ? "bg-green-500 hover:bg-green-500 scale-110 shadow-lg"
+                                : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
+                            )}
+                            aria-label={addedProducts.has(product.id) ? "Ajouté au panier" : "Ajouter au panier"}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              if (!addedProducts.has(product.id)) {
+                                handleAddToCart(product)
+                              }
+                            }}
+                            disabled={product.stock === 0 || addedProducts.has(product.id)}
                           >
-                            <ShoppingCart className="h-5 w-5" />
+                            {addedProducts.has(product.id) ? (
+                              <Check className="h-5 w-5 text-white animate-in zoom-in duration-200" />
+                            ) : (
+                              <ShoppingCart className="h-5 w-5" />
+                            )}
                           </Button>
                         </span>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Ajouter au panier</p>
+                        <p>{addedProducts.has(product.id) ? "Ajouté !" : "Ajouter au panier"}</p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
@@ -203,6 +271,8 @@ export function ProductsGrid({
                 reviewCount={product.reviewCount}
                 onSale={product.onSale}
                 badge={product.badge}
+                inStock={product.stock > 0}
+                onAddToCart={() => handleAddToCart(product)}
               />
             </div>
           )

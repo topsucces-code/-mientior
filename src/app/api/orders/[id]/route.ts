@@ -3,18 +3,31 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { Permission } from '@prisma/client'
+import { Permission } from '@/lib/permissions'
 import { prisma } from '@/lib/prisma'
-import { requireAuth, getSession } from '@/lib/auth-server'
-import { getAdminSession } from '@/lib/auth-admin'
+import { requireAuth } from '@/lib/auth-server'
+import { getAdminSession, type AdminSession } from '@/lib/auth-admin'
 import { withPermission } from '@/middleware/admin-auth'
 import { logUpdate } from '@/lib/audit-logger'
 import { triggerOrderUpdate } from '@/lib/pusher'
-import type { Order } from '@/types'
+import { triggerCustomerOrderUpdate } from '@/lib/real-time-updates'
+import type { Order, Address } from '@/types'
+
+// Type for OrderItem with product relation
+type OrderItemWithProduct = {
+  productId: string
+  quantity: number
+  price: number
+  product: {
+    id: string
+    name: string
+    images: Array<{ url: string }>
+  }
+}
 
 async function handleGET(
   request: NextRequest,
-  { params, adminSession }: { params: { id: string }, adminSession: any }
+  { params, adminSession }: { params: Record<string, string>, adminSession?: AdminSession | null }
 ) {
   try {
     // Check if admin access or require user authentication
@@ -39,13 +52,6 @@ async function handleGET(
                   take: 1
                 }
               }
-            },
-            variant: {
-              select: {
-                sku: true,
-                size: true,
-                color: true
-              }
             }
           }
         }
@@ -66,29 +72,25 @@ async function handleGET(
       id: order.id,
       orderNumber: order.orderNumber,
       userId: order.userId,
-      items: order.items.map(item => ({
+      items: order.items.map((item: OrderItemWithProduct) => ({
         productId: item.productId,
-        productName: item.product.name,
-        productImage: item.product.images[0]?.url,
-        variant: item.variant ? {
-          sku: item.variant.sku,
-          size: item.variant.size,
-          color: item.variant.color
-        } : undefined,
+        name: item.product.name,
+        productImage: item.product.images[0]?.url || '',
+        variant: undefined, // Variant data not available in current schema
         quantity: item.quantity,
         price: item.price,
         subtotal: item.price * item.quantity
       })),
       // Return uppercase enum values as-is for admin UI compatibility
-      status: order.status as any,
-      paymentStatus: order.paymentStatus as any,
+      status: order.status.toLowerCase() as Order['status'],
+      paymentStatus: order.paymentStatus.toLowerCase() as Order['paymentStatus'],
       subtotal: order.subtotal,
       shippingCost: order.shipping,
       tax: order.tax,
       discount: 0,
       total: order.total,
-      shippingAddress: order.shippingAddress as any,
-      billingAddress: order.billingAddress as any,
+      shippingAddress: order.shippingAddress as unknown as Address,
+      billingAddress: order.billingAddress as unknown as Address | undefined,
       trackingNumber: undefined,
       estimatedDelivery: undefined,
       createdAt: order.createdAt,
@@ -96,10 +98,10 @@ async function handleGET(
     }
 
     return NextResponse.json(transformedOrder)
-  } catch (error: any) {
+  } catch (error) {
     console.error('Order fetch error:', error)
 
-    if (error.message === 'Unauthorized') {
+    if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
 
@@ -112,7 +114,7 @@ async function handleGET(
 
 async function handlePUT(
   request: NextRequest,
-  { params, adminSession }: { params: { id: string }, adminSession: any }
+  { params, adminSession }: { params: Record<string, string>, adminSession: AdminSession }
 ) {
   try {
     const body = await request.json()
@@ -123,8 +125,7 @@ async function handlePUT(
       include: {
         items: {
           include: {
-            product: true,
-            variant: true
+            product: true
           }
         }
       }
@@ -143,8 +144,6 @@ async function handlePUT(
       data: {
         status: body.status?.toUpperCase(),
         paymentStatus: body.paymentStatus?.toUpperCase(),
-        trackingNumber: body.trackingNumber,
-        estimatedDelivery: body.estimatedDelivery ? new Date(body.estimatedDelivery) : undefined,
         notes: body.notes
       },
       include: {
@@ -159,29 +158,21 @@ async function handlePUT(
                   take: 1
                 }
               }
-            },
-            variant: {
-              select: {
-                sku: true,
-                size: true,
-                color: true
-              }
             }
           }
         },
-        user: true
       }
     })
 
     // Audit log the update
-    await logUpdate({
-      resource: 'order',
-      resourceId: params.id,
+    await logUpdate(
+      'order',
+      params.id as string,
       before,
-      after: order,
-      adminUser: adminSession.adminUser,
+      order,
+      adminSession.adminUser,
       request
-    })
+    )
 
     // Trigger real-time notification via Pusher to notify admins of order updates
     await triggerOrderUpdate(order.id, {
@@ -191,36 +182,41 @@ async function handlePUT(
       total: order.total
     })
 
+    // Trigger Customer 360 real-time update
+    await triggerCustomerOrderUpdate(order.userId, {
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      status: order.status,
+      total: order.total,
+      timestamp: new Date(),
+    })
+
     // Transform response to match GET endpoint (consistent shape)
     const transformedOrder: Order = {
       id: order.id,
       orderNumber: order.orderNumber,
       userId: order.userId,
-      items: order.items.map(item => ({
+      items: order.items.map((item: OrderItemWithProduct) => ({
         productId: item.productId,
-        productName: item.product.name,
-        productImage: item.product.images[0]?.url,
-        variant: item.variant ? {
-          sku: item.variant.sku,
-          size: item.variant.size,
-          color: item.variant.color
-        } : undefined,
+        name: item.product.name,
+        productImage: item.product.images[0]?.url || '',
+        variant: undefined, // Variant data not available in current schema
         quantity: item.quantity,
         price: item.price,
         subtotal: item.price * item.quantity
       })),
       // Return uppercase enum values as-is for admin UI compatibility
-      status: order.status as any,
-      paymentStatus: order.paymentStatus as any,
+      status: order.status.toLowerCase() as Order['status'],
+      paymentStatus: order.paymentStatus.toLowerCase() as Order['paymentStatus'],
       subtotal: order.subtotal,
       shippingCost: order.shipping,
       tax: order.tax,
       discount: 0,
       total: order.total,
-      shippingAddress: order.shippingAddress as any,
-      billingAddress: order.billingAddress as any,
-      trackingNumber: order.trackingNumber || undefined,
-      estimatedDelivery: order.estimatedDelivery || undefined,
+      shippingAddress: order.shippingAddress as unknown as Address,
+      billingAddress: order.billingAddress as unknown as Address | undefined,
+      trackingNumber: undefined, // Not in schema
+      estimatedDelivery: undefined, // Not in schema
       createdAt: order.createdAt,
       updatedAt: order.updatedAt
     }
@@ -236,7 +232,7 @@ async function handlePUT(
 // GET can be accessed by users or admins (users checked inside handler)
 export const GET = async (request: NextRequest, { params }: { params: { id: string } }) => {
   // Try to get admin session (won't throw if not admin)
-  const adminSession = await getAdminSession(request)
+  const adminSession = await getAdminSession()
 
   // If admin session exists, check permissions
   if (adminSession) {

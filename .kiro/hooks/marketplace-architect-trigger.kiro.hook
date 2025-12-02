@@ -1,0 +1,24 @@
+{
+  "enabled": true,
+  "name": "Marketplace Architecture Assistant",
+  "description": "Automatically consults the marketplace-architect agent when detecting marketplace-related patterns in code changes. Triggers when files related to vendors, commissions, payouts, multi-vendor orders, or marketplace-specific functionality are edited. Provides expert guidance on marketplace architecture, vendor management systems, commission structures, payout systems, and multi-vendor order management.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "prisma/schema.prisma",
+      "src/app/admin/vendors/**/*",
+      "src/app/api/vendors/**/*",
+      "src/components/vendor/**/*",
+      "src/lib/commission*",
+      "src/lib/payout*",
+      "src/lib/vendor*",
+      "src/types/vendor*",
+      "src/stores/vendor*"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "I've detected changes to marketplace-related files. As the marketplace-architect agent, please:\n\n1. **Analyze the changes** - Review what marketplace functionality is being implemented or modified\n2. **Assess architecture** - Evaluate if the approach follows marketplace best practices for multi-vendor systems\n3. **Provide guidance** - Offer expert recommendations on:\n   - Data model design for vendors, commissions, and payouts\n   - Multi-vendor order splitting and fulfillment flows\n   - Commission calculation strategies (tiered, category-based, vendor-specific)\n   - Payout scheduling and reconciliation\n   - Vendor dashboard requirements\n   - Trust & safety considerations\n4. **Consider stakeholders** - Address needs of platform admins, vendors, and customers\n5. **Include implementation** - Provide production-ready code examples using the Next.js 15 + Prisma + PostgreSQL stack\n6. **Local context** - Adapt solutions for the Côte d'Ivoire market (Mobile Money, French language)\n\nFocus on providing comprehensive, scalable marketplace architecture that works for both 10 vendors and 10,000 vendors."
+  }
+}

@@ -3,7 +3,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { Permission } from '@prisma/client'
+import { Permission } from '@/lib/permissions';
 import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth-server'
 import { getAdminSession } from '@/lib/auth-admin'
@@ -12,7 +12,7 @@ import { logUpdate } from '@/lib/audit-logger'
 
 async function handleGET(
   request: NextRequest,
-  { params, adminSession }: { params: { id: string }, adminSession: any }
+  { params, adminSession }: { params: Record<string, string>, adminSession?: any }
 ) {
   try {
     const user = await prisma.user.findUnique({
@@ -28,7 +28,6 @@ async function handleGET(
         totalSpent: true,
         addresses: true,
         recentlyViewed: true,
-        searchHistory: true,
         createdAt: true,
         updatedAt: true,
         reviews: {
@@ -41,7 +40,7 @@ async function handleGET(
           }
         }
       }
-    })
+    }) as any
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
@@ -61,7 +60,6 @@ async function handleGET(
       totalSpent: user.totalSpent,
       addresses: user.addresses,
       recentlyViewed: user.recentlyViewed,
-      searchHistory: user.searchHistory,
       reviews: user.reviews,
       reviewCount: user._count.reviews,
       createdAt: user.createdAt,
@@ -77,7 +75,7 @@ async function handleGET(
 
 async function handlePUT(
   request: NextRequest,
-  { params, adminSession }: { params: { id: string }, adminSession: any }
+  { params, adminSession }: { params: Record<string, string>, adminSession?: any }
 ) {
   try {
     const body = await request.json()
@@ -122,7 +120,6 @@ async function handlePUT(
         totalSpent: true,
         addresses: true,
         recentlyViewed: true,
-        searchHistory: true,
         createdAt: true,
         updatedAt: true,
         _count: {
@@ -159,7 +156,6 @@ async function handlePUT(
       totalSpent: user.totalSpent,
       addresses: user.addresses,
       recentlyViewed: user.recentlyViewed,
-      searchHistory: user.searchHistory,
       reviewCount: user._count.reviews,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt

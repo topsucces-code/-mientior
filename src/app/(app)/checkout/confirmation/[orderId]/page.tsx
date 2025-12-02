@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   },
 };
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{
     orderId: string;

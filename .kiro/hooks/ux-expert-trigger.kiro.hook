@@ -1,0 +1,24 @@
+{
+  "enabled": true,
+  "name": "UX Expert Review",
+  "description": "Automatically triggers the UX expert agent to review user-facing components, pages, and interfaces for usability, accessibility, and UX best practices when files are edited in customer-facing areas",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/app/(app)/**/*.tsx",
+      "src/components/home/**/*.tsx",
+      "src/components/products/**/*.tsx",
+      "src/components/cart/**/*.tsx",
+      "src/components/checkout/**/*.tsx",
+      "src/components/category/**/*.tsx",
+      "src/components/account/**/*.tsx",
+      "src/components/auth/**/*.tsx",
+      "src/components/search/**/*.tsx"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A user-facing component or page has been modified. Please review the changes from a UX perspective:\n\n**File changed:** {filePath}\n\n**Your review should cover:**\n\n1. **Usability Analysis**: Evaluate the user flow, interaction patterns, and ease of use\n2. **Accessibility Compliance**: Check for WCAG 2.1 AA compliance (keyboard navigation, ARIA labels, color contrast, screen reader support)\n3. **Visual Hierarchy**: Assess information architecture and content organization\n4. **Mobile Responsiveness**: Ensure the design works well on mobile devices\n5. **Error Prevention & Handling**: Review form validation, error messages, and user feedback\n6. **Cognitive Load**: Check if the interface follows Miller's Law and minimizes user effort\n7. **Consistency**: Verify adherence to design system and platform conventions\n8. **Conversion Optimization**: For e-commerce flows (cart, checkout, product pages), identify friction points\n\n**Provide:**\n- Specific issues found with severity ratings (Critical/High/Medium/Low)\n- Actionable recommendations with code examples where applicable\n- Best practice references (Nielsen's heuristics, UX laws, WCAG guidelines)\n- Alternative design approaches if current implementation has major issues\n\nFocus on practical, implementable improvements that enhance the user experience."
+  }
+}

@@ -33,6 +33,8 @@ export async function POST(request: NextRequest) {
       email,
       promoCode,
       orderId,
+      orderNotes,
+      totals,
     }: {
       items: OrderItem[]
       shippingAddress: Address
@@ -42,6 +44,14 @@ export async function POST(request: NextRequest) {
       email?: string
       promoCode?: string
       orderId?: string // For updating existing provisional order
+      orderNotes?: string
+      totals?: {
+        subtotal: number
+        shippingCost: number
+        tax: number
+        discount: number
+        total: number
+      }
     } = body
 
     // Validation
@@ -97,13 +107,14 @@ export async function POST(request: NextRequest) {
       const updatedOrder = await prisma.order.update({
         where: { id: orderId },
         data: {
-          subtotal: totalsResult.subtotal / 100, // Convert cents to euros for DB
-          shippingCost: totalsResult.shippingCost / 100,
-          tax: totalsResult.tax / 100,
-          discount: totalsResult.discount / 100,
-          total: totalsResult.total / 100,
-          shippingAddress: JSON.stringify(shippingAddress),
-          billingAddress: billingAddress ? JSON.stringify(billingAddress) : null,
+          subtotal: (totals?.subtotal ?? totalsResult.subtotal) / 100, // Convert cents to euros for DB
+          shippingCost: (totals?.shippingCost ?? totalsResult.shippingCost) / 100,
+          tax: (totals?.tax ?? totalsResult.tax) / 100,
+          discount: (totals?.discount ?? totalsResult.discount) / 100,
+          total: (totals?.total ?? totalsResult.total) / 100,
+          shippingAddress: shippingAddress as any, // Pass as JSON object
+          ...(billingAddress && { billingAddress: billingAddress as any }), // Only update if provided
+          notes: orderNotes || existingOrder.notes,
           updatedAt: new Date(),
         },
       })
@@ -112,7 +123,7 @@ export async function POST(request: NextRequest) {
         success: true,
         orderId: updatedOrder.id,
         orderNumber: updatedOrder.orderNumber,
-        totals: {
+        totals: totals || {
           subtotal: totalsResult.subtotal,
           shippingCost: totalsResult.shippingCost,
           tax: totalsResult.tax,
@@ -211,16 +222,15 @@ export async function POST(request: NextRequest) {
             variant: item.variant ? JSON.stringify(item.variant) : undefined,
           })),
         },
-        subtotal: totalsResult.subtotal / 100,
-        shippingCost: totalsResult.shippingCost / 100,
-        tax: totalsResult.tax / 100,
-        discount: totalsResult.discount / 100,
-        total: totalsResult.total / 100,
-        shippingAddress: JSON.stringify(shippingAddress),
-        billingAddress: billingAddress
-          ? JSON.stringify(billingAddress)
-          : JSON.stringify(shippingAddress), // Default to shipping
+        subtotal: (totals?.subtotal ?? totalsResult.subtotal) / 100,
+        shippingCost: (totals?.shippingCost ?? totalsResult.shippingCost) / 100,
+        tax: (totals?.tax ?? totalsResult.tax) / 100,
+        discount: (totals?.discount ?? totalsResult.discount) / 100,
+        total: (totals?.total ?? totalsResult.total) / 100,
+        shippingAddress: shippingAddress as any, // Pass as JSON object
+        billingAddress: (billingAddress || shippingAddress) as any, // Default to shipping, pass as JSON object
         couponCode: promoCode || null,
+        notes: orderNotes || null,
         customer: session?.user?.email
           ? JSON.stringify({
               firstName: shippingAddress.firstName,
@@ -243,7 +253,7 @@ export async function POST(request: NextRequest) {
       success: true,
       orderId: order.id,
       orderNumber: order.orderNumber,
-      totals: {
+      totals: totals || {
         subtotal: totalsResult.subtotal,
         shippingCost: totalsResult.shippingCost,
         tax: totalsResult.tax,

@@ -22,3 +22,9 @@ coverage/
 .vercelignore
 payload.config.ts
 src/payload/
+testsprite_venv/
+
+# Local Netlify folder
+.netlify
+.vercel
+.env*.local

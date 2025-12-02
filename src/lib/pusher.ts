@@ -111,3 +111,33 @@ export async function triggerBulkActionComplete(data: {
 }): Promise<void> {
   await triggerAdminNotification('bulk-action-complete', data);
 }
+
+/**
+ * Trigger a stock update notification for a product
+ * Requirement 8.2: Real-time stock updates
+ */
+export async function triggerStockUpdate(data: {
+  productId: string;
+  variantId?: string;
+  stock: number;
+}): Promise<void> {
+  try {
+    const pusher = getPusherServer();
+    
+    // Determine channel name based on whether it's a variant or product
+    const channelName = data.variantId
+      ? `product-${data.productId}-variant-${data.variantId}`
+      : `product-${data.productId}`;
+
+    await pusher.trigger(channelName, 'stock-updated', {
+      productId: data.productId,
+      variantId: data.variantId,
+      stock: data.stock,
+      timestamp: Date.now(),
+    });
+
+    console.log(`Stock update triggered for ${channelName}:`, data.stock);
+  } catch (error) {
+    console.error('Failed to trigger stock update:', error);
+  }
+}

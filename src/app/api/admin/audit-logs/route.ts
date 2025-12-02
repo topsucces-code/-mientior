@@ -4,7 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { Prisma, Permission } from '@prisma/client';
+import { Permission } from '@/lib/permissions';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { withPermission } from '@/middleware/admin-auth';
 

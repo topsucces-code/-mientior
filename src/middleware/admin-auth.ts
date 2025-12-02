@@ -1,13 +1,18 @@
 import {
   getAdminSession,
-  requireAdminAuth,
+  requireAdminAuth as requireAdminAuthFromLib,
   requirePermission,
   requireRole,
   type AdminSession,
 } from '@/lib/auth-admin';
 import { logAction } from '@/lib/audit-logger';
-import { Permission, Role } from '@prisma/client';
+import { Role } from '@prisma/client';
+import { Permission } from '@/lib/permissions';
 import { NextRequest, NextResponse } from 'next/server';
+
+// Re-export for backward compatibility
+export { requireAdminAuthFromLib as requireAdminAuth };
+export type { AdminSession };
 
 export type ApiHandler = (
   request: NextRequest,
@@ -32,7 +37,7 @@ export function withAdminAuth(
 ): ApiHandler {
   return async (request: NextRequest, context: { params: Record<string, string> }) => {
     try {
-      const adminSession = await requireAdminAuth();
+      const adminSession = await requireAdminAuthFromLib();
 
       // Optionally log the action
       if (options.logAction) {

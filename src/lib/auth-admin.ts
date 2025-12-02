@@ -6,7 +6,8 @@ import {
   hasRoleHierarchy,
   getMergedPermissions,
 } from '@/lib/rbac';
-import { AdminUser, Permission, Role } from '@prisma/client';
+import { AdminUser, Role } from '@prisma/client';
+import { Permission } from '@/lib/permissions';
 
 export interface AdminSession extends Session {
   adminUser: AdminUser;
@@ -17,6 +18,49 @@ export interface AdminSession extends Session {
  * Returns null if not authenticated or not an admin
  */
 export async function getAdminSession(): Promise<AdminSession | null> {
+  // Log critical warning if SKIP_AUTH is set in production
+  if (process.env.SKIP_AUTH === 'true' && process.env.NODE_ENV === 'production') {
+    console.error('🚨 CRITICAL SECURITY WARNING: SKIP_AUTH is enabled in production! This is a severe security vulnerability. Admin authentication bypass is DISABLED in production.');
+  }
+
+  // Bypass auth in development if SKIP_AUTH is set
+  if (process.env.SKIP_AUTH === 'true' && process.env.NODE_ENV === 'development') {
+    return {
+      user: {
+        id: 'mock-admin-id',
+        email: 'admin@mientior.com',
+        name: 'Super Admin',
+        image: null,
+        emailVerified: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      session: {
+        id: 'mock-session-id',
+        userId: 'mock-admin-id',
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        token: 'mock-token',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        ipAddress: '127.0.0.1',
+        userAgent: 'MockAgent',
+      },
+      adminUser: {
+        id: 'mock-admin-id',
+        email: 'admin@mientior.com',
+        firstName: 'Super',
+        lastName: 'Admin',
+        role: Role.SUPER_ADMIN,
+        isActive: true,
+        permissions: Object.values(Permission),
+        lastLoginAt: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        authUserId: 'mock-admin-id',
+      }
+    } as unknown as AdminSession;
+  }
+
   try {
     const session = await getSession();
     if (!session || !session.user) {

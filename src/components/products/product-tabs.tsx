@@ -4,7 +4,7 @@
  * Product tabs component for Description, Specifications, and Reviews sections
  */
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { FileText, ListChecks, MessageSquare, ThumbsUp, ThumbsDown, HelpCircle, Truck, X, ChevronLeft, ChevronRight, Search, MessageSquarePlus, ShieldCheck, MessageCircle, RotateCcw, Globe, Check } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -28,9 +28,54 @@ interface ProductTabsProps {
   shippingInfo?: ShippingInfo
 }
 
+/**
+ * Helper function to format specification values with units
+ * Detects and formats measurements with appropriate units
+ */
+function formatSpecificationValue(value: string): string {
+  if (!value) return value
+  
+  // Check if value already has a unit (common units)
+  const hasUnit = /\d+\s*(cm|mm|m|km|kg|g|mg|l|ml|cl|w|kw|v|a|hz|khz|mhz|ghz|gb|mb|tb|kb|inch|in|lb|oz|ft|yd|°c|°f|%|px|dpi)$/i.test(value)
+  if (hasUnit) return value
+  
+  // Check for dimension patterns (e.g., "30 x 20 x 10")
+  const dimensionMatch = value.match(/^(\d+\.?\d*)\s*x\s*(\d+\.?\d*)\s*x\s*(\d+\.?\d*)$/i)
+  if (dimensionMatch) {
+    // Dimensions without units - return as-is
+    return value
+  }
+  
+  // Check if it's a pure number that might need a unit
+  const numMatch = value.match(/^(\d+\.?\d*)$/)
+  if (numMatch) {
+    // Return as-is, unit should be in the key or context
+    return value
+  }
+  
+  return value
+}
+
+/**
+ * Helper function to parse specifications and group them
+ */
+function parseSpecifications(specs: Record<string, string> | undefined): Array<{ category: string; items: Array<{ key: string; value: string }> }> {
+  if (!specs || Object.keys(specs).length === 0) return []
+  
+  // For now, return all specs in a single "General" category
+  // In the future, this could be enhanced to group by category
+  return [{
+    category: 'Caractéristiques générales',
+    items: Object.entries(specs).map(([key, value]) => ({
+      key,
+      value: formatSpecificationValue(value)
+    }))
+  }]
+}
+
 export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shippingInfo }: ProductTabsProps) {
   const [reviewSort, setReviewSort] = useState<'recent' | 'helpful' | 'rating'>('recent')
-  const [filters, setFilters] = useState<{ photos: boolean; verified: boolean }>({ photos: false, verified: false })
+  const [filters, setFilters] = useState<{ photos: boolean; videos: boolean; verified: boolean }>({ photos: false, videos: false, verified: false })
   const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false)
   
   // Q&A state
@@ -38,6 +83,9 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
   const [showAskModal, setShowAskModal] = useState(false)
   const [userVotes, setUserVotes] = useState<Record<string, 'helpful' | 'notHelpful' | null>>({})
   const [expandedAnswers, setExpandedAnswers] = useState<Record<string, boolean>>({})
+
+  // Parse specifications
+  const specificationGroups = parseSpecifications(product.specifications)
 
   // Sort reviews based on selected option
   const sortedReviews = [...reviews].sort((a, b) => {
@@ -57,6 +105,9 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
     if (filters.photos && (!review.images || review.images.length === 0)) {
       return false
     }
+    if (filters.videos && (!review.videos || review.videos.length === 0)) {
+      return false
+    }
     if (filters.verified && !review.verified) {
       return false
     }
@@ -65,51 +116,114 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
 
   return (
     <Tabs defaultValue="description" className="w-full">
-      <TabsList className="w-full justify-start border-b border-platinum-300 bg-transparent rounded-none h-auto p-0">
+      <TabsList 
+        className="w-full justify-start border-b border-platinum-300 bg-transparent rounded-none h-auto p-0"
+        aria-label="Informations produit"
+      >
         <TabsTrigger
           value="description"
           className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none px-6 py-4"
+          aria-label="Description du produit"
         >
-          <FileText className="w-4 h-4" />
+          <FileText className="w-4 h-4" aria-hidden="true" />
           Description
         </TabsTrigger>
         <TabsTrigger
           value="specifications"
           className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none px-6 py-4"
+          aria-label="Caractéristiques techniques"
         >
-          <ListChecks className="w-4 h-4" />
+          <ListChecks className="w-4 h-4" aria-hidden="true" />
           Caractéristiques
         </TabsTrigger>
         <TabsTrigger
           value="reviews"
           className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none px-6 py-4"
+          aria-label={`Avis clients, ${reviews.length} avis`}
         >
-          <MessageSquare className="w-4 h-4" />
+          <MessageSquare className="w-4 h-4" aria-hidden="true" />
           Avis ({reviews.length})
         </TabsTrigger>
         <TabsTrigger
           value="qa"
           className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none px-6 py-4"
+          aria-label={`Questions et réponses, ${qa.length} questions`}
         >
-          <HelpCircle className="w-4 h-4" />
+          <HelpCircle className="w-4 h-4" aria-hidden="true" />
           Questions & Réponses ({qa.length})
         </TabsTrigger>
         <TabsTrigger
           value="shipping"
           className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none px-6 py-4"
+          aria-label="Informations de livraison et retours"
         >
-          <Truck className="w-4 h-4" />
+          <Truck className="w-4 h-4" aria-hidden="true" />
           Livraison & Retours
         </TabsTrigger>
       </TabsList>
 
       {/* Description Tab */}
-      <TabsContent value="description" className="mt-8 space-y-6">
+      <TabsContent value="description" className="mt-8 space-y-6" role="tabpanel" aria-labelledby="description-tab">
         <div className="prose prose-sm max-w-none">
           {product.description ? (
-            <p className="text-nuanced-700 leading-relaxed whitespace-pre-wrap">
-              {product.description}
-            </p>
+            <div className="text-nuanced-700 leading-relaxed space-y-4">
+              {product.description.split('\n\n').map((paragraph, index) => {
+                // Check if paragraph is a heading (starts with #)
+                if (paragraph.startsWith('# ')) {
+                  return (
+                    <h2 key={index} className="text-2xl font-bold text-anthracite-900 mt-6 mb-3">
+                      {paragraph.substring(2)}
+                    </h2>
+                  )
+                }
+                if (paragraph.startsWith('## ')) {
+                  return (
+                    <h3 key={index} className="text-xl font-bold text-anthracite-900 mt-5 mb-2">
+                      {paragraph.substring(3)}
+                    </h3>
+                  )
+                }
+                if (paragraph.startsWith('### ')) {
+                  return (
+                    <h4 key={index} className="text-lg font-bold text-anthracite-900 mt-4 mb-2">
+                      {paragraph.substring(4)}
+                    </h4>
+                  )
+                }
+                
+                // Check if paragraph is a list (lines starting with - or *)
+                const lines = paragraph.split('\n')
+                if (lines.every(line => line.trim().startsWith('-') || line.trim().startsWith('*') || line.trim() === '')) {
+                  return (
+                    <ul key={index} className="list-none space-y-2 my-4">
+                      {lines.filter(line => line.trim()).map((line, lineIndex) => (
+                        <li key={lineIndex} className="flex items-start gap-3">
+                          <span className="text-orange-500 mt-1">•</span>
+                          <span>{line.replace(/^[-*]\s*/, '')}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )
+                }
+                
+                // Regular paragraph with inline formatting
+                return (
+                  <p key={index} className="whitespace-pre-wrap">
+                    {paragraph.split(/(\*\*.*?\*\*|\*.*?\*)/).map((part, partIndex) => {
+                      // Bold text (**text**)
+                      if (part.startsWith('**') && part.endsWith('**')) {
+                        return <strong key={partIndex} className="font-bold text-anthracite-900">{part.slice(2, -2)}</strong>
+                      }
+                      // Italic text (*text*)
+                      if (part.startsWith('*') && part.endsWith('*')) {
+                        return <em key={partIndex} className="italic">{part.slice(1, -1)}</em>
+                      }
+                      return part
+                    })}
+                  </p>
+                )
+              })}
+            </div>
           ) : (
             <p className="text-nuanced-500 italic">Aucune description disponible pour ce produit.</p>
           )}
@@ -117,8 +231,11 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
 
         {/* Key Features */}
         {product.specifications && Object.keys(product.specifications).length > 0 && (
-          <div className="mt-8">
-            <h3 className="text-lg font-bold text-anthracite-900 mb-4">Points clés</h3>
+          <div className="mt-8 bg-platinum-50 rounded-lg p-6 border border-platinum-200">
+            <h3 className="text-lg font-bold text-anthracite-900 mb-4 flex items-center gap-2">
+              <span className="text-orange-500">✓</span>
+              Points clés
+            </h3>
             <div className="grid gap-3">
               {Object.entries(product.specifications).slice(0, 5).map(([key, value]) => (
                 <div key={key} className="flex items-start gap-3">
@@ -134,23 +251,43 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
       </TabsContent>
 
       {/* Specifications Tab */}
-      <TabsContent value="specifications" className="mt-8">
-        {product.specifications && Object.keys(product.specifications).length > 0 ? (
-          <div className="divide-y divide-platinum-200">
-            {Object.entries(product.specifications).map(([key, value]) => (
-              <div key={key} className="flex py-4">
-                <dt className="w-1/3 font-medium text-anthracite-900">{key}</dt>
-                <dd className="w-2/3 text-nuanced-700">{value}</dd>
+      <TabsContent value="specifications" className="mt-8" role="tabpanel" aria-labelledby="specifications-tab">
+        {specificationGroups.length > 0 ? (
+          <div className="space-y-8">
+            {specificationGroups.map((group, groupIndex) => (
+              <div key={groupIndex}>
+                {specificationGroups.length > 1 && (
+                  <h3 className="text-lg font-bold text-anthracite-900 mb-4">{group.category}</h3>
+                )}
+                <div className="border border-platinum-200 rounded-lg overflow-hidden">
+                  <table className="w-full">
+                    <tbody className="divide-y divide-platinum-200">
+                      {group.items.map((item, itemIndex) => (
+                        <tr key={itemIndex} className="hover:bg-platinum-50 transition-colors">
+                          <td className="w-1/3 px-6 py-4 font-medium text-anthracite-900 bg-platinum-50/50">
+                            {item.key}
+                          </td>
+                          <td className="w-2/3 px-6 py-4 text-nuanced-700">
+                            {item.value || <span className="text-nuanced-400 italic">Non spécifié</span>}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-nuanced-500 italic py-8">Aucune caractéristique technique disponible.</p>
+          <div className="text-center py-12">
+            <ListChecks className="w-12 h-12 text-nuanced-400 mx-auto mb-4" />
+            <p className="text-nuanced-500 italic">Aucune caractéristique technique disponible pour ce produit.</p>
+          </div>
         )}
       </TabsContent>
 
       {/* Reviews Tab */}
-      <TabsContent value="reviews" className="mt-8 space-y-8">
+      <TabsContent value="reviews" className="mt-8 space-y-8" role="tabpanel" aria-labelledby="reviews-tab">
         {/* Review Summary */}
         {reviewStats && (
           <div className="bg-platinum-50 rounded-lg p-6 border border-platinum-200">
@@ -216,10 +353,10 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm text-nuanced-600 mr-2">Filtrer par:</span>
             <Button
-              variant={!filters.photos && !filters.verified ? 'default' : 'outline'}
+              variant={!filters.photos && !filters.videos && !filters.verified ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setFilters({ photos: false, verified: false })}
-              className={!filters.photos && !filters.verified ? 'bg-orange-600 hover:bg-orange-700' : ''}
+              onClick={() => setFilters({ photos: false, videos: false, verified: false })}
+              className={!filters.photos && !filters.videos && !filters.verified ? 'bg-orange-600 hover:bg-orange-700' : ''}
             >
               Tous
             </Button>
@@ -230,6 +367,14 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
               className={filters.photos ? 'bg-orange-600 hover:bg-orange-700' : ''}
             >
               Avec photos
+            </Button>
+            <Button
+              variant={filters.videos ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setFilters(prev => ({ ...prev, videos: !prev.videos }))}
+              className={filters.videos ? 'bg-orange-600 hover:bg-orange-700' : ''}
+            >
+              Avec vidéos
             </Button>
             <Button
               variant={filters.verified ? 'default' : 'outline'}
@@ -278,7 +423,7 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
               <p className="text-nuanced-600 mb-4">Aucun avis ne correspond à vos filtres.</p>
               <Button 
                 variant="outline"
-                onClick={() => setFilters({ photos: false, verified: false })}
+                onClick={() => setFilters({ photos: false, videos: false, verified: false })}
               >
                 Réinitialiser les filtres
               </Button>
@@ -308,7 +453,7 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
       </TabsContent>
 
       {/* Q&A Tab */}
-      <TabsContent value="qa" className="mt-8 space-y-6">
+      <TabsContent value="qa" className="mt-8 space-y-6" role="tabpanel" aria-labelledby="qa-tab">
         {/* Header with search and ask button */}
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div className="relative flex-1 w-full sm:max-w-md">
@@ -386,7 +531,7 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
       </TabsContent>
 
       {/* Shipping & Returns Tab */}
-      <TabsContent value="shipping" className="mt-8 space-y-8">
+      <TabsContent value="shipping" className="mt-8 space-y-8" role="tabpanel" aria-labelledby="shipping-tab">
         {shippingInfo ? (
           <>
             {/* Shipping Options Section */}
@@ -634,25 +779,37 @@ function ReviewItem({ review }: { review: Review }) {
   const [helpful, setHelpful] = useState(review.helpful)
   const [notHelpful, setNotHelpful] = useState(review.notHelpful)
   const [userVote, setUserVote] = useState<'helpful' | 'not-helpful' | null>(null)
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
+  const [selectedMediaIndex, setSelectedMediaIndex] = useState<number | null>(null)
+  const [selectedMediaType, setSelectedMediaType] = useState<'image' | 'video' | null>(null)
+
+  // Combine images and videos into a single media array
+  const allMedia = React.useMemo(() => [
+    ...(review.images || []).map(url => ({ type: 'image' as const, url })),
+    ...(review.videos || []).map(url => ({ type: 'video' as const, url }))
+  ], [review.images, review.videos])
 
   // Keyboard navigation for lightbox
   useEffect(() => {
-    if (selectedImageIndex === null || !review.images) return
+    if (selectedMediaIndex === null || allMedia.length === 0) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        setSelectedImageIndex(null)
-      } else if (e.key === 'ArrowLeft' && selectedImageIndex > 0) {
-        setSelectedImageIndex(prev => prev !== null ? prev - 1 : null)
-      } else if (e.key === 'ArrowRight' && selectedImageIndex < review.images!.length - 1) {
-        setSelectedImageIndex(prev => prev !== null ? prev + 1 : null)
+        setSelectedMediaIndex(null)
+        setSelectedMediaType(null)
+      } else if (e.key === 'ArrowLeft' && selectedMediaIndex > 0) {
+        const newIndex = selectedMediaIndex - 1
+        setSelectedMediaIndex(newIndex)
+        setSelectedMediaType(allMedia[newIndex]?.type || null)
+      } else if (e.key === 'ArrowRight' && selectedMediaIndex < allMedia.length - 1) {
+        const newIndex = selectedMediaIndex + 1
+        setSelectedMediaIndex(newIndex)
+        setSelectedMediaType(allMedia[newIndex]?.type || null)
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedImageIndex, review.images])
+  }, [selectedMediaIndex, allMedia])
 
   const handleVote = (type: 'helpful' | 'not-helpful') => {
     if (userVote === type) {
@@ -729,80 +886,128 @@ function ReviewItem({ review }: { review: Review }) {
       {/* Review Comment */}
       <p className="text-nuanced-700 leading-relaxed">{review.comment}</p>
 
-      {/* Review Images */}
-      {review.images && review.images.length > 0 && (
+      {/* Review Media (Images and Videos) */}
+      {allMedia.length > 0 && (
         <>
-          <div className="flex gap-2">
-            {review.images.map((image, index) => (
+          <div className="flex gap-2 flex-wrap">
+            {allMedia.map((media, index) => (
               <button
                 key={index}
                 type="button"
-                onClick={() => setSelectedImageIndex(index)}
+                onClick={() => {
+                  setSelectedMediaIndex(index)
+                  setSelectedMediaType(media.type)
+                }}
                 className="w-20 h-20 rounded-lg overflow-hidden border border-platinum-200 relative hover:opacity-80 transition-opacity cursor-pointer"
               >
-                <Image
-                  src={image}
-                  alt={`Review image ${index + 1}`}
-                  fill
-                  className="object-cover"
-                />
+                {media.type === 'image' ? (
+                  <Image
+                    src={media.url}
+                    alt={`Review image ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="relative w-full h-full">
+                    <video
+                      src={media.url}
+                      className="w-full h-full object-cover"
+                      preload="metadata"
+                    />
+                    {/* Play icon overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                      <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center">
+                        <div className="w-0 h-0 border-l-[8px] border-l-anthracite-900 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent ml-1" />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </button>
             ))}
           </div>
 
-          {/* Image Lightbox */}
-          {selectedImageIndex !== null && (
-            <Dialog open={selectedImageIndex !== null} onOpenChange={() => setSelectedImageIndex(null)}>
+          {/* Media Lightbox */}
+          {selectedMediaIndex !== null && selectedMediaType && (
+            <Dialog open={selectedMediaIndex !== null} onOpenChange={() => {
+              setSelectedMediaIndex(null)
+              setSelectedMediaType(null)
+            }}>
               <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 bg-black/95">
                 <div className="relative w-full h-[90vh] flex items-center justify-center">
                   {/* Close Button */}
                   <button
-                    onClick={() => setSelectedImageIndex(null)}
+                    onClick={() => {
+                      setSelectedMediaIndex(null)
+                      setSelectedMediaType(null)
+                    }}
                     className="absolute top-4 right-4 z-10 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                    aria-label="Fermer"
                   >
                     <X className="w-6 h-6 text-white" />
                   </button>
 
                   {/* Previous Button */}
-                  {review.images && review.images.length > 1 && selectedImageIndex > 0 && (
+                  {allMedia.length > 1 && selectedMediaIndex > 0 && (
                     <button
-                      onClick={() => setSelectedImageIndex(prev => prev !== null ? Math.max(0, prev - 1) : 0)}
+                      onClick={() => {
+                        const newIndex = selectedMediaIndex - 1
+                        setSelectedMediaIndex(newIndex)
+                        setSelectedMediaType(allMedia[newIndex]?.type || null)
+                      }}
                       className="absolute left-4 z-10 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                      aria-label="Média précédent"
                     >
                       <ChevronLeft className="w-8 h-8 text-white" />
                     </button>
                   )}
 
-                  {/* Image */}
+                  {/* Media Content */}
                   <div className="relative w-full h-full flex items-center justify-center p-12">
                     <div className="relative max-w-full max-h-full">
-                      {review.images && review.images[selectedImageIndex] && (
+                      {selectedMediaType === 'image' && allMedia[selectedMediaIndex] ? (
                         <Image
-                          src={review.images[selectedImageIndex]}
-                          alt={`Review image ${selectedImageIndex + 1}`}
+                          src={allMedia[selectedMediaIndex].url}
+                          alt={`Review media ${selectedMediaIndex + 1}`}
                           width={1200}
                           height={900}
                           className="max-w-full max-h-[80vh] object-contain"
                         />
-                      )}
+                      ) : selectedMediaType === 'video' && allMedia[selectedMediaIndex] ? (
+                        <video
+                          src={allMedia[selectedMediaIndex].url}
+                          controls
+                          autoPlay
+                          className="max-w-full max-h-[80vh]"
+                          onError={(e) => {
+                            console.error('Video playback error:', e)
+                          }}
+                        >
+                          Votre navigateur ne supporte pas la lecture de vidéos.
+                        </video>
+                      ) : null}
                     </div>
                   </div>
 
                   {/* Next Button */}
-                  {review.images && review.images.length > 1 && selectedImageIndex < review.images.length - 1 && (
+                  {allMedia.length > 1 && selectedMediaIndex < allMedia.length - 1 && (
                     <button
-                      onClick={() => setSelectedImageIndex(prev => prev !== null ? Math.min(review.images!.length - 1, prev + 1) : 0)}
+                      onClick={() => {
+                        const newIndex = selectedMediaIndex + 1
+                        setSelectedMediaIndex(newIndex)
+                        setSelectedMediaType(allMedia[newIndex]?.type || null)
+                      }}
                       className="absolute right-4 z-10 p-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+                      aria-label="Média suivant"
                     >
                       <ChevronRight className="w-8 h-8 text-white" />
                     </button>
                   )}
 
-                  {/* Image Counter */}
-                  {review.images && review.images.length > 1 && (
+                  {/* Media Counter */}
+                  {allMedia.length > 1 && (
                     <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-white/10 rounded-full">
                       <span className="text-white text-sm font-medium">
-                        {selectedImageIndex + 1} / {review.images.length}
+                        {selectedMediaIndex + 1} / {allMedia.length}
                       </span>
                     </div>
                   )}

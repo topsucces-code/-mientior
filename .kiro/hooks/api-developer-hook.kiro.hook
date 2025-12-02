@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "name": "API Developer Agent",
+  "description": "Automatically triggers the api-developer agent when API route files are created or modified. This agent will review API implementations for REST compliance, security best practices, proper error handling, authentication/authorization, validation, documentation, and performance optimization. It ensures all API endpoints follow the project's established patterns and conventions.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/app/api/**/route.ts",
+      "src/lib/auth*.ts",
+      "src/lib/payment*.ts",
+      "src/lib/*-validation.ts",
+      "src/middleware/*.ts"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Review the modified API-related file(s) and provide expert feedback on:\n\n1. **REST API Design**: Check HTTP methods, status codes, endpoint naming, and resource structure\n2. **Security**: Verify authentication, authorization, input validation, rate limiting, and data sanitization\n3. **Error Handling**: Ensure consistent error responses with proper status codes and messages\n4. **Validation**: Check for Zod schemas or similar validation on all inputs\n5. **Response Format**: Verify standardized response structure (success/error format with meta)\n6. **Performance**: Look for optimization opportunities (caching, query optimization, pagination)\n7. **Documentation**: Suggest OpenAPI/Swagger documentation improvements\n8. **Testing**: Recommend test cases for the endpoint\n9. **Project Conventions**: Ensure alignment with existing patterns in CLAUDE.md\n\nProvide specific, actionable recommendations with code examples where helpful. Focus on production-readiness, security, and maintainability."
+  }
+}

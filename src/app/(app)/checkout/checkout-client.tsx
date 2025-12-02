@@ -10,7 +10,7 @@ import { OrderSummarySidebar } from '@/components/checkout/order-summary-sidebar
 import { MobileStickyBar } from '@/components/checkout/mobile-sticky-bar'
 import { Card, CardContent } from '@/components/ui/card'
 import { useCheckoutAnalytics } from '@/hooks/use-checkout-analytics'
-import type { Address, ShippingOption, PaymentMethod, CartItem } from '@/types'
+import type { Address, ShippingOption, PaymentMethod, CartItem, TotalsCalculationResult } from '@/types'
 
 // Lazy load step components for better performance
 const ShippingForm = dynamic(() => import('@/components/checkout/shipping-form').then(mod => ({ default: mod.ShippingForm })), {
@@ -64,34 +64,6 @@ interface CheckoutPageClientProps {
   isAuthenticated?: boolean
 }
 
-// Mock shipping options
-const mockShippingOptions: ShippingOption[] = [
-  {
-    id: 'standard',
-    name: 'Livraison Standard',
-    price: 0, // Free
-    estimatedDays: 5,
-    carrier: 'Colissimo',
-    description: 'Livraison gratuite sous 5 jours ouvrés',
-  },
-  {
-    id: 'express',
-    name: 'Livraison Express',
-    price: 990, // 9.90€
-    estimatedDays: 2,
-    carrier: 'Chronopost',
-    description: 'Livraison rapide en 2 jours ouvrés',
-  },
-  {
-    id: 'relay',
-    name: 'Point Relais',
-    price: 490, // 4.90€
-    estimatedDays: 3,
-    carrier: 'Mondial Relay',
-    description: 'Retrait en point relais sous 3 jours',
-  },
-]
-
 export function CheckoutPageClient({ userEmail, isAuthenticated = false }: CheckoutPageClientProps) {
   const router = useRouter()
   const { items, clearCart, getTotalPrice } = useCartStore()
@@ -103,6 +75,7 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
   const [shippingAddress, setShippingAddress] = React.useState<Address | null>(null)
   const [selectedShippingOption, setSelectedShippingOption] = React.useState<string>('')
   const [orderId, setOrderId] = React.useState<string | null>(null)
+  const [orderNotes, setOrderNotes] = React.useState<string | null>(null)
 
   // Promo code state
   const [appliedCoupon, setAppliedCoupon] = React.useState<string | null>(null)
@@ -112,13 +85,25 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
 
   const [isLoading, setIsLoading] = React.useState(false)
 
-  const subtotal = getTotalPrice()
+  // Real-time totals calculation state
+  const [calculatedTotals, setCalculatedTotals] = React.useState<TotalsCalculationResult | null>(null)
+  const [isCalculating, setIsCalculating] = React.useState(false)
+  const [calculationError, setCalculationError] = React.useState<string | null>(null)
+  const [availableShippingOptions, setAvailableShippingOptions] = React.useState<ShippingOption[]>([])
+  const [isLoadingShippingOptions, setIsLoadingShippingOptions] = React.useState(false)
 
-  // Calculate costs (in cents)
-  const shippingCost = mockShippingOptions.find((opt) => opt.id === selectedShippingOption)?.price || 0
-  const taxRate = 0.2 // 20% TVA in France
-  const tax = Math.round(subtotal * taxRate)
-  const total = subtotal + shippingCost + tax - discount // Apply discount
+  const cartTotalEstimate = getTotalPrice()
+
+  // Calculate local subtotal estimate (items only)
+  const localSubtotalEstimate = React.useMemo(() => {
+    return items.reduce((acc, item) => acc + (item.price || 0) * item.quantity, 0)
+  }, [items])
+
+  // Use calculated totals if available, otherwise fall back to local estimates
+  const shippingCost = calculatedTotals?.shipping.cost ?? 0
+  const tax = calculatedTotals?.tax.taxAmount ?? 0
+  const total = calculatedTotals?.total ?? cartTotalEstimate
+  const displaySubtotal = calculatedTotals?.subtotal ?? localSubtotalEstimate
 
   // Convert for sidebar (CartItem format)
   const cartItemsForSidebar: CartItem[] = items.map((item) => {
@@ -173,6 +158,101 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
     }
   }, [currentStep, shippingAddress])
 
+  // Fetch shipping options when address is set
+  React.useEffect(() => {
+    const fetchShippingOptions = async () => {
+      if (!shippingAddress) return
+
+      setIsLoadingShippingOptions(true)
+      try {
+        const response = await fetch('/api/checkout/shipping-options', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            address: shippingAddress,
+            items: items.map(item => ({
+              productId: item.productId || item.id,
+              quantity: item.quantity,
+            })),
+          }),
+        })
+
+        const data = await response.json()
+        if (data.success) {
+          setAvailableShippingOptions(data.data)
+        }
+      } catch (error) {
+        console.error('Error fetching shipping options:', error)
+      } finally {
+        setIsLoadingShippingOptions(false)
+      }
+    }
+
+    if (shippingAddress) {
+      fetchShippingOptions()
+    }
+  }, [shippingAddress, items])
+
+  // Calculate totals in real-time when address or shipping option changes
+  const calculateTotals = React.useCallback(async () => {
+    if (!shippingAddress || !selectedShippingOption || items.length === 0) {
+      // Not ready to calculate yet
+      return
+    }
+
+    setIsCalculating(true)
+    setCalculationError(null)
+
+    try {
+      const response = await fetch('/api/checkout/calculate-totals', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: items.map(item => ({
+            productId: item.productId || item.id,
+            quantity: item.quantity,
+            variantId: item.variant?.sku,
+          })),
+          address: shippingAddress,
+          shippingOptionId: selectedShippingOption,
+          couponCode: appliedCoupon || undefined,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to calculate totals')
+      }
+
+      setCalculatedTotals(result.data)
+      setDiscount(result.data.discount) // Update discount from server calculation
+    } catch (error) {
+      console.error('[Checkout] Error calculating totals:', error)
+      setCalculationError(error instanceof Error ? error.message : 'Erreur de calcul')
+    } finally {
+      setIsCalculating(false)
+    }
+  }, [shippingAddress, selectedShippingOption, appliedCoupon, items])
+
+  // Debounced totals calculation
+  React.useEffect(() => {
+    if (!shippingAddress || !selectedShippingOption) {
+      return
+    }
+
+    // Debounce: wait 500ms after last change before calculating
+    const timeoutId = setTimeout(() => {
+      calculateTotals()
+    }, 500)
+
+    return () => clearTimeout(timeoutId)
+  }, [shippingAddress, selectedShippingOption, appliedCoupon, calculateTotals])
+
   // Handle coupon application
   const handleApplyCoupon = async (code: string) => {
     try {
@@ -183,7 +263,7 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
         },
         body: JSON.stringify({
           code,
-          subtotal,
+          subtotal: localSubtotalEstimate,
         }),
       })
 
@@ -217,6 +297,8 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
   }
 
   const handleShippingSubmit = (address: Address) => {
+    // Extract and store order notes
+    setOrderNotes(address.orderNotes || null)
     setShippingAddress(address)
     setCompletedSteps((prev) => {
       const newSteps = new Set([...prev, 'shipping' as CheckoutStep])
@@ -260,6 +342,14 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
           shippingAddress,
           shippingOption: selectedShippingOption,
           email: shippingAddress.email || userEmail,
+          orderNotes: orderNotes || undefined,
+          totals: calculatedTotals ? {
+            subtotal: calculatedTotals.subtotal,
+            shippingCost: calculatedTotals.shipping.cost,
+            tax: calculatedTotals.tax.taxAmount,
+            discount: calculatedTotals.discount,
+            total: calculatedTotals.total
+          } : undefined
         }),
       })
 
@@ -313,6 +403,7 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
           paymentReference: data.paymentMethodId,
           paymentGateway: data.paymentGateway,
           billingAddress: data.billingAddress || shippingAddress,
+          orderNotes: orderNotes || undefined,
         }),
       })
 
@@ -418,11 +509,11 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
 
                     {/* Shipping Options */}
                     <ShippingOptions
-                      options={mockShippingOptions}
+                      options={availableShippingOptions}
                       selectedOption={selectedShippingOption}
                       onSelect={handleShippingOptionSelect}
                       onContinue={handleShippingOptionContinue}
-                      isLoading={isLoading}
+                      isLoading={isLoading || isLoadingShippingOptions}
                     />
                   </>
                 )}
@@ -459,7 +550,7 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
           <div className="hidden lg:block">
             <OrderSummarySidebar
               items={cartItemsForSidebar}
-              subtotal={subtotal / 100} // Convert to euros
+              subtotal={displaySubtotal / 100} // Convert to euros
               shippingCost={shippingCost / 100}
               discount={discount / 100} // Convert to euros
               tax={tax / 100}
@@ -467,6 +558,8 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
               appliedCoupon={appliedCoupon || undefined}
               onApplyCoupon={handleApplyCoupon}
               onRemoveCoupon={handleRemoveCoupon}
+              isCalculating={isCalculating}
+              calculationError={calculationError || undefined}
             />
           </div>
         </div>
@@ -483,7 +576,7 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
         {/* Order summary content shown in mobile drawer */}
         <OrderSummarySidebar
           items={cartItemsForSidebar}
-          subtotal={subtotal / 100}
+          subtotal={displaySubtotal / 100}
           shippingCost={shippingCost / 100}
           discount={discount / 100}
           tax={tax / 100}
@@ -491,6 +584,8 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
           appliedCoupon={appliedCoupon || undefined}
           onApplyCoupon={handleApplyCoupon}
           onRemoveCoupon={handleRemoveCoupon}
+          isCalculating={isCalculating}
+          calculationError={calculationError || undefined}
         />
       </MobileStickyBar>
     </div>

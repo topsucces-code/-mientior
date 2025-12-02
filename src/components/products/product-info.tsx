@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast'
 import { EnhancedColorSelector } from '@/components/products/enhanced-color-selector'
 import { EnhancedSizeSelector } from '@/components/products/enhanced-size-selector'
 import { EnhancedQuantitySelector } from '@/components/products/enhanced-quantity-selector'
-import { EnhancedStockIndicator } from '@/components/products/enhanced-stock-indicator'
+import { RealTimeStockIndicator } from '@/components/products/real-time-stock-indicator'
 import { SizeGuideModal } from '@/components/products/size-guide-modal'
 import { TrustBadges } from '@/components/products/trust-badges'
 import { PaymentMethods } from '@/components/products/payment-methods'
@@ -259,24 +259,25 @@ export function ProductInfo({
       </div>
 
       {/* Stock Indicator */}
-      <EnhancedStockIndicator 
-        stock={currentStock}
-        threshold={PDP_CONFIG.stockWarningThreshold}
-        lowStockThreshold={PDP_CONFIG.lowStockThreshold}
+      <RealTimeStockIndicator 
+        productId={product.id}
+        variantId={selectedVariant?.id}
+        initialStock={currentStock}
       />
 
       {/* CTAs */}
-      <div className="space-y-3">
+      <div className="flex items-center gap-3">
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="inline-flex">
+            <span className="flex-1">
               <RippleButton
                 onClick={handleAddToCart}
                 disabled={isAddingToCart || !isVariantSelectionComplete || currentStock === 0}
-                className="w-14 h-14 p-0 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                className="w-full h-14 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                 aria-label={currentStock === 0 ? 'RUPTURE DE STOCK' : isAddingToCart ? 'Ajout en cours...' : 'AJOUTER AU PANIER'}
               >
                 <ShoppingCart className="w-6 h-6" />
+                <p>{currentStock === 0 ? 'RUPTURE DE STOCK' : isAddingToCart ? 'Ajout en cours...' : 'AJOUTER AU PANIER'}</p>
               </RippleButton>
             </span>
           </TooltipTrigger>
@@ -285,15 +286,13 @@ export function ProductInfo({
           </TooltipContent>
         </Tooltip>
 
-        <div className="grid grid-cols-1 gap-3">
-          <button
-            onClick={handleAddToWishlist}
-            className="flex items-center justify-center gap-2 h-12 border-2 border-platinum-300 hover:border-orange-500 rounded-lg transition-all"
-          >
-            <Heart className={`w-5 h-5 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
-            <span className="font-medium">Favoris</span>
-          </button>
-        </div>
+        <button
+          onClick={handleAddToWishlist}
+          className="flex items-center justify-center w-14 h-14 border-2 border-platinum-300 hover:border-orange-500 rounded-lg transition-all flex-shrink-0"
+          aria-label="Ajouter aux favoris"
+        >
+          <Heart className={`w-6 h-6 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
+        </button>
       </div>
 
       {/* Trust Badges */}

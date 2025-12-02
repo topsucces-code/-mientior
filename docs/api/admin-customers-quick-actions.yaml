@@ -1,0 +1,403 @@
+openapi: 3.0.3
+info:
+  title: Customer 360 Quick Actions API
+  description: API for performing quick administrative actions on customers
+  version: 1.0.0
+  contact:
+    name: Mientior API Team
+    email: api@mientior.com
+
+servers:
+  - url: https://api.mientior.com
+    description: Production server
+  - url: http://localhost:3000
+    description: Development server
+
+paths:
+  /api/admin/customers/{customerId}/quick-actions:
+    post:
+      summary: Execute quick action on customer
+      description: Perform administrative actions like sending emails, adjusting loyalty points, creating tickets, or adding notes
+      operationId: executeCustomerQuickAction
+      tags:
+        - Customer Management
+        - Admin Actions
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: Unique identifier of the customer
+          schema:
+            type: string
+            format: uuid
+            example: "550e8400-e29b-41d4-a716-446655440000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/SendEmailAction'
+                - $ref: '#/components/schemas/CreateTicketAction'
+                - $ref: '#/components/schemas/AdjustPointsAction'
+                - $ref: '#/components/schemas/AddNoteAction'
+              discriminator:
+                propertyName: action
+            examples:
+              send_email:
+                summary: Send email to customer
+                value:
+                  action: "send_email"
+                  data:
+                    subject: "Welcome back to Mientior!"
+                    body: "We have exciting new products for you..."
+                    template: "welcome_back"
+              adjust_points:
+                summary: Add loyalty points
+                value:
+                  action: "adjust_points"
+                  data:
+                    amount: 500
+                    reason: "Compensation for delayed delivery"
+                    type: "add"
+              create_ticket:
+                summary: Create support ticket
+                value:
+                  action: "create_ticket"
+                  data:
+                    subject: "Account verification issue"
+                    description: "Customer unable to verify email address"
+                    priority: "high"
+              add_note:
+                summary: Add customer note
+                value:
+                  action: "add_note"
+                  data:
+                    content: "Customer prefers email communication over SMS"
+      responses:
+        '200':
+          description: Action executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuickActionResponse'
+              examples:
+                email_sent:
+                  summary: Email sent successfully
+                  value:
+                    success: true
+                    data:
+                      action: "send_email"
+                      result:
+                        emailId: "email_1703123456789"
+                        to: "customer@example.com"
+                        subject: "Welcome back to Mientior!"
+                        sentAt: "2023-12-21T10:30:45Z"
+                        success: true
+                      customerId: "550e8400-e29b-41d4-a716-446655440000"
+                      timestamp: "2023-12-21T10:30:45Z"
+                    meta:
+                      adminId: "admin_123"
+                      rateLimitRemaining: 9
+                points_adjusted:
+                  summary: Loyalty points adjusted
+                  value:
+                    success: true
+                    data:
+                      action: "adjust_points"
+                      result:
+                        previousPoints: 1200
+                        newPoints: 1700
+                        adjustment: 500
+                        type: "add"
+                        reason: "Compensation for delayed delivery"
+                        previousLevel: "SILVER"
+                        newLevel: "GOLD"
+                        adjustedBy: "admin_123"
+                        adjustedAt: "2023-12-21T10:30:45Z"
+                      customerId: "550e8400-e29b-41d4-a716-446655440000"
+                      timestamp: "2023-12-21T10:30:45Z"
+                    meta:
+                      adminId: "admin_123"
+                      rateLimitRemaining: 9
+        '400':
+          description: Validation error or bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: "Validation failed"
+                code: "VALIDATION_ERROR"
+                details:
+                  - field: "data.amount"
+                    message: "Amount must be positive"
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: "Authentication required"
+                code: "UNAUTHORIZED"
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: "Insufficient permissions"
+                code: "FORBIDDEN"
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: "Customer not found"
+                code: "NOT_FOUND"
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              description: Seconds until retry is allowed
+              schema:
+                type: integer
+                example: 60
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: "Too many requests. Please try again later."
+                code: "RATE_LIMIT_EXCEEDED"
+                retryAfter: 60
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                error: "Internal server error"
+                code: "INTERNAL_ERROR"
+
+components:
+  securitySchemes:
+    AdminAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Admin authentication token with MANAGE_CUSTOMERS permission
+
+  schemas:
+    SendEmailAction:
+      type: object
+      required:
+        - action
+        - data
+      properties:
+        action:
+          type: string
+          enum: [send_email]
+        data:
+          type: object
+          required:
+            - subject
+            - body
+          properties:
+            subject:
+              type: string
+              minLength: 1
+              maxLength: 200
+              description: Email subject line
+              example: "Welcome back to Mientior!"
+            body:
+              type: string
+              minLength: 1
+              maxLength: 5000
+              description: Email body content
+              example: "We have exciting new products for you..."
+            template:
+              type: string
+              description: Optional email template identifier
+              example: "welcome_back"
+
+    CreateTicketAction:
+      type: object
+      required:
+        - action
+        - data
+      properties:
+        action:
+          type: string
+          enum: [create_ticket]
+        data:
+          type: object
+          required:
+            - subject
+            - description
+          properties:
+            subject:
+              type: string
+              minLength: 1
+              maxLength: 200
+              description: Support ticket subject
+              example: "Account verification issue"
+            description:
+              type: string
+              minLength: 1
+              maxLength: 2000
+              description: Detailed description of the issue
+              example: "Customer unable to verify email address"
+            priority:
+              type: string
+              enum: [low, medium, high, urgent]
+              default: medium
+              description: Ticket priority level
+              example: "high"
+
+    AdjustPointsAction:
+      type: object
+      required:
+        - action
+        - data
+      properties:
+        action:
+          type: string
+          enum: [adjust_points]
+        data:
+          type: object
+          required:
+            - amount
+            - reason
+            - type
+          properties:
+            amount:
+              type: integer
+              minimum: 1
+              maximum: 100000
+              description: Number of points to add or subtract
+              example: 500
+            reason:
+              type: string
+              minLength: 1
+              maxLength: 500
+              description: Reason for the adjustment
+              example: "Compensation for delayed delivery"
+            type:
+              type: string
+              enum: [add, subtract]
+              description: Whether to add or subtract points
+              example: "add"
+
+    AddNoteAction:
+      type: object
+      required:
+        - action
+        - data
+      properties:
+        action:
+          type: string
+          enum: [add_note]
+        data:
+          type: object
+          required:
+            - content
+          properties:
+            content:
+              type: string
+              minLength: 1
+              maxLength: 5000
+              description: Note content
+              example: "Customer prefers email communication over SMS"
+
+    QuickActionResponse:
+      type: object
+      required:
+        - success
+        - data
+        - meta
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            action:
+              type: string
+              description: The action that was performed
+              example: "send_email"
+            result:
+              type: object
+              description: Action-specific result data
+            customerId:
+              type: string
+              format: uuid
+              description: ID of the customer the action was performed on
+            timestamp:
+              type: string
+              format: date-time
+              description: When the action was performed
+        meta:
+          type: object
+          properties:
+            adminId:
+              type: string
+              description: ID of the admin who performed the action
+            rateLimitRemaining:
+              type: integer
+              description: Number of requests remaining in current window
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+        - code
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: Human-readable error message
+          example: "Validation failed"
+        code:
+          type: string
+          description: Machine-readable error code
+          example: "VALIDATION_ERROR"
+        details:
+          type: array
+          description: Additional error details (for validation errors)
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                description: Field that failed validation
+              message:
+                type: string
+                description: Validation error message
+        retryAfter:
+          type: integer
+          description: Seconds until retry is allowed (for rate limit errors)
+          example: 60
+
+tags:
+  - name: Customer Management
+    description: Operations for managing customer data and interactions
+  - name: Admin Actions
+    description: Administrative actions that can be performed on resources

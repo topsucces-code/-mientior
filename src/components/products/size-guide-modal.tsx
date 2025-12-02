@@ -1,180 +1,243 @@
-'use client';
+'use client'
 
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { SIZE_GUIDES } from '@/lib/constants';
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+
+export interface SizeMeasurement {
+  size: string
+  chest?: number
+  waist?: number
+  hips?: number
+  length?: number
+  inseam?: number
+  sleeve?: number
+  unit: 'cm' | 'in'
+}
+
+export interface SizeGuideData {
+  id: string
+  categoryId: string
+  measurements: SizeMeasurement[]
+  instructions?: string
+  fitRecommendations?: {
+    size: string
+    recommendation: string
+  }[]
+}
 
 interface SizeGuideModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  category: string;
+  isOpen: boolean
+  onClose: () => void
+  sizeGuide: SizeGuideData | null
+  onSizeSelect?: (size: string) => void
 }
 
-interface SizeGuideData {
-  title: string;
-  illustration: string | null;
-  instructions: string[];
-  sizes: Record<string, unknown>[];
-}
+export function SizeGuideModal({
+  isOpen,
+  onClose,
+  sizeGuide,
+  onSizeSelect,
+}: SizeGuideModalProps) {
+  const [unit, setUnit] = useState<'cm' | 'in'>('cm')
 
-// Extend size guides with additional metadata
-const EXTENDED_SIZE_GUIDES: Record<string, SizeGuideData> = {
-  shoes: {
-    title: 'Guide des Tailles - Chaussures',
-    illustration: '/images/size-guide-shoes.svg',
-    instructions: [
-      'Mesurez votre pied du talon à l\'extrémité de votre orteil le plus long',
-      'Mesurez les deux pieds et utilisez la mesure la plus grande',
-      'Mesurez en fin de journée lorsque vos pieds sont légèrement gonflés',
-      'Portez les chaussettes que vous prévoyez de porter avec les chaussures',
-    ],
-    sizes: SIZE_GUIDES.shoes,
-  },
-  clothing: {
-    title: 'Guide des Tailles - Vêtements',
-    illustration: '/images/size-guide-clothing.svg',
-    instructions: [
-      'Tour de poitrine : Mesurez autour de la partie la plus large de votre poitrine',
-      'Tour de taille : Mesurez autour de votre taille naturelle',
-      'Tour de hanches : Mesurez autour de la partie la plus large de vos hanches',
-      'Utilisez un mètre ruban et gardez-le parallèle au sol',
-    ],
-    sizes: SIZE_GUIDES.clothing,
-  },
-  default: {
-    title: 'Guide des Tailles',
-    illustration: null,
-    instructions: [
-      'Consultez le tableau ci-dessous pour trouver votre taille',
-      'En cas de doute entre deux tailles, choisissez la plus grande',
-      'Contactez notre service client pour plus d\'assistance',
-    ],
-    sizes: [
-      { size: 'S', description: 'Small' },
-      { size: 'M', description: 'Medium' },
-      { size: 'L', description: 'Large' },
-      { size: 'XL', description: 'Extra Large' },
-    ],
-  },
-};
+  // Keyboard navigation support (Requirements 15.1)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return
 
-export function SizeGuideModal({ isOpen, onClose, category }: SizeGuideModalProps) {
-  // Determine which guide to show based on category
-  const categoryLower = category.toLowerCase();
-  let guideKey = 'default';
+      switch (e.key) {
+        case 'Escape':
+          e.preventDefault()
+          onClose()
+          break
+        case 'u':
+        case 'U':
+          // Toggle unit with 'u' key
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault()
+            setUnit((prev) => (prev === 'cm' ? 'in' : 'cm'))
+          }
+          break
+      }
+    }
 
-  if (categoryLower.includes('chaussure') || categoryLower.includes('shoe') || categoryLower.includes('running')) {
-    guideKey = 'shoes';
-  } else if (
-    categoryLower.includes('vêtement') ||
-    categoryLower.includes('clothing') ||
-    categoryLower.includes('shirt') ||
-    categoryLower.includes('pant') ||
-    categoryLower.includes('t-shirt')
-  ) {
-    guideKey = 'clothing';
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown)
+      return () => window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isOpen, onClose])
+
+  if (!sizeGuide) {
+    return null
   }
 
-  const guide: SizeGuideData = EXTENDED_SIZE_GUIDES[guideKey] ?? EXTENDED_SIZE_GUIDES.default!;
+  const convertMeasurement = (value: number | undefined, fromUnit: 'cm' | 'in'): number => {
+    if (value === undefined) return 0
+    
+    if (fromUnit === unit) {
+      return value
+    }
+    
+    // Convert between cm and inches
+    if (fromUnit === 'cm' && unit === 'in') {
+      return Math.round((value / 2.54) * 10) / 10
+    } else {
+      return Math.round((value * 2.54) * 10) / 10
+    }
+  }
+
+  const handleSizeClick = (size: string) => {
+    if (onSizeSelect) {
+      onSizeSelect(size)
+    }
+    onClose()
+  }
+
+  const measurementFields = [
+    { key: 'chest', label: 'Chest' },
+    { key: 'waist', label: 'Waist' },
+    { key: 'hips', label: 'Hips' },
+    { key: 'length', label: 'Length' },
+    { key: 'inseam', label: 'Inseam' },
+    { key: 'sleeve', label: 'Sleeve' },
+  ] as const
+
+  // Get available measurement fields
+  const availableFields = measurementFields.filter(field =>
+    sizeGuide.measurements.some(m => m[field.key] !== undefined)
+  )
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-graphite-900">
-            {guide.title}
-          </DialogTitle>
+          <DialogTitle>Size Guide</DialogTitle>
+          <DialogDescription>
+            Find your perfect fit with our detailed size measurements
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          {/* Illustration */}
-          {guide.illustration && (
-            <div className="flex justify-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={guide.illustration}
-                alt="Guide de mesure"
-                className="max-w-xs w-full"
-                onError={(e) => {
-                  // Hide image if it fails to load
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
+        <Tabs defaultValue="measurements" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="measurements">Measurements</TabsTrigger>
+            <TabsTrigger value="fit">Fit Recommendations</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="measurements" className="space-y-4">
+            {/* Unit Toggle */}
+            <div className="flex justify-end gap-2" role="group" aria-label="Unit selection">
+              <Button
+                variant={unit === 'cm' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setUnit('cm')}
+                aria-label="Switch to centimeters"
+                aria-pressed={unit === 'cm'}
+              >
+                CM
+              </Button>
+              <Button
+                variant={unit === 'in' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setUnit('in')}
+                aria-label="Switch to inches"
+                aria-pressed={unit === 'in'}
+              >
+                IN
+              </Button>
             </div>
-          )}
 
-          {/* Instructions */}
-          <div>
-            <h3 className="text-lg font-semibold text-graphite-900 mb-3">
-              Comment mesurer
-            </h3>
-            <ul className="space-y-2">
-              {guide.instructions.map((instruction: string, index: number) => (
-                <li key={index} className="flex items-start gap-2">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-orange-100 text-orange-600 text-sm font-semibold flex items-center justify-center mt-0.5">
-                    {index + 1}
-                  </span>
-                  <span className="text-sm text-graphite-700">{instruction}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Size Table */}
-          <div>
-            <h3 className="text-lg font-semibold text-graphite-900 mb-3">
-              Tableau des tailles
-            </h3>
+            {/* Measurements Table */}
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
+              <table className="w-full border-collapse" role="table" aria-label="Size measurements table">
                 <thead>
-                  <tr className="bg-platinum-100">
-                    {guide.sizes.length > 0 && Object.keys(guide.sizes[0]!).map((key) => (
-                      <th
-                        key={key}
-                        className="px-4 py-3 text-left text-sm font-semibold text-graphite-900 border border-platinum-300"
-                      >
-                        {key.toUpperCase()}
+                  <tr className="border-b">
+                    <th className="text-left p-3 font-semibold" scope="col">Size</th>
+                    {availableFields.map(field => (
+                      <th key={field.key} className="text-center p-3 font-semibold" scope="col">
+                        {field.label} ({unit})
                       </th>
                     ))}
+                    <th className="text-center p-3 font-semibold" scope="col">Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {guide.sizes.map((row: Record<string, unknown>, index: number) => (
-                    <tr
-                      key={index}
-                      className={
-                        index % 2 === 0 ? 'bg-white border border-platinum-300' : 'bg-platinum-50 border border-platinum-300'
-                      }
-                    >
-                      {Object.values(row).map((value: unknown, cellIndex: number) => (
-                        <td
-                          key={cellIndex}
-                          className="px-4 py-3 text-sm text-graphite-700"
-                        >
-                          {String(value)}
+                  {sizeGuide.measurements.map((measurement, index) => (
+                    <tr key={index} className="border-b hover:bg-muted/50">
+                      <th scope="row" className="p-3 font-medium text-left">{measurement.size}</th>
+                      {availableFields.map(field => (
+                        <td key={field.key} className="text-center p-3">
+                          {measurement[field.key] !== undefined
+                            ? convertMeasurement(measurement[field.key], measurement.unit)
+                            : '-'}
                         </td>
                       ))}
+                      <td className="text-center p-3">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSizeClick(measurement.size)}
+                          aria-label={`Select size ${measurement.size}`}
+                        >
+                          Select
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </div>
 
-          {/* Additional Info */}
-          <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
-            <p className="text-sm text-graphite-700">
-              <strong>Besoin d'aide ?</strong> Notre équipe de service client est là pour vous aider à trouver la taille parfaite.
-              Contactez-nous par chat ou par email.
-            </p>
-          </div>
-        </div>
+            {/* Instructions */}
+            {sizeGuide.instructions && (
+              <div className="mt-4 p-4 bg-muted rounded-lg">
+                <h4 className="font-semibold mb-2">How to Measure</h4>
+                <p className="text-sm text-muted-foreground whitespace-pre-line">
+                  {sizeGuide.instructions}
+                </p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="fit" className="space-y-4">
+            {sizeGuide.fitRecommendations && sizeGuide.fitRecommendations.length > 0 ? (
+              <div className="space-y-3">
+                {sizeGuide.fitRecommendations.map((rec, index) => (
+                  <div
+                    key={index}
+                    className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-semibold mb-1">Size {rec.size}</h4>
+                        <p className="text-sm text-muted-foreground">{rec.recommendation}</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSizeClick(rec.size)}
+                      >
+                        Select
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No fit recommendations available for this category.</p>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

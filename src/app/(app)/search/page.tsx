@@ -5,106 +5,53 @@
 
 import { Metadata } from 'next'
 import { Suspense } from 'react'
-import { prisma } from '@/lib/prisma'
 import { SearchPageClient } from './search-client'
-import type { SearchProduct, SearchResultsData } from '@/components/search/search-results'
+import { search } from '@/lib/search-service'
+import type { SearchResultsData } from '@/components/search/search-results'
 
 export const metadata: Metadata = {
   title: 'Search Results | Mientior',
   description: 'Search for products, brands, and articles',
 }
 
-async function searchProducts(query: string): Promise<SearchResultsData> {
-  if (!query || query.trim() === '') {
-    return {
-      products: [],
-      brands: [],
-      articles: [],
-    }
-  }
-
-  try {
-    // Search products by name or description using Prisma
-    const [products, categories] = await Promise.all([
-      prisma.product.findMany({
-        where: {
-          OR: [
-            { name: { contains: query, mode: 'insensitive' } },
-            { description: { contains: query, mode: 'insensitive' } },
-          ],
-        },
-        take: 24,
-        include: {
-          category: true,
-          images: {
-            orderBy: { order: 'asc' },
-            take: 1,
-          },
-        },
-      }),
-      prisma.category.findMany({
-        where: {
-          name: { contains: query, mode: 'insensitive' },
-        },
-        take: 10,
-      }),
-    ])
-
-    // Transform products for search results
-    const transformedProducts: SearchProduct[] = products.map((product) => ({
-      id: product.id,
-      name: product.name,
-      slug: product.slug,
-      price: product.price,
-      compareAtPrice: product.compareAtPrice || undefined,
-      image: product.images[0]?.url,
-      rating: product.rating,
-      reviewCount: product.reviewCount,
-      stock: product.stock,
-      badge: product.badge
-        ? {
-            text: product.badge,
-            variant: product.onSale ? 'sale' : product.featured ? 'featured' : 'new',
-          }
-        : undefined,
-      category: product.category.name,
-    }))
-
-    const brands = categories.map((cat) => ({
-      id: cat.id,
-      name: cat.name,
-      slug: cat.slug,
-      logo: cat.image || undefined,
-      productCount: 0, // Placeholder
-    }))
-
-    return {
-      products: transformedProducts,
-      brands,
-      articles: [], // Placeholder - would search articles collection if it exists
-      totalProducts: products.length,
-      totalBrands: categories.length,
-      totalArticles: 0,
-    }
-  } catch (error) {
-    console.error('Error searching:', error)
-    return {
-      products: [],
-      brands: [],
-      articles: [],
-    }
-  }
-}
-
 interface SearchPageProps {
-  searchParams: {
+  searchParams: Promise<{
     q?: string
-  }
+  }>
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const query = searchParams.q || ''
-  const results = await searchProducts(query)
+  const { q } = await searchParams
+  const query = q || ''
+  
+  // Use unified search service
+  const searchResult = await search({
+    query,
+    page: 1,
+    limit: 24
+  })
+
+  // Transform to component format
+  const results: SearchResultsData = {
+    products: searchResult.products.map(p => ({
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      price: p.price,
+      compareAtPrice: p.compareAtPrice,
+      image: p.images[0]?.url,
+      rating: p.rating,
+      reviewCount: p.reviewCount,
+      stock: p.stock,
+      category: p.category?.name,
+      badge: p.tags && Array.isArray(p.tags) && p.tags.some(t => t.name === 'new') ? { text: 'New', variant: 'new' } : undefined
+    })),
+    brands: [], // TODO: Implement brand search in unified service
+    articles: [], // TODO: Implement article search
+    totalProducts: searchResult.totalCount,
+    totalBrands: 0,
+    totalArticles: 0
+  }
 
   return (
     <div className="min-h-screen bg-platinum-50">

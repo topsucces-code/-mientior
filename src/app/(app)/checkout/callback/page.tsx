@@ -4,17 +4,17 @@ import { verifyFlutterwaveTransaction } from '@/lib/flutterwave'
 import { prisma } from '@/lib/prisma'
 
 interface CallbackPageProps {
-  searchParams: {
+  searchParams: Promise<{
     reference?: string // Paystack
     tx_ref?: string // Flutterwave
     transaction_id?: string // Flutterwave
     status?: string
     orderId?: string
-  }
+  }>
 }
 
 export default async function CallbackPage({ searchParams }: CallbackPageProps) {
-  const { reference, tx_ref, transaction_id } = searchParams
+  const { reference, tx_ref, transaction_id, orderId } = await searchParams
 
   try {
     let paymentReference: string | undefined
@@ -59,9 +59,9 @@ export default async function CallbackPage({ searchParams }: CallbackPageProps) 
     })
 
     // Fallback: Try to find by orderId from searchParams if not found by reference
-    if (!order && searchParams.orderId) {
+    if (!order && orderId) {
       order = await prisma.order.findUnique({
-        where: { id: searchParams.orderId },
+        where: { id: orderId },
         include: {
           items: {
             select: {

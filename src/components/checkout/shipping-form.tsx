@@ -8,7 +8,9 @@ import useSWR from 'swr'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Badge } from '@/components/ui/badge'
 import {
   Form,
   FormControl,
@@ -75,13 +77,16 @@ const addressSchema = z.object({
 
   // Save address option
   saveAddress: z.boolean(),
+
+  // Order notes
+  orderNotes: z.string().max(500, 'Les notes ne peuvent pas dépasser 500 caractères').optional(),
 })
 
 type AddressFormValues = z.infer<typeof addressSchema>
 
 interface ShippingFormProps {
   defaultValues?: Partial<Address & { email?: string }>
-  onSubmit: (data: Address) => void
+  onSubmit: (data: Address) => void // Address now includes orderNotes
   onBack?: () => void
   isLoading?: boolean
   className?: string
@@ -130,6 +135,7 @@ export function ShippingForm({
       email: defaultValues?.email || userEmail || '',
       emailOffers: false,
       saveAddress: false,
+      orderNotes: defaultValues?.orderNotes || '',
     },
   })
 
@@ -243,6 +249,7 @@ export function ShippingForm({
       country: data.country,
       phone: data.phone,
       email: data.email,
+      orderNotes: data.orderNotes,
     })
   }
 
@@ -502,6 +509,58 @@ export function ShippingForm({
                       <FormDescription className="text-xs">
                         Nécessaire pour la livraison
                       </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Order Notes */}
+                <FormField
+                  control={form.control}
+                  name="orderNotes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Instructions de livraison (Optionnel)</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Ex: Laisser devant la porte, Appeler avant livraison..."
+                          rows={3}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription className="text-xs">
+                        {field.value?.length || 0}/500
+                      </FormDescription>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <Badge
+                          variant="outline"
+                          className="cursor-pointer hover:bg-platinum-100"
+                          onClick={() => form.setValue('orderNotes', 'Laisser devant la porte')}
+                        >
+                          Laisser devant la porte
+                        </Badge>
+                        <Badge
+                          variant="outline"
+                          className="cursor-pointer hover:bg-platinum-100"
+                          onClick={() => form.setValue('orderNotes', 'Appeler avant livraison')}
+                        >
+                          Appeler avant livraison
+                        </Badge>
+                        <Badge
+                          variant="outline"
+                          className="cursor-pointer hover:bg-platinum-100"
+                          onClick={() => form.setValue('orderNotes', 'Sonner à l\'interphone')}
+                        >
+                          Sonner à l&apos;interphone
+                        </Badge>
+                        <Badge
+                          variant="outline"
+                          className="cursor-pointer hover:bg-platinum-100"
+                          onClick={() => form.setValue('orderNotes', 'Livraison en point relais préférée')}
+                        >
+                          Livraison en point relais préférée
+                        </Badge>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}

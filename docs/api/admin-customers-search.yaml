@@ -1,0 +1,292 @@
+openapi: 3.0.3
+info:
+  title: Customer Search API
+  version: 1.0.0
+paths:
+  /api/admin/customers/search:
+    get:
+      summary: Search and filter customers
+      description: |
+        Advanced customer search with multiple filter options and pagination.
+        Requires USERS_READ permission.
+      tags:
+        - Admin
+        - Customers
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          description: Search query (name, email, order number)
+          schema:
+            type: string
+            maxLength: 100
+            example: "john doe"
+        - name: segment
+          in: query
+          description: Filter by segment ID
+          schema:
+            type: string
+            format: uuid
+        - name: tier
+          in: query
+          description: Filter by loyalty tier
+          schema:
+            type: string
+            enum: [BRONZE, SILVER, GOLD, PLATINUM]
+        - name: tag
+          in: query
+          description: Filter by tag ID
+          schema:
+            type: string
+            format: uuid
+        - name: registrationFrom
+          in: query
+          description: Filter by registration date from
+          schema:
+            type: string
+            format: date-time
+        - name: registrationTo
+          in: query
+          description: Filter by registration date to
+          schema:
+            type: string
+            format: date-time
+        - name: lastPurchaseFrom
+          in: query
+          description: Filter by last purchase date from
+          schema:
+            type: string
+            format: date-time
+        - name: lastPurchaseTo
+          in: query
+          description: Filter by last purchase date to
+          schema:
+            type: string
+            format: date-time
+        - name: clvMin
+          in: query
+          description: Minimum customer lifetime value
+          schema:
+            type: number
+            minimum: 0
+            maximum: 1000000
+        - name: clvMax
+          in: query
+          description: Maximum customer lifetime value
+          schema:
+            type: number
+            minimum: 0
+            maximum: 1000000
+        - name: orderCountMin
+          in: query
+          description: Minimum order count
+          schema:
+            type: integer
+            minimum: 0
+        - name: orderCountMax
+          in: query
+          description: Maximum order count
+          schema:
+            type: integer
+            minimum: 0
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Results per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: sortBy
+          in: query
+          description: Sort field
+          schema:
+            type: string
+            enum: [createdAt, name, email, totalSpent, totalOrders, loyaltyLevel]
+            default: createdAt
+        - name: sortOrder
+          in: query
+          description: Sort direction
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        '200':
+          description: Successful search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      customers:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CustomerSearchResult'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+                      meta:
+                        $ref: '#/components/schemas/SearchMeta'
+        '400':
+          description: Invalid search parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    CustomerSearchResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        loyaltyLevel:
+          type: string
+          enum: [BRONZE, SILVER, GOLD, PLATINUM]
+        loyaltyPoints:
+          type: integer
+        totalOrders:
+          type: integer
+        totalSpent:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+        lastPurchaseDate:
+          type: string
+          format: date-time
+          nullable: true
+        segments:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              name:
+                type: string
+        tags:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              name:
+                type: string
+              color:
+                type: string
+    
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalCount:
+          type: integer
+        totalPages:
+          type: integer
+        hasNextPage:
+          type: boolean
+        hasPreviousPage:
+          type: boolean
+    
+    SearchMeta:
+      type: object
+      properties:
+        searchQuery:
+          type: string
+          nullable: true
+        filtersApplied:
+          type: object
+          properties:
+            segment:
+              type: boolean
+            tier:
+              type: boolean
+            tag:
+              type: boolean
+            dateRange:
+              type: boolean
+            clvRange:
+              type: boolean
+            orderCountRange:
+              type: boolean
+            lastPurchaseRange:
+              type: boolean
+        sortBy:
+          type: string
+        sortOrder:
+          type: string
+    
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+        code:
+          type: string
+        details:
+          type: object
+          nullable: true
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

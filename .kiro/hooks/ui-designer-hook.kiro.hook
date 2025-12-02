@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "name": "UI Designer Agent",
+  "description": "Automatically launches the ui-designer agent when design system files, component styles, or UI-related files are edited. This agent provides expert visual interface design work including design systems, component design, color palettes, typography, responsive layouts, accessibility compliance, and design handoffs.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "DESIGN_SYSTEM.md",
+      "tailwind.config.ts",
+      "src/app/globals.css",
+      "src/components/ui/**",
+      "docs/DESIGN_GUIDE.md",
+      "src/app/(app)/design-showcase/**"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A design-related file has been modified. As the ui-designer agent, please review the changes and provide expert visual design guidance. Consider:\n\n1. **Design System Consistency**: Does this change align with our established design system (colors, typography, spacing)?\n2. **Visual Hierarchy**: Is the visual hierarchy clear and effective?\n3. **Accessibility**: Does this meet WCAG 2.1 AA standards for contrast, focus states, and keyboard navigation?\n4. **Responsive Design**: Will this work well across mobile, tablet, and desktop breakpoints?\n5. **Component States**: Are all interactive states properly designed (hover, active, focus, disabled, error)?\n6. **Tailwind Integration**: Are we using Tailwind utilities effectively and consistently?\n7. **shadcn/ui Alignment**: Does this align with our shadcn/ui component patterns?\n\nFile changed: {filePath}\n\nPlease provide specific, actionable design recommendations with exact values (hex codes, pixel dimensions, timing) and CSS examples where helpful. Explain the \"why\" behind your suggestions to educate the team."
+  }
+}

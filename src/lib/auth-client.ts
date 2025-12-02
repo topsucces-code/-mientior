@@ -11,5 +11,6 @@ export const {
   signUp,
   signOut,
   useSession,
-  // Add other methods as needed
+  // OAuth methods
+  $Infer,
 } = authClient

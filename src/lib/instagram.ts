@@ -68,6 +68,22 @@ async function fetchFromInstagramApi(): Promise<InstagramPost[]> {
 
   if (!response.ok) {
     const errorText = await response.text()
+    let errorData
+    try {
+      errorData = JSON.parse(errorText)
+    } catch {
+      // ignore JSON parse error
+    }
+
+    // Handle specific error codes
+    if (response.status === 400 || response.status === 401) {
+      const code = errorData?.error?.code
+      if (code === 190) {
+        console.warn('Instagram Access Token invalid or expired. Using fallback data.')
+        throw new Error('Instagram Token Invalid')
+      }
+    }
+
     console.error('Instagram API error:', response.status, errorText)
     throw new Error(`Instagram API error: ${response.status}`)
   }
@@ -205,7 +221,11 @@ export async function fetchInstagramPosts(): Promise<InstagramApiResponse> {
       source: 'api',
     }
   } catch (error) {
-    console.error('Failed to fetch Instagram posts:', error)
+    if (error instanceof Error && error.message === 'Instagram Token Invalid') {
+      // Already logged warning above
+    } else {
+      console.error('Failed to fetch Instagram posts:', error)
+    }
 
     // Return fallback data
     const fallbackPosts = getFallbackPosts()

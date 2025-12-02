@@ -1,0 +1,16 @@
+{
+  "synonyms": {
+    "téléphone": ["smartphone", "mobile", "portable", "cellulaire"],
+    "ordinateur": ["laptop", "pc", "computer", "portable"],
+    "chaussures": ["souliers", "baskets", "sneakers", "running"],
+    "vêtements": ["habits", "fringues", "tenues", "vêtement"],
+    "pas cher": ["économique", "abordable", "bon marché", "petit prix"],
+    "télévision": ["tv", "télé", "écran", "smart tv"],
+    "réfrigérateur": ["frigo", "frigidaire", "réfrigérateur"],
+    "aspirateur": ["vacuum", "nettoyeur"],
+    "montre": ["watch", "chronomètre", "bracelet connecté"],
+    "sac": ["sacoche", "besace", "cartable", "sac à dos"]
+  },
+  "version": "1.0.0",
+  "lastUpdated": "2025-11-30T00:00:00.000Z"
+}

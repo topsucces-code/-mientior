@@ -10,9 +10,9 @@ import { ProductSchema } from '@/components/products/product-schema'
 import type { ProductImage, Review } from '@/types'
 
 interface ProductPageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 interface ProductSEO {
@@ -22,8 +22,9 @@ interface ProductSEO {
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+  const { slug } = await params
   const product = await prisma.product.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
     select: {
       id: true,
       name: true,
@@ -59,8 +60,9 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
+  const { slug } = await params
   const product = await prisma.product.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
     include: {
       category: {
         include: {

@@ -14,6 +14,9 @@ export const metadata: Metadata = {
   description: 'Browse our complete collection of products. Filter by category, price, and more.',
 }
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 async function getProductsData() {
   try {
     // Fetch all products with Prisma

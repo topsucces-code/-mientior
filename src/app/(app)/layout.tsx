@@ -4,6 +4,9 @@ import Footer from '@/components/layout/footer'
 import { MobileNav } from '@/components/layout/mobile-nav'
 import { QuickViewProvider } from '@/contexts/quick-view-context'
 
+// Force all pages in this layout to be dynamic
+export const dynamic = 'force-dynamic'
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <QuickViewProvider>

@@ -4,11 +4,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { Permission } from '@prisma/client'
+import { Prisma } from '@prisma/client'
+import { Permission } from '@/lib/permissions'
 import { prisma } from '@/lib/prisma'
 import { withPermission } from '@/middleware/admin-auth'
 
-async function handleGET(request: NextRequest, { adminSession }: { adminSession: any }) {
+async function handleGET(request: NextRequest, { adminSession: _adminSession }: { adminSession: unknown }) {
   try {
     const { searchParams } = new URL(request.url)
 
@@ -23,7 +24,7 @@ async function handleGET(request: NextRequest, { adminSession }: { adminSession:
     const _order = searchParams.get('_order') || 'desc'
 
     // Build where clause for filtering
-    const where: any = {}
+    const where: Prisma.UserWhereInput = {}
 
     // Filter by email (search)
     const email_like = searchParams.get('email_like')
@@ -37,12 +38,13 @@ async function handleGET(request: NextRequest, { adminSession }: { adminSession:
     // Filter by loyaltyLevel
     const loyaltyLevel = searchParams.get('loyaltyLevel')
     if (loyaltyLevel) {
-      where.loyaltyLevel = loyaltyLevel.toUpperCase()
+      where.loyaltyLevel = loyaltyLevel.toUpperCase() as Prisma.EnumLoyaltyLevelFilter
     }
 
     // Build orderBy clause
-    const orderBy: any = {}
-    orderBy[_sort] = _order
+    const orderBy: Prisma.UserOrderByWithRelationInput = {
+      [_sort]: _order as 'asc' | 'desc'
+    }
 
     // Fetch users with aggregations
     const [users, totalCount] = await Promise.all([

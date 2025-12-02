@@ -13,6 +13,8 @@ import { useDebouncedQuantityUpdate } from '@/hooks/use-debounced-cart-update'
 import { useOptimisticCart } from '@/hooks/use-optimistic-cart'
 import { useCartAnalytics } from '@/hooks/use-cart-analytics'
 import { formatCurrency } from '@/lib/currency'
+import { useCartStore } from '@/stores/cart.store'
+import { PromotionBadge } from '@/components/cart/promotion-badge'
 
 interface CartItemProps {
   item: CartItemType
@@ -25,6 +27,10 @@ export function CartItem({ item, className, showActions = true }: CartItemProps)
   const { trackRemoveFromCart } = useCartAnalytics()
   const { toast } = useToast()
   const [isRemoving, setIsRemoving] = React.useState(false)
+
+  // Get item-level promotions from cart store
+  const getItemPromotions = useCartStore(state => state.getItemPromotions)
+  const itemPromotions = getItemPromotions(item.id)
 
   // Use debounced quantity update
   const { 
@@ -145,17 +151,33 @@ export function CartItem({ item, className, showActions = true }: CartItemProps)
               )}
             </div>
 
-            {/* Compare at Price */}
-            {item.compareAtPrice && item.compareAtPrice > item.price && (
-              <div className="mt-1">
-                <span className="text-xs text-nuanced-500 line-through">
-                  {formatCurrency(item.compareAtPrice)}
-                </span>
-                <span className="ml-2 text-xs font-semibold text-green-600">
-                  Économisez {formatCurrency(item.compareAtPrice - item.price)}
-                </span>
-              </div>
-            )}
+            {/* Compare at Price & Item Promotions */}
+            <div className="mt-1 space-y-1">
+              {item.compareAtPrice && item.compareAtPrice > item.price && (
+                <div>
+                  <span className="text-xs text-nuanced-500 line-through">
+                    {formatCurrency(item.compareAtPrice)}
+                  </span>
+                  <span className="ml-2 text-xs font-semibold text-green-600">
+                    Économisez {formatCurrency(item.compareAtPrice - item.price)}
+                  </span>
+                </div>
+              )}
+
+              {/* Promotion Badges */}
+              {itemPromotions.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {itemPromotions.map(promo => (
+                    <PromotionBadge
+                      key={promo.id}
+                      type={promo.type}
+                      label={promo.label}
+                      size="sm"
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Remove Button */}

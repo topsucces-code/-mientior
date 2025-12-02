@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Full-Stack Developer Agent",
+  "description": "Automatically triggers the fullstack-developer agent when users need comprehensive full-stack development assistance spanning frontend (Next.js, React, TypeScript), backend (Node.js, APIs, databases), DevOps, and architecture. This agent excels at building complete web applications from scratch, implementing features end-to-end, integrating third-party services, optimizing performance, ensuring security, and following industry best practices.",
+  "version": "1",
+  "when": {
+    "type": "userPrompt"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "The user needs comprehensive full-stack development assistance. Based on their request: \"{{userMessage}}\"\n\nPlease analyze their needs and provide expert full-stack development guidance covering:\n\n1. **Architecture & Design**: Recommend appropriate patterns, tech stack decisions, and system design\n2. **Frontend Implementation**: React/Next.js components, TypeScript, state management, UI/UX\n3. **Backend Development**: API design, database schema, business logic, authentication\n4. **Integration**: Third-party services (payments, email, OAuth, etc.)\n5. **Security**: Input validation, authentication, authorization, data protection\n6. **Performance**: Optimization strategies for frontend and backend\n7. **Testing**: Unit, integration, and E2E test recommendations\n8. **Deployment**: Production considerations and best practices\n\nProvide complete, production-ready code implementations following the project's established patterns and conventions. Include:\n- Full code with proper TypeScript types\n- File structure and organization\n- Required dependencies\n- Environment variables\n- Database migrations if needed\n- API documentation\n- Testing examples\n- Deployment notes\n\nContext from the Mientior project:\n- Next.js 15 with App Router\n- PostgreSQL + Prisma ORM\n- Better Auth for authentication\n- Paystack/Flutterwave for payments\n- Refine.dev admin panel\n- Tailwind CSS + shadcn/ui\n\nDeliver maintainable, scalable, and secure solutions that follow industry best practices."
+  }
+}

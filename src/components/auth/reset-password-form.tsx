@@ -10,11 +10,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, Loader2 } from 'lucide-react'
+import { PasswordStrengthIndicator } from '@/components/auth/password-strength-indicator'
+import { passwordSchema } from '@/lib/password-validation'
 
 const resetPasswordSchema = z
   .object({
-    password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
+    password: passwordSchema,
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -38,9 +40,13 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
   })
+
+  // Watch password field for real-time strength indicator
+  const password = watch('password', '')
 
   const onSubmit = async (data: ResetPasswordFormData) => {
     setError(null)
@@ -48,11 +54,33 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     setIsSubmitting(true)
 
     try {
-      // TODO: Implement password reset with token
-      // For now, simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token,
+          password: data.password,
+        }),
+      })
 
-      console.log('Password reset with token:', token, data)
+      const result = await response.json()
+
+      if (!response.ok) {
+        // Handle specific error codes
+        if (result.code === 'TOKEN_INVALID') {
+          setError('Le lien de réinitialisation est invalide ou a expiré.')
+        } else if (result.code === 'PASSWORD_REUSED') {
+          setError('Veuillez choisir un mot de passe que vous n\'avez pas utilisé récemment.')
+        } else if (result.code === 'PASSWORD_INVALID') {
+          setError(result.details?.join(', ') || 'Le mot de passe ne respecte pas les exigences.')
+        } else {
+          setError(result.error || 'Une erreur est survenue.')
+        }
+        return
+      }
+
       setSuccess(true)
 
       // Redirect to login after 2 seconds
@@ -60,7 +88,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         router.push('/login')
       }, 2000)
     } catch (err) {
-      setError('Une erreur est survenue. Le lien est peut-être expiré.')
+      setError('Une erreur est survenue. Veuillez réessayer.')
       console.error('Reset password error:', err)
     } finally {
       setIsSubmitting(false)
@@ -137,6 +165,11 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           {errors.password && (
             <p className="text-sm text-red-500">{errors.password.message}</p>
           )}
+          
+          {/* Password strength indicator */}
+          {password && (
+            <PasswordStrengthIndicator password={password} className="mt-3" />
+          )}
         </div>
 
         <div className="space-y-2">
@@ -156,7 +189,14 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         </div>
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? 'Réinitialisation...' : 'Réinitialiser le mot de passe'}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Réinitialisation en cours...
+            </>
+          ) : (
+            'Réinitialiser le mot de passe'
+          )}
         </Button>
       </form>
 

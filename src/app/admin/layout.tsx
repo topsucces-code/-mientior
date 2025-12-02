@@ -95,6 +95,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               },
             },
             {
+              name: "customer-360",
+              show: "/admin/customers/360/:id",
+              meta: {
+                label: "Customer 360",
+                parent: "users",
+              },
+            },
+            {
               name: "vendors",
               list: "/admin/vendors",
               create: "/admin/vendors/create",
@@ -173,6 +181,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               list: "/admin/feature-flags",
               meta: {
                 label: "Feature Flags",
+                parent: "settings",
+              },
+            },
+            {
+              name: "search-synonyms",
+              list: "/admin/search/synonyms",
+              meta: {
+                label: "Search Synonyms",
                 parent: "settings",
               },
             },

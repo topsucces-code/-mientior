@@ -7,7 +7,6 @@
  */
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { ShoppingCart, Heart, Check, Truck, RotateCcw, Minus, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
@@ -125,6 +124,7 @@ export function DesktopStickySidebar({
     } else {
       addToWishlist({
         productId: product.id,
+        slug: product.slug,
         name: product.name,
         price: finalPrice,
         image: product.images[0]?.url || '/images/placeholder.svg',
@@ -143,41 +143,62 @@ export function DesktopStickySidebar({
   }
 
   return (
-    <div className="hidden lg:block sticky top-24 w-full">
-      <div className="bg-white border-2 border-platinum-300 rounded-2xl p-6 shadow-sm">
-        {/* Mini Product Info */}
-        <div className="flex items-start gap-4 mb-6 pb-6 border-b border-platinum-200">
-          <div className="relative w-20 h-20 flex-shrink-0 bg-platinum-100 rounded-lg overflow-hidden">
-            {product.images[0] && (
-              <Image
-                src={product.images[0].url}
-                alt={product.name}
-                fill
-                className="object-contain p-2"
-                sizes="80px"
-              />
+    <div className="sticky top-24 w-full">
+      <div className="bg-white border-2 border-platinum-300 rounded-2xl p-5 shadow-sm">
+        {/* Product Title & Badge */}
+        <div className="mb-4">
+          <h1 className="text-xl font-bold text-anthracite-900 leading-tight mb-2">
+            {product.name}
+          </h1>
+          {product.badge && (
+            <Badge variant="default" className="bg-aurore-500 text-anthracite-900 text-xs">
+              #{product.badge}
+            </Badge>
+          )}
+        </div>
+
+        {/* Rating */}
+        <div className="flex items-center gap-2 mb-4 pb-4 border-b border-platinum-200">
+          <div className="flex items-center">
+            {[...Array(5)].map((_, i) => (
+              <svg
+                key={i}
+                className={cn(
+                  'w-4 h-4',
+                  i < Math.floor(product.rating) ? 'text-aurore-500 fill-aurore-500' : 'text-platinum-300'
+                )}
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            ))}
+          </div>
+          <span className="text-sm text-nuanced-600">
+            {product.rating} ({product.reviewCount} avis)
+          </span>
+        </div>
+
+        {/* Price */}
+        <div className="mb-4 pb-4 border-b border-platinum-200">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            {product.compareAtPrice && (
+              <span className="text-base text-nuanced-500 line-through">
+                {product.compareAtPrice.toFixed(2)}€
+              </span>
+            )}
+            <span className="text-3xl font-bold text-orange-500">
+              {finalPrice.toFixed(2)}€
+            </span>
+            {discount > 0 && (
+              <Badge variant="destructive" className="text-sm">
+                -{discount}%
+              </Badge>
             )}
           </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-sm text-anthracite-900 line-clamp-2 mb-2">
-              {product.name}
-            </h3>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-anthracite-900">
-                {finalPrice.toFixed(2)} €
-              </span>
-              {product.compareAtPrice && (
-                <>
-                  <span className="text-sm text-nuanced-500 line-through">
-                    {product.compareAtPrice.toFixed(2)} €
-                  </span>
-                  <Badge variant="destructive" className="text-xs">
-                    -{discount}%
-                  </Badge>
-                </>
-              )}
-            </div>
-          </div>
+          <p className="text-sm text-nuanced-600 mt-1">
+            Ou <strong>3x {(finalPrice / 3).toFixed(2)}€</strong> sans frais
+          </p>
         </div>
 
         {/* Variant Selectors */}
@@ -283,11 +304,12 @@ export function DesktopStickySidebar({
                 <Button
                   onClick={handleAddToCart}
                   disabled={isAddingToCart || product.stock <= 0}
-                  className="w-full h-14 flex items-center justify-center"
+                  className="w-full h-14 flex items-center justify-center gap-3"
                   size="lg"
                   aria-label={product.stock <= 0 ? 'Rupture de stock' : isAddingToCart ? 'Ajout en cours...' : 'Ajouter au panier'}
                 >
                   <ShoppingCart className="w-6 h-6" />
+                  <p>{product.stock <= 0 ? 'Rupture de stock' : isAddingToCart ? 'Ajout en cours...' : 'Ajouter au panier'}</p>
                 </Button>
               </span>
             </TooltipTrigger>

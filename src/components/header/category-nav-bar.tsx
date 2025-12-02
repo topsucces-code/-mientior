@@ -18,15 +18,13 @@ interface CategoryNavBarProps {
 
 const DEFAULT_CATEGORIES: Category[] = [
     { id: '1', name: 'Électronique', slug: 'electronique', icon: '💻' },
-    { id: '2', name: 'Mode & Accessoires', slug: 'mode', icon: '👔' },
+    { id: '2', name: 'Mode', slug: 'mode', icon: '👔' },
     { id: '3', name: 'Maison & Jardin', slug: 'maison', icon: '🏠' },
     { id: '4', name: 'Sports & Loisirs', slug: 'sports', icon: '⚽' },
     { id: '5', name: 'Beauté & Santé', slug: 'beaute', icon: '💄' },
     { id: '6', name: 'Livres & Médias', slug: 'livres', icon: '📚' },
     { id: '7', name: 'Jouets & Enfants', slug: 'jouets', icon: '🧸' },
-    { id: '8', name: 'Alimentation', slug: 'alimentation', icon: '🍎' },
-    { id: '9', name: 'Auto & Moto', slug: 'auto', icon: '🚗' },
-    { id: '10', name: 'Bricolage', slug: 'bricolage', icon: '🔧' }
+    { id: '8', name: 'Électroménager', slug: 'electromenager', icon: '🍳' },
 ]
 
 export function CategoryNavBar({ categories = DEFAULT_CATEGORIES }: CategoryNavBarProps) {

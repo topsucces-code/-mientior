@@ -8,9 +8,12 @@ import { cn } from '@/lib/utils'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
 import { useQuickView } from '@/contexts/quick-view-context'
+import { useCartStore } from '@/stores/cart.store'
+import { toast } from 'sonner'
+import { useHeaderSafe } from '@/contexts/header-context'
 
 interface TrendingNowCarouselProps extends React.HTMLAttributes<HTMLElement> {
-  products: Omit<ProductCardProps, 'onQuickView'>[]
+  products: (Omit<ProductCardProps, 'onQuickView'> & { stock?: number })[]
   title?: string
   subtitle?: string
   autoplayDelay?: number
@@ -35,6 +38,8 @@ export default function TrendingNowCarousel({
   const [isPaused, setIsPaused] = React.useState(false)
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
+  const addToCart = useCartStore((state) => state.addItem)
+  const headerContext = useHeaderSafe()
 
   const scrollPrev = React.useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev()
@@ -51,6 +56,32 @@ export default function TrendingNowCarousel({
   }, [emblaApi])
 
   const { openQuickView } = useQuickView()
+
+  const handleAddToCart = (product: Omit<ProductCardProps, 'onQuickView'> & { stock?: number }) => {
+     addToCart({
+       id: product.id,
+       productId: product.id,
+       productName: product.name,
+       productSlug: product.slug,
+       productImage: product.image || '/placeholder-product.jpg',
+       price: product.price,
+       quantity: 1,
+       stock: product.stock || 0,
+     })
+     
+     toast.success("Ajouté au panier !", {
+       description: `${product.name} a été ajouté à votre panier.`,
+       action: {
+         label: "Voir le panier",
+         onClick: () => window.location.href = '/cart'
+       }
+     })
+     
+     // Open cart preview after adding item
+     if (headerContext?.openCart) {
+       setTimeout(() => headerContext.openCart(), 300)
+     }
+  }
 
   React.useEffect(() => {
     if (!emblaApi) return
@@ -177,12 +208,15 @@ export default function TrendingNowCarousel({
               {products.map((product, index) => (
                 <div
                   key={product.id}
-                  className="min-w-0 flex-[0_0_100%] sm:flex-[0_0_50%] lg:flex-[0_0_33.333%] xl:flex-[0_0_25%]"
+                  className="min-w-0 flex-[0_0_calc(50%-12px)] sm:flex-[0_0_calc(33.333%-16px)] md:flex-[0_0_calc(25%-18px)] lg:flex-[0_0_calc(20%-19px)] xl:flex-[0_0_calc(16.666%-20px)]"
                 >
                   <ProductCard
                     {...product}
+                    inStock={product.stock !== undefined ? product.stock > 0 : product.inStock}
                     badge={{ text: '🔥 Trending', variant: 'trending' }}
                     onQuickView={handleQuickView}
+                    onAddToCart={() => handleAddToCart(product)}
+                    priority={index < 6}
                     className={cn(
                       !prefersReducedMotion && isVisible && 'animate-fade-in-up'
                     )}

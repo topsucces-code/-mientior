@@ -3,6 +3,7 @@ import { getSession } from '@/lib/auth-server'
 import { prisma } from '@/lib/prisma'
 import { verifyPaystackTransaction } from '@/lib/paystack'
 import { verifyFlutterwaveTransaction } from '@/lib/flutterwave'
+import { sendOrderConfirmationEmail } from '@/lib/email'
 import type { Address, PaymentGateway } from '@/types'
 
 /**
@@ -30,11 +31,13 @@ export async function PATCH(
       paymentGateway,
       billingAddress,
       promoCode,
+      orderNotes,
     }: {
       paymentReference: string
       paymentGateway: PaymentGateway
       billingAddress?: Address
       promoCode?: string
+      orderNotes?: string
     } = body
 
     // Validation
@@ -167,6 +170,7 @@ export async function PATCH(
           paymentGateway,
           billingAddress: billingAddress ? JSON.stringify(billingAddress) : undefined,
           couponCode: promoCode || order.couponCode,
+          notes: orderNotes || order.notes,
           status: 'PROCESSING',
           paymentStatus: 'PAID',
           paymentMetadata: {
@@ -185,6 +189,14 @@ export async function PATCH(
           paymentStatus: true,
           total: true,
           email: true,
+          subtotal: true,
+          shippingCost: true,
+          tax: true,
+          discount: true,
+          notes: true,
+          shippingAddress: true,
+          estimatedDeliveryMin: true,
+          createdAt: true,
         },
       })
 
@@ -216,12 +228,72 @@ export async function PATCH(
       return updated
     })
 
-    // TODO: Send confirmation email
-    // await sendOrderConfirmationEmail({
-    //   email: updatedOrder.email,
-    //   orderNumber: updatedOrder.orderNumber,
-    //   total: updatedOrder.total,
-    // })
+    // Send confirmation email with order details
+    try {
+      const shippingAddr = typeof updatedOrder.shippingAddress === 'string'
+        ? JSON.parse(updatedOrder.shippingAddress)
+        : updatedOrder.shippingAddress
+
+      // Fetch order items with details
+      const orderWithItems = await prisma.order.findUnique({
+        where: { id: updatedOrder.id },
+        include: {
+          items: {
+            select: {
+              name: true,
+              quantity: true,
+              price: true,
+              productImage: true,
+            },
+          },
+        },
+      })
+
+      if (orderWithItems) {
+        await sendOrderConfirmationEmail({
+          orderNumber: updatedOrder.orderNumber,
+          customerName: `${shippingAddr.firstName} ${shippingAddr.lastName}`,
+          email: updatedOrder.email || '',
+          items: orderWithItems.items.map((item) => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: Math.round(item.price * 100), // Convert to cents
+            image: item.productImage || undefined,
+          })),
+          subtotal: Math.round(updatedOrder.subtotal * 100), // Convert to cents
+          shippingCost: Math.round(updatedOrder.shippingCost * 100),
+          tax: Math.round(updatedOrder.tax * 100),
+          discount: Math.round(updatedOrder.discount * 100),
+          total: Math.round(updatedOrder.total * 100),
+          shippingAddress: {
+            firstName: shippingAddr.firstName,
+            lastName: shippingAddr.lastName,
+            line1: shippingAddr.line1,
+            line2: shippingAddr.line2,
+            city: shippingAddr.city,
+            postalCode: shippingAddr.postalCode,
+            country: shippingAddr.country,
+            phone: shippingAddr.phone,
+          },
+          orderNotes: updatedOrder.notes || undefined,
+          orderDate: updatedOrder.createdAt.toLocaleDateString('fr-FR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          estimatedDelivery: updatedOrder.estimatedDeliveryMin
+            ? updatedOrder.estimatedDeliveryMin.toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })
+            : undefined,
+        })
+      }
+    } catch (emailError) {
+      console.error('Failed to send order confirmation email:', emailError)
+      // Don't fail the request if email fails
+    }
 
     return NextResponse.json({
       success: true,

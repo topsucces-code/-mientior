@@ -17,6 +17,7 @@ import {
   SafetyOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  SearchOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -150,6 +151,12 @@ export function AdminSidebar({ collapsed, onCollapse }: AdminSidebarProps) {
               key: '/admin/customers',
               label: t('menu.allCustomers', 'All Customers'),
               onClick: () => router.push('/admin/customers'),
+            },
+            {
+              key: '/admin/customers/search',
+              label: t('menu.customerSearch', 'Customer Search'),
+              icon: <SearchOutlined />,
+              onClick: () => router.push('/admin/customers/search'),
             },
             {
               key: '/admin/customers/segments',

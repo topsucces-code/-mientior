@@ -13,6 +13,7 @@ import {
   LogOut,
   Trophy,
   Gift,
+  Shield,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -25,42 +26,47 @@ export interface AccountSidebarProps {
 
 const navigationItems = [
   {
-    title: 'Account Overview',
+    title: 'Mon compte',
     href: '/account',
     icon: User,
   },
   {
-    title: 'Orders',
+    title: 'Mes commandes',
     href: '/account/orders',
     icon: ShoppingBag,
   },
   {
-    title: 'Wishlist',
+    title: 'Ma liste de souhaits',
     href: '/account/wishlist',
     icon: Heart,
   },
   {
-    title: 'Addresses',
+    title: 'Mes adresses',
     href: '/account/addresses',
     icon: MapPin,
   },
   {
-    title: 'Payment Methods',
+    title: 'Moyens de paiement',
     href: '/account/payment-methods',
     icon: CreditCard,
   },
   {
-    title: 'Loyalty Program',
+    title: 'Sécurité',
+    href: '/account/security',
+    icon: Shield,
+  },
+  {
+    title: 'Programme fidélité',
     href: '/account/loyalty',
     icon: Trophy,
   },
   {
-    title: 'Rewards',
+    title: 'Récompenses',
     href: '/account/rewards',
     icon: Gift,
   },
   {
-    title: 'Settings',
+    title: 'Paramètres',
     href: '/account/settings',
     icon: Settings,
   },
@@ -77,8 +83,8 @@ export function AccountSidebar({ className, onSignOut }: AccountSidebarProps) {
       )}
     >
       <div>
-        <h2 className="text-lg font-semibold text-anthracite-700">My Account</h2>
-        <p className="text-sm text-nuanced-500">Manage your account settings</p>
+        <h2 className="text-lg font-semibold text-anthracite-700">Mon Compte</h2>
+        <p className="text-sm text-nuanced-500">Gérez vos paramètres</p>
       </div>
 
       <Separator />
@@ -114,7 +120,7 @@ export function AccountSidebar({ className, onSignOut }: AccountSidebarProps) {
         onClick={onSignOut}
       >
         <LogOut className="h-5 w-5" />
-        Sign Out
+        Déconnexion
       </Button>
     </aside>
   )

@@ -1,0 +1,25 @@
+{
+  "enabled": true,
+  "name": "Content & UX Writer",
+  "description": "Automatically reviews and optimizes all user-facing content including microcopy (buttons, errors, tooltips, forms), marketing materials (emails, landing pages, product descriptions), and UI text to ensure clarity, consistency, and conversion optimization following UX writing best practices",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/components/**/*.tsx",
+      "src/app/**/page.tsx",
+      "src/app/**/layout.tsx",
+      "public/locales/**/*.json",
+      "src/components/auth/**/*.tsx",
+      "src/components/checkout/**/*.tsx",
+      "src/components/cart/**/*.tsx",
+      "src/components/products/**/*.tsx",
+      "src/components/home/**/*.tsx",
+      "src/components/support/**/*.tsx"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Review all user-facing text content in the modified file(s) as a Senior Content/UX Writer. Focus on:\n\n1. **Microcopy Review** (buttons, labels, error messages, tooltips, notifications, empty states):\n   - Apply the 4 C's: Clear, Concise, Consistent, Conversational\n   - Ensure error messages follow [Problem] + [Solution] format\n   - Verify CTAs use action verbs and show clear benefits\n   - Check tone appropriateness for context (success, error, onboarding, etc.)\n\n2. **Content Quality** (product descriptions, landing pages, marketing copy):\n   - Ensure scannability (short paragraphs, bullet points, clear headings)\n   - Verify power words are used appropriately (urgency, exclusivity, trust)\n   - Check that copy is persuasive while maintaining brand voice\n   - Validate SEO-friendly structure where applicable\n\n3. **Brand Voice & Tone**:\n   - Confirm consistency with Mientior's friendly, professional, accessible, helpful voice\n   - Verify French language quality and appropriateness for Côte d'Ivoire market\n   - Check that tone adapts to user's emotional state and context\n\n4. **Accessibility & Formatting**:\n   - Verify text contrast and readability\n   - Check for descriptive link text (no \"click here\")\n   - Ensure proper heading hierarchy\n   - Validate that content is mobile-friendly\n\n5. **Specific Improvements**:\n   - Provide before/after examples for any issues found\n   - Suggest A/B testing variations for critical CTAs\n   - Explain reasoning based on UX writing principles\n   - Highlight any inconsistencies with existing content\n\nFor each issue found, provide:\n- The problematic text\n- Why it's problematic (which principle it violates)\n- Recommended replacement\n- Brief explanation of the improvement\n\nFocus on the French-speaking market context, EUR currency, and Mientior's USPs (free delivery from 50€, 30-day returns, secure payment, 10,000+ products)."
+  }
+}

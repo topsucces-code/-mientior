@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   description: 'Find answers to common questions about our products, shipping, returns, and more',
 }
 
+// Force dynamic rendering to avoid build-time database queries
+export const dynamic = 'force-dynamic'
+
 async function getFAQs(): Promise<FAQ[]> {
   try {
     // Fetch FAQs from Prisma
@@ -26,13 +29,13 @@ async function getFAQs(): Promise<FAQ[]> {
         id: faq.id,
         question: faq.question,
         answer: faq.answer,
-        category: faq.category,
+        category: 'Autre' as const, // Default category
         order: faq.order,
-        views: faq.views,
-        helpful: faq.helpful,
-        notHelpful: faq.notHelpful,
-        relatedFAQs: faq.relatedFAQs,
-        isActive: true,
+        views: 0,
+        helpful: 0,
+        notHelpful: 0,
+        relatedFAQs: [],
+        isActive: faq.isActive,
       }))
     }
 

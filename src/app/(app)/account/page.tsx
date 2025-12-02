@@ -15,6 +15,9 @@ export const metadata: Metadata = {
   description: 'Manage your account, orders, and preferences',
 }
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 async function getAccountData(userId: string) {
   try {
     // Fetch user's orders using Prisma
@@ -64,7 +67,7 @@ async function getAccountData(userId: string) {
     const stats: DashboardStats = {
       totalOrders,
       pendingOrders,
-      wishlistItems: user?.wishlist?.length || 0,
+      wishlistItems: Array.isArray(user?.wishlist) ? user.wishlist.length : 0,
       loyaltyPoints: user?.loyaltyPoints,
     }
 

@@ -69,7 +69,7 @@ export const viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn(inter.variable, poppins.variable)}>
+    <html lang="en" className={cn(inter.variable, poppins.variable)} suppressHydrationWarning>
       <body className="min-h-screen bg-white font-sans text-anthracite-700 antialiased">
         <Providers>{children}</Providers>
       </body>

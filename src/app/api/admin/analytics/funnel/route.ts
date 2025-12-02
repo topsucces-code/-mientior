@@ -4,10 +4,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { Permission } from '@prisma/client';
+import { Permission } from '@/lib/permissions';
 import { prisma } from '@/lib/prisma';
 import { withPermission } from '@/middleware/admin-auth';
 import { getCachedData } from '@/lib/redis';
+
+import { type AdminSession } from '@/lib/auth-admin';
 
 interface FunnelStage {
   name: string;
@@ -18,7 +20,7 @@ interface FunnelStage {
 
 async function handleGET(
   request: NextRequest,
-  { adminSession }: { params: any; adminSession: any }
+  { adminSession: _adminSession }: { params: Record<string, string>; adminSession: AdminSession }
 ) {
   try {
     const { searchParams } = new URL(request.url);
@@ -73,22 +75,24 @@ async function handleGET(
         // For now, estimate from products with recent orders
         const productsWithViews = await prisma.product.findMany({
           where: {
-            orders: {
+            orderItems: {
               some: {
-                createdAt: startDate ? { gte: startDate } : undefined,
+                order: {
+                  createdAt: startDate ? { gte: startDate } : undefined,
+                }
               },
             },
             ...(categoryId && { categoryId }),
           },
           select: {
             _count: {
-              select: { orders: true },
+              select: { orderItems: true },
             },
           },
         });
 
         const productViews = productsWithViews.length > 0
-          ? productsWithViews.reduce((sum, p) => sum + p._count.orders, 0) * 5 // Assume 5 views per order
+          ? productsWithViews.reduce((sum, p) => sum + p._count.orderItems, 0) * 5 // Assume 5 views per order
           : Math.floor(visitors * 0.6); // 60% of visitors view products
 
         // Stage 3: Add to Cart
@@ -149,15 +153,15 @@ async function handleGET(
         const orderStats = await prisma.order.aggregate({
           where: whereClause,
           _avg: {
-            totalAmount: true,
+            total: true,
           },
           _sum: {
-            totalAmount: true,
+            total: true,
           },
         });
 
-        const avgOrderValue = orderStats._avg.totalAmount || 0;
-        const revenue = orderStats._sum.totalAmount || 0;
+        const avgOrderValue = orderStats._avg.total || 0;
+        const revenue = orderStats._sum.total || 0;
 
         return {
           stages,

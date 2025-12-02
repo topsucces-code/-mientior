@@ -1,13 +1,14 @@
 /**
- * API endpoint for retrieving shipping options
+ * API endpoint for retrieving shipping options with dynamic pricing
+ * Uses shipping-calculation service for zone-based and weight-based pricing
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import type { Address, ShippingOption } from '@/types'
-
-// Free shipping threshold in cents
-const FREE_SHIPPING_THRESHOLD = 2500 // 25€ in cents
+import { getAvailableShippingOptions } from '@/lib/shipping-calculation'
+import { getCachedData } from '@/lib/redis'
+import { detectDeliveryZone } from '@/lib/tax-calculation'
+import type { Address, CartItem } from '@/types'
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,9 +19,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    // Validate address has minimum required fields
+    if (!address.country || !address.postalCode) {
+      return NextResponse.json(
+        { error: 'Address must include country and postal code' },
+        { status: 400 }
+      )
+    }
+
     // Fetch products and calculate real subtotal
     let subtotal = 0 // in cents
-    let totalWeight = 0 // in grams (if available)
+    const cartItems: CartItem[] = []
 
     for (const item of items) {
       try {
@@ -29,7 +38,12 @@ export async function POST(request: NextRequest) {
           select: {
             id: true,
             name: true,
+            slug: true,
             price: true,
+            images: {
+              take: 1,
+              select: { url: true }
+            }
           },
         })
 
@@ -42,8 +56,17 @@ export async function POST(request: NextRequest) {
         const priceInCents = Math.round(product.price * 100)
         subtotal += priceInCents * item.quantity
 
-        // Add weight if available (for future use)
-        // totalWeight += (product.weight || 0) * item.quantity
+        // Build cart item for shipping calculation
+        cartItems.push({
+          id: product.id,
+          productId: product.id,
+          productSlug: product.slug,
+          productImage: product.images[0]?.url || '',
+          name: product.name,
+          price: priceInCents,
+          quantity: item.quantity,
+          stock: 999, // Not needed for shipping calculation
+        })
       } catch (error) {
         console.error(`Error fetching product ${item.productId}:`, error)
         return NextResponse.json(
@@ -53,61 +76,23 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Calculate estimated delivery dates (skip weekends)
-    const getEstimatedDays = (baseDays: number): number => {
-      let days = baseDays
-      const today = new Date()
-      let checkDate = new Date(today)
-      let businessDays = 0
+    // Generate cache key based on address and subtotal
+    const zone = detectDeliveryZone(address)
+    const cacheKey = `shipping:options:${zone}:${address.postalCode.replace(/\s/g, '')}:${subtotal}`
 
-      while (businessDays < baseDays) {
-        checkDate.setDate(checkDate.getDate() + 1)
-        // Skip weekends
-        if (checkDate.getDay() !== 0 && checkDate.getDay() !== 6) {
-          businessDays++
-        }
-        days++
-      }
+    // Get shipping options with caching
+    const options = await getCachedData(
+      cacheKey,
+      async () => {
+        console.log(`[Shipping Options] Cache miss - calculating for zone: ${zone}`)
+        return getAvailableShippingOptions(address, cartItems, subtotal)
+      },
+      3600 // 1 hour TTL
+    )
 
-      return days
-    }
+    console.log(`[Shipping Options] Zone: ${zone}, Options: ${options.length}`)
 
-    const options: ShippingOption[] = []
-
-    // Standard Shipping (4-6 business days)
-    const standardPrice = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 490 // 4.90€ in cents
-    options.push({
-      id: 'standard',
-      name: 'Livraison Standard',
-      price: standardPrice,
-      estimatedDays: getEstimatedDays(5),
-      carrier: 'Colissimo',
-      description: subtotal >= FREE_SHIPPING_THRESHOLD ? 'Gratuite - 4-6 jours ouvrés' : '4-6 jours ouvrés',
-    })
-
-    // Express Shipping (2-3 business days)
-    options.push({
-      id: 'express',
-      name: 'Livraison Express',
-      price: 990, // 9.90€ in cents
-      estimatedDays: getEstimatedDays(2),
-      carrier: 'Chronopost',
-      description: '2-3 jours ouvrés',
-    })
-
-    // Relay Point (3-5 business days)
-    options.push({
-      id: 'relay',
-      name: 'Point Relais',
-      price: 390, // 3.90€ in cents
-      estimatedDays: getEstimatedDays(4),
-      carrier: 'Mondial Relay',
-      description: '3-5 jours - Retrait en point relais',
-    })
-
-    // Store Pickup (if available)
-    // In production, query a Stores collection based on address proximity
-    // For now, disable pickup unless explicitly configured
+    // Add store pickup option if enabled
     const hasNearbyStores = process.env.ENABLE_STORE_PICKUP === 'true'
     if (hasNearbyStores) {
       options.push({
@@ -125,6 +110,9 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Shipping options error:', error)
-    return NextResponse.json({ error: 'Failed to fetch shipping options', success: false }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Failed to fetch shipping options', success: false },
+      { status: 500 }
+    )
   }
 }

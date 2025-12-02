@@ -1,0 +1,29 @@
+{
+  "enabled": true,
+  "name": "Media Manager Agent",
+  "description": "Automatically triggers the media-manager agent when media files are added or modified, providing expert guidance on image optimization, video production, format selection, and digital asset management for the Mientior e-commerce platform",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "public/images/**/*",
+      "src/components/products/product-gallery.tsx",
+      "src/components/products/product-card.tsx",
+      "src/components/home/hero-section.tsx",
+      "prisma/schema.prisma",
+      "src/app/admin/products/**/*",
+      "public/**/*.jpg",
+      "public/**/*.jpeg",
+      "public/**/*.png",
+      "public/**/*.gif",
+      "public/**/*.webp",
+      "public/**/*.avif",
+      "public/**/*.mp4",
+      "public/**/*.mov"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A file related to media assets has been modified in the Mientior e-commerce project. As the Senior Media Manager agent, please:\n\n1. **Analyze the change**: Review what media-related files or components were modified\n2. **Assess optimization opportunities**: Check if images/videos need optimization for web performance\n3. **Verify best practices**: Ensure the implementation follows:\n   - Next.js Image component usage with proper srcset\n   - WebP/AVIF format with fallbacks\n   - Lazy loading for below-the-fold images\n   - Alt text for accessibility\n   - Proper dimensions and compression\n4. **Provide specific recommendations**: If issues are found, give actionable steps with:\n   - Exact technical specifications (dimensions, formats, compression targets)\n   - Code examples for Next.js optimization\n   - Performance metrics and targets\n5. **Suggest improvements**: Proactively recommend enhancements like:\n   - Responsive image implementations\n   - CDN integration opportunities\n   - Media library organization improvements\n\nContext: This is a Next.js 15 e-commerce platform using:\n- Next.js built-in Image optimization\n- PostgreSQL with Media model for asset management\n- Potential CDN integration (Cloudinary, ImageKit)\n- Product images should be <100KB optimized, 2000x2000px minimum\n- Hero banners should be <200KB with responsive srcset\n- All images need WebP format with JPEG fallback\n\nFocus on practical, implementable advice that improves both performance and user experience."
+  }
+}

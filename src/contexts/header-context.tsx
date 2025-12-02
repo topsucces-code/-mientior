@@ -12,6 +12,7 @@ interface HeaderContextValue {
     activeDropdown: string | null
     setActiveDropdown: (dropdown: string | null) => void
     closeAllDropdowns: () => void
+    openCart: () => void
     searchQuery: string
     setSearchQuery: (query: string) => void
     getVisibleHeight: () => number
@@ -63,6 +64,10 @@ export function HeaderProvider({ children }: { children: React.ReactNode }) {
         setActiveDropdown(null)
     }, [])
 
+    const openCart = useCallback(() => {
+        setActiveDropdown('cart')
+    }, [])
+
     // Close dropdowns on scroll
     useEffect(() => {
         if (scrollY > 0 && activeDropdown) {
@@ -105,6 +110,7 @@ export function HeaderProvider({ children }: { children: React.ReactNode }) {
         activeDropdown,
         setActiveDropdown,
         closeAllDropdowns,
+        openCart,
         searchQuery,
         setSearchQuery,
         getVisibleHeight
@@ -119,5 +125,13 @@ export function useHeader() {
         throw new Error('useHeader must be used within HeaderProvider')
     }
     return context
+}
+
+/**
+ * Safe version of useHeader that returns null if not within HeaderProvider
+ * Useful for components that may be used outside of the header context
+ */
+export function useHeaderSafe() {
+    return useContext(HeaderContext)
 }
 

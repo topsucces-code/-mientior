@@ -1,13 +1,28 @@
 import Flutterwave from 'flutterwave-node-v3'
 
-if (!process.env.FLUTTERWAVE_SECRET_KEY) {
-  throw new Error('Missing required environment variable: FLUTTERWAVE_SECRET_KEY')
+// Only initialize Flutterwave if credentials are available
+const flutterwaveInstance = process.env.FLUTTERWAVE_SECRET_KEY && process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY
+  ? new Flutterwave(
+      process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY,
+      process.env.FLUTTERWAVE_SECRET_KEY
+    )
+  : null
+
+function ensureFlutterwave() {
+  if (!flutterwaveInstance) {
+    throw new Error('Flutterwave is not configured. Please set FLUTTERWAVE_SECRET_KEY and NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY environment variables.')
+  }
+  return flutterwaveInstance
 }
 
-export const flutterwave = new Flutterwave(
-  process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY!,
-  process.env.FLUTTERWAVE_SECRET_KEY
-)
+export const flutterwave = {
+  get Transaction() {
+    return ensureFlutterwave().Transaction
+  },
+  get Charge() {
+    return ensureFlutterwave().Charge
+  }
+}
 
 /**
  * Initialize a Flutterwave payment

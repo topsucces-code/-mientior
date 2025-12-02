@@ -11,10 +11,13 @@ import { cn } from '@/lib/utils'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
 import { useQuickView } from '@/contexts/quick-view-context'
+import { useCartStore } from '@/stores/cart.store'
+import { toast } from 'sonner'
+import { useHeaderSafe } from '@/contexts/header-context'
 import type { Filter, AvailableFilters } from '@/types'
 
 interface MainProductGridProps {
-  initialProducts?: Omit<ProductCardProps, 'onQuickView'>[]
+  initialProducts?: (Omit<ProductCardProps, 'onQuickView'> & { stock?: number })[]
   title?: string
   subtitle?: string
   viewAllHref?: string
@@ -41,6 +44,8 @@ export default function MainProductGrid({
   const { ref: loadMoreRef, isIntersecting: isLoadMoreVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
   const { openQuickView } = useQuickView()
+  const addToCart = useCartStore((state) => state.addItem)
+  const headerContext = useHeaderSafe()
 
   // Check if on mobile (simplified for now)
   const [isMobile, setIsMobile] = React.useState(false)
@@ -53,6 +58,32 @@ export default function MainProductGrid({
 
   const handleQuickView = (productId: string) => {
     openQuickView(productId)
+  }
+
+  const handleAddToCart = (product: Omit<ProductCardProps, 'onQuickView'> & { stock?: number }) => {
+     addToCart({
+       id: product.id,
+       productId: product.id,
+       productName: product.name,
+       productSlug: product.slug,
+       productImage: product.image || '/placeholder-product.jpg',
+       price: product.price,
+       quantity: 1,
+       stock: product.stock || 0,
+     })
+     
+     toast.success("Ajouté au panier !", {
+       description: `${product.name} a été ajouté à votre panier.`,
+       action: {
+         label: "Voir le panier",
+         onClick: () => window.location.href = '/cart'
+       }
+     })
+     
+     // Open cart preview after adding item
+     if (headerContext?.openCart) {
+       setTimeout(() => headerContext.openCart(), 300)
+     }
   }
 
   // Load more products
@@ -244,12 +275,15 @@ export default function MainProductGrid({
 
           {/* Products Grid */}
           <div className="flex-1">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
               {products.map((product, index) => (
                 <ProductCard
                   key={product.id}
                   {...product}
+                  inStock={product.stock !== undefined ? product.stock > 0 : product.inStock}
                   onQuickView={handleQuickView}
+                  onAddToCart={() => handleAddToCart(product)}
+                  priority={index < 12}
                   className={cn(
                     !prefersReducedMotion && isVisible && 'animate-fade-in-up'
                   )}
@@ -262,7 +296,7 @@ export default function MainProductGrid({
 
             {/* Loading Skeletons */}
             {isLoading && (
-              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i} className="overflow-hidden rounded-lg border border-platinum-300">
                     <Skeleton className="aspect-[4/5] w-full" />

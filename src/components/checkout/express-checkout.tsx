@@ -351,6 +351,35 @@ declare const ApplePaySession: {
   STATUS_FAILURE: number;
 };
 
+declare namespace ApplePayJS {
+  interface ApplePayPaymentRequest {
+    countryCode: string;
+    currencyCode: string;
+    supportedNetworks: string[];
+    merchantCapabilities: string[];
+    total: {
+      label: string;
+      amount: string;
+    };
+  }
+
+  interface ApplePayValidateMerchantEvent {
+    validationURL: string;
+  }
+
+  interface ApplePayPaymentAuthorizedEvent {
+    payment: {
+      token: {
+        paymentData: any;
+        paymentMethod: any;
+        transactionIdentifier: string;
+      };
+      billingContact?: any;
+      shippingContact?: any;
+    };
+  }
+}
+
 // Google Pay types
 declare namespace google {
   namespace payments {

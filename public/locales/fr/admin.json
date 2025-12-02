@@ -230,7 +230,8 @@
       "USERS_READ": "Voir les utilisateurs",
       "USERS_WRITE": "Modifier les utilisateurs",
       "AUDIT_LOGS_READ": "Voir les journaux d'audit",
-      "SETTINGS_WRITE": "Gérer les paramètres"
+      "SETTINGS_WRITE": "Gérer les paramètres",
+      "SEARCH_MANAGE": "Gérer la recherche (synonymes, stop words)"
     }
   },
   "adminUsers": {
@@ -605,8 +606,334 @@
     "allColumns": "Toutes les colonnes",
     "selectedColumns": "Colonnes sélectionnées"
   },
+  "customers": {
+    "360": {
+      "title": "Vue Client 360",
+      "notFound": "Client non trouvé",
+      "profile": {
+        "title": "Profil Client",
+        "memberSince": "Membre depuis",
+        "primaryAddress": "Adresse principale",
+        "moreAddresses": "adresses supplémentaires"
+      },
+      "metrics": {
+        "title": "Métriques Clés",
+        "lifetimeValue": "Valeur Vie Client",
+        "totalOrders": "Total Commandes",
+        "averageOrderValue": "Valeur Moyenne Commande",
+        "totalSpent": "Total Dépensé",
+        "lastPurchase": "Dernier Achat",
+        "purchaseFrequency": "Fréquence d'Achat",
+        "customerTenure": "Ancienneté Client",
+        "today": "Aujourd'hui",
+        "daysAgo": "jours",
+        "daysPerOrder": "jours par commande",
+        "ordersPerMonth": "commandes par mois",
+        "years": "ans",
+        "months": "mois"
+      },
+      "health": {
+        "title": "Santé & Risque"
+      },
+      "orders": {
+        "title": "Historique Commandes"
+      },
+      "loyalty": {
+        "title": "Programme Fidélité"
+      },
+      "marketing": {
+        "title": "Engagement Marketing"
+      },
+      "support": {
+        "title": "Tickets Support"
+      },
+      "timeline": {
+        "title": "Chronologie Activité",
+        "eventType": "Type d'Événement",
+        "selectEventTypes": "Sélectionner types d'événements",
+        "dateRange": "Période",
+        "showMore": "Voir plus",
+        "showLess": "Voir moins",
+        "noEvents": "Aucun événement trouvé",
+        "loading": "Chargement d'autres événements...",
+        "loadMore": "Charger plus d'événements",
+        "points": "points",
+        "types": {
+          "order": "Commande",
+          "support": "Support",
+          "loyalty": "Fidélité",
+          "marketing": "Marketing",
+          "account": "Compte"
+        },
+        "status": {
+          "pending": "En attente",
+          "completed": "Terminé",
+          "cancelled": "Annulé"
+        }
+      },
+      "notes": {
+        "title": "Notes & Étiquettes"
+      },
+      "analytics": {
+        "title": "Analyse Comportementale"
+      }
+    },
+    "quickActions": {
+      "title": "Actions Rapides",
+      "email": {
+        "button": "Envoyer Email",
+        "tooltip": "Envoyer un email au client",
+        "modalTitle": "Envoyer Email à {{name}}",
+        "subject": "Sujet",
+        "subjectRequired": "Le sujet est requis",
+        "subjectMaxLength": "Le sujet doit faire 200 caractères maximum",
+        "subjectPlaceholder": "Entrez le sujet de l'email",
+        "body": "Message",
+        "bodyRequired": "Le message est requis",
+        "bodyMaxLength": "Le message doit faire 5000 caractères maximum",
+        "bodyPlaceholder": "Entrez votre message",
+        "send": "Envoyer Email",
+        "success": "Email envoyé avec succès",
+        "successDesc": "L'email a été envoyé à {{email}}",
+        "error": "Échec de l'envoi de l'email"
+      },
+      "ticket": {
+        "button": "Créer Ticket",
+        "tooltip": "Créer un ticket de support",
+        "modalTitle": "Créer Ticket Support pour {{name}}",
+        "subject": "Sujet",
+        "subjectRequired": "Le sujet est requis",
+        "subjectMaxLength": "Le sujet doit faire 200 caractères maximum",
+        "subjectPlaceholder": "Entrez le sujet du ticket",
+        "priority": "Priorité",
+        "priorityLow": "Faible",
+        "priorityMedium": "Moyenne",
+        "priorityHigh": "Élevée",
+        "priorityUrgent": "Urgente",
+        "description": "Description",
+        "descriptionRequired": "La description est requise",
+        "descriptionMaxLength": "La description doit faire 2000 caractères maximum",
+        "descriptionPlaceholder": "Décrivez le problème ou la demande",
+        "create": "Créer Ticket",
+        "success": "Ticket de support créé",
+        "successDesc": "Le ticket '{{subject}}' a été créé",
+        "error": "Échec de la création du ticket"
+      },
+      "points": {
+        "button": "Ajuster Points",
+        "tooltip": "Ajuster les points de fidélité",
+        "modalTitle": "Ajuster Points Fidélité pour {{name}}",
+        "type": "Action",
+        "typeAdd": "Ajouter Points",
+        "typeSubtract": "Soustraire Points",
+        "amount": "Nombre de Points",
+        "amountRequired": "Le nombre de points est requis",
+        "amountMin": "Le montant doit être d'au moins 1",
+        "amountPlaceholder": "Entrez le nombre de points",
+        "reason": "Raison",
+        "reasonRequired": "La raison est requise",
+        "reasonMaxLength": "La raison doit faire 500 caractères maximum",
+        "reasonPlaceholder": "Expliquez pourquoi les points sont ajustés",
+        "adjust": "Ajuster Points",
+        "success": "Points ajustés avec succès",
+        "successDesc": "{{type}} {{amount}} points pour le client",
+        "error": "Échec de l'ajustement des points"
+      },
+      "note": {
+        "button": "Ajouter Note",
+        "tooltip": "Ajouter une note interne",
+        "modalTitle": "Ajouter Note pour {{name}}",
+        "content": "Contenu de la Note",
+        "contentRequired": "Le contenu de la note est requis",
+        "contentMaxLength": "La note doit faire 5000 caractères maximum",
+        "contentPlaceholder": "Entrez votre note sur ce client",
+        "add": "Ajouter Note",
+        "success": "Note ajoutée avec succès",
+        "successDesc": "La note interne a été ajoutée",
+        "error": "Échec de l'ajout de la note"
+      }
+    },
+    "export": {
+      "button": "Exporter les données",
+      "title": "Exporter les données client",
+      "description": "Téléchargez les informations de {{customer}} dans le format de votre choix",
+      "privacy": "Toutes les données sont exportées de manière sécurisée et conforme au RGPD",
+      "format": "Format d'export",
+      "formatRequired": "Veuillez sélectionner un format d'export",
+      "formatHelp": "Choisissez le format selon votre usage prévu",
+      "formats": {
+        "pdf": {
+          "label": "Rapport PDF",
+          "description": "Rapport complet prêt à imprimer ou partager",
+          "size": "~2-5 MB"
+        },
+        "csv": {
+          "label": "Données CSV",
+          "description": "Pour analyse dans Excel ou Google Sheets",
+          "size": "~500 KB"
+        },
+        "xlsx": {
+          "label": "Classeur Excel",
+          "description": "Données organisées en onglets multiples",
+          "size": "~1-3 MB"
+        },
+        "json": {
+          "label": "Données JSON",
+          "description": "Format technique pour intégrations système",
+          "size": "~200 KB"
+        }
+      },
+      "dataOptions": "Options d'export",
+      "dataOptionsHelp": "Sélectionnez les informations à inclure dans l'export",
+      "includeOrders": "Inclure l'historique des commandes",
+      "includeAnalytics": "Inclure les données d'analyse comportementale",
+      "includeNotes": "Inclure les notes internes et commentaires",
+      "includeTags": "Inclure les étiquettes et segments client",
+      "dateRange": "Période des données",
+      "dateRanges": {
+        "all": "Toutes les données disponibles",
+        "1y": "12 derniers mois",
+        "90d": "90 derniers jours",
+        "30d": "30 derniers jours"
+      },
+      "orderLimit": "Limite des commandes",
+      "orderLimitHelp": "Les exports volumineux peuvent prendre plus de temps",
+      "orderLimits": {
+        "50": "50 commandes récentes",
+        "100": "100 commandes récentes",
+        "250": "250 commandes récentes",
+        "500": "500 commandes récentes",
+        "1000": "1000 commandes récentes"
+      },
+      "startExport": "Lancer l'export",
+      "preparing": "Collecte des données client en cours...",
+      "generating": "Création du fichier d'export...",
+      "downloading": "Préparation du téléchargement...",
+      "complete": "Export terminé avec succès",
+      "failed": "Échec de l'export",
+      "downloadStarted": "Le téléchargement va commencer automatiquement",
+      "pleaseWait": "Veuillez patienter pendant la génération du fichier",
+      "dataPrivacy": "Vos données sont traitées de manière sécurisée",
+      "success": "Export {{format}} créé avec succès pour {{customer}}",
+      "error": "Impossible d'exporter les données. Vérifiez votre connexion et réessayez.",
+      "errorWithDetails": "Export échoué : {{error}}. Contactez le support si le problème persiste.",
+      "retry": "Réessayer"
+    }
+  },
   "common": {
     "all": "Tout",
-    "actions": "Actions"
+    "actions": "Actions",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "synonyms": {
+    "title": "Synonymes de recherche",
+    "description": "Gérez les synonymes pour améliorer la pertinence de la recherche",
+    "add": "Ajouter un synonyme",
+    "edit": "Modifier le synonyme",
+    "delete": "Supprimer le synonyme",
+    "key": "Clé",
+    "keyPlaceholder": "Ex: téléphone, ordinateur, chaussures",
+    "keyHelp": "Terme principal du groupe de synonymes (minuscules, alphanumériques, espaces et tirets autorisés)",
+    "terms": "Termes synonymes",
+    "termsPlaceholder": "Ex: smartphone, mobile, portable",
+    "termsHelp": "Liste des termes équivalents (minimum 2, maximum 20)",
+    "addTerm": "Ajouter un terme",
+    "removeTerm": "Retirer ce terme",
+    "actions": "Actions",
+    "count": "{{count}} synonyme(s)",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce synonyme ?",
+    "deleteWarning": "Cette action est irréversible. Les recherches utilisant ce synonyme ne fonctionneront plus.",
+    "syncStatus": "Dernière synchronisation",
+    "syncNow": "Synchroniser maintenant",
+    "syncing": "Synchronisation en cours...",
+    "syncSuccess": "Synonymes synchronisés avec succès",
+    "syncError": "Erreur lors de la synchronisation",
+    "addSuccess": "Synonyme ajouté avec succès",
+    "addError": "Erreur lors de l'ajout du synonyme",
+    "updateSuccess": "Synonyme mis à jour avec succès",
+    "updateError": "Erreur lors de la mise à jour du synonyme",
+    "deleteSuccess": "Synonyme supprimé avec succès",
+    "deleteError": "Erreur lors de la suppression du synonyme",
+    "validation": {
+      "keyRequired": "La clé est requise",
+      "keyFormat": "Format invalide (minuscules, alphanumériques, espaces et tirets uniquement)",
+      "keyLength": "La clé doit contenir entre 1 et 50 caractères",
+      "keyExists": "Cette clé existe déjà",
+      "termsRequired": "Au moins 2 termes sont requis",
+      "termsMin": "Minimum 2 termes requis",
+      "termsMax": "Maximum 20 termes autorisés",
+      "termLength": "Chaque terme doit contenir entre 1 et 50 caractères",
+      "termDuplicate": "Ce terme existe déjà dans la liste",
+      "termFormat": "Format invalide (minuscules uniquement)"
+    },
+    "empty": {
+      "title": "Aucun synonyme configuré",
+      "description": "Ajoutez des synonymes pour améliorer la pertinence de la recherche",
+      "action": "Ajouter le premier synonyme"
+    },
+    "help": {
+      "title": "À propos des synonymes",
+      "description": "Les synonymes permettent aux utilisateurs de trouver des produits en utilisant différents termes. Par exemple, si vous ajoutez 'téléphone' avec les termes 'smartphone', 'mobile', 'portable', une recherche pour n'importe lequel de ces termes retournera les mêmes résultats.",
+      "examples": "Exemples de synonymes utiles",
+      "example1": "téléphone → smartphone, mobile, portable",
+      "example2": "ordinateur → laptop, pc, computer",
+      "example3": "chaussures → souliers, baskets, sneakers"
+    }
+  },
+  "searchAnalytics": {
+    "title": "Tableau de bord des analyses de recherche",
+    "subtitle": "Surveillez les performances de recherche et le comportement des utilisateurs",
+    "period": {
+      "7d": "7 derniers jours",
+      "30d": "30 derniers jours",
+      "90d": "90 derniers jours",
+      "custom": "Période personnalisée"
+    },
+    "compare": {
+      "none": "Aucune comparaison",
+      "previousPeriod": "vs Période précédente",
+      "previousYear": "vs Année dernière"
+    },
+    "kpis": {
+      "totalSearches": "Recherches totales",
+      "overallCTR": "CTR global",
+      "uniqueUsers": "Utilisateurs uniques",
+      "avgResults": "Résultats moyens"
+    },
+    "charts": {
+      "searchTrends": "Tendances du volume de recherche",
+      "localeDistribution": "Recherches par langue",
+      "topQueries": "Requêtes les plus recherchées",
+      "ctrByQuery": "Taux de clic par requête",
+      "zeroResults": "Requêtes sans résultat",
+      "productClicks": "Produits les plus cliqués"
+    },
+    "table": {
+      "query": "Requête",
+      "count": "Nombre",
+      "avgResults": "Résultats moyens",
+      "ctr": "CTR",
+      "clicks": "Clics",
+      "lastSearched": "Dernière recherche",
+      "productId": "ID produit",
+      "avgPosition": "Position moyenne",
+      "topQueries": "Requêtes principales"
+    },
+    "actions": {
+      "exportCSV": "Exporter CSV",
+      "refresh": "Actualiser"
+    },
+    "messages": {
+      "exportSuccess": "Export CSV démarré. Le téléchargement va commencer.",
+      "exportError": "Échec de l'export des données. Veuillez réessayer.",
+      "loadError": "Échec du chargement des données analytiques.",
+      "noData": "Aucune donnée disponible pour la période sélectionnée.",
+      "retry": "Réessayer"
+    },
+    "empty": {
+      "zeroResults": "Aucune requête sans résultat trouvée. Excellent travail !",
+      "productClicks": "Aucune donnée de clic sur les produits disponible."
+    }
   }
 }

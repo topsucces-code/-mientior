@@ -3,8 +3,53 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("PRISMA_DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("PRISMA_DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Pour Supabase: connexion directe pour les migrations
+}
+
+model SearchLog {
+  id               String    @id @default(cuid())
+  query            String
+  resultCount      Int
+  userId           String?
+  sessionId        String?
+  filters          Json?
+  sort             String?
+  executionTime    Int?
+  clickedProductId String?
+  clickPosition    Int?
+  clickedAt        DateTime?
+  ipAddress        String?
+  userAgent        String?
+  correctedFrom    String?
+  locale           String?   @default("fr") // Language used for search (fr or en)
+  timestamp        DateTime  @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([query])
+  @@index([userId])
+  @@index([timestamp])
+  @@index([resultCount])
+  @@index([clickedProductId])
+  @@index([locale])
+  @@map("search_logs")
+}
+
+model SearchHistory {
+  id              String   @id @default(cuid())
+  userId          String
+  query           String // Original query with preserved casing
+  normalizedQuery String   @map("normalized_query") // Lowercase version for deduplication
+  timestamp       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, timestamp])
+  @@index([userId, normalizedQuery])
+  @@map("search_history")
 }
 
 model Analytics {
@@ -36,6 +81,54 @@ model AuditLog {
   @@index([resource])
   @@index([resourceId])
   @@map("audit_logs")
+}
+
+// New models for immersive product page
+model ProductQuestion {
+  id         String          @id @default(cuid())
+  productId  String
+  userId     String?
+  question   String          @db.Text
+  status     String          @default("PENDING") // PENDING, APPROVED, REJECTED
+  helpful    Int             @default(0)
+  notHelpful Int             @default(0)
+  verified   Boolean         @default(false)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  product    Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  answers    ProductAnswer[]
+
+  @@index([productId])
+  @@index([status])
+  @@map("product_questions")
+}
+
+model ProductAnswer {
+  id         String          @id @default(cuid())
+  questionId String
+  userId     String?
+  vendorId   String?
+  answer     String          @db.Text
+  isOfficial Boolean         @default(false)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  question   ProductQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+  @@map("product_answers")
+}
+
+model SizeGuide {
+  id           String   @id @default(cuid())
+  categoryId   String
+  measurements Json // Array of size measurements
+  instructions String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId])
+  @@map("size_guides")
 }
 
 enum ProductStatus {
@@ -150,35 +243,67 @@ enum ApprovalStatus {
   REJECTED
 }
 
+enum PimSyncStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  PARTIAL
+}
+
+enum PimSyncOperation {
+  CREATE
+  UPDATE
+  DELETE
+}
+
 model Product {
-  id              String           @id @default(cuid())
-  name            String
-  slug            String           @unique
-  description     String?          @db.Text
+  id                 String                   @id @default(cuid())
+  name               String
+  slug               String                   @unique
+  description        String?                  @db.Text
+  searchVector       Unsupported("tsvector")? @map("search_vector")
+  searchVectorSimple Unsupported("tsvector")? @map("search_vector_simple")
+
+  // Multilingual fields for i18n search support
+  nameEn        String? @map("name_en") // English product name
+  descriptionEn String? @map("description_en") @db.Text // English product description
+
   price           Float
-  compareAtPrice  Float?
-  stock           Int              @default(0)
-  rating          Float            @default(0)
-  reviewCount     Int              @default(0)
+  compareAtPrice  Float?         @map("compare_at_price")
+  stock           Int            @default(0)
+  rating          Float          @default(0)
+  reviewCount     Int            @default(0) @map("review_count")
   badge           String?
-  featured        Boolean          @default(false)
-  onSale          Boolean          @default(false)
-  status          ProductStatus    @default(ACTIVE)
-  approvalStatus  ApprovalStatus   @default(APPROVED)
-  rejectionReason String?          @db.Text
+  featured        Boolean        @default(false)
+  onSale          Boolean        @default(false) @map("on_sale")
+  status          ProductStatus  @default(ACTIVE)
+  approvalStatus  ApprovalStatus @default(APPROVED) @map("approval_status")
+  rejectionReason String?        @map("rejection_reason") @db.Text
   specifications  Json?
   seo             Json?
-  categoryId      String
-  category        Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  vendorId        String?
-  vendor          Vendor?          @relation(fields: [vendorId], references: [id], onDelete: SetNull)
-  images          ProductImage[]
-  variants        ProductVariant[]
-  tags            ProductTag[]
-  reviews         Review[]
-  orderItems      OrderItem[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  categoryId      String         @map("category_id")
+  category        Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  vendorId        String?        @map("vendor_id")
+  vendor          Vendor?        @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+
+  // New fields for immersive product page
+  arModelUrl     String? @map("ar_model_url") // URL to AR model (USDZ/GLB)
+  processingDays Int     @default(2) @map("processing_days") // Days to process order
+
+  // Popularity field - auto-calculated by ranking service (views * weight + sales * weight)
+  // Should not be manually set - updated via ranking:calculate script
+  popularity Int @default(0) @map("popularity")
+
+  images      ProductImage[]
+  variants    ProductVariant[]
+  tags        ProductTag[]
+  reviews     Review[]
+  orderItems  OrderItem[]
+  questions   ProductQuestion[]
+  pimSyncLogs PimSyncLog[]
+  pimMapping  PimProductMapping?
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
 
   @@index([slug])
   @@index([categoryId])
@@ -188,23 +313,29 @@ model Product {
   @@index([featured])
   @@index([onSale])
   @@index([createdAt])
+  @@index([popularity])
+  @@index([searchVector], type: Gin)
+  @@index([searchVectorSimple], type: Gin)
+  @@index([nameEn])
+  // Note: price index is managed manually via facets-indexes-migration.sql (partial index for ACTIVE + APPROVED)
   @@map("products")
 }
 
 model Category {
-  id          String     @id @default(cuid())
+  id          String      @id @default(cuid())
   name        String
-  slug        String     @unique
-  description String?    @db.Text
+  slug        String      @unique
+  description String?     @db.Text
   image       String?
   parentId    String?
-  parent      Category?  @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: Restrict)
-  children    Category[] @relation("CategoryToCategory")
+  parent      Category?   @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: Restrict)
+  children    Category[]  @relation("CategoryToCategory")
   products    Product[]
-  order       Int        @default(0)
-  isActive    Boolean    @default(true)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  sizeGuides  SizeGuide[]
+  order       Int         @default(0)
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   @@index([slug])
   @@index([parentId])
@@ -236,13 +367,19 @@ model ProductTag {
 model ProductImage {
   id        String   @id @default(cuid())
   url       String
-  alt       String
+  alt       String   @db.VarChar(500) // Max length for alt text
   type      String   @default("IMAGE")
   thumbnail String?
   order     Int      @default(0)
-  productId String
+  productId String   @map("product_id")
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // New fields for immersive product page
+  videoUrl String? @map("video_url") // For VIDEO type
+  frames   Json? // Array of frame URLs for THREE_SIXTY type
+  width    Int? // Original image width
+  height   Int? // Original image height
 
   @@index([productId])
   @@map("product_images")
@@ -254,13 +391,14 @@ model ProductVariant {
   size          String?
   color         String?
   stock         Int      @default(0)
-  priceModifier Float    @default(0)
-  productId     String
+  priceModifier Float    @default(0) @map("price_modifier")
+  productId     String   @map("product_id")
   product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@index([productId])
+  // Note: color, size, and composite indexes are managed manually via facets-indexes-migration.sql (partial indexes excluding NULL)
   @@map("product_variants")
 }
 
@@ -272,7 +410,8 @@ model Review {
   status     ReviewStatus @default(PENDING)
   userName   String
   userAvatar String?
-  images     Json?
+  images     Json? // Array of image URLs
+  videos     Json? // Array of video URLs (new field)
   verified   Boolean      @default(false)
   helpful    Int          @default(0)
   notHelpful Int          @default(0)
@@ -350,22 +489,30 @@ model OrderItem {
 }
 
 model User {
-  id             String         @id @default(cuid())
-  email          String         @unique
+  id             String          @id @default(cuid())
+  email          String          @unique
   firstName      String?
   lastName       String?
-  loyaltyLevel   LoyaltyLevel   @default(BRONZE)
-  loyaltyPoints  Int            @default(0)
-  totalOrders    Int            @default(0)
-  totalSpent     Float          @default(0)
+  loyaltyLevel   LoyaltyLevel    @default(BRONZE)
+  loyaltyPoints  Int             @default(0)
+  totalOrders    Int             @default(0)
+  totalSpent     Float           @default(0)
   orders         Order[]
   reviews        Review[]
   savedAddresses SavedAddress[]
   addresses      Json?
   recentlyViewed Json?
   wishlist       Json?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  cart           Json?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  searchLogs     SearchLog[]
+  searchHistory  SearchHistory[]
+
+  // User preferences for personalized search - auto-calculated by personalization service
+  // Contains favorite categories, brands, search patterns, and calculation metadata
+  // Do not manually edit - use personalization:calculate script or admin API
+  preferences Json?
 
   @@index([email])
   @@index([loyaltyLevel])
@@ -416,21 +563,21 @@ model Media {
 }
 
 model AdminUser {
-  id            String         @id @default(cuid())
-  email         String         @unique
-  authUserId    String?        @unique @map("auth_user_id")
+  id            String          @id @default(cuid())
+  email         String          @unique
+  authUserId    String?         @unique @map("auth_user_id")
   authUser      BetterAuthUser? @relation(fields: [authUserId], references: [id], onDelete: SetNull)
   firstName     String
   lastName      String
-  role          Role           @default(VIEWER)
+  role          Role            @default(VIEWER)
   permissions   Json?
-  isActive      Boolean        @default(true)
+  isActive      Boolean         @default(true)
   lastLoginAt   DateTime?
   auditLogs     AuditLog[]
   savedViews    SavedView[]
   notifications Notification[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
   @@index([email])
   @@index([authUserId])
@@ -629,13 +776,13 @@ model NewsletterSubscription {
 
 // Better Auth Models
 model BetterAuthUser {
-  id            String          @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String
-  email         String          @unique
-  emailVerified Boolean         @default(false)
+  email         String     @unique
+  emailVerified Boolean    @default(false)
   image         String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
   accounts      Account[]
   sessions      Session[]
   adminUser     AdminUser?
@@ -659,20 +806,20 @@ model Session {
 }
 
 model Account {
-  id                String         @id @default(cuid())
-  userId            String
-  accountId         String
-  providerId        String
-  accessToken       String?
-  refreshToken      String?
-  idToken           String?
-  accessTokenExpiresAt DateTime?
+  id                    String         @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
   refreshTokenExpiresAt DateTime?
-  scope             String?
-  password          String?
-  user              BetterAuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  scope                 String?
+  password              String?
+  user                  BetterAuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
 
   @@unique([providerId, accountId])
   @@index([userId])
@@ -689,4 +836,297 @@ model Verification {
 
   @@unique([identifier, value])
   @@map("verifications")
+}
+
+model PimSyncLog {
+  id        String           @id @default(cuid())
+  source    String
+  operation PimSyncOperation
+  productId String?
+  status    PimSyncStatus
+  metadata  Json?
+  error     String?          @db.Text
+  duration  Int?
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([productId])
+  @@index([status])
+  @@index([operation])
+  @@index([createdAt])
+  @@index([source])
+  @@map("pim_sync_logs")
+}
+
+model PimProductMapping {
+  id                String        @id @default(cuid())
+  akeneoProductId   String        @map("akeneo_product_id")
+  mientiorProductId String        @map("mientior_product_id")
+  akeneoSku         String        @unique @map("akeneo_sku") // SKU is unique in Akeneo PIM
+  lastSyncedAt      DateTime?     @map("last_synced_at")
+  syncStatus        PimSyncStatus @map("sync_status")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  product Product @relation(fields: [mientiorProductId], references: [id], onDelete: Cascade)
+
+  @@unique([akeneoProductId])
+  @@unique([mientiorProductId])
+  @@index([syncStatus])
+  @@index([lastSyncedAt])
+  @@map("pim_product_mappings")
+}
+
+// ==================== CMS MODELS ====================
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  ARCHIVED
+}
+
+enum BannerPosition {
+  TOP
+  HERO
+  SIDEBAR
+  FOOTER
+  POPUP
+}
+
+enum ContentBlockType {
+  HERO
+  TEXT
+  IMAGE
+  VIDEO
+  CTA
+  PRODUCT_GRID
+  CATEGORY_GRID
+  TESTIMONIALS
+  FAQ
+  NEWSLETTER
+  CUSTOM_HTML
+}
+
+// CMS Pages - Marketing pages, landing pages, etc.
+model CmsPage {
+  id          String         @id @default(cuid())
+  title       String
+  slug        String         @unique
+  description String?        @db.Text
+  content     Json?
+  template    String         @default("default")
+  status      ContentStatus  @default(DRAFT)
+  publishedAt DateTime?      @map("published_at")
+  scheduledAt DateTime?      @map("scheduled_at")
+  seo         Json?
+  blocks      ContentBlock[]
+  createdBy   String?        @map("created_by")
+  updatedBy   String?        @map("updated_by")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([status])
+  @@index([publishedAt])
+  @@map("cms_pages")
+}
+
+// Content Blocks - Reusable content sections
+model ContentBlock {
+  id        String           @id @default(cuid())
+  name      String
+  type      ContentBlockType
+  content   Json
+  settings  Json?
+  order     Int              @default(0)
+  isActive  Boolean          @default(true) @map("is_active")
+  pageId    String?          @map("page_id")
+  page      CmsPage?         @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  @@index([pageId])
+  @@index([type])
+  @@index([isActive])
+  @@map("content_blocks")
+}
+
+// Promotional Banners
+model Banner {
+  id              String         @id @default(cuid())
+  title           String
+  message         String         @db.Text
+  backgroundColor String?        @map("background_color")
+  textColor       String?        @map("text_color")
+  backgroundImage String?        @map("background_image")
+  link            String?
+  linkText        String?        @map("link_text")
+  position        BannerPosition @default(TOP)
+  priority        Int            @default(0)
+  status          ContentStatus  @default(DRAFT)
+  dismissible     Boolean        @default(true)
+  showCountdown   Boolean        @default(false) @map("show_countdown")
+  startDate       DateTime?      @map("start_date")
+  endDate         DateTime?      @map("end_date")
+  targetAudience  Json?
+  impressions     Int            @default(0)
+  clicks          Int            @default(0)
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  @@index([position])
+  @@index([status])
+  @@index([priority])
+  @@index([startDate])
+  @@index([endDate])
+  @@map("banners")
+}
+
+// Blog Posts
+model BlogPost {
+  id            String        @id @default(cuid())
+  title         String
+  slug          String        @unique
+  excerpt       String?       @db.Text
+  content       Json
+  featuredImage String?       @map("featured_image")
+  status        ContentStatus @default(DRAFT)
+  publishedAt   DateTime?     @map("published_at")
+  scheduledAt   DateTime?     @map("scheduled_at")
+  authorId      String?       @map("author_id")
+  authorName    String?       @map("author_name")
+  authorAvatar  String?       @map("author_avatar")
+  categoryId    String?       @map("category_id")
+  category      BlogCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags          BlogPostTag[]
+  seo           Json?
+  readTime      Int?
+  views         Int           @default(0)
+  likes         Int           @default(0)
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([categoryId])
+  @@map("blog_posts")
+}
+
+model BlogCategory {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?    @db.Text
+  image       String?
+  order       Int        @default(0)
+  isActive    Boolean    @default(true) @map("is_active")
+  posts       BlogPost[]
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([isActive])
+  @@map("blog_categories")
+}
+
+model BlogTag {
+  id        String        @id @default(cuid())
+  name      String
+  slug      String        @unique
+  posts     BlogPostTag[]
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  @@index([slug])
+  @@map("blog_tags")
+}
+
+model BlogPostTag {
+  postId    String   @map("post_id")
+  tagId     String   @map("tag_id")
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag       BlogTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@id([postId, tagId])
+  @@map("blog_post_tags")
+}
+
+// Media Library for CMS
+model CmsMedia {
+  id           String   @id @default(cuid())
+  filename     String
+  url          String
+  thumbnailUrl String?  @map("thumbnail_url")
+  alt          String?
+  caption      String?  @db.Text
+  mimeType     String   @map("mime_type")
+  size         Int
+  width        Int?
+  height       Int?
+  folder       String?  @default("uploads")
+  tags         Json?
+  uploadedBy   String?  @map("uploaded_by")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([folder])
+  @@index([mimeType])
+  @@index([createdAt])
+  @@map("cms_media")
+}
+
+// Reusable Snippets
+model Snippet {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  key       String   @unique
+  content   Json
+  type      String   @default("html")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([key])
+  @@index([isActive])
+  @@map("snippets")
+}
+
+// Navigation Menus
+model Menu {
+  id        String     @id @default(cuid())
+  name      String
+  location  String     @unique
+  items     MenuItem[]
+  isActive  Boolean    @default(true) @map("is_active")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  @@index([location])
+  @@index([isActive])
+  @@map("menus")
+}
+
+model MenuItem {
+  id        String     @id @default(cuid())
+  label     String
+  url       String?
+  icon      String?
+  target    String?    @default("_self")
+  order     Int        @default(0)
+  menuId    String     @map("menu_id")
+  menu      Menu       @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  parentId  String?    @map("parent_id")
+  parent    MenuItem?  @relation("MenuItemToMenuItem", fields: [parentId], references: [id], onDelete: Cascade)
+  children  MenuItem[] @relation("MenuItemToMenuItem")
+  isActive  Boolean    @default(true) @map("is_active")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  @@index([menuId])
+  @@index([parentId])
+  @@index([order])
+  @@map("menu_items")
 }

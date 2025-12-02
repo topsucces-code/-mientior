@@ -620,3 +620,372 @@
     animation-delay: 500ms;
   }
 }
+
+/* ==================== AUTH TOAST STYLING ==================== */
+
+/* Base toast styling */
+.auth-toast {
+  @apply rounded-lg border-2 shadow-elevation-3 backdrop-blur-sm;
+  @apply transition-all duration-300 ease-smooth;
+  @apply font-sans text-sm;
+  min-width: 320px;
+  max-width: 420px;
+}
+
+/* Toast title styling */
+.auth-toast-title {
+  @apply font-semibold text-base mb-1;
+}
+
+/* Toast description styling */
+.auth-toast-description {
+  @apply text-sm opacity-90 leading-relaxed;
+}
+
+/* Close button styling - Requirement 6.5: Keyboard navigation */
+.auth-toast-close {
+  @apply rounded-md p-1 transition-all duration-200;
+  @apply hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  @apply focus-visible:ring-2 focus-visible:ring-offset-2;
+}
+
+/* Ensure close button is keyboard accessible */
+.auth-toast-close:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Action button styling - Requirement 6.5: Keyboard navigation */
+.auth-toast-action {
+  @apply rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-200;
+  @apply hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  @apply focus-visible:ring-2 focus-visible:ring-offset-2;
+}
+
+/* Ensure action button is keyboard accessible */
+.auth-toast-action:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Cancel button styling - Requirement 6.5: Keyboard navigation */
+.auth-toast-cancel {
+  @apply rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-200;
+  @apply hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  @apply focus-visible:ring-2 focus-visible:ring-offset-2;
+}
+
+/* Ensure cancel button is keyboard accessible */
+.auth-toast-cancel:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Success variant - Green with proper contrast */
+.auth-toast-success {
+  @apply bg-success-light border-success text-success-dark;
+}
+
+.auth-toast-success .auth-toast-title {
+  @apply text-success-dark;
+}
+
+.auth-toast-success .auth-toast-description {
+  @apply text-success-dark;
+}
+
+.auth-toast-success .auth-toast-close {
+  @apply text-success-dark hover:bg-success/20 focus:ring-success;
+}
+
+.auth-toast-success .auth-toast-action {
+  @apply bg-success text-white hover:bg-success-dark focus:ring-success;
+}
+
+/* Error variant - Red with proper contrast */
+.auth-toast-error {
+  @apply bg-error-light border-error text-error-dark;
+}
+
+.auth-toast-error .auth-toast-title {
+  @apply text-error-dark;
+}
+
+.auth-toast-error .auth-toast-description {
+  @apply text-error-dark;
+}
+
+.auth-toast-error .auth-toast-close {
+  @apply text-error-dark hover:bg-error/20 focus:ring-error;
+}
+
+.auth-toast-error .auth-toast-action {
+  @apply bg-error text-white hover:bg-error-dark focus:ring-error;
+}
+
+/* Warning variant - Aurore (Orange/Yellow) with proper contrast */
+.auth-toast-warning {
+  @apply bg-aurore-100 border-aurore-500 text-aurore-900;
+}
+
+.auth-toast-warning .auth-toast-title {
+  @apply text-aurore-900;
+}
+
+.auth-toast-warning .auth-toast-description {
+  @apply text-aurore-900;
+}
+
+.auth-toast-warning .auth-toast-close {
+  @apply text-aurore-900 hover:bg-aurore-200 focus:ring-aurore-500;
+}
+
+.auth-toast-warning .auth-toast-action {
+  @apply bg-aurore-500 text-anthracite-700 hover:bg-aurore-600 focus:ring-aurore-500;
+}
+
+/* Info variant - Blue with proper contrast */
+.auth-toast-info {
+  @apply bg-blue-100 border-blue-500 text-blue-900;
+}
+
+.auth-toast-info .auth-toast-title {
+  @apply text-blue-900;
+}
+
+.auth-toast-info .auth-toast-description {
+  @apply text-blue-900;
+}
+
+.auth-toast-info .auth-toast-close {
+  @apply text-blue-900 hover:bg-blue-200 focus:ring-blue-500;
+}
+
+.auth-toast-info .auth-toast-action {
+  @apply bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-500;
+}
+
+/* Loading variant - Neutral with spinner */
+.auth-toast-loading {
+  @apply bg-platinum-50 border-nuanced-500 text-anthracite-700;
+}
+
+.auth-toast-loading .auth-toast-title {
+  @apply text-anthracite-700;
+}
+
+.auth-toast-loading .auth-toast-description {
+  @apply text-nuanced-600;
+}
+
+/* Toast animations */
+@keyframes toast-slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes toast-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes toast-fade-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* Apply animations to toasts */
+[data-sonner-toast] {
+  animation: toast-slide-in 300ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+[data-sonner-toast][data-removed="true"] {
+  animation: toast-slide-out 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Hover pause animation indicator */
+[data-sonner-toast]:hover [data-progress] {
+  animation-play-state: paused !important;
+}
+
+/* Icon styling within toasts */
+.auth-toast [data-icon] {
+  @apply flex-shrink-0;
+}
+
+.auth-toast-success [data-icon] {
+  @apply text-success;
+}
+
+.auth-toast-error [data-icon] {
+  @apply text-error;
+}
+
+.auth-toast-warning [data-icon] {
+  @apply text-aurore-600;
+}
+
+.auth-toast-info [data-icon] {
+  @apply text-blue-600;
+}
+
+/* Ensure proper spacing for icon + content */
+.auth-toast [data-content] {
+  @apply flex items-start gap-3;
+}
+
+/* Progress bar styling */
+[data-sonner-toast] [data-progress] {
+  @apply transition-all duration-100;
+}
+
+.auth-toast-success [data-progress] {
+  @apply bg-success;
+}
+
+.auth-toast-error [data-progress] {
+  @apply bg-error;
+}
+
+.auth-toast-warning [data-progress] {
+  @apply bg-aurore-500;
+}
+
+.auth-toast-info [data-progress] {
+  @apply bg-blue-500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .auth-toast {
+    min-width: 280px;
+    max-width: calc(100vw - 2rem);
+  }
+}
+
+/* Dark mode support */
+.dark .auth-toast-success {
+  @apply bg-success-dark/20 border-success text-success-light;
+}
+
+.dark .auth-toast-error {
+  @apply bg-error-dark/20 border-error text-error-light;
+}
+
+.dark .auth-toast-warning {
+  @apply bg-aurore-900/20 border-aurore-500 text-aurore-100;
+}
+
+.dark .auth-toast-info {
+  @apply bg-blue-900/20 border-blue-500 text-blue-100;
+}
+
+.dark .auth-toast-loading {
+  @apply bg-anthracite-700/80 border-nuanced-500 text-platinum-50;
+}
+
+/* Keyboard navigation: Tab focus order (Requirement 6.5) */
+[data-sonner-toast] {
+  /* Ensure toasts are in the tab order */
+  position: relative;
+}
+
+[data-sonner-toast]:focus-within {
+  /* Highlight toast when any interactive element inside has focus */
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.3);
+}
+
+/* Keyboard navigation: Ensure all interactive elements are keyboard accessible */
+.auth-toast button,
+.auth-toast a {
+  cursor: pointer;
+}
+
+.auth-toast button:focus-visible,
+.auth-toast a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Accessibility: Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  [data-sonner-toast] {
+    animation: toast-fade-in 100ms ease-out;
+  }
+
+  [data-sonner-toast][data-removed="true"] {
+    animation: toast-fade-out 100ms ease-out;
+  }
+
+  .auth-toast,
+  .auth-toast-close,
+  .auth-toast-action,
+  .auth-toast-cancel {
+    transition: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .auth-toast {
+    @apply border-4;
+  }
+
+  .auth-toast-success {
+    @apply bg-white border-success text-black;
+  }
+
+  .auth-toast-error {
+    @apply bg-white border-error text-black;
+  }
+
+  .auth-toast-warning {
+    @apply bg-white border-aurore-600 text-black;
+  }
+
+  .auth-toast-info {
+    @apply bg-white border-blue-600 text-black;
+  }
+}
+
+/* Accessibility: Reduced motion support for video player */
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin {
+    animation: none;
+  }
+  
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

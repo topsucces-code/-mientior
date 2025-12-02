@@ -2,14 +2,18 @@
 
 import { Heart, X, ShoppingCart } from 'lucide-react'
 import { useWishlistStore } from '@/stores/wishlist.store'
+import { useCartStore } from '@/stores/cart.store'
 import { useHeader } from '@/contexts/header-context'
+import { useToast } from '@/hooks/use-toast'
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 
 export function WishlistDropdown() {
     const { items, removeItem } = useWishlistStore()
+    const { addItem: addToCart } = useCartStore()
     const { activeDropdown, setActiveDropdown } = useHeader()
+    const { toast } = useToast()
     const dropdownRef = useRef<HTMLDivElement>(null)
     const [mounted, setMounted] = useState(false)
 
@@ -68,7 +72,7 @@ export function WishlistDropdown() {
                                     className="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
                                 >
                                     <div className="flex gap-3">
-                                        <Link href={`/products/${item.productId}`} className="flex-shrink-0">
+                                        <Link href={`/products/${item.slug || item.productId}`} className="flex-shrink-0">
                                             <Image
                                                 src={item.image || '/placeholder.png'}
                                                 alt={item.name || 'Product'}
@@ -79,17 +83,33 @@ export function WishlistDropdown() {
                                         </Link>
 
                                         <div className="flex-1 min-w-0">
-                                            <Link href={`/products/${item.productId}`}>
+                                            <Link href={`/products/${item.slug || item.productId}`}>
                                                 <h4 className="font-medium hover:text-blue-600 truncate">
                                                     {item.name || 'Produit'}
                                                 </h4>
                                             </Link>
                                             <p className="text-sm text-gray-600 mt-1">
-                                                {item.price ? `${(item.price / 100).toFixed(2)} €` : 'Prix non disponible'}
+                                                {item.price ? `${item.price.toFixed(2)} €` : 'Prix non disponible'}
                                             </p>
 
                                             <div className="flex items-center gap-2 mt-2">
                                                 <button
+                                                    onClick={() => {
+                                                        addToCart({
+                                                            id: item.productId,
+                                                            productId: item.productId,
+                                                            productName: item.name || 'Produit',
+                                                            productSlug: item.slug || item.productId,
+                                                            productImage: item.image || '/images/placeholder.svg',
+                                                            price: item.price || 0,
+                                                            quantity: 1,
+                                                            stock: 99,
+                                                        })
+                                                        toast({
+                                                            title: 'Ajouté au panier',
+                                                            description: `${item.name} a été ajouté à votre panier.`,
+                                                        })
+                                                    }}
                                                     className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-1"
                                                 >
                                                     <ShoppingCart className="w-3.5 h-3.5" />

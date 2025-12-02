@@ -189,11 +189,13 @@ export function checkForFraud(options: FraudCheckOptions): FraudCheckResult {
   // Fast checkout risk (less than 30 seconds from start to payment)
   if (requestHistory.length > 0) {
     const firstRequest = requestHistory[0]
-    const timeSinceStart = Date.now() - firstRequest.timestamp
-    if (timeSinceStart < 30000) {
-      // Less than 30 seconds
-      flags.push('fast_checkout')
-      riskScore += 2
+    if (firstRequest) {
+      const timeSinceStart = Date.now() - firstRequest.timestamp
+      if (timeSinceStart < 30000) {
+        // Less than 30 seconds
+        flags.push('fast_checkout')
+        riskScore += 2
+      }
     }
   }
 
@@ -286,10 +288,12 @@ export async function createProvisionalExpressOrder(options: {
     let variant = undefined
     if (item.variantId && product?.variants && product.variants.length > 0) {
       const v = product.variants[0]
-      variant = {
-        size: v.size || undefined,
-        color: v.color || undefined,
-        sku: v.sku,
+      if (v) {
+        variant = {
+          size: v.size || undefined,
+          color: v.color || undefined,
+          sku: v.sku,
+        }
       }
     }
 
@@ -314,21 +318,19 @@ export async function createProvisionalExpressOrder(options: {
   const order = await prisma.order.create({
     data: {
       orderNumber,
-      userId: userId || null,
-      email,
+      userId: userId || undefined,
       status: 'PENDING',
       paymentStatus: 'PENDING',
-      paymentGateway: paymentGateway as any, // Express payment gateway
+      paymentGateway: paymentGateway as any,
       items: {
         create: orderItems.map((item) => ({
           productId: item.productId,
           variantId: item.variantId,
-          name: item.name,
-          price: item.price / 100, // Convert cents to euros for DB
+          productName: item.name,
+          price: item.price / 100,
           quantity: item.quantity,
           productImage: item.productImage,
-          variant: item.variant ? JSON.stringify(item.variant) : undefined,
-        })),
+        }))
       },
       subtotal: totalsResult.subtotal / 100,
       shippingCost: totalsResult.shippingCost / 100,
@@ -343,12 +345,7 @@ export async function createProvisionalExpressOrder(options: {
         expressMethod: gateway,
         ...metadata,
       },
-      customer: JSON.stringify({
-        firstName: shippingAddress.firstName || shippingAddress.givenName,
-        lastName: shippingAddress.lastName || shippingAddress.familyName,
-        email,
-      }),
-    },
+    } as any,
     select: {
       id: true,
       orderNumber: true,

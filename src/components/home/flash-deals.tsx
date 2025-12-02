@@ -11,9 +11,12 @@ import { cn } from '@/lib/utils'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
 import { useQuickView } from '@/contexts/quick-view-context'
+import { useCartStore } from '@/stores/cart.store'
+import { toast } from 'sonner'
+import { useHeaderSafe } from '@/contexts/header-context'
 
 interface FlashDealsProps extends React.HTMLAttributes<HTMLElement> {
-  products: Omit<ProductCardProps, 'onQuickView'>[]
+  products: (Omit<ProductCardProps, 'onQuickView'> & { stock?: number })[]
   title?: string
   subtitle?: string
   endDate: Date | string
@@ -38,6 +41,34 @@ export default function FlashDeal({
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
   const { openQuickView } = useQuickView()
+  const addToCart = useCartStore((state) => state.addItem)
+  const headerContext = useHeaderSafe()
+
+  const handleAddToCart = (product: Omit<ProductCardProps, 'onQuickView'> & { stock?: number }) => {
+     addToCart({
+       id: product.id,
+       productId: product.id,
+       productName: product.name,
+       productSlug: product.slug,
+       productImage: product.image || '/placeholder-product.jpg',
+       price: product.price,
+       quantity: 1,
+       stock: product.stock || 0,
+     })
+     
+     toast.success("Ajouté au panier !", {
+       description: `${product.name} a été ajouté à votre panier.`,
+       action: {
+         label: "Voir le panier",
+         onClick: () => window.location.href = '/cart'
+       }
+     })
+     
+     // Open cart preview after adding item
+     if (headerContext?.openCart) {
+       setTimeout(() => headerContext.openCart(), 300)
+     }
+  }
   
   // Calculate stock percentage if data is provided
   const stockData = React.useMemo(() => {
@@ -189,12 +220,15 @@ export default function FlashDeal({
               {products.map((product, index) => (
                 <div
                   key={product.id}
-                  className="min-w-0 flex-[0_0_100%] sm:flex-[0_0_calc(50%-12px)] lg:flex-[0_0_calc(33.333%-16px)] xl:flex-[0_0_calc(25%-18px)]"
+                  className="min-w-0 flex-[0_0_calc(50%-8px)] sm:flex-[0_0_calc(33.333%-10px)] md:flex-[0_0_calc(25%-12px)] lg:flex-[0_0_calc(20%-12px)] xl:flex-[0_0_calc(16.666%-14px)]"
                 >
                   <ProductCard
                     {...product}
+                    inStock={product.stock !== undefined ? product.stock > 0 : product.inStock}
                     badge={{ text: 'FLASH', variant: 'flash' }}
                     onQuickView={handleQuickView}
+                    onAddToCart={() => handleAddToCart(product)}
+                    priority={index < 6}
                     className={cn(
                       'border-2 border-orange-200',
                       'shadow-[0_0_15px_rgba(255,107,0,0.2)]',

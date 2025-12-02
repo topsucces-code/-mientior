@@ -1,4 +1,5 @@
-import { Role, Permission } from '@prisma/client';
+import { Role } from '@prisma/client';
+import { Permission } from '@/lib/permissions';
 
 // Role hierarchy: higher roles inherit permissions from lower roles
 export const ROLE_HIERARCHY: Record<Role, number> = {
@@ -34,6 +35,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     Permission.MARKETING_WRITE,
     Permission.SEGMENTS_READ,
     Permission.SEGMENTS_WRITE,
+    Permission.SEARCH_MANAGE,
   ],
   ADMIN: [
     Permission.PRODUCTS_READ,
@@ -55,6 +57,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     Permission.MARKETING_WRITE,
     Permission.SEGMENTS_READ,
     Permission.SEGMENTS_WRITE,
+    Permission.SEARCH_MANAGE,
   ],
   MANAGER: [
     Permission.PRODUCTS_READ,
@@ -310,6 +313,7 @@ export function getPermissionDescription(permission: Permission): string {
     [Permission.MARKETING_WRITE]: 'Create and edit marketing campaigns',
     [Permission.SEGMENTS_READ]: 'View customer segments',
     [Permission.SEGMENTS_WRITE]: 'Create and edit customer segments',
+    [Permission.SEARCH_MANAGE]: 'Manage search settings (synonyms, stop words)',
   };
 
   return descriptions[permission] || permission;
@@ -329,3 +333,8 @@ export function getRoleDescription(role: Role): string {
 
   return descriptions[role] || role;
 }
+
+/**
+ * Alias for hasPermission for backward compatibility
+ */
+export const checkPermission = hasPermission;

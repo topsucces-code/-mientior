@@ -11,6 +11,8 @@ import { cn } from '@/lib/utils'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
 import { useQuickView } from '@/contexts/quick-view-context'
+import { useCartStore } from '@/stores/cart.store'
+import { useToast } from '@/hooks/use-toast'
 
 export interface CollectionData {
   id: string
@@ -27,7 +29,7 @@ export interface CollectionData {
     text: string
     variant?: 'new' | 'bestseller' | 'trending'
   }
-  products: Omit<ProductCardProps, 'onQuickView'>[]
+  products: (Omit<ProductCardProps, 'onQuickView'> & { stock?: number })[]
 }
 
 interface CuratedCollectionProps extends React.HTMLAttributes<HTMLElement> {
@@ -48,6 +50,8 @@ export default function CuratedCollection({
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
   const { openQuickView } = useQuickView()
+  const addToCart = useCartStore((state) => state.addItem)
+  const { toast } = useToast()
 
   const displayProducts = showAllProducts
     ? collection.products
@@ -55,6 +59,23 @@ export default function CuratedCollection({
 
   const handleQuickView = (productId: string) => {
     openQuickView(productId)
+  }
+
+  const handleAddToCart = (product: any) => {
+     addToCart({
+       id: product.id,
+       productId: product.id,
+       productName: product.name,
+       productSlug: product.slug,
+       productImage: product.image || '/placeholder-product.jpg',
+       price: product.price,
+       quantity: 1,
+       stock: product.stock || 0,
+     })
+     toast({
+       title: "Ajouté au panier",
+       description: `${product.name} a été ajouté à votre panier.`,
+     })
   }
 
   if (!collection || !collection.products || collection.products.length === 0) {
@@ -121,7 +142,9 @@ export default function CuratedCollection({
             <div key={product.id} className="sm:col-span-2 lg:row-span-2">
               <ProductCard
                 {...product}
+                inStock={product.stock !== undefined ? product.stock > 0 : product.inStock}
                 onQuickView={handleQuickView}
+                onAddToCart={() => handleAddToCart(product)}
                 className={cn(
                   'h-full',
                   !prefersReducedMotion && isVisible && 'animate-fade-in-up'
@@ -136,7 +159,9 @@ export default function CuratedCollection({
             <ProductCard
               key={product.id}
               {...product}
+              inStock={product.stock !== undefined ? product.stock > 0 : product.inStock}
               onQuickView={handleQuickView}
+              onAddToCart={() => handleAddToCart(product)}
               className={cn(
                 !prefersReducedMotion && isVisible && 'animate-fade-in-up'
               )}
@@ -154,7 +179,7 @@ export default function CuratedCollection({
 // Hero Layout with featured image
 interface HeroLayoutProps {
   collection: CollectionData
-  displayProducts: Omit<ProductCardProps, 'onQuickView'>[]
+  displayProducts: (Omit<ProductCardProps, 'onQuickView'> & { stock?: number })[]
   isVisible: boolean
   prefersReducedMotion: boolean
   onQuickView: (id: string) => void
@@ -177,6 +202,26 @@ function HeroLayout({
     textColor: 'dark' as const,
   }
   const isDark = theme.textColor === 'light'
+
+  const addToCart = useCartStore((state) => state.addItem)
+  const { toast } = useToast()
+
+  const handleAddToCart = (product: any) => {
+     addToCart({
+       id: product.id,
+       productId: product.id,
+       productName: product.name,
+       productSlug: product.slug,
+       productImage: product.image || '/placeholder-product.jpg',
+       price: product.price,
+       quantity: 1,
+       stock: product.stock || 0,
+     })
+     toast({
+       title: "Ajouté au panier",
+       description: `${product.name} a été ajouté à votre panier.`,
+     })
+  }
 
   return (
     <section className={cn('py-10 md:py-14', className)} {...props}>
@@ -279,7 +324,9 @@ function HeroLayout({
             <ProductCard
               key={product.id}
               {...product}
+              inStock={product.stock !== undefined ? product.stock > 0 : product.inStock}
               onQuickView={onQuickView}
+              onAddToCart={() => handleAddToCart(product)}
               className={cn(
                 !prefersReducedMotion && isVisible && 'animate-fade-in-up'
               )}

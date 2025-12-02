@@ -3,7 +3,7 @@
 import * as React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Heart, ShoppingCart, Eye, Star, Truck } from 'lucide-react'
+import { Heart, ShoppingCart, Eye, Star, Truck, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from './badge'
 import { Button } from './button'
@@ -33,6 +33,7 @@ export interface ProductCardProps extends React.HTMLAttributes<HTMLDivElement> {
   onWishlistToggle?: (id: string) => void
   isInWishlist?: boolean
   style?: React.CSSProperties
+  priority?: boolean
 }
 
 export function ProductCard({
@@ -47,6 +48,7 @@ export function ProductCard({
   rating = 0,
   reviewCount = 0,
   badge,
+  onSale: _onSale,
   inStock = true,
   freeShipping = false,
   onAddToCart,
@@ -55,11 +57,13 @@ export function ProductCard({
   isInWishlist = false,
   className,
   style,
+  priority = false,
   ...props
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = React.useState(false)
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0)
   const [isImageLoaded, setIsImageLoaded] = React.useState(false)
+  const [isAddedToCart, setIsAddedToCart] = React.useState(false)
 
   const allImages = [image, ...images].filter(Boolean) as string[]
   const displayImage = allImages[currentImageIndex] || '/placeholder-product.jpg'
@@ -94,7 +98,13 @@ export function ProductCard({
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    if (isAddedToCart) return // Prevent double-click
+    
     onAddToCart?.(id)
+    
+    // Show visual feedback
+    setIsAddedToCart(true)
+    setTimeout(() => setIsAddedToCart(false), 2000)
   }
 
   const handleQuickView = (e: React.MouseEvent) => {
@@ -123,9 +133,9 @@ export function ProductCard({
       {...props}
     >
       {/* Image Container */}
-      <Link href={`/products/${slug}`} className="relative aspect-[4/5] overflow-hidden bg-platinum-100">
+      <Link href={`/products/${slug}`} className="relative block w-full overflow-hidden bg-platinum-100" style={{ paddingBottom: '100%' }}>
         {/* Badges */}
-        <div className="absolute left-2 top-2 z-10 flex flex-col gap-2">
+        <div className="absolute left-1.5 top-1.5 z-10 flex flex-col gap-1">
           {badgeObject && (
             <Badge variant={badgeObject.variant} size="sm">
               {badgeObject.text}
@@ -147,14 +157,14 @@ export function ProductCard({
         <button
           onClick={handleWishlistToggle}
           className={cn(
-            'absolute right-2 top-2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-all duration-300',
+            'absolute right-1.5 top-1.5 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-all duration-300',
             'hover:bg-white hover:scale-110 hover:shadow-elevation-2',
             isInWishlist && 'bg-orange-500 text-white hover:bg-orange-600'
           )}
           aria-label={isInWishlist ? 'Retirer des favoris' : 'Ajouter aux favoris'}
         >
           <Heart
-            className={cn('h-5 w-5 transition-all', isInWishlist && 'fill-current')}
+            className={cn('h-4 w-4 transition-all', isInWishlist && 'fill-current')}
           />
         </button>
 
@@ -169,14 +179,16 @@ export function ProductCard({
             !isImageLoaded && 'blur-sm',
             isImageLoaded && 'blur-0'
           )}
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
           onLoad={() => setIsImageLoaded(true)}
+          priority={priority}
+          loading={priority ? 'eager' : 'lazy'}
         />
 
         {/* Quick View Overlay */}
         <div
           className={cn(
-            'absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-all duration-300',
+            'absolute inset-0 flex items-center justify-center gap-2 bg-black/40 backdrop-blur-sm transition-all duration-300',
             isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'
           )}
         >
@@ -184,25 +196,25 @@ export function ProductCard({
             variant="secondary"
             size="sm"
             onClick={handleQuickView}
-            className="gap-2"
+            className="w-10 h-10 p-0 rounded-full"
+            aria-label="Aperçu rapide"
           >
             <Eye className="h-4 w-4" />
-            Aperçu rapide
           </Button>
         </div>
       </Link>
 
       {/* Product Info */}
-      <div className="flex flex-1 flex-col gap-2 p-3">
+      <div className="flex flex-1 flex-col gap-1.5 p-2">
         {/* Rating */}
         {rating > 0 && (
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-1.5 text-xs">
             <div className="flex items-center gap-0.5">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
                   className={cn(
-                    'h-3.5 w-3.5',
+                    'h-3 w-3',
                     i < Math.floor(rating)
                       ? 'fill-aurore-500 text-aurore-500'
                       : 'text-platinum-400'
@@ -218,7 +230,7 @@ export function ProductCard({
 
         {/* Product Name */}
         <Link href={`/products/${slug}`}>
-          <h3 className="line-clamp-2 text-sm font-medium text-anthracite-500 transition-colors hover:text-orange-500">
+          <h3 className="line-clamp-2 text-xs font-medium text-anthracite-500 transition-colors hover:text-orange-500">
             {name}
           </h3>
         </Link>
@@ -236,11 +248,11 @@ export function ProductCard({
           {/* Price */}
           <div className="flex items-baseline gap-2">
             {hasDiscount && (
-              <span className="text-sm text-nuanced-500 line-through decoration-2" style={{ fontFeatureSettings: '"tnum"' }}>
+              <span className="text-xs text-nuanced-500 line-through" style={{ fontFeatureSettings: '"tnum"' }}>
                 {(compareAtPrice / 100).toFixed(2)}€
               </span>
             )}
-            <span className="font-display text-2xl font-extrabold text-orange-500" style={{ fontFeatureSettings: '"tnum"' }}>
+            <span className="font-display text-lg font-extrabold text-orange-500" style={{ fontFeatureSettings: '"tnum"' }}>
               {(price / 100).toFixed(2)}€
             </span>
           </div>
@@ -251,23 +263,25 @@ export function ProductCard({
               <span className="inline-flex">
                 <Button
                   onClick={handleAddToCart}
-                  disabled={!inStock}
+                  disabled={!inStock || isAddedToCart}
                   className={cn(
-                    'w-10 h-10 p-0 md:w-auto md:h-10 md:px-4 md:gap-2 flex items-center justify-center transition-all duration-300',
-                    isHovered && 'shadow-elevation-2'
+                    'w-8 h-8 p-0 rounded-full flex items-center justify-center transition-all duration-300',
+                    isHovered && !isAddedToCart && 'shadow-elevation-2 scale-110',
+                    isAddedToCart && 'bg-green-500 hover:bg-green-500 scale-110 shadow-elevation-2'
                   )}
                   variant={inStock ? 'default' : 'outline'}
-                  aria-label={inStock ? 'Ajouter au panier' : 'Rupture de stock'}
+                  aria-label={isAddedToCart ? 'Ajouté au panier' : (inStock ? 'Ajouter au panier' : 'Rupture de stock')}
                 >
-                  <ShoppingCart className="h-4 w-4 flex-shrink-0" />
-                  <span className="hidden md:inline whitespace-nowrap">
-                    {inStock ? 'Ajouter au panier' : 'Rupture de stock'}
-                  </span>
+                  {isAddedToCart ? (
+                    <Check className="h-4 w-4 text-white animate-in zoom-in duration-200" />
+                  ) : (
+                    <ShoppingCart className="h-4 w-4" />
+                  )}
                 </Button>
               </span>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{inStock ? 'Ajouter au panier' : 'Rupture de stock'}</p>
+              <p>{isAddedToCart ? 'Ajouté !' : (inStock ? 'Ajouter au panier' : 'Rupture de stock')}</p>
             </TooltipContent>
           </Tooltip>
         </div>

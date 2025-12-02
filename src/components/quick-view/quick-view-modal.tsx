@@ -164,7 +164,7 @@ export function QuickViewModal({ productId, isOpen, onClose, onAddToCart }: Quic
         ) : (
           <div className="grid md:grid-cols-2 gap-0">
             {/* Left Column - Product Gallery */}
-            <div className="relative bg-platinum-50 p-6">
+            <div className="relative bg-platinum-50 p-6 md:p-8">
               {/* Badges */}
               {product.badges && product.badges.length > 0 && (
                 <div className="absolute left-6 top-6 z-10 flex flex-wrap gap-2">
@@ -183,30 +183,30 @@ export function QuickViewModal({ productId, isOpen, onClose, onAddToCart }: Quic
               )}
 
               {/* Main Image */}
-              <div className="relative aspect-square overflow-hidden rounded-lg bg-white mb-4">
+              <div className="relative aspect-square min-h-[350px] md:min-h-[450px] lg:min-h-[500px] overflow-hidden rounded-xl bg-white mb-4 shadow-sm">
                 <Image
                   src={product.images[selectedImage]?.url || '/images/placeholder.svg'}
                   alt={product.images[selectedImage]?.alt || product.name}
                   fill
                   unoptimized={!product.images[selectedImage]?.url} // SVG placeholder needs unoptimized
                   className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 500px"
                   priority
                 />
               </div>
 
               {/* Thumbnail Gallery */}
               {product.images.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto">
+                <div className="flex gap-3 overflow-x-auto pb-2">
                   {product.images.map((image, index) => (
                     <button
                       key={index}
                       onClick={() => setSelectedImage(index)}
                       className={cn(
-                        'relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border-2 transition-all',
+                        'relative h-20 w-20 md:h-24 md:w-24 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all bg-white shadow-sm',
                         selectedImage === index
                           ? 'border-orange-500 ring-2 ring-orange-200'
-                          : 'border-transparent hover:border-nuanced-300'
+                          : 'border-platinum-200 hover:border-nuanced-400'
                       )}
                     >
                       <Image
@@ -214,7 +214,7 @@ export function QuickViewModal({ productId, isOpen, onClose, onAddToCart }: Quic
                         alt={image.alt || `${product.name} - Image ${index + 1}`}
                         fill
                         className="object-cover"
-                        sizes="80px"
+                        sizes="96px"
                       />
                     </button>
                   ))}

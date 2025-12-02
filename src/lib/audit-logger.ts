@@ -242,3 +242,10 @@ export async function logImport(
     userAgent,
   });
 }
+
+/**
+ * Alias for logAction for backward compatibility
+ */
+export const logAdminAction = logAction;
+export const logAuditEvent = logAction;
+export const logAuditAction = logAction;

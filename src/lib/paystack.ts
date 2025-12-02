@@ -1,11 +1,17 @@
 import Paystack from 'paystack'
 import crypto from 'crypto'
 
-if (!process.env.PAYSTACK_SECRET_KEY) {
-  throw new Error('Missing required environment variable: PAYSTACK_SECRET_KEY')
-}
+// Only initialize Paystack if the secret key is available
+const paystack = process.env.PAYSTACK_SECRET_KEY 
+  ? Paystack(process.env.PAYSTACK_SECRET_KEY)
+  : null
 
-const paystack = Paystack(process.env.PAYSTACK_SECRET_KEY)
+function ensurePaystack() {
+  if (!paystack) {
+    throw new Error('Paystack is not configured. Please set PAYSTACK_SECRET_KEY environment variable.')
+  }
+  return paystack
+}
 
 /**
  * Initialize a Paystack transaction
@@ -25,7 +31,7 @@ export async function initializePaystackTransaction({
   metadata?: Record<string, unknown>
   callbackUrl?: string
 }) {
-  const response = await paystack.transaction.initialize({
+  const response = await ensurePaystack().transaction.initialize({
     email,
     amount, // In kobo (100 kobo = 1 NGN)
     currency: 'NGN', // Nigerian Naira (change to XOF for West Africa, etc.)
@@ -46,7 +52,7 @@ export async function initializePaystackTransaction({
  * @returns Verification response with transaction details
  */
 export async function verifyPaystackTransaction(reference: string) {
-  const response = await paystack.transaction.verify(reference)
+  const response = await ensurePaystack().transaction.verify(reference)
 
   if (!response.status) {
     throw new Error(response.message || 'Failed to verify Paystack transaction')

@@ -8,11 +8,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth-server'
 import type { ReviewStats } from '@/types'
+import { Prisma } from '@prisma/client'
 
 // GET /api/products/[slug]/reviews
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Record<string, string> }
 ) {
   try {
     const { slug } = params
@@ -40,13 +41,14 @@ export async function GET(
     const productId = product.id
 
     // Build query for reviews
-    const where: any = {
+    // Build query for reviews
+    const where: Prisma.ReviewWhereInput = {
       productId,
       status: 'APPROVED', // Only show approved reviews
     }
 
     if (withPhotos) {
-      where.images = { isEmpty: false }
+      where.images = { not: [] }
     }
 
     if (verified) {
@@ -58,7 +60,8 @@ export async function GET(
     }
 
     // Sort mapping
-    const orderBy: any = { createdAt: 'desc' }
+    // Sort mapping
+    const orderBy: Prisma.ReviewOrderByWithRelationInput = { createdAt: 'desc' }
     switch (sort) {
       case 'recent':
         orderBy.createdAt = 'desc'
@@ -123,11 +126,11 @@ export async function GET(
       average: product.rating,
       total: allReviewsCount,
       distribution: {
-        5: distribution[5],
-        4: distribution[4],
-        3: distribution[3],
-        2: distribution[2],
-        1: distribution[1],
+        5: distribution[5] || 0,
+        4: distribution[4] || 0,
+        3: distribution[3] || 0,
+        2: distribution[2] || 0,
+        1: distribution[1] || 0,
       },
     }
 
@@ -146,7 +149,7 @@ export async function GET(
       helpful: review.helpful,
       notHelpful: review.notHelpful,
       createdAt: review.createdAt,
-      response: review.response ? (review.response as any) : undefined,
+      response: review.response ? review.response : undefined,
     }))
 
     return NextResponse.json({
@@ -166,7 +169,7 @@ export async function GET(
 // POST /api/products/[slug]/reviews
 export async function POST(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Record<string, string> }
 ) {
   try {
     const { slug } = params
@@ -241,26 +244,22 @@ export async function POST(
     const images: string[] = []
     const imageFiles: File[] = []
 
-    for (const [key, value] of formData.entries()) {
+    formData.forEach((value, key) => {
       if (key.startsWith('images[') && value instanceof File) {
         imageFiles.push(value)
       }
-    }
+    })
 
     // Upload images to media collection if any
     if (imageFiles.length > 0) {
       for (const file of imageFiles.slice(0, 5)) {
         // Max 5 images
-        const buffer = Buffer.from(await file.arrayBuffer())
-
         // Create media entry
         const media = await prisma.media.create({
           data: {
             url: '', // Placeholder - in production, upload to cloud storage
             alt: `Review image for ${product.name}`,
-            filename: file.name,
-            mimeType: file.type,
-            size: file.size,
+            type: file.type.startsWith('image/') ? 'IMAGE' : 'VIDEO',
           },
         })
 

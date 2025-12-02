@@ -1,0 +1,386 @@
+openapi: 3.0.3
+info:
+  title: Customer Export API
+  description: Enhanced API for exporting customer data in multiple formats with rate limiting, caching, and streaming support
+  version: 2.0.0
+  contact:
+    name: Mientior API Support
+    email: support@mientior.com
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://api.mientior.com
+    description: Production server
+
+paths:
+  /admin/customers/{id}/export:
+    get:
+      summary: Export customer data
+      description: |
+        Export comprehensive customer data in multiple formats (PDF, CSV, XLSX, JSON).
+        
+        Features:
+        - Rate limiting (5 exports per minute per IP)
+        - Export caching (5 minutes TTL)
+        - Size validation and limits
+        - Streaming for large datasets
+        - Comprehensive error handling
+        - Audit logging
+        
+      operationId: exportCustomerData
+      tags:
+        - Customer Export
+      security:
+        - AdminAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Customer UUID
+          schema:
+            type: string
+            format: uuid
+            example: "550e8400-e29b-41d4-a716-446655440000"
+        - name: format
+          in: query
+          description: Export format
+          schema:
+            type: string
+            enum: [pdf, csv, xlsx, json]
+            default: pdf
+          example: pdf
+        - name: includeOrders
+          in: query
+          description: Include order history in export
+          schema:
+            type: boolean
+            default: true
+          example: true
+        - name: includeAnalytics
+          in: query
+          description: Include behavioral analytics data
+          schema:
+            type: boolean
+            default: false
+          example: false
+        - name: includeNotes
+          in: query
+          description: Include customer notes
+          schema:
+            type: boolean
+            default: true
+          example: true
+        - name: includeTags
+          in: query
+          description: Include customer tags
+          schema:
+            type: boolean
+            default: true
+          example: true
+        - name: dateRange
+          in: query
+          description: Date range for historical data
+          schema:
+            type: string
+            enum: [30d, 90d, 1y, all]
+            default: all
+          example: 1y
+        - name: orderLimit
+          in: query
+          description: Maximum number of orders to include (1-1000)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+          example: 100
+      responses:
+        '200':
+          description: Export file generated successfully
+          headers:
+            Content-Type:
+              description: MIME type of the export file
+              schema:
+                type: string
+                enum: 
+                  - application/pdf
+                  - text/csv
+                  - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+                  - application/json
+            Content-Disposition:
+              description: Attachment filename
+              schema:
+                type: string
+                example: "attachment; filename=\"customer-123-1640995200000.pdf\""
+            Content-Length:
+              description: Size of the export file in bytes
+              schema:
+                type: integer
+                example: 1048576
+            X-Cache:
+              description: Cache status (HIT or MISS)
+              schema:
+                type: string
+                enum: [HIT, MISS]
+                example: MISS
+            X-Export-Size:
+              description: Export file size in bytes
+              schema:
+                type: string
+                example: "1048576"
+            X-RateLimit-Remaining:
+              description: Remaining export requests in current window
+              schema:
+                type: string
+                example: "4"
+            Cache-Control:
+              description: Cache control directive
+              schema:
+                type: string
+                example: "private, no-cache, no-store, must-revalidate"
+            Pragma:
+              description: HTTP/1.0 cache control
+              schema:
+                type: string
+                example: "no-cache"
+            Expires:
+              description: Expiration date
+              schema:
+                type: string
+                example: "0"
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+                description: PDF export file
+            text/csv:
+              schema:
+                type: string
+                description: CSV export data
+                example: |
+                  Export Timestamp,Exported By,Customer ID,Name,Email
+                  2024-01-01 10:00:00,Admin User,customer-123,John Doe,john@example.com
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+                description: Excel XLSX export file
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exportMetadata:
+                    type: object
+                    properties:
+                      exportedBy:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            example: "admin-123"
+                          name:
+                            type: string
+                            example: "Admin User"
+                      exportedAt:
+                        type: string
+                        format: date-time
+                        example: "2024-01-01T10:00:00Z"
+                      customerId:
+                        type: string
+                        example: "customer-123"
+                      format:
+                        type: string
+                        example: "json"
+                  customerData:
+                    type: object
+                    description: Complete customer 360 data
+        '400':
+          description: Bad Request - Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                validation_error:
+                  summary: Validation error
+                  value:
+                    error: "Invalid request parameters: format: Invalid enum value"
+                    code: "VALIDATION_ERROR"
+                unsupported_format:
+                  summary: Unsupported format
+                  value:
+                    error: "Unsupported export format: xml. Supported formats: pdf, csv, xlsx, json"
+                    code: "UNSUPPORTED_FORMAT"
+        '401':
+          description: Unauthorized - Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Authentication required"
+                code: "UNAUTHORIZED"
+        '403':
+          description: Forbidden - Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Insufficient permissions"
+                code: "FORBIDDEN"
+        '404':
+          description: Not Found - Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Customer not found"
+                code: "CUSTOMER_NOT_FOUND"
+        '413':
+          description: Payload Too Large - Export size exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Export data too large. Please reduce the data scope."
+                code: "EXPORT_SIZE_EXCEEDED"
+        '429':
+          description: Too Many Requests - Rate limit exceeded
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying
+              schema:
+                type: integer
+                example: 60
+            X-RateLimit-Limit:
+              description: Rate limit maximum requests
+              schema:
+                type: string
+                example: "5"
+            X-RateLimit-Remaining:
+              description: Remaining requests in current window
+              schema:
+                type: string
+                example: "0"
+            X-RateLimit-Reset:
+              description: Rate limit reset time
+              schema:
+                type: string
+                format: date-time
+                example: "2024-01-01T10:01:00Z"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitErrorResponse'
+              example:
+                error: "Too many export requests"
+                code: "RATE_LIMIT_EXCEEDED"
+                retryAfter: 60
+        '500':
+          description: Internal Server Error - Export generation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                export_failed:
+                  summary: Export generation failed
+                  value:
+                    error: "Export generation failed. Please try again or contact support."
+                    code: "EXPORT_GENERATION_FAILED"
+                server_error:
+                  summary: Generic server error
+                  value:
+                    error: "Export generation failed"
+                    code: "EXPORT_FAILED"
+
+components:
+  securitySchemes:
+    AdminAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Admin authentication token
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - code
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+          example: "Customer not found"
+        code:
+          type: string
+          description: Machine-readable error code
+          example: "CUSTOMER_NOT_FOUND"
+        details:
+          type: array
+          items:
+            type: string
+          description: Additional error details (for validation errors)
+          example: ["format: Invalid enum value", "orderLimit: Must be between 1 and 1000"]
+
+    RateLimitErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            retryAfter:
+              type: integer
+              description: Seconds to wait before retrying
+              example: 60
+
+  examples:
+    PDFExportRequest:
+      summary: Export customer data as PDF
+      value:
+        format: pdf
+        includeOrders: true
+        includeAnalytics: false
+        dateRange: 1y
+        orderLimit: 100
+
+    CSVExportRequest:
+      summary: Export customer data as CSV
+      value:
+        format: csv
+        includeOrders: true
+        includeNotes: true
+        includeTags: true
+        dateRange: all
+
+    XLSXExportRequest:
+      summary: Export customer data as Excel
+      value:
+        format: xlsx
+        includeOrders: true
+        includeAnalytics: true
+        dateRange: 90d
+        orderLimit: 500
+
+    JSONExportRequest:
+      summary: Export customer data as JSON
+      value:
+        format: json
+        includeOrders: true
+        includeAnalytics: true
+        includeNotes: true
+        includeTags: true
+        dateRange: all
+
+tags:
+  - name: Customer Export
+    description: Customer data export operations with multiple format support
+
+externalDocs:
+  description: Customer Export API Documentation
+  url: https://docs.mientior.com/api/customer-export

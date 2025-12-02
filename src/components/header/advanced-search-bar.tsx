@@ -1,9 +1,10 @@
 'use client'
 
-import { Search, Mic, Camera, X } from 'lucide-react'
+import { Search, Mic, Camera, X, Clock } from 'lucide-react'
 import { useHeader } from '@/contexts/header-context'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import type { SearchSuggestion } from '@/types'
+import { useSearchHistory } from '@/hooks/use-search-history'
 
 // Type declarations for Speech Recognition API
 interface SpeechRecognitionResult {
@@ -58,13 +59,51 @@ export function AdvancedSearchBar() {
     const { searchQuery, setSearchQuery } = useHeader()
     const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
     const [showSuggestions, setShowSuggestions] = useState(false)
+    const [showHistory, setShowHistory] = useState(false)
     const [isListening, setIsListening] = useState(false)
+    const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
     const inputRef = useRef<HTMLInputElement>(null)
+    const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
+    const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistory()
+
+    // Cleanup debounce timer on unmount
+    useEffect(() => {
+        return () => {
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current)
+            }
+        }
+    }, [])
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault()
-        if (searchQuery.trim()) {
-            window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`
+        
+        // Get query from input ref as most reliable source
+        const inputValue = inputRef.current?.value || ''
+        
+        // Get query from form data as fallback
+        const formData = new FormData(e.currentTarget as HTMLFormElement)
+        const formQuery = formData.get('search') as string
+        
+        // Use multiple sources with priority: input ref > context > form data
+        const query = inputValue.trim() || searchQuery.trim() || formQuery?.trim() || ''
+        
+        // Debug logging (remove in production)
+        console.log('[Search Debug]', {
+            inputValue,
+            searchQuery,
+            formQuery,
+            finalQuery: query
+        })
+        
+        if (query) {
+            // Add to history (fire-and-forget)
+            addToHistory(query)
+            // Update context if it was empty
+            if (!searchQuery.trim()) {
+                setSearchQuery(query)
+            }
+            window.location.href = `/search?q=${encodeURIComponent(query)}`
         }
     }
 
@@ -101,19 +140,71 @@ export function AdvancedSearchBar() {
         window.location.href = '/search/visual'
     }
 
+    const fetchSuggestions = async (query: string) => {
+        if (query.length < 2) {
+            setSuggestions([])
+            setShowSuggestions(false)
+            return
+        }
+
+        setIsLoadingSuggestions(true)
+        const startTime = performance.now()
+
+        try {
+            const response = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}`)
+
+            if (!response.ok) {
+                console.error('Failed to fetch suggestions:', response.status)
+                setSuggestions([])
+                setIsLoadingSuggestions(false)
+                return
+            }
+
+            const data = await response.json()
+            const duration = performance.now() - startTime
+
+            // Log performance in dev mode
+            if (process.env.NODE_ENV === 'development') {
+                console.log(`[Autocomplete] ${duration.toFixed(0)}ms for "${query}"`, data.metadata)
+            }
+
+            // Transform API suggestions to component format
+            const transformedSuggestions: SearchSuggestion[] = (data.suggestions || []).map((s: any) => ({
+                type: s.type || 'product',
+                title: s.text || s.title || s.query || '',
+                link: `/search?q=${encodeURIComponent(s.text || s.query || s.title || '')}`
+            }))
+
+            setSuggestions(transformedSuggestions)
+            setShowSuggestions(true)
+        } catch (error) {
+            console.error('Error fetching suggestions:', error)
+            setSuggestions([])
+        } finally {
+            setIsLoadingSuggestions(false)
+        }
+    }
+
     const handleInputChange = (value: string) => {
         setSearchQuery(value)
 
-        // Mock suggestions - replace with actual API call
-        if (value.length >= 2) {
-            setSuggestions([
-                { type: 'product', title: `${value} iPhone`, link: `/search?q=${value}+iPhone` },
-                { type: 'brand', title: `${value} Samsung`, link: `/search?q=${value}+Samsung` },
-                { type: 'category', title: `${value} électronique`, link: `/search?q=${value}+électronique` }
-            ])
-            setShowSuggestions(true)
-        } else {
+        // Clear existing debounce timer
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current)
+        }
+
+        // Show history or suggestions based on input length
+        if (value.length < 2) {
+            // Show history when input is empty or short
             setShowSuggestions(false)
+            setShowHistory(true)
+            setSuggestions([])
+        } else {
+            // Debounce suggestions fetch to avoid flooding the server
+            setShowHistory(false)
+            debounceTimerRef.current = setTimeout(() => {
+                fetchSuggestions(value)
+            }, 150) // 150ms debounce for responsive feel while limiting requests
         }
     }
 
@@ -125,9 +216,25 @@ export function AdvancedSearchBar() {
                 <input
                     ref={inputRef}
                     type="text"
+                    name="search"
                     value={searchQuery}
                     onChange={(e) => handleInputChange(e.target.value)}
-                    onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
+                    onFocus={() => {
+                        if (searchQuery.length >= 2) {
+                            setShowSuggestions(true)
+                            setShowHistory(false)
+                        } else {
+                            setShowHistory(true)
+                            setShowSuggestions(false)
+                        }
+                    }}
+                    onBlur={() => {
+                        // Hide dropdowns after a delay to allow clicks
+                        setTimeout(() => {
+                            setShowSuggestions(false)
+                            setShowHistory(false)
+                        }, 200)
+                    }}
                     placeholder="Rechercher des produits, marques ou catégories..."
                     className="w-full h-12 pl-12 pr-32 rounded-full border-2 border-gray-200 focus:border-blue-500 focus:outline-none transition-colors"
                 />
@@ -138,6 +245,9 @@ export function AdvancedSearchBar() {
                         onClick={() => {
                             setSearchQuery('')
                             setShowSuggestions(false)
+                            if (history.length > 0) {
+                                setShowHistory(true)
+                            }
                             inputRef.current?.focus()
                         }}
                         className="absolute right-24 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -172,6 +282,47 @@ export function AdvancedSearchBar() {
                     </button>
                 </div>
             </div>
+
+            {/* Search History */}
+            {showHistory && history.length > 0 && (
+                <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 animate-slide-down">
+                    {history.map((query, index) => (
+                        <div
+                            key={`history-${index}`}
+                            className="w-full px-4 py-2.5 hover:bg-gray-50 flex items-center gap-3 transition-colors group"
+                        >
+                            <Clock className="w-4 h-4 text-gray-400" />
+                            <button
+                                onClick={() => {
+                                    setSearchQuery(query)
+                                    setShowHistory(false)
+                                    addToHistory(query)
+                                    window.location.href = `/search?q=${encodeURIComponent(query)}`
+                                }}
+                                className="flex-1 text-left"
+                            >
+                                {query}
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    removeFromHistory(query)
+                                }}
+                                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-200 rounded-full transition-opacity"
+                                aria-label="Supprimer"
+                            >
+                                <X className="w-3 h-3 text-gray-500" />
+                            </button>
+                        </div>
+                    ))}
+                    <button
+                        onClick={clearHistory}
+                        className="w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 text-left transition-colors border-t border-gray-100 mt-1"
+                    >
+                        Effacer l&apos;historique
+                    </button>
+                </div>
+            )}
 
             {/* Search Suggestions */}
             {showSuggestions && suggestions.length > 0 && (

@@ -291,6 +291,7 @@ export function StickyPurchasePanel({
                       aria-label={product.stock === 0 ? 'Rupture de stock' : isAddingToCart ? 'Ajout en cours...' : 'Ajouter au panier'}
                     >
                       <ShoppingCart className="w-5 h-5" />
+                      <span className="hidden md:inline">{product.stock === 0 ? 'Rupture de stock' : isAddingToCart ? 'Ajout en cours...' : 'Ajouter au panier'}</span>
                     </RippleButton>
                   </span>
                 </TooltipTrigger>

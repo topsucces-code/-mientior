@@ -5,9 +5,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { Prisma, Permission } from '@prisma/client';
+import { Permission } from '@/lib/permissions';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import { withPermission, withAdminAuth } from '@/middleware/admin-auth';
+import { withAdminAuth, withPermission } from '@/middleware/admin-auth';
 import { logCreate } from '@/lib/audit-logger';
 
 async function handleGET(
@@ -122,13 +123,12 @@ async function handlePOST(
     });
 
     // Log feature flag creation
-    await logCreate({
-      resource: 'featureFlag',
-      resourceId: featureFlag.id,
-      after: featureFlag,
-      adminUser: adminSession.adminUser,
-      request,
-    });
+    await logCreate(
+      'featureFlag',
+      featureFlag,
+      adminSession.adminUser,
+      request
+    );
 
     return NextResponse.json(featureFlag, { status: 201 });
   } catch (error) {

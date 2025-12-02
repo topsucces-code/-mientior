@@ -24,31 +24,31 @@ const MOCK_CATEGORIES: MegaMenuColumn[] = [
             {
                 id: 'computers',
                 title: 'Ordinateurs',
-                link: '/categories/electronique/ordinateurs',
+                link: '/categories/electronique',
                 items: [
-                    { id: '1', title: 'PC Portables', link: '/categories/electronique/ordinateurs/portables' },
-                    { id: '2', title: 'PC de Bureau', link: '/categories/electronique/ordinateurs/bureau' },
-                    { id: '3', title: 'Tablettes', link: '/categories/electronique/ordinateurs/tablettes', badge: 'Nouveau' }
+                    { id: '1', title: 'PC Portables', link: '/categories/electronique' },
+                    { id: '2', title: 'PC de Bureau', link: '/categories/electronique' },
+                    { id: '3', title: 'Tablettes', link: '/categories/electronique', badge: 'Nouveau' }
                 ]
             },
             {
                 id: 'smartphones',
                 title: 'Smartphones',
-                link: '/categories/electronique/smartphones',
+                link: '/categories/electronique',
                 items: [
-                    { id: '4', title: 'iPhone', link: '/categories/electronique/smartphones/iphone' },
-                    { id: '5', title: 'Samsung', link: '/categories/electronique/smartphones/samsung' },
-                    { id: '6', title: 'Xiaomi', link: '/categories/electronique/smartphones/xiaomi', badge: 'Promo' }
+                    { id: '4', title: 'iPhone', link: '/categories/electronique' },
+                    { id: '5', title: 'Samsung', link: '/categories/electronique' },
+                    { id: '6', title: 'Xiaomi', link: '/categories/electronique', badge: 'Promo' }
                 ]
             },
             {
                 id: 'accessories',
                 title: 'Accessoires',
-                link: '/categories/electronique/accessoires',
+                link: '/categories/electronique',
                 items: [
-                    { id: '7', title: 'Écouteurs', link: '/categories/electronique/accessoires/ecouteurs' },
-                    { id: '8', title: 'Chargeurs', link: '/categories/electronique/accessoires/chargeurs' },
-                    { id: '9', title: 'Coques', link: '/categories/electronique/accessoires/coques' }
+                    { id: '7', title: 'Écouteurs', link: '/categories/electronique' },
+                    { id: '8', title: 'Chargeurs', link: '/categories/electronique' },
+                    { id: '9', title: 'Coques', link: '/categories/electronique' }
                 ]
             }
         ]
@@ -63,13 +63,46 @@ const MOCK_CATEGORIES: MegaMenuColumn[] = [
             {
                 id: 'men',
                 title: 'Homme',
-                link: '/categories/mode/homme',
+                link: '/categories/homme',
                 items: [
-                    { id: '10', title: 'T-shirts', link: '/categories/mode/homme/tshirts' },
-                    { id: '11', title: 'Pantalons', link: '/categories/mode/homme/pantalons' }
+                    { id: '10', title: 'T-shirts', link: '/categories/homme' },
+                    { id: '11', title: 'Pantalons', link: '/categories/homme' }
+                ]
+            },
+            {
+                id: 'women',
+                title: 'Femme',
+                link: '/categories/femme',
+                items: [
+                    { id: '12', title: 'Robes', link: '/categories/femme' },
+                    { id: '13', title: 'Accessoires', link: '/categories/accessoires' }
                 ]
             }
         ]
+    },
+    {
+        id: 'home',
+        title: 'Maison & Jardin',
+        icon: '🏠',
+        link: '/categories/maison',
+        description: 'Tout pour embellir votre maison et votre jardin',
+        subcategories: []
+    },
+    {
+        id: 'sports',
+        title: 'Sports & Loisirs',
+        icon: '⚽',
+        link: '/categories/sports',
+        description: 'Équipements sportifs et articles de loisirs',
+        subcategories: []
+    },
+    {
+        id: 'beauty',
+        title: 'Beauté & Santé',
+        icon: '💄',
+        link: '/categories/beaute',
+        description: 'Produits de beauté et de santé pour votre bien-être',
+        subcategories: []
     }
 ]
 

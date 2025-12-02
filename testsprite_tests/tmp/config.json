@@ -2,5 +2,17 @@
   "status": "commited",
   "type": "frontend",
   "scope": "codebase",
-  "localEndpoint": "http://localhost:3000"
+  "localEndpoint": "http://localhost:3000",
+  "executionArgs": {
+    "projectName": "mientior",
+    "projectPath": "/home/yao-elisee/Documents/mientior",
+    "testIds": [
+      "TC008"
+    ],
+    "additionalInstruction": "Focus on testing the search functionality including: autocomplete suggestions, search results display, filtering, and no-results handling. Test with both valid search terms and edge cases like empty queries and gibberish input.",
+    "envs": {
+      "API_KEY": "sk-user-oDe1B4yFcVhJRc_q9FfcQUwKaY52fVn71tJQFhBm82W0Y2rrZxsVHci6JKHAR5Ug1vu9XCp2uvOuWpLDdlPcJAydhJudpn1iuhCSzTlgXXtJ4q-v-BxWxu0TVT8AHuRNVYs"
+    }
+  },
+  "proxy": "http://a6d04a03-eade-48a0-af2d-d128df8f09b3:AvoTaKA4AmbfKxiZ3mluFVpKSgWEJRA0@tun.testsprite.com:8080"
 }

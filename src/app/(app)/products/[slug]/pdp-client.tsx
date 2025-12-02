@@ -65,36 +65,43 @@ export function PDPClient({
 
   return (
     <>
-      <div className="grid lg:grid-cols-[1fr_400px] gap-8 mb-12">
-        {/* Left Column: Gallery and Product Info */}
-        <div className="space-y-8">
-          {/* Gallery */}
+      {/* Main Product Section - Gallery + Info side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(400px,500px)] gap-6 lg:gap-8 mb-8">
+        {/* Left Column: Gallery */}
+        <div className="w-full">
           <ProductGallery
             images={images}
             productName={product.name}
             has360View={has360View}
             hasVideo={hasVideo}
           />
-
-          {/* Product Info (visible on all screens) */}
-          <ProductInfo
-            product={product}
-            selectedVariant={selectedVariant}
-            onVariantChange={handleVariantChange}
-            quantity={quantity}
-            onQuantityChange={handleQuantityChange}
-          />
         </div>
 
-        {/* Right Column: Desktop Sticky Sidebar */}
-        <DesktopStickySidebar
-          product={product}
-          selectedVariant={selectedVariant}
-          onVariantChange={handleVariantChange}
-          quantity={quantity}
-          onQuantityChange={handleQuantityChange}
-          shippingInfo={shippingInfo}
-        />
+        {/* Right Column: Product Info + Sticky Sidebar combined */}
+        <div className="w-full">
+          {/* Desktop: Show ProductInfo inline */}
+          <div className="lg:hidden">
+            <ProductInfo
+              product={product}
+              selectedVariant={selectedVariant}
+              onVariantChange={handleVariantChange}
+              quantity={quantity}
+              onQuantityChange={handleQuantityChange}
+            />
+          </div>
+          
+          {/* Desktop Sticky Sidebar - contains all product info */}
+          <div className="hidden lg:block">
+            <DesktopStickySidebar
+              product={product}
+              selectedVariant={selectedVariant}
+              onVariantChange={handleVariantChange}
+              quantity={quantity}
+              onQuantityChange={handleQuantityChange}
+              shippingInfo={shippingInfo}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Frequently Bought Together */}

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withPermission } from '@/middleware/admin-auth';
-import { Permission, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { Permission } from '@/lib/permissions';
 import { logAction } from '@/lib/audit-logger';
 import { getCachedData, invalidateCache } from '@/lib/redis';
 

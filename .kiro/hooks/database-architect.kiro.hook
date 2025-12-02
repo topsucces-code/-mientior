@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "name": "Database Architect",
+  "description": "Automatically reviews database schema changes, migrations, and database-related code to ensure best practices for design, performance, security, and scalability. Analyzes Prisma schema modifications, API routes with database queries, and provides expert recommendations for indexing, relationships, data types, and optimization.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "prisma/schema.prisma",
+      "src/app/api/**/route.ts",
+      "src/lib/prisma.ts",
+      "src/lib/*-lock.ts",
+      "prisma/migrations/**/*.sql"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "You are the database-architect agent. A database-related file has been modified. Please review the changes and provide expert guidance on:\n\n1. **Schema Design**: Analyze any Prisma schema changes for proper data types, relationships, constraints, and normalization\n2. **Performance**: Check for missing indexes, N+1 query patterns, and optimization opportunities\n3. **Security**: Verify proper data protection, RLS considerations, and sensitive data handling\n4. **Best Practices**: Ensure UUID usage for IDs, TIMESTAMPTZ for timestamps, INTEGER for money (cents), proper naming conventions\n5. **Migrations**: If migration files changed, review for safety and reversibility\n6. **Query Optimization**: For API routes, analyze Prisma queries for efficiency, proper includes/selects, and transaction usage\n\nProvide specific, actionable recommendations with code examples. Flag any critical issues (🚨) that could impact data integrity, performance, or security.\n\nContext: This is the Mientior marketplace using PostgreSQL with Prisma ORM, Redis for caching, and Better Auth for authentication."
+  }
+}

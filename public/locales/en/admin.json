@@ -605,8 +605,277 @@
     "allColumns": "All Columns",
     "selectedColumns": "Selected Columns"
   },
+  "customers": {
+    "360": {
+      "title": "Customer 360 View",
+      "notFound": "Customer not found",
+      "profile": {
+        "title": "Customer Profile",
+        "memberSince": "Member since",
+        "primaryAddress": "Primary Address",
+        "moreAddresses": "more addresses"
+      },
+      "metrics": {
+        "title": "Key Metrics",
+        "lifetimeValue": "Lifetime Value",
+        "totalOrders": "Total Orders",
+        "averageOrderValue": "Average Order Value",
+        "totalSpent": "Total Spent",
+        "lastPurchase": "Last Purchase",
+        "purchaseFrequency": "Purchase Frequency",
+        "customerTenure": "Customer Tenure",
+        "today": "Today",
+        "daysAgo": "days ago",
+        "daysPerOrder": "days per order",
+        "ordersPerMonth": "orders per month",
+        "years": "years",
+        "months": "months"
+      },
+      "health": {
+        "title": "Health & Risk"
+      },
+      "orders": {
+        "title": "Order History"
+      },
+      "loyalty": {
+        "title": "Loyalty Program"
+      },
+      "marketing": {
+        "title": "Marketing Engagement"
+      },
+      "support": {
+        "title": "Support Tickets"
+      },
+      "timeline": {
+        "title": "Activity Timeline",
+        "eventType": "Event Type",
+        "selectEventTypes": "Select event types",
+        "dateRange": "Date Range",
+        "showMore": "Show more",
+        "showLess": "Show less",
+        "noEvents": "No events found",
+        "loading": "Loading more events...",
+        "loadMore": "Load more events",
+        "points": "points",
+        "types": {
+          "order": "Order",
+          "support": "Support",
+          "loyalty": "Loyalty",
+          "marketing": "Marketing",
+          "account": "Account"
+        },
+        "status": {
+          "pending": "Pending",
+          "completed": "Completed",
+          "cancelled": "Cancelled"
+        }
+      },
+      "notes": {
+        "title": "Notes & Tags"
+      },
+      "analytics": {
+        "title": "Behavioral Analytics"
+      }
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "email": {
+        "button": "Send Email",
+        "tooltip": "Send email to customer",
+        "modalTitle": "Send Email to {{name}}",
+        "subject": "Subject",
+        "subjectRequired": "Subject is required",
+        "subjectMaxLength": "Subject must be 200 characters or less",
+        "subjectPlaceholder": "Enter email subject",
+        "body": "Message",
+        "bodyRequired": "Message is required",
+        "bodyMaxLength": "Message must be 5000 characters or less",
+        "bodyPlaceholder": "Enter your message",
+        "send": "Send Email",
+        "success": "Email sent successfully",
+        "successDesc": "Email has been sent to {{email}}",
+        "error": "Failed to send email"
+      },
+      "ticket": {
+        "button": "Create Ticket",
+        "tooltip": "Create support ticket",
+        "modalTitle": "Create Support Ticket for {{name}}",
+        "subject": "Subject",
+        "subjectRequired": "Subject is required",
+        "subjectMaxLength": "Subject must be 200 characters or less",
+        "subjectPlaceholder": "Enter ticket subject",
+        "priority": "Priority",
+        "priorityLow": "Low",
+        "priorityMedium": "Medium",
+        "priorityHigh": "High",
+        "priorityUrgent": "Urgent",
+        "description": "Description",
+        "descriptionRequired": "Description is required",
+        "descriptionMaxLength": "Description must be 2000 characters or less",
+        "descriptionPlaceholder": "Describe the issue or request",
+        "create": "Create Ticket",
+        "success": "Support ticket created",
+        "successDesc": "Ticket '{{subject}}' has been created",
+        "error": "Failed to create ticket"
+      },
+      "points": {
+        "button": "Adjust Points",
+        "tooltip": "Adjust loyalty points",
+        "modalTitle": "Adjust Loyalty Points for {{name}}",
+        "type": "Action",
+        "typeAdd": "Add Points",
+        "typeSubtract": "Subtract Points",
+        "amount": "Points Amount",
+        "amountRequired": "Points amount is required",
+        "amountMin": "Amount must be at least 1",
+        "amountPlaceholder": "Enter points amount",
+        "reason": "Reason",
+        "reasonRequired": "Reason is required",
+        "reasonMaxLength": "Reason must be 500 characters or less",
+        "reasonPlaceholder": "Explain why points are being adjusted",
+        "adjust": "Adjust Points",
+        "success": "Points adjusted successfully",
+        "successDesc": "{{type}} {{amount}} points for customer",
+        "error": "Failed to adjust points"
+      },
+      "note": {
+        "button": "Add Note",
+        "tooltip": "Add internal note",
+        "modalTitle": "Add Note for {{name}}",
+        "content": "Note Content",
+        "contentRequired": "Note content is required",
+        "contentMaxLength": "Note must be 5000 characters or less",
+        "contentPlaceholder": "Enter your note about this customer",
+        "add": "Add Note",
+        "success": "Note added successfully",
+        "successDesc": "Internal note has been added",
+        "error": "Failed to add note"
+      }
+    },
+    "export": {
+      "button": "Export Data",
+      "title": "Export Customer Data",
+      "description": "Download {{customer}}'s information in your preferred format",
+      "privacy": "All data is exported securely and GDPR compliant",
+      "format": "Export Format",
+      "formatRequired": "Please select an export format",
+      "formatHelp": "Choose format based on your intended use",
+      "formats": {
+        "pdf": {
+          "label": "PDF Report",
+          "description": "Complete formatted report ready to print or share",
+          "size": "~2-5 MB"
+        },
+        "csv": {
+          "label": "CSV Data",
+          "description": "For analysis in Excel or Google Sheets",
+          "size": "~500 KB"
+        },
+        "xlsx": {
+          "label": "Excel Workbook",
+          "description": "Structured data organized in multiple sheets",
+          "size": "~1-3 MB"
+        },
+        "json": {
+          "label": "JSON Data",
+          "description": "Technical format for system integrations",
+          "size": "~200 KB"
+        }
+      },
+      "dataOptions": "Export Options",
+      "dataOptionsHelp": "Select information to include in the export",
+      "includeOrders": "Include Order History",
+      "includeAnalytics": "Include Behavioral Analytics Data",
+      "includeNotes": "Include Internal Notes & Comments",
+      "includeTags": "Include Tags & Customer Segments",
+      "dateRange": "Data Period",
+      "dateRanges": {
+        "all": "All Available Data",
+        "1y": "Last 12 Months",
+        "90d": "Last 90 Days",
+        "30d": "Last 30 Days"
+      },
+      "orderLimit": "Order Limit",
+      "orderLimitHelp": "Large exports may take longer to process",
+      "orderLimits": {
+        "50": "50 Recent Orders",
+        "100": "100 Recent Orders",
+        "250": "250 Recent Orders",
+        "500": "500 Recent Orders",
+        "1000": "1000 Recent Orders"
+      },
+      "startExport": "Start Export",
+      "preparing": "Collecting customer data...",
+      "generating": "Creating export file...",
+      "downloading": "Preparing download...",
+      "complete": "Export completed successfully",
+      "failed": "Export failed",
+      "downloadStarted": "Download will start automatically",
+      "pleaseWait": "Please wait while we generate your file",
+      "dataPrivacy": "Your data is processed securely",
+      "success": "{{format}} export created successfully for {{customer}}",
+      "error": "Unable to export data. Check your connection and try again.",
+      "errorWithDetails": "Export failed: {{error}}. Contact support if the issue persists.",
+      "retry": "Retry"
+    }
+  },
   "common": {
     "all": "All",
     "actions": "Actions"
+  },
+  "searchAnalytics": {
+    "title": "Search Analytics Dashboard",
+    "subtitle": "Monitor search performance and user behavior",
+    "period": {
+      "7d": "Last 7 days",
+      "30d": "Last 30 days",
+      "90d": "Last 90 days",
+      "custom": "Custom range"
+    },
+    "compare": {
+      "none": "No comparison",
+      "previousPeriod": "vs Previous period",
+      "previousYear": "vs Last year"
+    },
+    "kpis": {
+      "totalSearches": "Total Searches",
+      "overallCTR": "Overall CTR",
+      "uniqueUsers": "Unique Users",
+      "avgResults": "Avg Results"
+    },
+    "charts": {
+      "searchTrends": "Search Volume Trends",
+      "localeDistribution": "Searches by Language",
+      "topQueries": "Top Search Queries",
+      "ctrByQuery": "Click-Through Rate by Query",
+      "zeroResults": "Zero-Result Queries",
+      "productClicks": "Most Clicked Products"
+    },
+    "table": {
+      "query": "Query",
+      "count": "Count",
+      "avgResults": "Avg Results",
+      "ctr": "CTR",
+      "clicks": "Clicks",
+      "lastSearched": "Last Searched",
+      "productId": "Product ID",
+      "avgPosition": "Avg Position",
+      "topQueries": "Top Queries"
+    },
+    "actions": {
+      "exportCSV": "Export CSV",
+      "refresh": "Refresh"
+    },
+    "messages": {
+      "exportSuccess": "CSV export started. Download will begin shortly.",
+      "exportError": "Failed to export data. Please try again.",
+      "loadError": "Failed to load analytics data.",
+      "noData": "No data available for the selected period.",
+      "retry": "Retry"
+    },
+    "empty": {
+      "zeroResults": "No zero-result queries found. Great job!",
+      "productClicks": "No product click data available."
+    }
   }
 }

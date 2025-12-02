@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, Loader2 } from 'lucide-react'
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Email invalide'),
@@ -36,15 +36,41 @@ export function ForgotPasswordForm() {
     setIsSubmitting(true)
 
     try {
-      // TODO: Implement password reset request
-      // For now, simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Call the forgot password API endpoint
+      // Requirements 4.1, 4.2: Request password reset
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: data.email }),
+      })
 
-      console.log('Password reset requested for:', data.email)
+      const result = await response.json()
+
+      // Handle rate limiting error (429)
+      if (response.status === 429) {
+        const retryAfter = result.retryAfter || 3600
+        const minutes = Math.ceil(retryAfter / 60)
+        setError(
+          `Trop de tentatives. Veuillez réessayer dans ${minutes} minute${minutes > 1 ? 's' : ''}.`
+        )
+        return
+      }
+
+      // Handle other errors
+      if (!response.ok && response.status !== 429) {
+        setError(result.error || 'Une erreur est survenue. Veuillez réessayer.')
+        return
+      }
+
+      // Always show success message (prevents email enumeration)
+      // Requirement 4.3: Always show success message
       setSuccess(true)
     } catch (err) {
-      setError('Une erreur est survenue. Veuillez réessayer.')
+      // Handle network errors gracefully
       console.error('Forgot password error:', err)
+      setError('Impossible de se connecter au serveur. Veuillez vérifier votre connexion.')
     } finally {
       setIsSubmitting(false)
     }
@@ -105,7 +131,14 @@ export function ForgotPasswordForm() {
         </div>
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? 'Envoi en cours...' : 'Envoyer le lien'}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Envoi en cours...
+            </>
+          ) : (
+            'Envoyer le lien'
+          )}
         </Button>
       </form>
 
