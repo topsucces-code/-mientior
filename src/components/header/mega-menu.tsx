@@ -103,7 +103,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                                                     }
                                                 }}
                                                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-md transition-colors ${hoveredCategory === category.id || (!hoveredCategory && category === categories[0])
-                                                    ? 'bg-white text-blue-600 shadow-sm'
+                                                    ? 'bg-white text-emerald-600 shadow-sm'
                                                     : 'hover:bg-white/50'
                                                     }`}
                                                 aria-current={hoveredCategory === category.id || (!hoveredCategory && category === categories[0]) ? 'true' : undefined}
@@ -139,7 +139,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                                             <div key={subcat.id}>
                                                 <Link
                                                     href={subcat.link}
-                                                    className="font-semibold text-sm text-gray-900 hover:text-blue-600 transition-colors block mb-3"
+                                                    className="font-semibold text-sm text-gray-900 hover:text-emerald-600 transition-colors block mb-3"
                                                 >
                                                     {subcat.title}
                                                 </Link>
@@ -149,7 +149,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                                                             <li key={item.id}>
                                                                 <Link
                                                                     href={item.link}
-                                                                    className="text-sm text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-2"
+                                                                    className="text-sm text-gray-600 hover:text-emerald-600 transition-colors flex items-center gap-2"
                                                                 >
                                                                     {item.title}
                                                                     {item.badge && (

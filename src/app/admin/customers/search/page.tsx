@@ -30,7 +30,6 @@ import {
   ClearOutlined,
   UserOutlined,
   MailOutlined,
-  PhoneOutlined,
   CheckCircleOutlined,
   TrophyOutlined,
   DollarOutlined,
@@ -46,6 +45,7 @@ import dayjs, { Dayjs } from "dayjs";
 import { useDebounce } from "@/hooks/use-debounce";
 import CustomerComparisonView from "@/components/admin/customer-360/customer-comparison-view";
 import type { CustomerComparison } from "@/types/customer-360";
+import { CustomerExportButton } from "@/components/admin/export-button";
 
 const { RangePicker } = DatePicker;
 const { Text, Title } = Typography;
@@ -168,7 +168,8 @@ export default function CustomerSearchPage() {
   useEffect(() => {
     if (debouncedQuery !== filters.q) return; // Wait for debounce
     performSearch();
-  }, [debouncedQuery, filters.segment, filters.tier, filters.tag, 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedQuery, filters.q, filters.segment, filters.tier, filters.tag, 
       filters.registrationFrom, filters.registrationTo,
       filters.lastPurchaseFrom, filters.lastPurchaseTo,
       filters.clvMin, filters.clvMax, filters.orderCountMin, filters.orderCountMax,
@@ -228,12 +229,28 @@ export default function CustomerSearchPage() {
       const response = await fetch(`/api/admin/customers/search?${params.toString()}`);
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Search failed");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("API Error Response:", response.status, errorData);
+        
+        // Handle authentication errors
+        if (response.status === 401) {
+          throw new Error("Session expired. Please refresh the page.");
+        }
+        if (response.status === 403) {
+          throw new Error("You don't have permission to search customers.");
+        }
+        
+        // API returns { success: false, error: { code, message } }
+        const errorMessage = errorData.error?.message 
+          || (typeof errorData.error === 'string' ? errorData.error : null)
+          || errorData.message 
+          || `Search failed (${response.status})`;
+        throw new Error(errorMessage);
       }
       
       const data = await response.json();
-      setSearchResults(data);
+      // Handle API success response format { success: true, data: {...} }
+      setSearchResults(data.data || data);
     } catch (error) {
       console.error("Search error:", error);
       setError(error instanceof Error ? error.message : "Search failed");
@@ -242,7 +259,7 @@ export default function CustomerSearchPage() {
     }
   };
   
-  const handleFilterChange = useCallback((key: keyof SearchFilters, value: any) => {
+  const handleFilterChange = useCallback((key: keyof SearchFilters, value: string | number | null | undefined) => {
     setFilters(prev => ({ ...prev, [key]: value }));
     setCurrentPage(1); // Reset to first page when filters change
   }, []);
@@ -301,7 +318,7 @@ export default function CustomerSearchPage() {
   
   const columns = [
     ...(comparisonMode ? [{
-      title: "Select",
+      title: t("admin:customers.search.select"),
       key: "select",
       width: 60,
       render: (_: unknown, record: CustomerSearchResult) => (
@@ -380,38 +397,38 @@ export default function CustomerSearchPage() {
       sorter: true,
     },
     {
-      title: "Segments",
+      title: t("admin:customers.fields.segments"),
       dataIndex: "segments",
       key: "segments",
       render: (segments: Array<{ id: string; name: string }>) => (
         <Space wrap>
           {segments.slice(0, 2).map((segment) => (
-            <Tag key={segment.id} color="blue" size="small">
+            <Tag key={segment.id} color="blue" style={{ fontSize: 12 }}>
               {segment.name}
             </Tag>
           ))}
           {segments.length > 2 && (
             <Tooltip title={segments.slice(2).map(s => s.name).join(", ")}>
-              <Tag size="small">+{segments.length - 2}</Tag>
+              <Tag style={{ fontSize: 12 }}>+{segments.length - 2}</Tag>
             </Tooltip>
           )}
         </Space>
       ),
     },
     {
-      title: "Tags",
+      title: t("admin:customers.fields.tags"),
       dataIndex: "tags",
       key: "tags",
       render: (tags: Array<{ id: string; name: string; color: string }>) => (
         <Space wrap>
           {tags.slice(0, 2).map((tag) => (
-            <Tag key={tag.id} color={tag.color} size="small">
+            <Tag key={tag.id} color={tag.color} style={{ fontSize: 12 }}>
               {tag.name}
             </Tag>
           ))}
           {tags.length > 2 && (
             <Tooltip title={tags.slice(2).map(t => t.name).join(", ")}>
-              <Tag size="small">+{tags.length - 2}</Tag>
+              <Tag style={{ fontSize: 12 }}>+{tags.length - 2}</Tag>
             </Tooltip>
           )}
         </Space>
@@ -422,18 +439,18 @@ export default function CustomerSearchPage() {
       dataIndex: "lastPurchaseDate",
       key: "lastPurchaseDate",
       render: (date: string | null) =>
-        date ? dayjs(date).format("MMM D, YYYY") : t("common.never"),
+        date ? dayjs(date).format("MMM D, YYYY") : t("never"),
       sorter: true,
     },
     {
-      title: t("common.actions"),
+      title: t("actions"),
       key: "actions",
       fixed: "right" as const,
       render: (_: unknown, record: CustomerSearchResult) => (
         <Space>
           <Link href={`/admin/customers/360/${record.id}`}>
             <Button type="link" size="small" icon={<DashboardOutlined />}>
-              360 View
+              {t("admin:customers.search.view360")}
             </Button>
           </Link>
         </Space>
@@ -516,17 +533,21 @@ export default function CustomerSearchPage() {
       <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
         <Col>
           <Title level={2}>
-            <SearchOutlined /> Customer Search
+            <SearchOutlined /> {t("admin:customers.search.title")}
           </Title>
         </Col>
         <Col>
           <Space>
+            <CustomerExportButton 
+              customers={searchResults?.customers || []} 
+              loading={loading} 
+            />
             <Button
               type={comparisonMode ? "primary" : "default"}
               icon={<SwapOutlined />}
               onClick={toggleComparisonMode}
             >
-              {comparisonMode ? "Exit Comparison Mode" : "Compare Customers"}
+              {comparisonMode ? t("admin:customers.search.exitComparisonMode") : t("admin:customers.search.compareCustomers")}
             </Button>
           </Space>
         </Col>
@@ -535,11 +556,11 @@ export default function CustomerSearchPage() {
       {/* Comparison Mode Alert */}
       {comparisonMode && (
         <Alert
-          message="Comparison Mode Active"
+          message={t("admin:customers.search.comparisonModeActive")}
           description={
             <Space direction="vertical" style={{ width: "100%" }}>
               <Text>
-                Select 2-3 customers to compare. Selected: {selectedCustomers.length}/3
+                {t("admin:customers.search.selectCustomersToCompare")} {selectedCustomers.length}/3
               </Text>
               <Space>
                 <Button
@@ -548,14 +569,14 @@ export default function CustomerSearchPage() {
                   disabled={selectedCustomers.length < 2}
                   loading={loadingComparison}
                 >
-                  Compare Selected ({selectedCustomers.length})
+                  {t("admin:customers.search.compareSelected")} ({selectedCustomers.length})
                 </Button>
                 <Button
                   icon={<CloseOutlined />}
                   onClick={() => setSelectedCustomers([])}
                   disabled={selectedCustomers.length === 0}
                 >
-                  Clear Selection
+                  {t("admin:customers.search.clearSelection")}
                 </Button>
               </Space>
             </Space>
@@ -572,7 +593,7 @@ export default function CustomerSearchPage() {
           <Col xs={24} sm={12} md={6}>
             <Card>
               <Statistic
-                title="Total Results"
+                title={t("admin:customers.search.totalResults")}
                 value={searchResults.pagination.totalCount}
                 prefix={<UserOutlined />}
               />
@@ -581,7 +602,7 @@ export default function CustomerSearchPage() {
           <Col xs={24} sm={12} md={6}>
             <Card>
               <Statistic
-                title="Search Time"
+                title={t("admin:customers.search.searchTime")}
                 value={searchResults.meta.performance.executionTime}
                 suffix="ms"
                 prefix={<ReloadOutlined />}
@@ -591,8 +612,8 @@ export default function CustomerSearchPage() {
           <Col xs={24} sm={12} md={6}>
             <Card>
               <Statistic
-                title="Cache Hit"
-                value={searchResults.meta.performance.cacheHit ? "Yes" : "No"}
+                title={t("admin:customers.search.cacheHit")}
+                value={searchResults.meta.performance.cacheHit ? t("admin:customers.search.yes") : t("admin:customers.search.no")}
                 valueStyle={{ 
                   color: searchResults.meta.performance.cacheHit ? "#3f8600" : "#cf1322" 
                 }}
@@ -602,7 +623,7 @@ export default function CustomerSearchPage() {
           <Col xs={24} sm={12} md={6}>
             <Card>
               <Statistic
-                title="Query Complexity"
+                title={t("admin:customers.search.queryComplexity")}
                 value={searchResults.meta.performance.queryComplexity}
                 valueStyle={{ 
                   color: searchResults.meta.performance.queryComplexity === "simple" ? "#3f8600" : 
@@ -622,7 +643,7 @@ export default function CustomerSearchPage() {
             <Col xs={24} md={12}>
               <Input
                 size="large"
-                placeholder="Search by name, email, phone, or order number..."
+                placeholder={t("admin:customers.search.placeholder")}
                 prefix={<SearchOutlined />}
                 value={filters.q}
                 onChange={(e) => handleFilterChange("q", e.target.value)}
@@ -636,14 +657,14 @@ export default function CustomerSearchPage() {
                   onClick={() => setFiltersVisible(!filtersVisible)}
                   type={activeFiltersCount > 0 ? "primary" : "default"}
                 >
-                  Filters {activeFiltersCount > 0 && `(${activeFiltersCount})`}
+                  {t("admin:customers.search.filters")} {activeFiltersCount > 0 && `(${activeFiltersCount})`}
                 </Button>
                 <Button
                   icon={<ClearOutlined />}
                   onClick={clearFilters}
                   disabled={activeFiltersCount === 0}
                 >
-                  Clear All
+                  {t("admin:customers.search.clearAll")}
                 </Button>
               </Space>
             </Col>
@@ -655,9 +676,9 @@ export default function CustomerSearchPage() {
               <Divider />
               <Row gutter={16}>
                 <Col xs={24} md={8}>
-                  <Text strong>Loyalty Tier</Text>
+                  <Text strong>{t("admin:customers.search.loyaltyTier")}</Text>
                   <Select
-                    placeholder="Select loyalty tier"
+                    placeholder={t("admin:customers.search.selectLoyaltyTier")}
                     value={filters.tier}
                     onChange={(value) => handleFilterChange("tier", value)}
                     style={{ width: "100%", marginTop: 4 }}
@@ -670,9 +691,9 @@ export default function CustomerSearchPage() {
                   </Select>
                 </Col>
                 <Col xs={24} md={8}>
-                  <Text strong>Segment</Text>
+                  <Text strong>{t("admin:customers.search.segment")}</Text>
                   <Select
-                    placeholder="Select segment"
+                    placeholder={t("admin:customers.search.selectSegment")}
                     value={filters.segment}
                     onChange={(value) => handleFilterChange("segment", value)}
                     style={{ width: "100%", marginTop: 4 }}
@@ -688,9 +709,9 @@ export default function CustomerSearchPage() {
                   </Select>
                 </Col>
                 <Col xs={24} md={8}>
-                  <Text strong>Tag</Text>
+                  <Text strong>{t("admin:customers.search.tag")}</Text>
                   <Select
-                    placeholder="Select tag"
+                    placeholder={t("admin:customers.search.selectTag")}
                     value={filters.tag}
                     onChange={(value) => handleFilterChange("tag", value)}
                     style={{ width: "100%", marginTop: 4 }}
@@ -700,7 +721,7 @@ export default function CustomerSearchPage() {
                   >
                     {tags.map((tag) => (
                       <Select.Option key={tag.id} value={tag.id}>
-                        <Tag color={tag.color} size="small">{tag.name}</Tag>
+                        <Tag color={tag.color} style={{ fontSize: 12 }}>{tag.name}</Tag>
                         ({tag.customerCount})
                       </Select.Option>
                     ))}
@@ -710,7 +731,7 @@ export default function CustomerSearchPage() {
               
               <Row gutter={16}>
                 <Col xs={24} md={12}>
-                  <Text strong>Registration Date Range</Text>
+                  <Text strong>{t("admin:customers.search.registrationDateRange")}</Text>
                   <RangePicker
                     style={{ width: "100%", marginTop: 4 }}
                     value={[
@@ -721,7 +742,7 @@ export default function CustomerSearchPage() {
                   />
                 </Col>
                 <Col xs={24} md={12}>
-                  <Text strong>Last Purchase Date Range</Text>
+                  <Text strong>{t("admin:customers.search.lastPurchaseDateRange")}</Text>
                   <RangePicker
                     style={{ width: "100%", marginTop: 4 }}
                     value={[
@@ -735,38 +756,38 @@ export default function CustomerSearchPage() {
               
               <Row gutter={16}>
                 <Col xs={24} md={12}>
-                  <Text strong>Customer Lifetime Value (€)</Text>
+                  <Text strong>{t("admin:customers.search.customerLifetimeValue")}</Text>
                   <Row gutter={8} style={{ marginTop: 4 }}>
                     <Col span={12}>
                       <InputNumber
-                        placeholder="Min CLV"
+                        placeholder={t("admin:customers.search.minCLV")}
                         value={filters.clvMin}
                         onChange={(value) => handleFilterChange("clvMin", value)}
                         style={{ width: "100%" }}
                         min={0}
                         formatter={(value) => `€ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                        parser={(value) => value!.replace(/€\s?|(,*)/g, '')}
+                        parser={(value) => Number(value?.replace(/€\s?|(,*)/g, '') || 0)}
                       />
                     </Col>
                     <Col span={12}>
                       <InputNumber
-                        placeholder="Max CLV"
+                        placeholder={t("admin:customers.search.maxCLV")}
                         value={filters.clvMax}
                         onChange={(value) => handleFilterChange("clvMax", value)}
                         style={{ width: "100%" }}
                         min={0}
                         formatter={(value) => `€ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                        parser={(value) => value!.replace(/€\s?|(,*)/g, '')}
+                        parser={(value) => Number(value?.replace(/€\s?|(,*)/g, '') || 0)}
                       />
                     </Col>
                   </Row>
                 </Col>
                 <Col xs={24} md={12}>
-                  <Text strong>Order Count</Text>
+                  <Text strong>{t("admin:customers.search.orderCount")}</Text>
                   <Row gutter={8} style={{ marginTop: 4 }}>
                     <Col span={12}>
                       <InputNumber
-                        placeholder="Min Orders"
+                        placeholder={t("admin:customers.search.minOrders")}
                         value={filters.orderCountMin}
                         onChange={(value) => handleFilterChange("orderCountMin", value)}
                         style={{ width: "100%" }}
@@ -775,7 +796,7 @@ export default function CustomerSearchPage() {
                     </Col>
                     <Col span={12}>
                       <InputNumber
-                        placeholder="Max Orders"
+                        placeholder={t("admin:customers.search.maxOrders")}
                         value={filters.orderCountMax}
                         onChange={(value) => handleFilterChange("orderCountMax", value)}
                         style={{ width: "100%" }}
@@ -793,7 +814,7 @@ export default function CustomerSearchPage() {
       {/* Error Display */}
       {error && (
         <Alert
-          message="Search Error"
+          message={t("admin:customers.search.searchError")}
           description={error}
           type="error"
           showIcon
@@ -817,7 +838,7 @@ export default function CustomerSearchPage() {
               showSizeChanger: true,
               showQuickJumper: true,
               showTotal: (total, range) =>
-                `${range[0]}-${range[1]} of ${total} customers`,
+                t("admin:customers.search.showingResults", { from: range[0], to: range[1], total }),
               onChange: (page, size) => {
                 setCurrentPage(page);
                 setPageSize(size || 20);

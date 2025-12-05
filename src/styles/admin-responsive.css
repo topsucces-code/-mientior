@@ -1,0 +1,140 @@
+/* Admin Panel Responsive Styles */
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  /* Hide sidebar on mobile - handled by Drawer */
+  .ant-layout-sider {
+    display: none !important;
+  }
+
+  /* Full width content on mobile */
+  .admin-main-layout {
+    margin-left: 0 !important;
+  }
+
+  /* Adjust header padding */
+  .ant-layout-header {
+    padding: 0 12px !important;
+  }
+
+  /* Adjust search button width */
+  .ant-layout-header .ant-btn {
+    max-width: 200px;
+  }
+
+  /* Stack KPI cards */
+  .ant-row {
+    margin: 0 !important;
+  }
+
+  /* Adjust table for mobile */
+  .ant-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .ant-table {
+    min-width: 600px;
+  }
+
+  /* Adjust card padding */
+  .ant-card-body {
+    padding: 12px !important;
+  }
+
+  /* Adjust form layout */
+  .ant-form-item {
+    margin-bottom: 12px;
+  }
+
+  /* Modal adjustments */
+  .ant-modal {
+    max-width: calc(100vw - 32px) !important;
+    margin: 16px auto !important;
+  }
+
+  .ant-modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+  }
+
+  /* Drawer adjustments */
+  .ant-drawer-content-wrapper {
+    max-width: 85vw !important;
+  }
+
+  /* Typography adjustments */
+  h1 {
+    font-size: 20px !important;
+  }
+
+  h2 {
+    font-size: 18px !important;
+  }
+
+  /* Button group stacking */
+  .ant-space-horizontal {
+    flex-wrap: wrap;
+  }
+
+  /* Tabs adjustments */
+  .ant-tabs-nav {
+    margin-bottom: 12px !important;
+  }
+
+  .ant-tabs-tab {
+    padding: 8px 12px !important;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .ant-layout-sider {
+    width: 200px !important;
+  }
+
+  .admin-main-layout {
+    margin-left: 200px !important;
+  }
+
+  .ant-layout-sider-collapsed + .admin-main-layout {
+    margin-left: 80px !important;
+  }
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .ant-layout-header,
+.dark .ant-layout-header {
+  background: #141414;
+  border-bottom-color: #303030;
+}
+
+[data-theme="dark"] .ant-layout-content,
+.dark .ant-layout-content {
+  background: #141414;
+}
+
+/* Smooth transitions */
+.ant-layout,
+.ant-layout-sider,
+.ant-layout-header,
+.ant-layout-content {
+  transition: all 0.3s ease;
+}
+
+/* Print styles */
+@media print {
+  .ant-layout-sider,
+  .ant-layout-header,
+  .ant-drawer {
+    display: none !important;
+  }
+
+  .admin-main-layout {
+    margin-left: 0 !important;
+  }
+
+  .ant-layout-content {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}

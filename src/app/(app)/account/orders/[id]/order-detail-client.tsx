@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import OrderTracking from '@/components/orders/order-tracking'
 
 interface OrderItem {
   id: string
@@ -222,6 +223,13 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
               </p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Detailed Order Tracking */}
+      {order.status !== 'CANCELLED' && (
+        <div className="mb-6">
+          <OrderTracking orderId={order.id} orderNumber={order.orderNumber} />
         </div>
       )}
 

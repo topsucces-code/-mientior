@@ -45,7 +45,7 @@ export function GeolocationSelector() {
         setDetecting(true)
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
-                (position) => {
+                (_position) => {
                     // In a real app, you would reverse geocode these coordinates
                     // For now, we'll use the IP-based detection
                     if (data?.city) {
@@ -67,7 +67,7 @@ export function GeolocationSelector() {
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-1.5 text-sm hover:text-blue-600 transition-colors group"
+                className="flex items-center gap-1.5 text-sm hover:text-emerald-600 transition-colors group"
                 aria-label={`Localisation actuelle: ${displayLocation}`}
                 aria-expanded={isOpen}
                 aria-haspopup="true"
@@ -92,7 +92,7 @@ export function GeolocationSelector() {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Rechercher une ville..."
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm"
                             />
                         </div>
                     </div>
@@ -102,7 +102,7 @@ export function GeolocationSelector() {
                         <button
                             onClick={handleAutoDetect}
                             disabled={detecting}
-                            className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-blue-50 transition-colors text-sm font-medium text-blue-600 disabled:opacity-50"
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-emerald-50 transition-colors text-sm font-medium text-emerald-600 disabled:opacity-50"
                         >
                             {detecting ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -123,7 +123,7 @@ export function GeolocationSelector() {
                                         onClick={() => handleCitySelect(city.name)}
                                         className={`w-full flex items-start gap-3 px-3 py-2 rounded-md transition-colors text-left ${
                                             location === city.name
-                                                ? 'bg-blue-50 text-blue-600'
+                                                ? 'bg-emerald-50 text-emerald-600'
                                                 : 'hover:bg-gray-50'
                                         }`}
                                     >
@@ -133,7 +133,7 @@ export function GeolocationSelector() {
                                             <div className="text-xs text-gray-500">{city.region}</div>
                                         </div>
                                         {location === city.name && (
-                                            <span className="text-blue-600 flex-shrink-0">✓</span>
+                                            <span className="text-emerald-600 flex-shrink-0">✓</span>
                                         )}
                                     </button>
                                 ))}

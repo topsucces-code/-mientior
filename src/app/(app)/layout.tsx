@@ -3,6 +3,7 @@ import Header from '@/components/layout/header'
 import Footer from '@/components/layout/footer'
 import { MobileNav } from '@/components/layout/mobile-nav'
 import { QuickViewProvider } from '@/contexts/quick-view-context'
+import InstallPrompt from '@/components/pwa/install-prompt'
 
 // Force all pages in this layout to be dynamic
 export const dynamic = 'force-dynamic'
@@ -15,6 +16,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <main id="main-content" className="flex-1 pb-20 md:pb-0">{children}</main>
         <Footer />
         <MobileNav />
+        <InstallPrompt />
       </div>
     </QuickViewProvider>
   )

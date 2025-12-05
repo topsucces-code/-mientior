@@ -6,34 +6,54 @@
  * Supports two modes: targeted sync (specific product IDs) or batch sync (filters).
  * Requires admin authentication with PRODUCTS_WRITE permission.
  *
- * GET /api/admin/pim/sync
- * Check current PIM sync queue status and recent activity.
- * Returns real-time queue statistics and last 10 sync operations.
- *
  * @see src/lib/pim-sync-queue.ts - Queue operations
  * @see src/lib/pim-sync-worker.ts - Worker that processes jobs
  * @see src/app/api/admin/search/reindex/route.ts - Similar pattern for search reindex
+ * @see src/app/api/admin/pim/sync/status/route.ts - Status endpoint
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
-import { enqueuePimSyncJob, getPimSyncStats } from '@/lib/pim-sync-queue'
+import { enqueuePimSyncJob } from '@/lib/pim-sync-queue'
 import { logCreate } from '@/lib/audit-logger'
-import { withPermission } from '@/middleware/admin-auth'
+import { withPermission, type AuthenticatedApiHandler } from '@/middleware/admin-auth'
 import { Permission } from '@/lib/permissions'
 
 /**
- * Request body for POST /api/admin/pim/sync
+ * Zod schema for POST /api/admin/pim/sync request validation
+ * Enforces that exactly one of productIds or filters is provided
  */
-interface SyncRequestBody {
-  productIds?: string[]
-  filters?: {
-    categoryId?: string
-    vendorId?: string
-    status?: 'ACTIVE' | 'DRAFT' | 'ARCHIVED'
-  }
-  dryRun?: boolean
-}
+const SyncRequestSchema = z
+  .object({
+    productIds: z
+      .array(z.string())
+      .min(1, 'productIds must be a non-empty array')
+      .max(1000, 'Maximum 1000 products can be synced at once')
+      .optional(),
+    filters: z
+      .object({
+        categoryId: z.string().optional(),
+        vendorId: z.string().optional(),
+        status: z.enum(['ACTIVE', 'DRAFT', 'ARCHIVED']).optional(),
+      })
+      .optional(),
+    dryRun: z.boolean().optional(),
+  })
+  .refine((data) => (data.productIds && !data.filters) || (!data.productIds && data.filters), {
+    message: 'Either productIds or filters must be provided (but not both)',
+  })
+  .refine(
+    (data) => {
+      if (data.filters) {
+        return data.filters.categoryId || data.filters.vendorId || data.filters.status
+      }
+      return true
+    },
+    {
+      message: 'At least one filter must be provided when using filters mode',
+    }
+  )
 
 /**
  * Response for POST /api/admin/pim/sync
@@ -49,35 +69,12 @@ interface SyncResponse {
   filters?: Record<string, unknown>
 }
 
-/**
- * Response for GET /api/admin/pim/sync
- */
-interface StatusResponse {
-  success: boolean
-  queueStats: {
-    pending: number
-    processing: number
-    failed: number
-    timestamp: number
-  }
-  recentActivity: Array<{
-    id: string
-    operation: string
-    status: string
-    productId: string | null
-    duration: number | null
-    createdAt: Date
-    error: string | null
-    product?: { name: string; slug: string } | null
-  }>
-  timestamp: string
-}
 
 /**
  * POST Handler - Trigger manual PIM synchronization
  *
  * @param request - Next.js request object
- * @param context - Context with adminSession (injected by withPermission middleware)
+ * @param context - Context with params and adminSession (injected by withPermission middleware)
  * @returns JSON response with enqueued job IDs and sync details
  *
  * @example
@@ -99,68 +96,23 @@ interface StatusResponse {
  *   "dryRun": true
  * }
  */
-async function handlePOST(
-  request: NextRequest,
-  context: { adminSession: { adminUser: { id: string } } }
-) {
+const handlePOST: AuthenticatedApiHandler = async (request, context) => {
   try {
-    // Parse request body
-    const body = (await request.json()) as SyncRequestBody
-    const { productIds, filters, dryRun = false } = body
+    // Parse and validate request body with Zod
+    const parseResult = SyncRequestSchema.safeParse(await request.json())
 
-    // Input validation
-    if (!productIds && !filters) {
+    if (!parseResult.success) {
+      const errors = parseResult.error.flatten()
       return NextResponse.json(
         {
-          error: 'Either productIds or filters must be provided',
+          error: 'Validation failed',
+          details: errors.formErrors.length > 0 ? errors.formErrors : errors.fieldErrors,
         },
         { status: 400 }
       )
     }
 
-    if (productIds && filters) {
-      return NextResponse.json(
-        {
-          error: 'Cannot provide both productIds and filters - choose one mode',
-        },
-        { status: 400 }
-      )
-    }
-
-    // Validate productIds mode
-    if (productIds) {
-      if (!Array.isArray(productIds) || productIds.length === 0) {
-        return NextResponse.json(
-          {
-            error: 'productIds must be a non-empty array',
-          },
-          { status: 400 }
-        )
-      }
-
-      if (productIds.length > 1000) {
-        return NextResponse.json(
-          {
-            error: 'Maximum 1000 products can be synced at once',
-          },
-          { status: 400 }
-        )
-      }
-    }
-
-    // Validate filters mode
-    if (filters) {
-      const hasFilters =
-        filters.categoryId || filters.vendorId || filters.status
-      if (!hasFilters) {
-        return NextResponse.json(
-          {
-            error: 'At least one filter must be provided',
-          },
-          { status: 400 }
-        )
-      }
-    }
+    const { productIds, filters, dryRun = false } = parseResult.data
 
     // Determine mode
     const mode = productIds ? 'productIds' : 'filters'
@@ -343,80 +295,5 @@ async function handlePOST(
   }
 }
 
-/**
- * GET Handler - Check PIM sync status
- *
- * @param request - Next.js request object
- * @param context - Context with adminSession (injected by withPermission middleware)
- * @returns JSON response with queue statistics and recent activity
- *
- * @example
- * GET /api/admin/pim/sync
- * Response:
- * {
- *   "success": true,
- *   "queueStats": {
- *     "pending": 15,
- *     "processing": 2,
- *     "failed": 1,
- *     "timestamp": 1701234567890
- *   },
- *   "recentActivity": [...]
- * }
- */
-async function handleGET(
-  request: NextRequest,
-  context: { adminSession: { adminUser: { id: string } } }
-) {
-  try {
-    // Get real-time queue statistics
-    const stats = await getPimSyncStats()
-
-    // Query recent sync activity
-    const recentLogs = await prisma.pimSyncLog.findMany({
-      take: 10,
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        operation: true,
-        status: true,
-        productId: true,
-        duration: true,
-        createdAt: true,
-        error: true,
-        product: {
-          select: {
-            name: true,
-            slug: true,
-          },
-        },
-      },
-    })
-
-    // Success response
-    return NextResponse.json<StatusResponse>({
-      success: true,
-      queueStats: {
-        pending: stats.mainQueue,
-        processing: stats.processingQueue,
-        failed: stats.failedQueue,
-        timestamp: stats.timestamp,
-      },
-      recentActivity: recentLogs,
-      timestamp: new Date().toISOString(),
-    })
-  } catch (error) {
-    console.error('[Admin PIM Sync] Status check error:', error)
-    return NextResponse.json(
-      {
-        error: 'Failed to retrieve sync status',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    )
-  }
-}
-
-// Export handlers with permission middleware
+// Export handler with permission middleware
 export const POST = withPermission(Permission.PRODUCTS_WRITE, handlePOST)
-export const GET = withPermission(Permission.PRODUCTS_WRITE, handleGET)

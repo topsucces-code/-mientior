@@ -1,5 +1,5 @@
 [build]
-  command = "echo 'Skipping build - using pre-built assets'"
+  command = "npm run build"
   publish = ".next"
 
 [build.environment]

@@ -44,6 +44,7 @@ type ProductWithRelations = Prisma.ProductGetPayload<{
         tag: true
       }
     }
+    pimMapping: true
     reviews: {
       include: {
         user: {
@@ -86,6 +87,7 @@ async function handleGET(
             tag: true
           }
         },
+        pimMapping: true,
         reviews: {
           where: { status: 'APPROVED' },
           include: {
@@ -155,6 +157,12 @@ async function handleGET(
         name: pt.tag.name,
         slug: pt.tag.slug
       })),
+      pimMapping: product.pimMapping ? {
+        akeneoProductId: product.pimMapping.akeneoProductId,
+        akeneoSku: product.pimMapping.akeneoSku,
+        lastSyncedAt: product.pimMapping.lastSyncedAt,
+        syncStatus: product.pimMapping.syncStatus
+      } : undefined,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt
     }
@@ -284,7 +292,8 @@ async function handlePUT(
             include: {
               tag: true
             }
-          }
+          },
+          pimMapping: true
         }
       })
     })
@@ -333,6 +342,12 @@ async function handlePUT(
         name: pt.tag.name,
         slug: pt.tag.slug
       })),
+      pimMapping: product.pimMapping ? {
+        akeneoProductId: product.pimMapping.akeneoProductId,
+        akeneoSku: product.pimMapping.akeneoSku,
+        lastSyncedAt: product.pimMapping.lastSyncedAt,
+        syncStatus: product.pimMapping.syncStatus
+      } : undefined,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt
     }

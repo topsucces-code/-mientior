@@ -33,45 +33,77 @@ export const LANGUAGES: Language[] = [
         flag: '🇬🇧'
     },
     {
-        code: 'es',
-        name: 'Spanish',
-        nativeName: 'Español',
-        flag: '🇪🇸'
+        code: 'ar',
+        name: 'العربية',
+        nativeName: 'العربية',
+        flag: '🇸🇦'
     }
 ]
 
 export const DEFAULT_LANGUAGE = 'fr'
 
-// ==================== CURRENCIES ====================
+// ==================== CURRENCIES (African Focus) ====================
 
 export const CURRENCIES: Currency[] = [
+    // West African CFA Franc (BCEAO)
+    {
+        code: 'XOF',
+        symbol: 'FCFA',
+        name: 'Franc CFA (BCEAO)',
+        rate: 655.96
+    },
+    // Central African CFA Franc (BEAC)
+    {
+        code: 'XAF',
+        symbol: 'FCFA',
+        name: 'Franc CFA (BEAC)',
+        rate: 655.96
+    },
+    // Nigerian Naira
+    {
+        code: 'NGN',
+        symbol: '₦',
+        name: 'Naira nigérian',
+        rate: 1650
+    },
+    // Kenyan Shilling
+    {
+        code: 'KES',
+        symbol: 'KSh',
+        name: 'Shilling kényan',
+        rate: 165
+    },
+    // South African Rand
+    {
+        code: 'ZAR',
+        symbol: 'R',
+        name: 'Rand sud-africain',
+        rate: 20
+    },
+    // Moroccan Dirham
+    {
+        code: 'MAD',
+        symbol: 'DH',
+        name: 'Dirham marocain',
+        rate: 11
+    },
+    // Ghanaian Cedi
+    {
+        code: 'GHS',
+        symbol: 'GH₵',
+        name: 'Cedi ghanéen',
+        rate: 15
+    },
+    // Euro (reference)
     {
         code: 'EUR',
         symbol: '€',
         name: 'Euro',
         rate: 1
-    },
-    {
-        code: 'USD',
-        symbol: '$',
-        name: 'US Dollar',
-        rate: 1.08
-    },
-    {
-        code: 'GBP',
-        symbol: '£',
-        name: 'British Pound',
-        rate: 0.86
-    },
-    {
-        code: 'XOF',
-        symbol: 'CFA',
-        name: 'CFA Franc',
-        rate: 655.96
     }
 ]
 
-export const DEFAULT_CURRENCY = 'EUR'
+export const DEFAULT_CURRENCY = 'XOF'
 
 // ==================== ROTATING MESSAGES ====================
 

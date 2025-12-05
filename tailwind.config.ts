@@ -59,61 +59,103 @@ export default {
                     DEFAULT: 'hsl(var(--card))',
                     foreground: 'hsl(var(--card-foreground))',
                 },
-                // New chromatic system
-                orange: {
-                    50: '#FFF7ED',
-                    100: '#FFEDD5',
-                    200: '#FED7AA',
-                    300: '#FDBA74',
-                    400: '#FB923C',
-                    500: '#FF6B00',
-                    600: '#FF8C00',
-                    700: '#C2410C',
-                    800: '#9A3412',
-                    900: '#7C2D12',
+                // L'Opulence Organique - Luxe Naturel Branding
+                // Vert Émeraude Profond (Primary) - Richesse, héritage, nature précieuse
+                emerald: {
+                    50: '#ECFDF5',
+                    100: '#D1FAE5',
+                    200: '#A7F3D0',
+                    300: '#6EE7B7',
+                    400: '#34D399',
+                    500: '#047857',  // Vert Émeraude Profond
+                    600: '#065F46',
+                    700: '#064E3B',
+                    800: '#022C22',
+                    900: '#014737',
                 },
+                // Beige Doré / Taupe (Secondary) - Chaleur, élégance, confort
+                taupe: {
+                    50: '#FAF8F5',
+                    100: '#F5F0E8',
+                    200: '#E8DFD0',
+                    300: '#D4C4A8',
+                    400: '#C4A77D',
+                    500: '#A68B5B',  // Beige Doré principal
+                    600: '#8B7355',
+                    700: '#6B5B45',
+                    800: '#4A3F30',
+                    900: '#2D2620',
+                },
+                // Cuivre / Or Rose (Accent) - Touche métallique chaude et contemporaine
+                copper: {
+                    50: '#FDF4F0',
+                    100: '#FCE8E0',
+                    200: '#F9D0C0',
+                    300: '#F0A890',
+                    400: '#E07850',
+                    500: '#B87333',  // Cuivre principal
+                    600: '#9A5D2A',
+                    700: '#7A4A22',
+                    800: '#5C381A',
+                    900: '#3D2512',
+                },
+                // Or Rose pour les accents luxueux
+                rosegold: {
+                    50: '#FFF5F5',
+                    100: '#FFEBE8',
+                    200: '#FFD6D0',
+                    300: '#FFB8AD',
+                    400: '#E8A090',
+                    500: '#B76E79',  // Or Rose principal
+                    600: '#9A5A64',
+                    700: '#7D474F',
+                    800: '#60353B',
+                    900: '#432428',
+                },
+                // Neutral palette - tons naturels
+                platinum: {
+                    50: '#FAFAF9',
+                    100: '#F5F5F4',
+                    200: '#E7E5E4',
+                    300: '#D6D3D1',
+                    400: '#A8A29E',
+                    500: '#78716C',
+                },
+                anthracite: {
+                    500: '#44403C',
+                    600: '#292524',
+                    700: '#1C1917',
+                },
+                nuanced: {
+                    500: '#78716C',
+                    600: '#57534E',
+                    700: '#44403C',
+                },
+                // Alias pour compatibilité (orange -> copper)
+                orange: {
+                    50: '#FDF4F0',
+                    100: '#FCE8E0',
+                    200: '#F9D0C0',
+                    300: '#F0A890',
+                    400: '#E07850',
+                    500: '#B87333',
+                    600: '#9A5D2A',
+                    700: '#7A4A22',
+                    800: '#5C381A',
+                    900: '#3D2512',
+                },
+                // Blue for info states (keeping for semantic purposes)
                 blue: {
                     50: '#EFF6FF',
                     100: '#DBEAFE',
                     200: '#BFDBFE',
                     300: '#93C5FD',
                     400: '#60A5FA',
-                    500: '#1E3A8A',
+                    500: '#3B82F6',
                     600: '#2563EB',
                     700: '#1D4ED8',
                     800: '#1E40AF',
                     900: '#1E3A8A',
-                },
-                aurore: {
-                    50: '#FFFBEB',
-                    100: '#FEF3C7',
-                    200: '#FDE68A',
-                    300: '#FCD34D',
-                    400: '#FBBF24',
-                    500: '#FFC107',
-                    600: '#FFD54F',
-                    700: '#F59E0B',
-                    800: '#D97706',
-                    900: '#B45309',
-                },
-                // Neutral palette
-                platinum: {
-                    50: '#F8F9FA',
-                    100: '#F1F3F4',
-                    200: '#E9ECEF',
-                    300: '#DEE2E6',
-                    400: '#CED4DA',
-                    500: '#ADB5BD',
-                },
-                anthracite: {
-                    500: '#2D3748',
-                    600: '#1A202C',
-                    700: '#171923',
-                },
-                nuanced: {
-                    500: '#718096',
-                    600: '#4A5568',
-                    700: '#2D3748',
                 },
                 // Semantic colors with proper contrast
                 success: {

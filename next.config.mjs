@@ -1,8 +1,11 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
+import createNextIntlPlugin from 'next-intl/plugin'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+
+const withNextIntl = createNextIntlPlugin('./i18n.ts')
 
 const nextConfig = {
   reactStrictMode: true,
@@ -34,6 +37,7 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 768, 1024, 1280, 1536, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    unoptimized: process.env.NODE_ENV === 'development', // Skip optimization in dev for missing images
     remotePatterns: [
       {
         protocol: 'https',
@@ -108,4 +112,4 @@ const nextConfig = {
   },
 }
 
-export default nextConfig
+export default withNextIntl(nextConfig)

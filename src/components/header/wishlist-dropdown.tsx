@@ -51,7 +51,7 @@ export function WishlistDropdown() {
             >
                 <Heart className="w-6 h-6" />
                 {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    <span className="absolute -top-1 -right-1 bg-rosegold-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                         {totalItems > 9 ? '9+' : totalItems}
                     </span>
                 )}
@@ -84,7 +84,7 @@ export function WishlistDropdown() {
 
                                         <div className="flex-1 min-w-0">
                                             <Link href={`/products/${item.slug || item.productId}`}>
-                                                <h4 className="font-medium hover:text-blue-600 truncate">
+                                                <h4 className="font-medium hover:text-emerald-600 truncate">
                                                     {item.name || 'Produit'}
                                                 </h4>
                                             </Link>
@@ -110,7 +110,7 @@ export function WishlistDropdown() {
                                                             description: `${item.name} a été ajouté à votre panier.`,
                                                         })
                                                     }}
-                                                    className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-1"
+                                                    className="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded-md hover:bg-emerald-700 transition-colors flex items-center gap-1"
                                                 >
                                                     <ShoppingCart className="w-3.5 h-3.5" />
                                                     Ajouter au panier
@@ -137,13 +137,13 @@ export function WishlistDropdown() {
                         )}
                     </div>
 
-                    {items.length > 5 && (
+                    {items.length > 0 && (
                         <div className="p-3 border-t border-gray-200">
                             <Link
                                 href="/wishlist"
-                                className="block text-center text-sm text-blue-600 hover:underline font-medium"
+                                className="block w-full text-center text-sm bg-rosegold-500 text-white py-2 rounded-lg hover:bg-rosegold-600 font-medium transition-colors"
                             >
-                                Voir tous les articles ({totalItems})
+                                Voir ma liste ({totalItems})
                             </Link>
                         </div>
                     )}

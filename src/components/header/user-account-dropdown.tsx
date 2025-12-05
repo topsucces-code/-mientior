@@ -1,6 +1,6 @@
 'use client'
 
-import { User, LogOut, Package, Heart, Settings, CreditCard, MapPin } from 'lucide-react'
+import { User, LogOut, Package, Heart, Settings, CreditCard, MapPin, MessageCircle, Shield } from 'lucide-react'
 import { useHeader } from '@/contexts/header-context'
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
@@ -48,7 +48,7 @@ export function UserAccountDropdown() {
         return (
             <Link
                 href="/login"
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors font-medium"
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-full hover:bg-emerald-700 transition-colors font-medium"
             >
                 <User className="w-5 h-5" />
                 <span className="hidden lg:inline">Connexion</span>
@@ -69,9 +69,9 @@ export function UserAccountDropdown() {
 
             {isOpen && (
                 <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 z-50 animate-slide-down">
-                    <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+                    <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-emerald-50 to-taupe-50">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
                                 {session.user.name?.[0]?.toUpperCase() || session.user.email?.[0]?.toUpperCase() || 'U'}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -120,6 +120,24 @@ export function UserAccountDropdown() {
                         >
                             <Settings className="w-5 h-5 text-gray-600" />
                             <span className="font-medium">Paramètres</span>
+                        </Link>
+
+                        <Link
+                            href="/account/security"
+                            className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                        >
+                            <Shield className="w-5 h-5 text-gray-600" />
+                            <span className="font-medium">Sécurité & 2FA</span>
+                        </Link>
+                    </div>
+
+                    <div className="border-t border-gray-200 py-2">
+                        <Link
+                            href="/support"
+                            className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                        >
+                            <MessageCircle className="w-5 h-5 text-gray-600" />
+                            <span className="font-medium">Support & Aide</span>
                         </Link>
                     </div>
 

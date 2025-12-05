@@ -23,6 +23,15 @@
       "parserOptions": {
         "project": null
       }
+    },
+    {
+      "files": ["public/**/*.js"],
+      "parserOptions": {
+        "project": null
+      },
+      "env": {
+        "serviceworker": true
+      }
     }
   ]
 }

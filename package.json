@@ -170,6 +170,7 @@
     "lucide-react": "^0.553.0",
     "meilisearch": "^0.44.1",
     "next": "^15.0.0",
+    "next-intl": "^4.5.8",
     "papaparse": "^5.5.3",
     "paystack": "^2.0.1",
     "posthog-js": "^1.296.1",

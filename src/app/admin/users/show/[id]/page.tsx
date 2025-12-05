@@ -8,12 +8,12 @@ import { useState } from "react";
 const { Title } = Typography;
 
 export default function UserShow({ params }: { params: { id: string } }) {
-  const { queryResult } = useShow({
+  const { query } = useShow({
     resource: "users",
     id: params.id,
   });
 
-  const { data, isLoading } = queryResult;
+  const { data, isLoading } = query;
   const record = data?.data;
 
   const addressColumns = [

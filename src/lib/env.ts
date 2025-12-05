@@ -72,6 +72,14 @@ const envSchema = z.object({
   // Optional - Akeneo PIM Integration
   AKENEO_WEBHOOK_SECRET: z.string().min(32, 'Akeneo webhook secret must be at least 32 characters').optional(),
 
+  // Optional - PIM Health Monitoring
+  /** Percentage of failed syncs to trigger alert (default: 10%) */
+  PIM_SYNC_FAILURE_THRESHOLD: z.coerce.number().int().positive().default(10).optional(),
+  /** Seconds since last sync to trigger delay alert (default: 3600 = 1h) */
+  PIM_SYNC_DELAY_THRESHOLD: z.coerce.number().int().positive().default(3600).optional(),
+  /** Seconds of sync history to analyze (default: 86400 = 24h) */
+  PIM_SYNC_HEALTH_CHECK_WINDOW: z.coerce.number().int().positive().default(86400).optional(),
+
   // Optional - Domain
   NEXT_PUBLIC_DOMAIN: z.string().optional(),
 })

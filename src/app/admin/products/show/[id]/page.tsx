@@ -2,21 +2,47 @@
 
 import { useShow } from "@refinedev/core";
 import { Show } from "@refinedev/antd";
-import { Typography, Descriptions, Table, Tag, Image, Space } from "antd";
-import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import { Typography, Descriptions, Table, Tag, Image, Space, Alert, Button } from "antd";
+import { CheckCircleOutlined, CloseCircleOutlined, CloudOutlined, ExportOutlined } from "@ant-design/icons";
 import { use } from "react";
+import { useTranslation } from "react-i18next";
 
 const { Title } = Typography;
 
 export default function ProductShow({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { t } = useTranslation(["admin", "common"]);
   const { query } = useShow({
     resource: "products",
     id: id,
   });
 
   const { data, isLoading } = query;
-  const record = data?.data;
+  const record = data?.data as {
+    id: string;
+    name: string;
+    slug: string;
+    description?: string;
+    price: number;
+    compareAtPrice?: number;
+    stock: number;
+    status: string;
+    rating: number;
+    reviewCount: number;
+    featured: boolean;
+    onSale: boolean;
+    badge?: string;
+    category?: { name: string };
+    variants?: Array<{ id: string; size?: string; color?: string; sku: string; stock: number; priceModifier?: number }>;
+    images?: Array<{ id: string; url: string; alt: string; type: string }>;
+    tags?: Array<{ id: string; name: string }>;
+    pimMapping?: {
+      akeneoProductId: string;
+      akeneoSku: string;
+      lastSyncedAt: Date | null;
+      syncStatus: string;
+    };
+  };
 
   const variantColumns = [
     {
@@ -78,6 +104,32 @@ export default function ProductShow({ params }: { params: Promise<{ id: string }
 
   return (
     <Show isLoading={isLoading}>
+      {record?.pimMapping && (
+        <Alert
+          message={t("products.managedByAkeneo", "This product is managed by Akeneo PIM")}
+          description={
+            <Space>
+              <span>{t("products.syncedFromAkeneo", "Changes should be made in Akeneo and will be synchronized automatically.")}</span>
+              {process.env.NEXT_PUBLIC_AKENEO_API_URL && (
+                <Button
+                  type="link"
+                  icon={<ExportOutlined />}
+                  href={`${process.env.NEXT_PUBLIC_AKENEO_API_URL}/enrich/product/identifier/${record.pimMapping.akeneoProductId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t("products.viewInAkeneo", "View in Akeneo")}
+                </Button>
+              )}
+            </Space>
+          }
+          type="info"
+          showIcon
+          icon={<CloudOutlined />}
+          style={{ marginBottom: 16 }}
+        />
+      )}
+
       <Descriptions title="Product Details" bordered column={2}>
         <Descriptions.Item label="ID">{record?.id}</Descriptions.Item>
         <Descriptions.Item label="Slug">{record?.slug}</Descriptions.Item>
@@ -94,6 +146,17 @@ export default function ProductShow({ params }: { params: Promise<{ id: string }
           <Tag color={record?.status === "ACTIVE" ? "green" : record?.status === "DRAFT" ? "orange" : "red"}>
             {record?.status}
           </Tag>
+        </Descriptions.Item>
+        <Descriptions.Item label={t("products.fields.source", "Source")}>
+          {record?.pimMapping ? (
+            <Tag color="blue" icon={<CloudOutlined />}>
+              {t("products.sourceAkeneo", "Akeneo")}
+            </Tag>
+          ) : (
+            <Tag color="default">
+              {t("products.sourceManual", "Manual")}
+            </Tag>
+          )}
         </Descriptions.Item>
         <Descriptions.Item label="Rating">{record?.rating || 0} / 5</Descriptions.Item>
         <Descriptions.Item label="Review Count">{record?.reviewCount || 0}</Descriptions.Item>

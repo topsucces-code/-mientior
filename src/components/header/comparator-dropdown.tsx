@@ -66,7 +66,7 @@ export function ComparatorDropdown() {
                         {totalItems >= 2 && (
                             <Link
                                 href="/compare"
-                                className="mt-2 block text-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+                                className="mt-2 block text-center bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700 transition-colors text-sm font-medium"
                             >
                                 <Eye className="w-4 h-4 inline mr-2" />
                                 Comparer les produits
@@ -95,7 +95,7 @@ export function ComparatorDropdown() {
 
                                             <div className="flex-1 min-w-0">
                                                 <Link href={`/products/${item.id}`}>
-                                                    <h4 className="font-medium hover:text-blue-600 truncate">
+                                                    <h4 className="font-medium hover:text-emerald-600 truncate">
                                                         {item.name}
                                                     </h4>
                                                 </Link>
@@ -117,7 +117,13 @@ export function ComparatorDropdown() {
                                 ))}
 
                                 {displayItems.length > 0 && (
-                                    <div className="p-3 border-t border-gray-200">
+                                    <div className="p-3 border-t border-gray-200 space-y-2">
+                                        <Link
+                                            href="/compare"
+                                            className="block w-full text-center text-sm bg-emerald-600 text-white py-2 rounded-lg hover:bg-emerald-700 font-medium transition-colors"
+                                        >
+                                            Comparer ({displayItems.length})
+                                        </Link>
                                         <button
                                             onClick={clearAll}
                                             className="w-full text-center text-sm text-red-600 hover:underline font-medium"

@@ -113,7 +113,7 @@ export function MainHeader() {
 
     return (
         <div
-            className={`bg-white border-b border-gray-200 transition-all duration-300 ${isCompact ? 'shadow-md' : ''
+            className={`bg-white border-b border-taupe-200 transition-all duration-300 ${isCompact ? 'shadow-md' : ''
                 }`}
             style={{ height: `${height}px` }}
         >

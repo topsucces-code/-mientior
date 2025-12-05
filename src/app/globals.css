@@ -4,65 +4,77 @@
 
 @layer base {
   :root {
-    /* Background and foreground */
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Background and foreground - tons naturels */
+    --background: 40 20% 99%;
+    --foreground: 24 10% 10%;
 
-    /* New chromatic system */
-    --orange-dynamic: 25 100% 50%; /* #FF6B00 */
-    --orange-dynamic-light: 25 100% 60%; /* #FF8C00 */
-    --blue-institutional: 220 78% 33%; /* #1E3A8A */
-    --blue-institutional-light: 217 91% 60%; /* #2563EB */
-    --aurore-accent: 45 100% 51%; /* #FFC107 */
-    --aurore-accent-light: 48 100% 65%; /* #FFD54F */
+    /* L'Opulence Organique - Luxe Naturel */
+    /* Vert Émeraude Profond (Primary) - Richesse, héritage, nature précieuse */
+    --emerald-primary: 160 96% 18%; /* #047857 */
+    --emerald-light: 158 64% 52%; /* #34D399 */
+    --emerald-dark: 163 94% 15%; /* #064E3B */
+    
+    /* Beige Doré / Taupe (Secondary) - Chaleur, élégance, confort */
+    --taupe-primary: 36 30% 50%; /* #A68B5B */
+    --taupe-light: 38 35% 75%; /* #D4C4A8 */
+    --taupe-dark: 33 25% 35%; /* #6B5B45 */
+    
+    /* Cuivre (Accent) - Touche métallique chaude */
+    --copper-primary: 28 55% 46%; /* #B87333 */
+    --copper-light: 20 60% 75%; /* #F0A890 */
+    --copper-dark: 25 55% 30%; /* #7A4A22 */
+    
+    /* Or Rose (Luxury accent) */
+    --rosegold-primary: 350 30% 57%; /* #B76E79 */
+    --rosegold-light: 5 100% 84%; /* #FFB8AD */
 
-    /* Neutral palette */
-    --gray-platinum: 210 17% 98%; /* #F8F9FA */
-    --gray-platinum-2: 210 11% 93%; /* #E9ECEF */
-    --gray-anthracite: 210 25% 24%; /* #2D3748 */
-    --gray-nuanced: 214 15% 55%; /* #718096 */
+    /* Neutral palette - tons naturels chauds */
+    --gray-platinum: 30 10% 98%; /* #FAFAF9 */
+    --gray-platinum-2: 30 6% 90%; /* #E7E5E4 */
+    --gray-anthracite: 24 9% 23%; /* #44403C */
+    --gray-nuanced: 25 6% 45%; /* #78716C */
 
     /* Component tokens */
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: var(--orange-dynamic);
+    --card: 40 20% 99%;
+    --card-foreground: 24 10% 10%;
+    --popover: 40 20% 99%;
+    --popover-foreground: 24 10% 10%;
+    --primary: var(--emerald-primary);
     --primary-foreground: 0 0% 100%;
-    --secondary: var(--blue-institutional);
+    --secondary: var(--taupe-primary);
     --secondary-foreground: 0 0% 100%;
     --muted: var(--gray-platinum);
     --muted-foreground: var(--gray-nuanced);
-    --accent: var(--aurore-accent);
-    --accent-foreground: 222.2 84% 4.9%;
+    --accent: var(--copper-primary);
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
     --border: var(--gray-platinum-2);
     --input: var(--gray-platinum-2);
-    --ring: var(--orange-dynamic);
+    --ring: var(--emerald-primary);
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: var(--orange-dynamic);
-    --primary-foreground: 0 0% 100%;
-    --secondary: var(--blue-institutional-light);
-    --secondary-foreground: 0 0% 100%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: var(--aurore-accent);
-    --accent-foreground: 222.2 84% 4.9%;
+    --background: 24 10% 8%;
+    --foreground: 40 20% 95%;
+    --card: 24 10% 10%;
+    --card-foreground: 40 20% 95%;
+    --popover: 24 10% 10%;
+    --popover-foreground: 40 20% 95%;
+    --primary: var(--emerald-light);
+    --primary-foreground: 24 10% 10%;
+    --secondary: var(--taupe-light);
+    --secondary-foreground: 24 10% 10%;
+    --muted: 24 10% 15%;
+    --muted-foreground: 25 6% 60%;
+    --accent: var(--copper-light);
+    --accent-foreground: 24 10% 10%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: var(--orange-dynamic);
+    --destructive-foreground: 40 20% 95%;
+    --border: 24 10% 18%;
+    --input: 24 10% 18%;
+    --ring: var(--emerald-light);
   }
 }
 
@@ -92,17 +104,38 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Gradient utilities */
+  /* Gradient utilities - L'Opulence Organique */
+  .gradient-emerald {
+    background: linear-gradient(135deg, #047857 0%, #065F46 100%);
+  }
+
+  .gradient-taupe {
+    background: linear-gradient(135deg, #A68B5B 0%, #D4C4A8 100%);
+  }
+
+  .gradient-copper {
+    background: linear-gradient(135deg, #B87333 0%, #E07850 100%);
+  }
+
+  .gradient-rosegold {
+    background: linear-gradient(135deg, #B76E79 0%, #E8A090 100%);
+  }
+
+  .gradient-luxury {
+    background: linear-gradient(135deg, #047857 0%, #A68B5B 50%, #B87333 100%);
+  }
+
+  /* Legacy aliases - map old names to new branding colors */
   .gradient-orange {
-    background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
+    background: linear-gradient(135deg, #B87333 0%, #E07850 100%); /* Maps to copper */
   }
 
   .gradient-blue {
-    background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);
+    background: linear-gradient(135deg, #047857 0%, #065F46 100%); /* Maps to emerald */
   }
 
   .gradient-aurore {
-    background: linear-gradient(135deg, #FFC107 0%, #FFD54F 100%);
+    background: linear-gradient(135deg, #A68B5B 0%, #D4C4A8 100%); /* Maps to taupe */
   }
 
   /* Glassmorphism effect */
@@ -725,23 +758,23 @@
 
 /* Warning variant - Aurore (Orange/Yellow) with proper contrast */
 .auth-toast-warning {
-  @apply bg-aurore-100 border-aurore-500 text-aurore-900;
+  @apply bg-copper-100 border-copper-500 text-copper-900;
 }
 
 .auth-toast-warning .auth-toast-title {
-  @apply text-aurore-900;
+  @apply text-copper-900;
 }
 
 .auth-toast-warning .auth-toast-description {
-  @apply text-aurore-900;
+  @apply text-copper-900;
 }
 
 .auth-toast-warning .auth-toast-close {
-  @apply text-aurore-900 hover:bg-aurore-200 focus:ring-aurore-500;
+  @apply text-copper-900 hover:bg-copper-200 focus:ring-copper-500;
 }
 
 .auth-toast-warning .auth-toast-action {
-  @apply bg-aurore-500 text-anthracite-700 hover:bg-aurore-600 focus:ring-aurore-500;
+  @apply bg-copper-500 text-anthracite-700 hover:bg-copper-600 focus:ring-copper-500;
 }
 
 /* Info variant - Blue with proper contrast */
@@ -851,7 +884,7 @@
 }
 
 .auth-toast-warning [data-icon] {
-  @apply text-aurore-600;
+  @apply text-copper-600;
 }
 
 .auth-toast-info [data-icon] {
@@ -877,7 +910,7 @@
 }
 
 .auth-toast-warning [data-progress] {
-  @apply bg-aurore-500;
+  @apply bg-copper-500;
 }
 
 .auth-toast-info [data-progress] {
@@ -902,7 +935,7 @@
 }
 
 .dark .auth-toast-warning {
-  @apply bg-aurore-900/20 border-aurore-500 text-aurore-100;
+  @apply bg-copper-900/20 border-copper-500 text-copper-100;
 }
 
 .dark .auth-toast-info {
@@ -969,7 +1002,7 @@
   }
 
   .auth-toast-warning {
-    @apply bg-white border-aurore-600 text-black;
+    @apply bg-white border-copper-600 text-black;
   }
 
   .auth-toast-info {

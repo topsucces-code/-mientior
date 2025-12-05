@@ -510,6 +510,7 @@ export default function SearchAnalyticsPage() {
                           callbacks: {
                             label: (context) => {
                               const locale = data.localeDistribution[context.dataIndex];
+                              if (!locale) return '';
                               return `${locale.locale.toUpperCase()}: ${locale.count.toLocaleString()} (${locale.percentage.toFixed(1)}%)`;
                             },
                           },

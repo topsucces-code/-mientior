@@ -3,7 +3,7 @@
 import React from "react";
 import { useTable } from "@refinedev/antd";
 import { Table, Space, Button, Tag } from "antd";
-import { EditOutlined, EyeOutlined, PlusOutlined, FilterOutlined } from "@ant-design/icons";
+import { EditOutlined, EyeOutlined, PlusOutlined, FilterOutlined, CloudOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilters } from "@/components/admin/advanced-filters";
@@ -20,6 +20,12 @@ interface Product {
   categoryId?: string;
   featured?: boolean;
   onSale?: boolean;
+  pimMapping?: {
+    akeneoProductId: string;
+    akeneoSku: string;
+    lastSyncedAt: Date | null;
+    syncStatus: string;
+  };
 }
 
 export default function ProductsList() {
@@ -33,6 +39,7 @@ export default function ProductsList() {
     { key: "price", title: t("admin:products.fields.price"), visible: true },
     { key: "stock", title: t("admin:products.fields.stock"), visible: true },
     { key: "status", title: t("admin:products.fields.status"), visible: true },
+    { key: "source", title: t("admin:products.fields.source"), visible: true },
     { key: "actions", title: t("common:labels.actions"), visible: true, fixed: true },
   ]);
 
@@ -150,6 +157,23 @@ export default function ProductsList() {
                   <Tag color={getStatusColor(status)}>
                     {t(`admin:products.status.${status}`)}
                   </Tag>
+                )}
+              />
+            );
+          }
+          if (col.key === "source") {
+            return (
+              <Table.Column
+                key="source"
+                title={col.title}
+                render={(_, record: Product) => (
+                  record.pimMapping ? (
+                    <Tag color="blue" icon={<CloudOutlined />}>
+                      {t("admin:products.sourceAkeneo")}
+                    </Tag>
+                  ) : (
+                    <Tag color="default">{t("admin:products.sourceManual")}</Tag>
+                  )
                 )}
               />
             );

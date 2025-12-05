@@ -1,30 +1,87 @@
 import Redis from 'ioredis'
-import { getSearchCacheTTL, getSuggestionsCacheTTL } from './cache-config'
+import { getSearchCacheTTL, getSuggestionsCacheTTL, getFacetsCacheTTL } from './cache-config'
 
 const redisUrl = process.env.REDIS_URL
 
 // Redis is optional - graceful degradation when not available (e.g., Vercel)
 let redis: Redis | null = null
-let redisAvailable = false
+let isConnected = false
 
-if (redisUrl) {
+function createRedisClient(): Redis | null {
+  if (!redisUrl) {
+    console.log('[Redis] No REDIS_URL configured - running without cache')
+    return null
+  }
+
   try {
-    redis = new Redis(redisUrl, {
-      maxRetriesPerRequest: 1,
-      retryStrategy: () => null, // Don't retry on failure
+    const client = new Redis(redisUrl, {
+      maxRetriesPerRequest: 3,
+      retryStrategy: (times) => {
+        if (times > 3) {
+          console.warn('[Redis] Max retries reached, giving up')
+          return null
+        }
+        // Exponential backoff: 200ms, 400ms, 800ms
+        return Math.min(times * 200, 2000)
+      },
       lazyConnect: true,
+      connectTimeout: 5000,
+      commandTimeout: 3000,
+      enableReadyCheck: true,
+      reconnectOnError: (err) => {
+        const targetErrors = ['READONLY', 'ECONNRESET', 'ETIMEDOUT']
+        return targetErrors.some(e => err.message.includes(e))
+      },
     })
-    
-    redis.on('error', () => {
-      redisAvailable = false
+
+    client.on('connect', () => {
+      console.log('[Redis] Connected successfully')
+      isConnected = true
     })
-    
-    redis.on('connect', () => {
-      redisAvailable = true
+
+    client.on('ready', () => {
+      console.log('[Redis] Ready to accept commands')
     })
-  } catch {
+
+    client.on('error', (err) => {
+      console.warn('[Redis] Connection error:', err.message)
+      isConnected = false
+    })
+
+    client.on('close', () => {
+      console.log('[Redis] Connection closed')
+      isConnected = false
+    })
+
+    client.on('reconnecting', () => {
+      console.log('[Redis] Reconnecting...')
+    })
+
+    return client
+  } catch (err) {
+    console.error('[Redis] Failed to create client:', err)
+    return null
+  }
+}
+
+redis = createRedisClient()
+
+/**
+ * Check if Redis is currently connected
+ */
+export function isRedisConnected(): boolean {
+  return isConnected && redis !== null
+}
+
+/**
+ * Gracefully close Redis connection
+ */
+export async function closeRedisConnection(): Promise<void> {
+  if (redis) {
+    await redis.quit()
     redis = null
-    redisAvailable = false
+    isConnected = false
+    console.log('[Redis] Connection closed gracefully')
   }
 }
 
@@ -298,8 +355,6 @@ export async function getCachedFacets<T>(
   key: string,
   computeFn: () => Promise<T>
 ): Promise<T> {
-  // Import here to avoid circular dependency
-  const { getFacetsCacheTTL } = require('./cache-config')
   const ttl = getFacetsCacheTTL()
   
   // Use getCachedData to ensure consistent metrics tracking

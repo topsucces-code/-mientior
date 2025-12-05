@@ -236,7 +236,7 @@ export function AdvancedSearchBar() {
                         }, 200)
                     }}
                     placeholder="Rechercher des produits, marques ou catégories..."
-                    className="w-full h-12 pl-12 pr-32 rounded-full border-2 border-gray-200 focus:border-blue-500 focus:outline-none transition-colors"
+                    className="w-full h-12 pl-12 pr-32 rounded-full border-2 border-gray-200 focus:border-emerald-500 focus:outline-none transition-colors"
                 />
 
                 {searchQuery && (
@@ -317,7 +317,7 @@ export function AdvancedSearchBar() {
                     ))}
                     <button
                         onClick={clearHistory}
-                        className="w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 text-left transition-colors border-t border-gray-100 mt-1"
+                        className="w-full px-4 py-2 text-sm text-emerald-600 hover:bg-emerald-50 text-left transition-colors border-t border-gray-100 mt-1"
                     >
                         Effacer l&apos;historique
                     </button>

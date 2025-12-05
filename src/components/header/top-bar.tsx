@@ -7,9 +7,11 @@ import { RotatingMessages } from './rotating-messages'
 import { LanguageCurrencySelector } from './language-currency-selector'
 import Link from 'next/link'
 import { HelpCircle, Truck, Shield } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export function TopBar() {
     const { isScrolled } = useHeader()
+    const t = useTranslations('header')
 
     if (isScrolled) {
         return null
@@ -17,7 +19,7 @@ export function TopBar() {
 
     return (
         <div
-            className="bg-gray-50 border-b border-gray-200 transition-all duration-300 animate-slide-down"
+            className="bg-taupe-50 border-b border-taupe-200 transition-all duration-300 animate-slide-down"
             style={{ height: HEADER_CONFIG.heights.topBar }}
         >
             <div className="container mx-auto px-4 h-full flex items-center justify-between">
@@ -26,13 +28,13 @@ export function TopBar() {
                     <GeolocationSelector />
 
                     <div className="hidden lg:flex items-center gap-4 text-xs text-gray-600">
-                        <Link href="/livraison" className="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
+                        <Link href="/livraison" className="flex items-center gap-1.5 hover:text-emerald-600 transition-colors">
                             <Truck className="w-3.5 h-3.5" />
-                            <span>Livraison gratuite dès 50€</span>
+                            <span>{t('freeShipping', { amount: '50€' })}</span>
                         </Link>
-                        <Link href="/garantie" className="flex items-center gap-1.5 hover:text-blue-600 transition-colors">
+                        <Link href="/garantie" className="flex items-center gap-1.5 hover:text-emerald-600 transition-colors">
                             <Shield className="w-3.5 h-3.5" />
-                            <span>Garantie 2 ans</span>
+                            <span>{t('warranty')}</span>
                         </Link>
                     </div>
                 </div>
@@ -48,10 +50,10 @@ export function TopBar() {
 
                     <Link
                         href="/aide"
-                        className="flex items-center gap-1.5 text-sm hover:text-blue-600 transition-colors"
+                        className="flex items-center gap-1.5 text-sm hover:text-emerald-600 transition-colors"
                     >
                         <HelpCircle className="w-4 h-4" />
-                        <span className="hidden md:inline font-medium">Aide</span>
+                        <span className="hidden md:inline font-medium">{t('help')}</span>
                     </Link>
                 </div>
             </div>

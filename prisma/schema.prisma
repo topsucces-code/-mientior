@@ -153,8 +153,22 @@ enum PaymentStatus {
 }
 
 enum PaymentGateway {
+  // Card payments
   PAYSTACK
   FLUTTERWAVE
+  STRIPE
+  // Mobile Money - West Africa
+  ORANGE_MONEY
+  MTN_MOMO
+  WAVE
+  MOOV_MONEY
+  FREE_MONEY
+  // Mobile Money - East Africa
+  MPESA
+  // Cash
+  COD // Cash on Delivery
+  // Bank
+  BANK_TRANSFER
 }
 
 enum LoyaltyLevel {
@@ -294,16 +308,17 @@ model Product {
   // Should not be manually set - updated via ranking:calculate script
   popularity Int @default(0) @map("popularity")
 
-  images      ProductImage[]
-  variants    ProductVariant[]
-  tags        ProductTag[]
-  reviews     Review[]
-  orderItems  OrderItem[]
-  questions   ProductQuestion[]
-  pimSyncLogs PimSyncLog[]
-  pimMapping  PimProductMapping?
-  createdAt   DateTime           @default(now()) @map("created_at")
-  updatedAt   DateTime           @updatedAt @map("updated_at")
+  images             ProductImage[]
+  variants           ProductVariant[]
+  tags               ProductTag[]
+  reviews            Review[]
+  orderItems         OrderItem[]
+  questions          ProductQuestion[]
+  pimSyncLogs        PimSyncLog[]
+  pimMapping         PimProductMapping?
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+  returnRequestItems ReturnRequestItem[]
 
   @@index([slug])
   @@index([categoryId])
@@ -440,6 +455,13 @@ model Order {
   shippingCost         Float            @default(0)
   discount             Float            @default(0)
   total                Float
+  // Multi-currency support for African markets
+  currency             String           @default("XOF") // XOF, XAF, NGN, KES, ZAR, MAD, GHS, EUR
+  currencyRate         Float            @default(1) // Exchange rate at time of order
+  totalInEur           Float?           @map("total_in_eur") // Total in EUR for reporting
+  // Country and locale
+  countryCode          String?          @map("country_code") // SN, CI, CM, NG, etc.
+  locale               String           @default("fr") // fr, en, ar
   estimatedDeliveryMin DateTime?
   estimatedDeliveryMax DateTime?
   notes                String?          @db.Text
@@ -454,11 +476,13 @@ model Order {
   promoCodeUsages      PromoCodeUsage[]
   shippingAddress      Json?
   billingAddress       Json?
-  paymentReference     String? // Paystack reference ou Flutterwave tx_ref
-  paymentGateway       PaymentGateway? // Gateway utilisée (PAYSTACK ou FLUTTERWAVE)
+  paymentReference     String? // Paystack, Flutterwave, Orange Money, MTN MoMo reference
+  paymentGateway       PaymentGateway? // Gateway utilisée
+  paymentMethod        String?          @map("payment_method") // orange_money, mtn_momo, mpesa, wave, card, cod
   paymentMetadata      Json? // Données supplémentaires (customer code, transaction details)
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
+  returnRequests       ReturnRequest[]
 
   @@index([userId])
   @@index([vendorId])
@@ -493,10 +517,16 @@ model User {
   email          String          @unique
   firstName      String?
   lastName       String?
+  phone          String? // Phone number for Mobile Money
+  // Localization preferences for African markets
+  countryCode    String          @default("SN") @map("country_code") // SN, CI, CM, NG, etc.
+  currency       String          @default("XOF") // XOF, XAF, NGN, KES, ZAR, MAD, GHS
+  locale         String          @default("fr") // fr, en, ar
+  // Loyalty
   loyaltyLevel   LoyaltyLevel    @default(BRONZE)
   loyaltyPoints  Int             @default(0)
   totalOrders    Int             @default(0)
-  totalSpent     Float           @default(0)
+  totalSpent     Float           @default(0) // Stored in EUR for consistency
   orders         Order[]
   reviews        Review[]
   savedAddresses SavedAddress[]
@@ -512,7 +542,15 @@ model User {
   // User preferences for personalized search - auto-calculated by personalization service
   // Contains favorite categories, brands, search patterns, and calculation metadata
   // Do not manually edit - use personalization:calculate script or admin API
-  preferences Json?
+  preferences       Json?
+  returnRequests    ReturnRequest[]
+  supportTickets    SupportTicket[]
+  userNotifications UserNotification[]
+
+  // Two-Factor Authentication
+  twoFactorEnabled     Boolean @default(false) @map("two_factor_enabled")
+  twoFactorSecret      String? @map("two_factor_secret")
+  twoFactorBackupCodes Json?   @map("two_factor_backup_codes") // Array of hashed backup codes
 
   @@index([email])
   @@index([loyaltyLevel])
@@ -563,21 +601,22 @@ model Media {
 }
 
 model AdminUser {
-  id            String          @id @default(cuid())
-  email         String          @unique
-  authUserId    String?         @unique @map("auth_user_id")
-  authUser      BetterAuthUser? @relation(fields: [authUserId], references: [id], onDelete: SetNull)
-  firstName     String
-  lastName      String
-  role          Role            @default(VIEWER)
-  permissions   Json?
-  isActive      Boolean         @default(true)
-  lastLoginAt   DateTime?
-  auditLogs     AuditLog[]
-  savedViews    SavedView[]
-  notifications Notification[]
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id             String          @id @default(cuid())
+  email          String          @unique
+  authUserId     String?         @unique @map("auth_user_id")
+  authUser       BetterAuthUser? @relation(fields: [authUserId], references: [id], onDelete: SetNull)
+  firstName      String
+  lastName       String
+  role           Role            @default(VIEWER)
+  permissions    Json?
+  isActive       Boolean         @default(true)
+  lastLoginAt    DateTime?
+  auditLogs      AuditLog[]
+  savedViews     SavedView[]
+  notifications  Notification[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  supportTickets SupportTicket[]
 
   @@index([email])
   @@index([authUserId])
@@ -1129,4 +1168,230 @@ model MenuItem {
   @@index([parentId])
   @@index([order])
   @@map("menu_items")
+}
+
+// Settings key-value store for admin configuration
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([key])
+  @@map("settings")
+}
+
+// Return/Refund requests
+model ReturnRequest {
+  id            String              @id @default(cuid())
+  orderId       String              @map("order_id")
+  order         Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId        String              @map("user_id")
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status        ReturnStatus        @default(PENDING)
+  reason        String
+  reasonDetails String              @default("") @map("reason_details")
+  totalAmount   Float               @map("total_amount")
+  refundAmount  Float               @default(0) @map("refund_amount")
+  refundMethod  RefundMethod        @default(ORIGINAL) @map("refund_method")
+  timeline      Json                @default("[]")
+  items         ReturnRequestItem[]
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
+
+  @@index([orderId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("return_requests")
+}
+
+model ReturnRequestItem {
+  id              String        @id @default(cuid())
+  returnRequestId String        @map("return_request_id")
+  returnRequest   ReturnRequest @relation(fields: [returnRequestId], references: [id], onDelete: Cascade)
+  productId       String        @map("product_id")
+  product         Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity        Int
+  price           Float
+  condition       String        @default("UNOPENED")
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  @@index([returnRequestId])
+  @@index([productId])
+  @@map("return_request_items")
+}
+
+enum ReturnStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+enum RefundMethod {
+  ORIGINAL
+  STORE_CREDIT
+  BANK_TRANSFER
+}
+
+// ==================== SUPPORT SYSTEM ====================
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_CUSTOMER
+  WAITING_VENDOR
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketCategory {
+  ORDER_ISSUE
+  PAYMENT_ISSUE
+  DELIVERY_ISSUE
+  PRODUCT_QUESTION
+  RETURN_REFUND
+  ACCOUNT_ISSUE
+  VENDOR_ISSUE
+  TECHNICAL_ISSUE
+  OTHER
+}
+
+model SupportTicket {
+  id           String         @id @default(cuid())
+  ticketNumber String         @unique @map("ticket_number")
+  subject      String
+  description  String         @db.Text
+  status       TicketStatus   @default(OPEN)
+  priority     TicketPriority @default(MEDIUM)
+  category     TicketCategory
+
+  // Relations
+  userId       String     @map("user_id")
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId      String?    @map("order_id")
+  vendorId     String?    @map("vendor_id")
+  assignedToId String?    @map("assigned_to_id")
+  assignedTo   AdminUser? @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  messages    TicketMessage[]
+  attachments Json? // Array of attachment URLs
+  tags        Json? // Array of tags
+  metadata    Json? // Additional data
+
+  // Timestamps
+  firstResponseAt DateTime? @map("first_response_at")
+  resolvedAt      DateTime? @map("resolved_at")
+  closedAt        DateTime? @map("closed_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([status])
+  @@index([priority])
+  @@index([category])
+  @@index([assignedToId])
+  @@index([createdAt])
+  @@map("support_tickets")
+}
+
+model TicketMessage {
+  id         String  @id @default(cuid())
+  content    String  @db.Text
+  isStaff    Boolean @default(false) @map("is_staff")
+  isInternal Boolean @default(false) @map("is_internal") // Internal notes not visible to customer
+
+  ticketId     String        @map("ticket_id")
+  ticket       SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  senderId     String        @map("sender_id")
+  senderName   String        @map("sender_name")
+  senderAvatar String?       @map("sender_avatar")
+
+  attachments Json? // Array of attachment URLs
+  readAt      DateTime? @map("read_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@index([ticketId])
+  @@index([createdAt])
+  @@map("ticket_messages")
+}
+
+// ==================== ORDER TRACKING ====================
+
+enum TrackingEventType {
+  ORDER_PLACED
+  ORDER_CONFIRMED
+  PAYMENT_RECEIVED
+  PROCESSING
+  PACKED
+  SHIPPED
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  DELIVERY_ATTEMPTED
+  RETURNED_TO_SENDER
+  CANCELLED
+}
+
+model OrderTracking {
+  id             String            @id @default(cuid())
+  orderId        String            @map("order_id")
+  eventType      TrackingEventType @map("event_type")
+  title          String
+  description    String?
+  location       String?
+  carrier        String? // DHL, Fedex, local carrier, etc.
+  trackingNumber String?           @map("tracking_number")
+  metadata       Json?
+  createdAt      DateTime          @default(now()) @map("created_at")
+
+  @@index([orderId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("order_tracking")
+}
+
+// ==================== NOTIFICATIONS ====================
+
+enum NotificationType {
+  ORDER_UPDATE
+  PAYMENT_UPDATE
+  DELIVERY_UPDATE
+  PROMO_OFFER
+  PRICE_DROP
+  BACK_IN_STOCK
+  REVIEW_REQUEST
+  SUPPORT_UPDATE
+  SYSTEM_ALERT
+}
+
+model UserNotification {
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  message   String           @db.Text
+  link      String?
+  data      Json?
+  read      Boolean          @default(false)
+  readAt    DateTime?        @map("read_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([type])
+  @@index([read])
+  @@index([createdAt])
+  @@map("user_notifications")
 }

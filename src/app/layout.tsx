@@ -4,6 +4,8 @@ import type { Metadata } from 'next'
 import { Inter, Poppins } from 'next/font/google'
 import Providers from './providers'
 import { cn } from '@/lib/utils'
+import { NextIntlClientProvider } from 'next-intl'
+import { getMessages, getLocale } from 'next-intl/server'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -67,11 +69,16 @@ export const viewport = {
   maximumScale: 5,
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+  
   return (
-    <html lang="en" className={cn(inter.variable, poppins.variable)} suppressHydrationWarning>
+    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} className={cn(inter.variable, poppins.variable)} suppressHydrationWarning>
       <body className="min-h-screen bg-white font-sans text-anthracite-700 antialiased">
-        <Providers>{children}</Providers>
+        <NextIntlClientProvider messages={messages}>
+          <Providers>{children}</Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   )

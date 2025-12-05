@@ -8,6 +8,7 @@ import { Permission } from '@/lib/permissions';
 import { prisma } from '@/lib/prisma';
 import { withPermission } from '@/middleware/admin-auth';
 import { getCachedData, invalidateCache } from '@/lib/redis';
+import { getPimAlerts } from '@/lib/pim-alerts';
 
 interface Alert {
   id: string;
@@ -148,6 +149,15 @@ async function handleGET(
             count: inactiveVendorsCount,
             timestamp: new Date(),
           });
+        }
+
+        // Check PIM sync health (Akeneo integration)
+        try {
+          const pimAlerts = await getPimAlerts();
+          alertsList.push(...pimAlerts);
+        } catch (error) {
+          console.error('[Dashboard Alerts] PIM health check failed:', error);
+          // Continue without PIM alerts to avoid breaking the dashboard
         }
 
         // Sort by type priority and count

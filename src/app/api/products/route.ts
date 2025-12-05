@@ -112,6 +112,7 @@ async function handleGET(request: NextRequest, { adminSession: _adminSession }: 
               tag: true
             }
           },
+          pimMapping: true,
           _count: {
             select: { reviews: true }
           }
@@ -164,6 +165,12 @@ async function handleGET(request: NextRequest, { adminSession: _adminSession }: 
         name: pt.tag.name,
         slug: pt.tag.slug
       })),
+      pimMapping: product.pimMapping ? {
+        akeneoProductId: product.pimMapping.akeneoProductId,
+        akeneoSku: product.pimMapping.akeneoSku,
+        lastSyncedAt: product.pimMapping.lastSyncedAt,
+        syncStatus: product.pimMapping.syncStatus
+      } : undefined,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt
     }))

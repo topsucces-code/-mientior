@@ -39,17 +39,17 @@ import Link from "next/link";
 const { Title, Text, Paragraph } = Typography;
 
 export default function VendorShow({ params }: { params: { id: string } }) {
-  const { queryResult } = useShow({
+  const { query } = useShow({
     resource: "vendors",
     id: params.id,
   });
 
   const { mutate: updateVendor } = useUpdate();
   const [form] = Form.useForm();
-  // const [notesModalVisible, setNotesModalVisible] = useState(false);
+  const [notesModalVisible, setNotesModalVisible] = useState(false);
   const [payoutModalVisible, setPayoutModalVisible] = useState(false);
 
-  const { data, isLoading } = queryResult;
+  const { data, isLoading } = query;
   const record = data?.data;
 
   const handleApprove = () => {
@@ -94,7 +94,7 @@ export default function VendorShow({ params }: { params: { id: string } }) {
         message.success("Payout processed successfully");
         setPayoutModalVisible(false);
         form.resetFields();
-        queryResult.refetch();
+        query.refetch();
       } else {
         message.error("Failed to process payout");
       }
@@ -215,14 +215,23 @@ export default function VendorShow({ params }: { params: { id: string } }) {
     },
   ];
 
+  interface VendorOrder {
+    id: string;
+    orderNumber: string;
+    createdAt: string;
+    userId: string;
+    total: number;
+    status: string;
+  }
+
   const orderColumns = [
     {
       title: "Order #",
       dataIndex: "orderNumber",
       key: "orderNumber",
-      render: (orderNumber: string, order: { id: string }) => (
+      render: (orderNumber: string, order: VendorOrder) => (
         <Link href={`/admin/orders/show/${order.id}`}>
-          <a style={{ color: "#1890ff" }}>{orderNumber}</a>
+          <span style={{ color: "#1890ff" }}>{orderNumber}</span>
         </Link>
       ),
     },
@@ -246,7 +255,7 @@ export default function VendorShow({ params }: { params: { id: string } }) {
     {
       title: "Commission",
       key: "commission",
-      render: (_: unknown, order: { total: number }) => {
+      render: (_: unknown, order: VendorOrder) => {
         const commission = (order.total * (record?.commissionRate || 10)) / 100;
         return `$${commission.toFixed(2)}`;
       },

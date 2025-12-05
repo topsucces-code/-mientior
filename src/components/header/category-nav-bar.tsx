@@ -105,7 +105,7 @@ export function CategoryNavBar({ categories = DEFAULT_CATEGORIES }: CategoryNavB
                                 href={`/categories/${category.slug}`}
                                 onClick={() => setActiveCategory(category.id)}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${activeCategory === category.id
-                                    ? 'bg-blue-600 text-white shadow-md'
+                                    ? 'bg-emerald-600 text-white shadow-md'
                                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                                     }`}
                             >

@@ -243,7 +243,7 @@ export default function HeroSection({ slides = defaultSlides, autoplayDelay = 60
       {/* Skip link for keyboard navigation */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-anthracite-700 focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-anthracite-700 focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
       >
         Skip to main content
       </a>
@@ -265,9 +265,9 @@ export default function HeroSection({ slides = defaultSlides, autoplayDelay = 60
             return (
               <div key={slide.id} className="embla__slide relative min-w-0 flex-[0_0_100%]">
                 {/* Background Image with Fade + Scale Animation */}
-                <div className="relative h-[85vh] overflow-hidden bg-anthracite-700">
+                <div className="relative h-[50vh] md:h-[60vh] lg:h-[65vh] overflow-hidden bg-anthracite-700">
                   {/* Fallback Gradient (only visible if image fails to load) */}
-                  <div className="absolute inset-0 -z-10 bg-gradient-to-br from-orange-500 via-orange-600 to-blue-600" />
+                  <div className="absolute inset-0 -z-10 bg-gradient-to-br from-emerald-600 via-emerald-700 to-taupe-600" />
                   
                   {/* Background Layer with scale animation on transition */}
                   <div
@@ -355,7 +355,7 @@ export default function HeroSection({ slides = defaultSlides, autoplayDelay = 60
                           'mb-4 font-display font-extrabold leading-[1.1] tracking-tight',
                           'text-[clamp(48px,8vw,96px)]',
                           isDark ? 'text-transparent' : 'text-anthracite-700',
-                          'bg-gradient-to-r from-white via-platinum-100 to-aurore-200 bg-clip-text',
+                          'bg-gradient-to-r from-white via-platinum-100 to-taupe-200 bg-clip-text',
                           isActive && !prefersReducedMotion && 'animate-fade-in-up'
                         )}
                         style={{
@@ -394,8 +394,8 @@ export default function HeroSection({ slides = defaultSlides, autoplayDelay = 60
                             className={cn(
                               'group flex items-center gap-2',
                               'h-14 px-12 rounded-xl',
-                              'shadow-[0_12px_24px_rgba(255,107,0,0.3)]',
-                              'hover:shadow-[0_16px_32px_rgba(255,107,0,0.4)]',
+                              'shadow-[0_12px_24px_rgba(4,120,87,0.3)]',
+                              'hover:shadow-[0_16px_32px_rgba(4,120,87,0.4)]',
                               'hover:-translate-y-0.5',
                               'transition-all duration-300',
                               'hover:scale-105'

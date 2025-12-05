@@ -1,11 +1,12 @@
 'use client'
 
-import { Bell, Package, Gift, MessageCircle, AlertCircle } from 'lucide-react'
+import { Bell, Package, Gift, MessageCircle, AlertCircle, CreditCard, Truck, Tag, TrendingDown, Box, Star } from 'lucide-react'
 import { useNotificationsStore } from '@/stores/notifications.store'
 import { useHeader } from '@/contexts/header-context'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import Pusher from 'pusher-js'
 import type { Notification } from '@/types'
+import { useNotifications } from '@/hooks/use-notifications'
 
 interface OrderCreatedData {
     orderId: string;
@@ -38,17 +39,65 @@ const ICON_MAP = {
     order: Package,
     promo: Gift,
     message: MessageCircle,
-    system: AlertCircle
+    system: AlertCircle,
+    // API notification types
+    ORDER_UPDATE: Package,
+    PAYMENT_UPDATE: CreditCard,
+    DELIVERY_UPDATE: Truck,
+    PROMO_OFFER: Tag,
+    PRICE_DROP: TrendingDown,
+    BACK_IN_STOCK: Box,
+    REVIEW_REQUEST: Star,
+    SUPPORT_UPDATE: MessageCircle,
+    SYSTEM_ALERT: AlertCircle,
 } as const
 
 export function NotificationsDropdown() {
-    const { notifications, unreadCount, markAsRead, markAllAsRead, addNotification } = useNotificationsStore()
+    const { notifications: storeNotifications, unreadCount: storeUnreadCount, markAsRead: storeMarkAsRead, markAllAsRead: storeMarkAllAsRead, addNotification } = useNotificationsStore()
     const { activeDropdown, setActiveDropdown } = useHeader()
     const dropdownRef = useRef<HTMLDivElement>(null)
     const triggerRef = useRef<HTMLButtonElement>(null)
     const pusherRef = useRef<Pusher | null>(null)
+    
+    // Use API notifications hook
+    const { 
+        notifications: apiNotifications, 
+        unreadCount: apiUnreadCount, 
+        markAsRead: apiMarkAsRead, 
+        markAllAsRead: apiMarkAllAsRead 
+    } = useNotifications({ pollInterval: 30000, limit: 10 })
 
     const isOpen = activeDropdown === 'notifications'
+    
+    // Combine store and API notifications
+    const combinedNotifications = [
+        ...storeNotifications.map(n => ({ ...n, source: 'store' as const })),
+        ...apiNotifications.map(n => ({ 
+            id: n.id, 
+            type: n.type, 
+            title: n.title, 
+            message: n.message, 
+            timestamp: new Date(n.createdAt), 
+            read: n.read, 
+            link: n.link || undefined,
+            source: 'api' as const 
+        }))
+    ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    
+    const totalUnreadCount = storeUnreadCount + apiUnreadCount
+    
+    const handleMarkAsRead = useCallback((id: string, source: 'store' | 'api') => {
+        if (source === 'store') {
+            storeMarkAsRead(id)
+        } else {
+            apiMarkAsRead(id)
+        }
+    }, [storeMarkAsRead, apiMarkAsRead])
+    
+    const handleMarkAllAsRead = useCallback(() => {
+        storeMarkAllAsRead()
+        apiMarkAllAsRead()
+    }, [storeMarkAllAsRead, apiMarkAllAsRead])
 
     // Initialize Pusher connection and subscribe to real-time notifications
     useEffect(() => {
@@ -161,7 +210,7 @@ export function NotificationsDropdown() {
         }
     }, [isOpen, setActiveDropdown])
 
-    const recentNotifications = notifications.slice(0, 5)
+    const recentNotifications = combinedNotifications.slice(0, 5)
 
     return (
         <div className="relative" ref={dropdownRef}>
@@ -169,18 +218,18 @@ export function NotificationsDropdown() {
                 ref={triggerRef}
                 onClick={() => setActiveDropdown(isOpen ? null : 'notifications')}
                 className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
-                aria-label={`Notifications${unreadCount > 0 ? ` - ${unreadCount} non lues` : ''}`}
+                aria-label={`Notifications${totalUnreadCount > 0 ? ` - ${totalUnreadCount} non lues` : ''}`}
                 aria-expanded={isOpen}
                 aria-haspopup="menu"
                 aria-controls="notifications-dropdown"
             >
                 <Bell className="w-6 h-6" />
-                {unreadCount > 0 && (
+                {totalUnreadCount > 0 && (
                     <span
                         className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
                         aria-hidden="true"
                     >
-                        {unreadCount > 9 ? '9+' : unreadCount}
+                        {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
                     </span>
                 )}
             </button>
@@ -194,11 +243,11 @@ export function NotificationsDropdown() {
                 >
                     <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                         <h3 className="font-semibold">Notifications</h3>
-                        {unreadCount > 0 && (
+                        {totalUnreadCount > 0 && (
                             <button
-                                onClick={markAllAsRead}
-                                className="text-sm text-blue-600 hover:underline"
-                                aria-label={`Marquer toutes les ${unreadCount} notifications comme lues`}
+                                onClick={handleMarkAllAsRead}
+                                className="text-sm text-emerald-600 hover:underline"
+                                aria-label={`Marquer toutes les ${totalUnreadCount} notifications comme lues`}
                             >
                                 Tout marquer comme lu
                             </button>
@@ -208,26 +257,26 @@ export function NotificationsDropdown() {
                     <div className="max-h-96 overflow-y-auto custom-scrollbar">
                         {recentNotifications.length > 0 ? (
                             recentNotifications.map((notification) => {
-                                const Icon = ICON_MAP[notification.type]
+                                const Icon = ICON_MAP[notification.type as keyof typeof ICON_MAP] || Bell
                                 return (
                                     <button
-                                        key={notification.id}
+                                        key={`${notification.source}-${notification.id}`}
                                         role="menuitem"
                                         tabIndex={isOpen ? 0 : -1}
                                         onClick={() => {
-                                            markAsRead(notification.id)
+                                            handleMarkAsRead(notification.id, notification.source)
                                             if (notification.link) {
                                                 window.location.href = notification.link
                                             }
                                         }}
-                                        className={`w-full p-4 border-b border-gray-100 hover:bg-gray-50 text-left transition-colors ${!notification.read ? 'bg-blue-50' : ''
+                                        className={`w-full p-4 border-b border-gray-100 hover:bg-gray-50 text-left transition-colors ${!notification.read ? 'bg-emerald-50' : ''
                                             }`}
                                         aria-label={`${notification.read ? 'Lue' : 'Non lue'} - ${notification.title}`}
                                     >
                                         <div className="flex gap-3">
-                                            <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${notification.type === 'order' ? 'bg-green-100 text-green-600' :
-                                                notification.type === 'promo' ? 'bg-yellow-100 text-yellow-600' :
-                                                    notification.type === 'message' ? 'bg-blue-100 text-blue-600' :
+                                            <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${notification.type === 'order' || notification.type === 'ORDER_UPDATE' ? 'bg-green-100 text-green-600' :
+                                                notification.type === 'promo' || notification.type === 'PROMO_OFFER' ? 'bg-yellow-100 text-yellow-600' :
+                                                    notification.type === 'message' || notification.type === 'SUPPORT_UPDATE' ? 'bg-emerald-100 text-emerald-600' :
                                                         'bg-gray-100 text-gray-600'
                                                 }`}
                                                 aria-hidden="true"
@@ -235,7 +284,7 @@ export function NotificationsDropdown() {
                                                 <Icon className="w-5 h-5" />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className={`font-medium ${!notification.read ? 'text-blue-600' : ''}`}>
+                                                <p className={`font-medium ${!notification.read ? 'text-emerald-600' : ''}`}>
                                                     {notification.title}
                                                 </p>
                                                 <p className="text-sm text-gray-600 truncate">{notification.message}</p>
@@ -246,7 +295,7 @@ export function NotificationsDropdown() {
                                                 </p>
                                             </div>
                                             {!notification.read && (
-                                                <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2" />
+                                                <div className="flex-shrink-0 w-2 h-2 bg-emerald-500 rounded-full mt-2" />
                                             )}
                                         </div>
                                     </button>
@@ -260,11 +309,11 @@ export function NotificationsDropdown() {
                         )}
                     </div>
 
-                    {notifications.length > 5 && (
+                    {combinedNotifications.length > 5 && (
                         <div className="p-3 border-t border-gray-200 text-center">
                             <a
                                 href="/account/notifications"
-                                className="text-sm text-blue-600 hover:underline font-medium"
+                                className="text-sm text-emerald-600 hover:underline font-medium"
                             >
                                 Voir toutes les notifications
                             </a>

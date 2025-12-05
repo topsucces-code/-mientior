@@ -93,6 +93,8 @@
     "reports": "Reports",
     "analytics": "Analytics"
   },
+  "actions": "Actions",
+  "never": "Never",
   "common": {
     "yes": "Yes",
     "no": "No",

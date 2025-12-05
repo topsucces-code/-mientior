@@ -1,11 +1,12 @@
 "use client";
 
 import { useForm } from "@refinedev/antd";
-import { Form, Input, InputNumber, Select, Button, Checkbox, Space, Popconfirm } from "antd";
-import { PlusOutlined, MinusCircleOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Form, Input, InputNumber, Select, Button, Checkbox, Space, Popconfirm, Alert } from "antd";
+import { PlusOutlined, MinusCircleOutlined, DeleteOutlined, CloudOutlined, ExportOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, use } from "react";
 import { useDelete } from "@refinedev/core";
+import { useTranslation } from "react-i18next";
 
 const { TextArea } = Input;
 
@@ -24,6 +25,7 @@ interface Tag {
 export default function ProductEdit({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const { id } = use(params);
+  const { t } = useTranslation(["admin", "common"]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
 
@@ -34,6 +36,10 @@ export default function ProductEdit({ params }: { params: Promise<{ id: string }
   });
 
   const { mutate: deleteProduct } = useDelete();
+
+  // Check if product is managed by Akeneo PIM
+  const productData = query?.data?.data as any;
+  const hasPimMapping = !!productData?.pimMapping;
 
   // Fetch categories
   useEffect(() => {
@@ -98,25 +104,61 @@ export default function ProductEdit({ params }: { params: Promise<{ id: string }
         </Popconfirm>
       </div>
 
+      {hasPimMapping && (
+        <Alert
+          message={t("products.managedByAkeneo", "This product is managed by Akeneo PIM")}
+          description={
+            <Space direction="vertical">
+              <span>{t("products.syncedFromAkeneo", "Changes should be made in Akeneo and will be synchronized automatically.")}</span>
+              <span>
+                {t("products.akeneoFieldsReadOnly", "Core product fields (name, description, price, images) are read-only in this form. Only inventory and metadata can be updated here.")}
+              </span>
+              {process.env.NEXT_PUBLIC_AKENEO_API_URL && (
+                <Button
+                  type="link"
+                  icon={<ExportOutlined />}
+                  href={`${process.env.NEXT_PUBLIC_AKENEO_API_URL}/enrich/product/identifier/${productData?.pimMapping?.akeneoProductId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ paddingLeft: 0 }}
+                >
+                  {t("products.viewInAkeneo", "View in Akeneo")}
+                </Button>
+              )}
+            </Space>
+          }
+          type="warning"
+          showIcon
+          icon={<CloudOutlined />}
+          style={{ marginBottom: 16 }}
+        />
+      )}
+
       <Form {...formProps} layout="vertical">
         <Form.Item
           label="Name"
           name="name"
           rules={[{ required: true, message: "Please enter product name" }]}
+          tooltip={hasPimMapping ? t("products.managedInAkeneo", "This field is managed in Akeneo") : undefined}
         >
-          <Input onChange={handleNameChange} placeholder="Product name" />
+          <Input onChange={handleNameChange} placeholder="Product name" disabled={hasPimMapping} />
         </Form.Item>
 
         <Form.Item
           label="Slug"
           name="slug"
           rules={[{ required: true, message: "Slug is required" }]}
+          tooltip={hasPimMapping ? t("products.managedInAkeneo", "This field is managed in Akeneo") : undefined}
         >
-          <Input placeholder="Auto-generated from name" />
+          <Input placeholder="Auto-generated from name" disabled={hasPimMapping} />
         </Form.Item>
 
-        <Form.Item label="Description" name="description">
-          <TextArea rows={4} placeholder="Product description" />
+        <Form.Item
+          label="Description"
+          name="description"
+          tooltip={hasPimMapping ? t("products.managedInAkeneo", "This field is managed in Akeneo") : undefined}
+        >
+          <TextArea rows={4} placeholder="Product description" disabled={hasPimMapping} />
         </Form.Item>
 
         <Space style={{ width: "100%", marginBottom: 16 }}>
@@ -125,21 +167,29 @@ export default function ProductEdit({ params }: { params: Promise<{ id: string }
             name="price"
             rules={[{ required: true, message: "Price is required" }]}
             style={{ marginBottom: 0 }}
+            tooltip={hasPimMapping ? t("products.managedInAkeneo", "This field is managed in Akeneo") : undefined}
           >
             <InputNumber
               min={0}
               step={0.01}
               placeholder="0.00"
               style={{ width: 150 }}
+              disabled={hasPimMapping}
             />
           </Form.Item>
 
-          <Form.Item label="Compare At Price" name="compareAtPrice" style={{ marginBottom: 0 }}>
+          <Form.Item
+            label="Compare At Price"
+            name="compareAtPrice"
+            style={{ marginBottom: 0 }}
+            tooltip={hasPimMapping ? t("products.managedInAkeneo", "This field is managed in Akeneo") : undefined}
+          >
             <InputNumber
               min={0}
               step={0.01}
               placeholder="0.00"
               style={{ width: 150 }}
+              disabled={hasPimMapping}
             />
           </Form.Item>
 
@@ -200,7 +250,10 @@ export default function ProductEdit({ params }: { params: Promise<{ id: string }
           <Input placeholder="e.g., New, Limited, Exclusive" />
         </Form.Item>
 
-        <h3>Variants</h3>
+        <h3>
+          Variants
+          {hasPimMapping && <span style={{ fontSize: "14px", color: "#888", marginLeft: "8px" }}>({t("products.managedInAkeneo", "Managed in Akeneo")})</span>}
+        </h3>
         <Form.List name="variants">
           {(fields, { add, remove }) => (
             <>
@@ -215,7 +268,7 @@ export default function ProductEdit({ params }: { params: Promise<{ id: string }
                     name={[name, "size"]}
                     rules={[{ required: false }]}
                   >
-                    <Input placeholder="Size (e.g., M, L)" style={{ width: 100 }} />
+                    <Input placeholder="Size (e.g., M, L)" style={{ width: 100 }} disabled={hasPimMapping} />
                   </Form.Item>
 
                   <Form.Item
@@ -223,7 +276,7 @@ export default function ProductEdit({ params }: { params: Promise<{ id: string }
                     name={[name, "color"]}
                     rules={[{ required: false }]}
                   >
-                    <Input placeholder="Color" style={{ width: 120 }} />
+                    <Input placeholder="Color" style={{ width: 120 }} disabled={hasPimMapping} />
                   </Form.Item>
 
                   <Form.Item
@@ -231,7 +284,7 @@ export default function ProductEdit({ params }: { params: Promise<{ id: string }
                     name={[name, "sku"]}
                     rules={[{ required: true, message: "SKU required" }]}
                   >
-                    <Input placeholder="SKU" style={{ width: 150 }} />
+                    <Input placeholder="SKU" style={{ width: 150 }} disabled={hasPimMapping} />
                   </Form.Item>
 
                   <Form.Item
@@ -239,7 +292,7 @@ export default function ProductEdit({ params }: { params: Promise<{ id: string }
                     name={[name, "stock"]}
                     rules={[{ required: true, message: "Stock required" }]}
                   >
-                    <InputNumber placeholder="Stock" min={0} style={{ width: 100 }} />
+                    <InputNumber placeholder="Stock" min={0} style={{ width: 100 }} disabled={hasPimMapping} />
                   </Form.Item>
 
                   <Form.Item {...restField} name={[name, "priceModifier"]}>
@@ -247,27 +300,33 @@ export default function ProductEdit({ params }: { params: Promise<{ id: string }
                       placeholder="Price ±"
                       step={0.01}
                       style={{ width: 100 }}
+                      disabled={hasPimMapping}
                     />
                   </Form.Item>
 
-                  <MinusCircleOutlined onClick={() => remove(name)} />
+                  {!hasPimMapping && <MinusCircleOutlined onClick={() => remove(name)} />}
                 </Space>
               ))}
-              <Form.Item>
-                <Button
-                  type="dashed"
-                  onClick={() => add()}
-                  block
-                  icon={<PlusOutlined />}
-                >
-                  Add Variant
-                </Button>
-              </Form.Item>
+              {!hasPimMapping && (
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                  >
+                    Add Variant
+                  </Button>
+                </Form.Item>
+              )}
             </>
           )}
         </Form.List>
 
-        <h3>Images</h3>
+        <h3>
+          Images
+          {hasPimMapping && <span style={{ fontSize: "14px", color: "#888", marginLeft: "8px" }}>({t("products.managedInAkeneo", "Managed in Akeneo")})</span>}
+        </h3>
         <Form.List name="images">
           {(fields, { add, remove }) => (
             <>
@@ -282,7 +341,7 @@ export default function ProductEdit({ params }: { params: Promise<{ id: string }
                     name={[name, "url"]}
                     rules={[{ required: true, message: "Image URL required" }]}
                   >
-                    <Input placeholder="Image URL" style={{ width: 300 }} />
+                    <Input placeholder="Image URL" style={{ width: 300 }} disabled={hasPimMapping} />
                   </Form.Item>
 
                   <Form.Item
@@ -290,7 +349,7 @@ export default function ProductEdit({ params }: { params: Promise<{ id: string }
                     name={[name, "alt"]}
                     rules={[{ required: true, message: "Alt text required" }]}
                   >
-                    <Input placeholder="Alt text" style={{ width: 200 }} />
+                    <Input placeholder="Alt text" style={{ width: 200 }} disabled={hasPimMapping} />
                   </Form.Item>
 
                   <Form.Item
@@ -298,26 +357,28 @@ export default function ProductEdit({ params }: { params: Promise<{ id: string }
                     name={[name, "type"]}
                     initialValue="IMAGE"
                   >
-                    <Select style={{ width: 120 }}>
+                    <Select style={{ width: 120 }} disabled={hasPimMapping}>
                       <Select.Option value="IMAGE">Image</Select.Option>
                       <Select.Option value="VIDEO">Video</Select.Option>
                       <Select.Option value="THREE_SIXTY">360°</Select.Option>
                     </Select>
                   </Form.Item>
 
-                  <MinusCircleOutlined onClick={() => remove(name)} />
+                  {!hasPimMapping && <MinusCircleOutlined onClick={() => remove(name)} />}
                 </Space>
               ))}
-              <Form.Item>
-                <Button
-                  type="dashed"
-                  onClick={() => add()}
-                  block
-                  icon={<PlusOutlined />}
-                >
-                  Add Image
-                </Button>
-              </Form.Item>
+              {!hasPimMapping && (
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                  >
+                    Add Image
+                  </Button>
+                </Form.Item>
+              )}
             </>
           )}
         </Form.List>

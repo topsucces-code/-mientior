@@ -15,7 +15,7 @@ export function PromotionalBanner() {
 
     return (
         <div
-            className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white"
+            className="bg-gradient-to-r from-emerald-600 via-emerald-700 to-purple-600 text-white"
             style={{ height: HEADER_CONFIG.heights.promotionalBanner }}
         >
             <div className="container mx-auto px-4 h-full flex items-center justify-between">

@@ -48,7 +48,7 @@ export function EnhancedCartPreview() {
             >
                 <ShoppingCart className="w-6 h-6" />
                 {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    <span className="absolute -top-1 -right-1 bg-emerald-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                         {totalItems > 9 ? '9+' : totalItems}
                     </span>
                 )}
@@ -83,7 +83,7 @@ export function EnhancedCartPreview() {
 
                                         <div className="flex-1 min-w-0">
                                             <Link href={`/products/${item.productSlug}`}>
-                                                <h4 className="font-medium hover:text-blue-600 line-clamp-2">
+                                                <h4 className="font-medium hover:text-emerald-600 line-clamp-2">
                                                     {item.productName}
                                                 </h4>
                                             </Link>
@@ -98,7 +98,7 @@ export function EnhancedCartPreview() {
                                                 <span className="text-sm text-gray-600">
                                                     Qté: {item.quantity}
                                                 </span>
-                                                <span className="font-semibold text-blue-600">
+                                                <span className="font-semibold text-emerald-600">
                                                     {((item.price / 100) * item.quantity).toFixed(2)} €
                                                 </span>
                                             </div>
@@ -127,14 +127,14 @@ export function EnhancedCartPreview() {
                         <div className="p-4 border-t border-gray-200 bg-gray-50">
                             <div className="flex items-center justify-between mb-3">
                                 <span className="font-medium">Total</span>
-                                <span className="text-xl font-bold text-blue-600">
+                                <span className="text-xl font-bold text-emerald-600">
                                     {(totalPrice / 100).toFixed(2)} €
                                 </span>
                             </div>
 
                             <Link
                                 href="/checkout"
-                                className="block w-full bg-blue-600 text-white text-center py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                className="block w-full bg-emerald-600 text-white text-center py-3 rounded-lg hover:bg-emerald-700 transition-colors font-medium"
                             >
                                 Passer la commande
                                 <ArrowRight className="w-4 h-4 inline ml-2" />
@@ -142,7 +142,7 @@ export function EnhancedCartPreview() {
 
                             <Link
                                 href="/cart"
-                                className="block w-full text-center mt-2 text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                                className="block w-full text-center mt-2 text-sm text-gray-600 hover:text-emerald-600 transition-colors"
                             >
                                 Voir le panier complet
                             </Link>

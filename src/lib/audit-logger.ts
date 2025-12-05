@@ -1,16 +1,18 @@
 import { prisma } from '@/lib/prisma';
-import { AdminUser } from '@prisma/client';
+import { AdminUser, Prisma } from '@prisma/client';
 import { NextRequest } from 'next/server';
+
+type JsonValue = Prisma.JsonValue;
 
 export interface AuditLogParams {
   action: string;
   resource: string;
   resourceId?: string;
   adminUserId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, JsonValue>;
   changes?: {
-    before?: Record<string, any>;
-    after?: Record<string, any>;
+    before?: Record<string, JsonValue>;
+    after?: Record<string, JsonValue>;
   };
   ipAddress?: string;
   userAgent?: string;
@@ -37,16 +39,29 @@ export function getClientInfo(request: NextRequest): {
  */
 export async function logAction(params: AuditLogParams): Promise<void> {
   try {
+    // Verify adminUserId exists if provided
+    let validAdminUserId = params.adminUserId;
+    if (validAdminUserId) {
+      const adminExists = await prisma.adminUser.findUnique({
+        where: { id: validAdminUserId },
+        select: { id: true },
+      });
+      if (!adminExists) {
+        console.warn(`Audit log: adminUserId ${validAdminUserId} not found, logging without user reference`);
+        validAdminUserId = undefined;
+      }
+    }
+
     await prisma.auditLog.create({
       data: {
         action: params.action,
         resource: params.resource,
         resourceId: params.resourceId,
-        adminUserId: params.adminUserId,
+        adminUserId: validAdminUserId,
         ipAddress: params.ipAddress,
         userAgent: params.userAgent,
-        metadata: params.metadata as any,
-        changes: params.changes as any,
+        metadata: params.metadata as Prisma.InputJsonValue,
+        changes: params.changes as Prisma.InputJsonValue,
       },
     });
   } catch (error) {
@@ -60,7 +75,7 @@ export async function logAction(params: AuditLogParams): Promise<void> {
  */
 export async function logCreate(
   resource: string,
-  data: Record<string, any>,
+  data: Record<string, JsonValue>,
   adminUser: AdminUser,
   request: NextRequest
 ): Promise<void> {
@@ -69,7 +84,7 @@ export async function logCreate(
   await logAction({
     action: 'CREATE',
     resource,
-    resourceId: data.id,
+    resourceId: data.id as string | undefined,
     adminUserId: adminUser.id,
     metadata: data,
     ipAddress,
@@ -83,8 +98,8 @@ export async function logCreate(
 export async function logUpdate(
   resource: string,
   id: string,
-  before: Record<string, any>,
-  after: Record<string, any>,
+  before: Record<string, JsonValue>,
+  after: Record<string, JsonValue>,
   adminUser: AdminUser,
   request: NextRequest
 ): Promise<void> {
@@ -114,7 +129,7 @@ export async function logUpdate(
 export async function logDelete(
   resource: string,
   id: string,
-  data: Record<string, any>,
+  data: Record<string, JsonValue>,
   adminUser: AdminUser,
   request: NextRequest
 ): Promise<void> {
@@ -140,7 +155,7 @@ export async function logBulkAction(
   action: string,
   adminUser: AdminUser,
   request: NextRequest,
-  metadata?: Record<string, any>
+  metadata?: Record<string, JsonValue>
 ): Promise<void> {
   const { ipAddress, userAgent } = getClientInfo(request);
 
@@ -162,17 +177,17 @@ export async function logBulkAction(
  * Calculate the difference between two objects
  */
 function calculateDiff(
-  before: Record<string, any>,
-  after: Record<string, any>
-): Record<string, { before: any; after: any }> {
-  const changes: Record<string, { before: any; after: any }> = {};
+  before: Record<string, JsonValue>,
+  after: Record<string, JsonValue>
+): Record<string, { before: JsonValue | null; after: JsonValue | null }> {
+  const changes: Record<string, { before: JsonValue | null; after: JsonValue | null }> = {};
 
   // Check for changed or removed fields
   for (const key in before) {
     if (JSON.stringify(before[key]) !== JSON.stringify(after[key])) {
       changes[key] = {
-        before: before[key],
-        after: after[key],
+        before: before[key] ?? null,
+        after: after[key] ?? null,
       };
     }
   }
@@ -181,8 +196,8 @@ function calculateDiff(
   for (const key in after) {
     if (!(key in before)) {
       changes[key] = {
-        before: undefined,
-        after: after[key],
+        before: null,
+        after: after[key] ?? null,
       };
     }
   }
@@ -199,7 +214,7 @@ export async function logExport(
   count: number,
   adminUser: AdminUser,
   request: NextRequest,
-  filters?: Record<string, any>
+  filters?: Record<string, JsonValue>
 ): Promise<void> {
   const { ipAddress, userAgent } = getClientInfo(request);
 
@@ -210,7 +225,7 @@ export async function logExport(
     metadata: {
       format,
       count,
-      filters,
+      ...(filters && { filters }),
     },
     ipAddress,
     userAgent,

@@ -9,7 +9,7 @@ import { useState } from "react";
 const { Title } = Typography;
 
 export default function OrderShow({ params }: { params: { id: string } }) {
-  const { queryResult } = useShow({
+  const { query } = useShow({
     resource: "orders",
     id: params.id,
   });
@@ -17,7 +17,7 @@ export default function OrderShow({ params }: { params: { id: string } }) {
   const { mutate: updateOrder } = useUpdate();
   const [form] = Form.useForm();
 
-  const { data, isLoading } = queryResult;
+  const { data, isLoading } = query;
   const record = data?.data;
 
   const handleStatusUpdate = (values: any) => {

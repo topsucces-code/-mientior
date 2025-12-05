@@ -23,15 +23,15 @@ const footerLinks = {
   support: [
     { href: '/contact', label: 'Contact Us' },
     { href: '/faq', label: 'FAQ' },
-    { href: '/shipping', label: 'Shipping Info' },
-    { href: '/returns', label: 'Returns & Exchanges' },
-    { href: '/track-order', label: 'Track Order' },
+    { href: '/livraison', label: 'Shipping Info' },
+    { href: '/garantie', label: 'Returns & Warranty' },
+    { href: '/account/orders', label: 'Track Order' },
   ],
   legal: [
-    { href: '/privacy', label: 'Privacy Policy' },
-    { href: '/terms', label: 'Terms of Service' },
-    { href: '/cookies', label: 'Cookie Policy' },
-    { href: '/accessibility', label: 'Accessibility' },
+    { href: '/legal#privacy', label: 'Privacy Policy' },
+    { href: '/legal#terms', label: 'Terms of Service' },
+    { href: '/legal#cookies', label: 'Cookie Policy' },
+    { href: '/legal', label: 'Legal Information' },
   ],
 }
 
@@ -51,7 +51,7 @@ const trustBadges = [
 
 export default function Footer() {
   return (
-    <footer className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 text-white">
+    <footer className="bg-gradient-to-br from-emerald-800 via-emerald-700 to-emerald-800 text-white">
       {/* Newsletter Section - Before Footer Content */}
       <NewsletterSubscription className="border-b border-white/10" />
 
@@ -64,7 +64,7 @@ export default function Footer() {
               <Link href="/" className="mb-4 inline-block font-display text-3xl font-bold text-white">
                 Mientior
               </Link>
-              <p className="mb-6 text-sm leading-relaxed text-blue-100">
+              <p className="mb-6 text-sm leading-relaxed text-emerald-100">
                 Your premier destination for quality products and exceptional service. We bring you the best selection with unmatched customer care.
               </p>
 
@@ -72,19 +72,19 @@ export default function Footer() {
               <div className="space-y-2 text-sm">
                 <a
                   href="mailto:support@mientior.com"
-                  className="flex items-center gap-3 text-blue-100 transition-colors hover:text-white"
+                  className="flex items-center gap-3 text-emerald-100 transition-colors hover:text-white"
                 >
                   <Mail className="h-4 w-4 flex-shrink-0" />
                   <span>support@mientior.com</span>
                 </a>
                 <a
                   href="tel:+1234567890"
-                  className="flex items-center gap-3 text-blue-100 transition-colors hover:text-white"
+                  className="flex items-center gap-3 text-emerald-100 transition-colors hover:text-white"
                 >
                   <Phone className="h-4 w-4 flex-shrink-0" />
                   <span>+1 (234) 567-890</span>
                 </a>
-                <div className="flex items-center gap-3 text-blue-100">
+                <div className="flex items-center gap-3 text-emerald-100">
                   <MapPin className="h-4 w-4 flex-shrink-0" />
                   <span>123 Commerce St, Business District</span>
                 </div>
@@ -99,7 +99,7 @@ export default function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-blue-100 transition-colors hover:text-white hover:underline"
+                      className="text-sm text-emerald-100 transition-colors hover:text-white hover:underline"
                     >
                       {link.label}
                     </Link>
@@ -116,7 +116,7 @@ export default function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-blue-100 transition-colors hover:text-white hover:underline"
+                      className="text-sm text-emerald-100 transition-colors hover:text-white hover:underline"
                     >
                       {link.label}
                     </Link>
@@ -133,7 +133,7 @@ export default function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-blue-100 transition-colors hover:text-white hover:underline"
+                      className="text-sm text-emerald-100 transition-colors hover:text-white hover:underline"
                     >
                       {link.label}
                     </Link>
@@ -171,7 +171,7 @@ export default function Footer() {
         <div className="container mx-auto px-4 py-6 md:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             {/* Copyright */}
-            <p className="text-sm text-blue-100">
+            <p className="text-sm text-emerald-100">
               © {new Date().getFullYear()} Mientior. All rights reserved.
             </p>
 
@@ -196,7 +196,7 @@ export default function Footer() {
 
             {/* Payment Methods */}
             <div className="flex items-center gap-2">
-              <span className="text-sm text-blue-100">We accept:</span>
+              <span className="text-sm text-emerald-100">We accept:</span>
               <div className="flex gap-2">
                 {/* Payment icons placeholder */}
                 <div className="h-6 w-10 rounded bg-white/20 flex items-center justify-center text-[8px] font-bold">VISA</div>

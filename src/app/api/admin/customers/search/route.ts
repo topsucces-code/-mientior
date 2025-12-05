@@ -1,8 +1,7 @@
 import { NextRequest } from 'next/server'
-import { Prisma } from '@prisma/client'
 import { requirePermission } from '@/lib/auth-admin'
 import { Permission } from '@/lib/permissions'
-import { ApiResponse, ApiErrorResponse } from '@/lib/api-response'
+import { apiSuccess, apiError } from '@/lib/api-response'
 import { customerSearchSchema } from '@/lib/customer-search-validation'
 import { rateLimitSearch } from '@/lib/search-rate-limit'
 import { CustomerSearchService } from '@/lib/customer-search-service'
@@ -57,10 +56,10 @@ export async function GET(request: NextRequest) {
     
     const rateLimitResult = await rateLimitSearch(adminSession.adminUser.id, ipAddress)
     if (!rateLimitResult.allowed) {
-      return ApiErrorResponse(
+      return apiError(
         'Too many search requests',
+        'RATE_LIMIT_EXCEEDED',
         429,
-        'RATE_LIMITED',
         { retryAfter: rateLimitResult.retryAfter }
       )
     }
@@ -88,10 +87,10 @@ export async function GET(request: NextRequest) {
     })
 
     if (!validationResult.success) {
-      return ApiErrorResponse(
+      return apiError(
         'Invalid search parameters',
-        400,
         'VALIDATION_ERROR',
+        400,
         validationResult.error.errors
       )
     }
@@ -126,23 +125,23 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return ApiResponse(responseData)
+    return apiSuccess(responseData)
 
   } catch (error) {
     if (error instanceof Error) {
       if (error.message.includes('Unauthorized')) {
-        return ApiErrorResponse('Authentication required', 401, 'UNAUTHORIZED')
+        return apiError('Authentication required', 'UNAUTHORIZED', 401)
       }
       if (error.message.includes('Forbidden')) {
-        return ApiErrorResponse('Insufficient permissions', 403, 'FORBIDDEN')
+        return apiError('Insufficient permissions', 'FORBIDDEN', 403)
       }
     }
 
     console.error('Error searching customers:', error)
-    return ApiErrorResponse(
+    return apiError(
       'Failed to search customers',
-      500,
-      'INTERNAL_SERVER_ERROR'
+      'INTERNAL_ERROR',
+      500
     )
   }
 }

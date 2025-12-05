@@ -676,3 +676,132 @@ export interface PimSyncQueueStats {
    */
   timestamp: number
 }
+
+// ============================================================================
+// PIM ALERTING TYPES
+// ============================================================================
+
+/**
+ * Types of PIM sync alerts that can be triggered.
+ *
+ * Used by the PIM alerting system to categorize health issues:
+ * - sync_failed_threshold: High failure rate detected (> configured %)
+ * - sync_delayed: No sync activity for extended period (> configured time)
+ * - akeneo_unreachable: Multiple consecutive connection errors to Akeneo
+ *
+ * @see src/lib/pim-alerts.ts - Alert implementation
+ *
+ * @example
+ * const alertType: PimAlertType = 'sync_failed_threshold';
+ */
+export type PimAlertType = 'sync_failed_threshold' | 'sync_delayed' | 'akeneo_unreachable'
+
+/**
+ * Severity levels for PIM alerts.
+ *
+ * Maps to notification types in the admin dashboard:
+ * - urgent: Requires immediate attention (red badge)
+ * - attention: Should be reviewed soon (yellow badge)
+ * - info: Informational, no immediate action needed (blue badge)
+ */
+export type PimAlertSeverity = 'urgent' | 'attention' | 'info'
+
+/**
+ * Metadata included with PIM alerts.
+ *
+ * Provides contextual information about the alert condition
+ * to help admins diagnose and resolve issues.
+ *
+ * @example
+ * {
+ *   failureRate: 15.3,
+ *   lastSyncAt: new Date('2025-12-03T10:30:00Z'),
+ *   consecutiveFailures: 5,
+ *   errorPattern: 'ECONNREFUSED',
+ *   affectedProducts: 127
+ * }
+ */
+export interface PimAlertMetadata {
+  /** Percentage of failed syncs (for sync_failed_threshold alerts) */
+  failureRate?: number
+  /** Timestamp of last successful sync (for sync_delayed alerts) */
+  lastSyncAt?: Date
+  /** Number of consecutive connection failures (for akeneo_unreachable alerts) */
+  consecutiveFailures?: number
+  /** Pattern of connection error detected (e.g., 'ECONNREFUSED', 'ETIMEDOUT') */
+  errorPattern?: string
+  /** Number of products affected by sync issues */
+  affectedProducts?: number
+}
+
+/**
+ * Health status of PIM synchronization system with metrics and alerts.
+ *
+ * Returned by health check functions to provide comprehensive status
+ * including any detected issues and performance metrics.
+ *
+ * @see src/lib/pim-alerts.ts - checkPimSyncHealth()
+ *
+ * @example
+ * // Healthy system
+ * {
+ *   isHealthy: true,
+ *   alerts: [],
+ *   metrics: {
+ *     totalSyncs: 1000,
+ *     failedSyncs: 5,
+ *     successRate: 99.5,
+ *     lastSyncAt: new Date('2025-12-03T14:30:00Z'),
+ *     avgDuration: 1250
+ *   }
+ * }
+ *
+ * @example
+ * // Unhealthy system with alert
+ * {
+ *   isHealthy: false,
+ *   alerts: [
+ *     {
+ *       type: 'sync_failed_threshold',
+ *       severity: 'attention',
+ *       message: 'PIM sync failure rate is 15.3% (threshold: 10%)',
+ *       data: { failureRate: 15.3, failedCount: 153, totalCount: 1000 }
+ *     }
+ *   ],
+ *   metrics: {
+ *     totalSyncs: 1000,
+ *     failedSyncs: 153,
+ *     successRate: 84.7,
+ *     lastSyncAt: new Date('2025-12-03T14:30:00Z'),
+ *     avgDuration: 1450
+ *   }
+ * }
+ */
+export interface PimHealthStatus {
+  /** Whether the PIM sync system is operating within acceptable parameters */
+  isHealthy: boolean
+  /** Array of detected health issues (empty if healthy) */
+  alerts: Array<{
+    /** Type of alert condition detected */
+    type: PimAlertType
+    /** Severity level of the alert */
+    severity: PimAlertSeverity
+    /** Human-readable description of the issue */
+    message: string
+    /** Additional context and metrics related to the alert */
+    data?: any
+  }>
+  /** Performance and reliability metrics for the sync system */
+  metrics: {
+    /** Total number of sync operations in the monitoring window */
+    totalSyncs: number
+    /** Number of failed sync operations */
+    failedSyncs: number
+    /** Percentage of successful syncs (0-100) */
+    successRate: number
+    /** Timestamp of most recent sync operation (null if no syncs) */
+    lastSyncAt: Date | null
+    /** Average duration of sync operations in milliseconds (null if no syncs) */
+    avgDuration: number | null
+  }
+}

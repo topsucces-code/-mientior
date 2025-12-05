@@ -1,18 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Card,
   Row,
   Col,
-  DatePicker,
   Select,
   Button,
   Space,
   Table,
   Progress,
   Tag,
+  Spin,
+  message,
 } from 'antd';
 import {
   DollarOutlined,
@@ -23,8 +24,8 @@ import {
   DownloadOutlined,
   LineChartOutlined,
   BarChartOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons';
-import dayjs, { Dayjs } from 'dayjs';
 import { Line, Bar, Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -54,85 +55,114 @@ ChartJS.register(
   Filler
 );
 
-const { RangePicker } = DatePicker;
-
-type DateRange = [Dayjs, Dayjs];
-
-interface KPI {
-  title: string;
-  value: number;
-  prefix?: string;
-  suffix?: string;
-  change: number;
-  trend: 'up' | 'down';
-  icon: React.ReactNode;
-  color: string;
-}
-
-interface ChartData {
-  labels: string[];
-  datasets: Array<{
-    label: string;
-    data: number[];
-    borderColor?: string;
-    backgroundColor?: string | string[];
-    fill?: boolean;
-  }>;
+interface AnalyticsData {
+  kpis: {
+    totalRevenue: { value: number; change: number };
+    totalOrders: { value: number; change: number };
+    newCustomers: { value: number; change: number };
+    avgOrderValue: { value: number; change: number };
+  };
+  charts: {
+    revenue: Array<{ date: string; revenue: number }>;
+    ordersByStatus: Array<{ status: string; count: number }>;
+    salesByCategory: Array<{ name: string; value: number }>;
+    topProducts: Array<{
+      id: string;
+      name: string;
+      category: string;
+      sales: number;
+      revenue: number;
+    }>;
+  };
+  funnel: {
+    visitors: number;
+    productViews: number;
+    addToCart: number;
+    checkoutStarted: number;
+    ordersCompleted: number;
+  };
 }
 
 export default function AnalyticsPage() {
   const { t } = useTranslation(["admin", "common"]);
-  const [dateRange, setDateRange] = useState<DateRange>([
-    dayjs().subtract(30, 'days'),
-    dayjs(),
-  ]);
+  const [period, setPeriod] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
   const [compareWith, setCompareWith] = useState<'previous-period' | 'previous-year'>('previous-period');
+  const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  const [data, setData] = useState<AnalyticsData | null>(null);
 
-  // KPIs
-  const kpis: KPI[] = [
+  const fetchAnalytics = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `/api/admin/analytics?period=${period}&compareWith=${compareWith}`
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setData(result);
+      } else {
+        message.error(t('admin:analytics.messages.loadError'));
+      }
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+      message.error(t('admin:analytics.messages.loadError'));
+    } finally {
+      setLoading(false);
+    }
+  }, [period, compareWith, t]);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
+
+  // Build KPIs from data
+  const kpis = data ? [
     {
       title: t('admin:analytics.kpis.totalRevenue'),
-      value: 125480.50,
-      prefix: '$',
-      change: 12.5,
-      trend: 'up',
+      value: data.kpis.totalRevenue.value,
+      prefix: '€',
+      change: data.kpis.totalRevenue.change,
+      trend: data.kpis.totalRevenue.change >= 0 ? 'up' : 'down',
       icon: <DollarOutlined />,
       color: '#52c41a',
     },
     {
       title: t('admin:analytics.kpis.totalOrders'),
-      value: 1847,
-      change: 8.3,
-      trend: 'up',
+      value: data.kpis.totalOrders.value,
+      change: data.kpis.totalOrders.change,
+      trend: data.kpis.totalOrders.change >= 0 ? 'up' : 'down',
       icon: <ShoppingCartOutlined />,
       color: '#1890ff',
     },
     {
       title: t('admin:analytics.kpis.newCustomers'),
-      value: 523,
-      change: -3.2,
-      trend: 'down',
+      value: data.kpis.newCustomers.value,
+      change: data.kpis.newCustomers.change,
+      trend: data.kpis.newCustomers.change >= 0 ? 'up' : 'down',
       icon: <UserOutlined />,
       color: '#722ed1',
     },
     {
       title: t('admin:analytics.kpis.avgOrderValue'),
-      value: 67.92,
-      prefix: '$',
-      change: 4.7,
-      trend: 'up',
+      value: data.kpis.avgOrderValue.value,
+      prefix: '€',
+      change: data.kpis.avgOrderValue.change,
+      trend: data.kpis.avgOrderValue.change >= 0 ? 'up' : 'down',
       icon: <LineChartOutlined />,
       color: '#faad14',
     },
-  ];
+  ] : [];
 
-  // Revenue chart data
-  const revenueChartData: ChartData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  // Build chart data from API response
+  const revenueChartData = {
+    labels: data?.charts.revenue.map((r) => {
+      const date = new Date(r.date);
+      return date.toLocaleDateString('fr-FR', { month: 'short', day: 'numeric' });
+    }) || [],
     datasets: [
       {
         label: t('admin:analytics.charts.revenue'),
-        data: [12000, 15000, 13000, 17000, 16000, 19000, 21000, 23000, 20000, 24000, 26000, 28000],
+        data: data?.charts.revenue.map((r) => r.revenue) || [],
         borderColor: '#1890ff',
         backgroundColor: 'rgba(24, 144, 255, 0.1)',
         fill: true,
@@ -140,80 +170,36 @@ export default function AnalyticsPage() {
     ],
   };
 
-  // Orders chart data
-  const ordersChartData: ChartData = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  const ordersChartData = {
+    labels: data?.charts.ordersByStatus.map((o) => o.status) || [],
     datasets: [
       {
         label: t('admin:analytics.charts.orders'),
-        data: [45, 52, 48, 63, 71, 88, 76],
-        backgroundColor: '#1890ff',
+        data: data?.charts.ordersByStatus.map((o) => o.count) || [],
+        backgroundColor: ['#52c41a', '#1890ff', '#faad14', '#722ed1', '#ff4d4f'],
       },
     ],
   };
 
-  // Category distribution
-  const categoryData: ChartData = {
-    labels: ['Electronics', 'Clothing', 'Home & Garden', 'Sports', 'Books', 'Other'],
+  const categoryColors = ['#1890ff', '#52c41a', '#faad14', '#722ed1', '#eb2f96', '#13c2c2'];
+  const categoryData = {
+    labels: data?.charts.salesByCategory.map((c) => c.name) || [],
     datasets: [
       {
         label: t('admin:analytics.charts.salesByCategory'),
-        data: [35, 25, 15, 12, 8, 5],
-        backgroundColor: [
-          '#1890ff',
-          '#52c41a',
-          '#faad14',
-          '#722ed1',
-          '#eb2f96',
-          '#13c2c2',
-        ],
+        data: data?.charts.salesByCategory.map((c) => c.value) || [],
+        backgroundColor: categoryColors,
       },
     ],
   };
 
-  // Top products table data
-  const topProducts = [
-    {
-      key: '1',
-      name: 'MacBook Pro 16" M3 Max',
-      category: 'Electronics',
-      sales: 127,
-      revenue: 317230,
-      growth: 15.4,
-    },
-    {
-      key: '2',
-      name: 'iPhone 15 Pro Max',
-      category: 'Electronics',
-      sales: 243,
-      revenue: 291570,
-      growth: 22.1,
-    },
-    {
-      key: '3',
-      name: 'AirPods Pro',
-      category: 'Electronics',
-      sales: 389,
-      revenue: 97250,
-      growth: 8.7,
-    },
-    {
-      key: '4',
-      name: 'Samsung Galaxy S24 Ultra',
-      category: 'Electronics',
-      sales: 156,
-      revenue: 187200,
-      growth: -3.2,
-    },
-    {
-      key: '5',
-      name: 'Sony WH-1000XM5',
-      category: 'Electronics',
-      sales: 278,
-      revenue: 111200,
-      growth: 12.8,
-    },
-  ];
+  const topProducts = data?.charts.topProducts.map((p, index) => ({
+    key: p.id || String(index),
+    name: p.name,
+    category: p.category,
+    sales: p.sales,
+    revenue: p.revenue,
+  })) || [];
 
   const topProductsColumns = [
     {
@@ -237,32 +223,94 @@ export default function AnalyticsPage() {
       title: t('admin:analytics.topProducts.revenue'),
       dataIndex: 'revenue',
       key: 'revenue',
-      render: (revenue: number) => `$${revenue.toLocaleString()}`,
+      render: (revenue: number) => `€${revenue.toLocaleString()}`,
       sorter: (a: typeof topProducts[0], b: typeof topProducts[0]) => a.revenue - b.revenue,
-    },
-    {
-      title: t('admin:analytics.topProducts.growth'),
-      dataIndex: 'growth',
-      key: 'growth',
-      render: (growth: number) => (
-        <span style={{ color: growth >= 0 ? '#52c41a' : '#ff4d4f' }}>
-          {growth >= 0 ? <RiseOutlined /> : <FallOutlined />} {Math.abs(growth)}%
-        </span>
-      ),
-      sorter: (a: typeof topProducts[0], b: typeof topProducts[0]) => a.growth - b.growth,
     },
   ];
 
-  // Export handlers
-  const handleExportPDF = () => {
-    console.log('Exporting to PDF...');
-    // TODO: Implement PDF export
+  // Funnel data
+  const funnel = data?.funnel || {
+    visitors: 0,
+    productViews: 0,
+    addToCart: 0,
+    checkoutStarted: 0,
+    ordersCompleted: 0,
   };
 
-  const handleExportExcel = () => {
-    console.log('Exporting to Excel...');
-    // TODO: Implement Excel export
+  // Export handlers
+  const handleExportPDF = async () => {
+    setExporting(true);
+    try {
+      const response = await fetch('/api/admin/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'analytics',
+          format: 'pdf',
+          period,
+          data,
+        }),
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `analytics-${period}-${new Date().toISOString().split('T')[0]}.pdf`;
+        a.click();
+        message.success(t('admin:analytics.messages.exportSuccess'));
+      } else {
+        message.error(t('admin:analytics.messages.exportError'));
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+      message.error(t('admin:analytics.messages.exportError'));
+    } finally {
+      setExporting(false);
+    }
   };
+
+  const handleExportExcel = async () => {
+    setExporting(true);
+    try {
+      const response = await fetch('/api/admin/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'analytics',
+          format: 'xlsx',
+          period,
+          data,
+        }),
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `analytics-${period}-${new Date().toISOString().split('T')[0]}.xlsx`;
+        a.click();
+        message.success(t('admin:analytics.messages.exportSuccess'));
+      } else {
+        message.error(t('admin:analytics.messages.exportError'));
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+      message.error(t('admin:analytics.messages.exportError'));
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  if (loading && !data) {
+    return (
+      <div style={{ padding: '24px', textAlign: 'center' }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: '24px' }}>
@@ -276,11 +324,16 @@ export default function AnalyticsPage() {
         </Col>
         <Col>
           <Space>
-            <RangePicker
-              value={dateRange}
-              onChange={(dates) => dates && setDateRange(dates as DateRange)}
-              format="MMM DD, YYYY"
-              allowClear={false}
+            <Select
+              value={period}
+              onChange={setPeriod}
+              style={{ width: 140 }}
+              options={[
+                { label: t('admin:analytics.period.7d', '7 days'), value: '7d' },
+                { label: t('admin:analytics.period.30d', '30 days'), value: '30d' },
+                { label: t('admin:analytics.period.90d', '90 days'), value: '90d' },
+                { label: t('admin:analytics.period.1y', '1 year'), value: '1y' },
+              ]}
             />
             <Select
               value={compareWith}
@@ -291,10 +344,13 @@ export default function AnalyticsPage() {
                 { label: t('admin:analytics.compare.previousYear'), value: 'previous-year' },
               ]}
             />
-            <Button icon={<DownloadOutlined />} onClick={handleExportPDF}>
+            <Button icon={<ReloadOutlined />} onClick={fetchAnalytics} loading={loading}>
+              {t('common:buttons.refresh', 'Refresh')}
+            </Button>
+            <Button icon={<DownloadOutlined />} onClick={handleExportPDF} loading={exporting}>
               {t('admin:analytics.actions.exportPDF')}
             </Button>
-            <Button icon={<DownloadOutlined />} onClick={handleExportExcel}>
+            <Button icon={<DownloadOutlined />} onClick={handleExportExcel} loading={exporting}>
               {t('admin:analytics.actions.exportExcel')}
             </Button>
           </Space>
@@ -329,8 +385,7 @@ export default function AnalyticsPage() {
                   </div>
                   <div style={{ fontSize: 24, fontWeight: 600 }}>
                     {kpi.prefix}
-                    {kpi.value.toLocaleString()}
-                    {kpi.suffix}
+                    {typeof kpi.value === 'number' ? kpi.value.toLocaleString(undefined, { maximumFractionDigits: 2 }) : kpi.value}
                   </div>
                 </div>
               </div>
@@ -422,38 +477,46 @@ export default function AnalyticsPage() {
             <Space direction="vertical" style={{ width: '100%' }} size="large">
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span>Visitors</span>
-                  <span style={{ fontWeight: 600 }}>10,000</span>
+                  <span>{t('admin:analytics.funnel.visitors')}</span>
+                  <span style={{ fontWeight: 600 }}>{funnel.visitors.toLocaleString()}</span>
                 </div>
                 <Progress percent={100} strokeColor="#1890ff" showInfo={false} />
               </div>
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span>Product Views</span>
-                  <span style={{ fontWeight: 600 }}>6,500 (65%)</span>
+                  <span>{t('admin:analytics.funnel.productViews')}</span>
+                  <span style={{ fontWeight: 600 }}>
+                    {funnel.productViews.toLocaleString()} ({funnel.visitors > 0 ? Math.round((funnel.productViews / funnel.visitors) * 100) : 0}%)
+                  </span>
                 </div>
-                <Progress percent={65} strokeColor="#52c41a" showInfo={false} />
+                <Progress percent={funnel.visitors > 0 ? (funnel.productViews / funnel.visitors) * 100 : 0} strokeColor="#52c41a" showInfo={false} />
               </div>
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span>Add to Cart</span>
-                  <span style={{ fontWeight: 600 }}>3,200 (32%)</span>
+                  <span>{t('admin:analytics.funnel.addToCart')}</span>
+                  <span style={{ fontWeight: 600 }}>
+                    {funnel.addToCart.toLocaleString()} ({funnel.visitors > 0 ? Math.round((funnel.addToCart / funnel.visitors) * 100) : 0}%)
+                  </span>
                 </div>
-                <Progress percent={32} strokeColor="#faad14" showInfo={false} />
+                <Progress percent={funnel.visitors > 0 ? (funnel.addToCart / funnel.visitors) * 100 : 0} strokeColor="#faad14" showInfo={false} />
               </div>
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span>Checkout Started</span>
-                  <span style={{ fontWeight: 600 }}>2,400 (24%)</span>
+                  <span>{t('admin:analytics.funnel.checkout')}</span>
+                  <span style={{ fontWeight: 600 }}>
+                    {funnel.checkoutStarted.toLocaleString()} ({funnel.visitors > 0 ? Math.round((funnel.checkoutStarted / funnel.visitors) * 100) : 0}%)
+                  </span>
                 </div>
-                <Progress percent={24} strokeColor="#722ed1" showInfo={false} />
+                <Progress percent={funnel.visitors > 0 ? (funnel.checkoutStarted / funnel.visitors) * 100 : 0} strokeColor="#722ed1" showInfo={false} />
               </div>
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span>Orders Completed</span>
-                  <span style={{ fontWeight: 600 }}>1,847 (18.5%)</span>
+                  <span>{t('admin:analytics.funnel.orders')}</span>
+                  <span style={{ fontWeight: 600 }}>
+                    {funnel.ordersCompleted.toLocaleString()} ({funnel.visitors > 0 ? ((funnel.ordersCompleted / funnel.visitors) * 100).toFixed(1) : 0}%)
+                  </span>
                 </div>
-                <Progress percent={18.5} strokeColor="#eb2f96" showInfo={false} />
+                <Progress percent={funnel.visitors > 0 ? (funnel.ordersCompleted / funnel.visitors) * 100 : 0} strokeColor="#eb2f96" showInfo={false} />
               </div>
             </Space>
           </Card>
