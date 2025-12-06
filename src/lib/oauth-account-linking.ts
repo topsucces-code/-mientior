@@ -54,12 +54,12 @@ export async function linkOAuthAccount(
     if (!user) {
       // Create new User record for first-time OAuth users
       // Requirement 3.3: Create new User and Customer records for first-time OAuth users
+      // User model has firstName/lastName, not name
       user = await prisma.user.create({
         data: {
           email,
           firstName,
           lastName,
-          name: name || `${firstName} ${lastName}`.trim(),
           loyaltyLevel: 'BRONZE',
           loyaltyPoints: 0,
           totalOrders: 0,
@@ -74,9 +74,10 @@ export async function linkOAuthAccount(
       console.log(`[OAuth] Linked OAuth account to existing User ${email}`)
     }
 
-    // Update better_auth_users to ensure emailVerified is true for OAuth users
+    // Update BetterAuthUser to ensure emailVerified is true for OAuth users
     // OAuth providers have already verified the email
-    await prisma.user.update({
+    // emailVerified, name, image are on BetterAuthUser, not User
+    await prisma.betterAuthUser.update({
       where: { id: authUserId },
       data: { 
         emailVerified: true,

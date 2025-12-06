@@ -331,26 +331,55 @@ declare global {
   }
 }
 
-interface ApplePaySession {
-  canMakePayments(): boolean;
-  new (version: number, paymentRequest: ApplePayJS.ApplePayPaymentRequest): ApplePaySession;
-  STATUS_SUCCESS: number;
-  STATUS_FAILURE: number;
+// ApplePaySession instance type
+interface ApplePaySessionInstance {
   onvalidatemerchant: (event: ApplePayJS.ApplePayValidateMerchantEvent) => void;
   onpaymentauthorized: (event: ApplePayJS.ApplePayPaymentAuthorizedEvent) => void;
-  completeMerchantValidation(merchantSession: any): void;
+  completeMerchantValidation(merchantSession: unknown): void;
   completePayment(status: number): void;
   begin(): void;
   abort(): void;
 }
 
-declare const ApplePaySession: {
+// ApplePaySession static interface
+interface ApplePaySessionConstructor {
   canMakePayments(): boolean;
-  new (version: number, paymentRequest: ApplePayJS.ApplePayPaymentRequest): ApplePaySession;
+  new (version: number, paymentRequest: ApplePayJS.ApplePayPaymentRequest): ApplePaySessionInstance;
   STATUS_SUCCESS: number;
   STATUS_FAILURE: number;
-};
+}
 
+declare const ApplePaySession: ApplePaySessionConstructor;
+
+// ApplePayJS types - using global interface instead of namespace for ES2015 module compatibility
+interface ApplePayPaymentRequest {
+  countryCode: string;
+  currencyCode: string;
+  supportedNetworks: string[];
+  merchantCapabilities: string[];
+  total: {
+    label: string;
+    amount: string;
+  };
+}
+
+interface ApplePayValidateMerchantEvent {
+  validationURL: string;
+}
+
+interface ApplePayPaymentAuthorizedEvent {
+  payment: {
+    token: {
+      paymentData: Record<string, unknown>;
+      paymentMethod: Record<string, unknown>;
+      transactionIdentifier: string;
+    };
+    billingContact?: Record<string, unknown>;
+    shippingContact?: Record<string, unknown>;
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace ApplePayJS {
   interface ApplePayPaymentRequest {
     countryCode: string;
@@ -370,66 +399,78 @@ declare namespace ApplePayJS {
   interface ApplePayPaymentAuthorizedEvent {
     payment: {
       token: {
-        paymentData: any;
-        paymentMethod: any;
+        paymentData: Record<string, unknown>;
+        paymentMethod: Record<string, unknown>;
         transactionIdentifier: string;
       };
-      billingContact?: any;
-      shippingContact?: any;
+      billingContact?: Record<string, unknown>;
+      shippingContact?: Record<string, unknown>;
     };
   }
 }
 
-// Google Pay types
+// Google Pay types - using interfaces
+interface GooglePaymentsClientOptions {
+  environment: "TEST" | "PRODUCTION";
+}
+
+interface GooglePaymentDataRequest {
+  apiVersion: number;
+  apiVersionMinor: number;
+  allowedPaymentMethods: GooglePaymentMethod[];
+  merchantInfo: GoogleMerchantInfo;
+  transactionInfo: GoogleTransactionInfo;
+}
+
+interface GooglePaymentMethod {
+  type: string;
+  parameters: {
+    allowedAuthMethods: string[];
+    allowedCardNetworks: string[];
+  };
+  tokenizationSpecification: {
+    type: string;
+    parameters: {
+      gateway: string;
+      gatewayMerchantId: string;
+    };
+  };
+}
+
+interface GoogleMerchantInfo {
+  merchantId: string;
+  merchantName: string;
+}
+
+interface GoogleTransactionInfo {
+  totalPriceStatus: string;
+  totalPrice: string;
+  currencyCode: string;
+  countryCode: string;
+}
+
+interface GooglePaymentData {
+  paymentMethodData: Record<string, unknown>;
+}
+
+interface GooglePaymentsClient {
+  loadPaymentData(request: GooglePaymentDataRequest): Promise<GooglePaymentData>;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace google {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace payments {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace api {
-      interface PaymentsClientOptions {
-        environment: "TEST" | "PRODUCTION";
-      }
-
-      interface PaymentsClient {
-        loadPaymentData(request: PaymentDataRequest): Promise<PaymentData>;
-      }
-
-      interface PaymentDataRequest {
-        apiVersion: number;
-        apiVersionMinor: number;
-        allowedPaymentMethods: PaymentMethod[];
-        merchantInfo: MerchantInfo;
-        transactionInfo: TransactionInfo;
-      }
-
-      interface PaymentMethod {
-        type: string;
-        parameters: {
-          allowedAuthMethods: string[];
-          allowedCardNetworks: string[];
-        };
-        tokenizationSpecification: {
-          type: string;
-          parameters: {
-            gateway: string;
-            gatewayMerchantId: string;
-          };
-        };
-      }
-
-      interface MerchantInfo {
-        merchantId: string;
-        merchantName: string;
-      }
-
-      interface TransactionInfo {
-        totalPriceStatus: string;
-        totalPrice: string;
-        currencyCode: string;
-        countryCode: string;
-      }
-
-      interface PaymentData {
-        paymentMethodData: any;
-      }
+      type PaymentsClientOptions = GooglePaymentsClientOptions;
+      type PaymentsClient = GooglePaymentsClient;
+      type PaymentDataRequest = GooglePaymentDataRequest;
+      type PaymentMethod = GooglePaymentMethod;
+      type MerchantInfo = GoogleMerchantInfo;
+      type TransactionInfo = GoogleTransactionInfo;
+      type PaymentData = GooglePaymentData;
     }
   }
 }
+

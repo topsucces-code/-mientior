@@ -20,6 +20,8 @@ import {
 import { generateOrderNumber, calculateEstimatedDelivery } from '@/lib/checkout-utils'
 import { addBusinessDays } from 'date-fns'
 import type { Address } from '@/types'
+import { validatePromoCode, recordPromoCodeUsage } from '@/lib/promo-code-validator'
+import { redeemLoyaltyPoints, awardOrderPoints } from '@/lib/loyalty-points'
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,6 +47,7 @@ export async function POST(request: NextRequest) {
       paymentReference?: string
       paymentGateway?: 'PAYSTACK' | 'FLUTTERWAVE'
       promoCode?: string
+      loyaltyPointsToRedeem?: number
       orderNotes?: string
     } = body
 
@@ -189,14 +192,75 @@ export async function POST(request: NextRequest) {
 
     // Calculate discount (in cents)
     let discount = 0
+    let promoCodeId: string | null = null
+    let loyaltyPointsUsed = 0
+    let loyaltyDiscount = 0
+
+    // Check if this is user's first order
+    const previousOrderCount = await prisma.order.count({
+      where: {
+        userId,
+        status: { notIn: ['CANCELLED'] },
+      },
+    })
+    const isFirstOrder = previousOrderCount === 0
+
+    // Validate and apply promo code
     if (promoCode) {
-      // Validate promo code (placeholder)
-      // In production, query promo codes collection
-      discount = 0
+      const cartItems = orderItems.map((item) => ({
+        productId: item.productId,
+        categoryId: item.categoryId,
+        price: item.price / 100, // Convert cents to euros
+        quantity: item.quantity,
+        name: item.productName,
+      }))
+
+      const promoValidation = await validatePromoCode({
+        code: promoCode,
+        userId,
+        cartItems,
+        subtotal: subtotal / 100, // Convert cents to euros
+        shippingCost: shippingCost / 100,
+        isFirstOrder,
+      })
+
+      if (!promoValidation.valid) {
+        return NextResponse.json(
+          { error: promoValidation.error, errorCode: promoValidation.errorCode, success: false },
+          { status: 400 }
+        )
+      }
+
+      // Apply promo code discount (convert to cents)
+      discount = Math.round(promoValidation.discount * 100)
+      promoCodeId = promoValidation.promoCode?.id || null
+      console.log(`Promo code ${promoCode} applied: -$${promoValidation.discount}`)
+    }
+
+    // Apply loyalty points redemption
+    if (body.loyaltyPointsToRedeem && body.loyaltyPointsToRedeem > 0) {
+      const subtotalAfterPromo = subtotal - discount
+      const loyaltyResult = await redeemLoyaltyPoints(
+        userId,
+        body.loyaltyPointsToRedeem,
+        subtotalAfterPromo / 100 // Convert cents to euros
+      )
+
+      if (!loyaltyResult.success) {
+        return NextResponse.json(
+          { error: loyaltyResult.error, success: false },
+          { status: 400 }
+        )
+      }
+
+      loyaltyPointsUsed = loyaltyResult.pointsUsed || 0
+      loyaltyDiscount = Math.round((loyaltyResult.discountAmount || 0) * 100) // Convert to cents
+      console.log(`Loyalty points redeemed: ${loyaltyPointsUsed} points = -$${loyaltyResult.discountAmount}`)
     }
 
     // Calculate total (in cents)
-    const total = subtotal + shippingCost + tax - discount
+    const totalDiscount = discount + loyaltyDiscount
+    const total = subtotal + shippingCost + tax - totalDiscount
 
     // Generate order number
     const orderNumber = generateOrderNumber()
@@ -218,8 +282,10 @@ export async function POST(request: NextRequest) {
         subtotal: subtotal / 100, // Convert cents to euros for storage
         shippingCost: shippingCost / 100,
         tax: tax / 100,
-        discount: discount / 100,
+        discount: totalDiscount / 100,
         total: total / 100,
+        promoCodeId,
+        // loyaltyPointsUsed stored in metadata if needed
         shippingAddress: shippingAddress as any,
         billingAddress: (billingAddress || shippingAddress) as any,
         estimatedDeliveryMin: estimatedDelivery.min,
@@ -240,6 +306,12 @@ export async function POST(request: NextRequest) {
     await markOrderProcessed(paymentReference, order.id)
     console.log(`Order ${orderNumber} marked as processed for payment reference ${paymentReference}`)
 
+    // Record promo code usage
+    if (promoCodeId && discount > 0) {
+      await recordPromoCodeUsage(promoCodeId, order.id, userId, discount / 100)
+      console.log(`Promo code usage recorded for order ${orderNumber}`)
+    }
+
     // Trigger real-time notification via Pusher to notify admins of new order
     await triggerNewOrder({
       orderId: order.id,
@@ -248,33 +320,37 @@ export async function POST(request: NextRequest) {
       customerEmail: session.user.email || shippingAddress.email || ''
     })
 
-    // Update user stats
+    // Update user stats and award loyalty points
     try {
-      const user = await prisma.user.findUnique({
-        where: { id: userId }
+      // Award loyalty points for the order
+      const pointsResult = await awardOrderPoints(userId, total / 100, isFirstOrder)
+      
+      // Update order count and total spent
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          totalOrders: { increment: 1 },
+          totalSpent: { increment: total / 100 }, // Convert cents to euros
+        },
       })
 
-      if (user) {
-        const pointsEarned = Math.floor(total / 100) // 1 point per euro
-        const newBalance = user.loyaltyPoints + pointsEarned
-        
-        await prisma.user.update({
+      // Trigger Customer 360 real-time update for loyalty points
+      if (pointsResult.success && pointsResult.pointsEarned > 0) {
+        const user = await prisma.user.findUnique({
           where: { id: userId },
-          data: {
-            totalOrders: user.totalOrders + 1,
-            totalSpent: user.totalSpent + (total / 100), // Convert cents to euros
-            loyaltyPoints: newBalance
-          }
+          select: { loyaltyPoints: true },
         })
 
-        // Trigger Customer 360 real-time update for loyalty points
-        if (pointsEarned > 0) {
-          await triggerCustomerLoyaltyUpdate(userId, {
-            pointsChange: pointsEarned,
-            newBalance,
-            reason: 'Order purchase reward',
-            timestamp: new Date(),
-          })
+        await triggerCustomerLoyaltyUpdate(userId, {
+          pointsChange: pointsResult.pointsEarned + pointsResult.bonusPoints,
+          newBalance: user?.loyaltyPoints || pointsResult.totalPoints,
+          reason: isFirstOrder ? 'First order bonus + purchase reward' : 'Order purchase reward',
+          timestamp: new Date(),
+        })
+
+        // Log level up if applicable
+        if (pointsResult.newLevel) {
+          console.log(`User ${userId} leveled up to ${pointsResult.newLevel}!`)
         }
       }
     } catch (error) {
@@ -283,10 +359,12 @@ export async function POST(request: NextRequest) {
 
     // Send order confirmation email with new template
     try {
-      const customerEmail = order.email || session.user.email || shippingAddress.email || ''
+      // Order doesn't have email directly - get from shippingAddress or session
       const shippingAddr = typeof order.shippingAddress === 'string'
         ? JSON.parse(order.shippingAddress)
         : order.shippingAddress
+      const customerEmail = session.user.email || shippingAddr?.email || shippingAddress.email || ''
+
 
       await sendOrderConfirmationEmail({
         orderNumber: order.orderNumber,

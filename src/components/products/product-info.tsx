@@ -23,7 +23,8 @@ import { TrustBadges } from '@/components/products/trust-badges'
 import { PaymentMethods } from '@/components/products/payment-methods'
 import { SocialShare } from '@/components/products/social-share'
 import { ProductMeta } from '@/components/products/product-meta'
-import { COLOR_HEX_MAP, PDP_CONFIG } from '@/lib/constants'
+import { COLOR_HEX_MAP } from '@/lib/constants'
+import { useTranslations } from 'next-intl'
 import { createCartItem } from '@/lib/cart-utils'
 import type { Product, ProductVariant } from '@/types'
 
@@ -53,8 +54,9 @@ export function ProductInfo({
   const setQuantity = onQuantityChange ?? setInternalQuantity
 
   const { addItem } = useCartStore()
-  const { addItem: addToWishlist, isInWishlist } = useWishlistStore()
+  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
   const { toast } = useToast()
+  const t = useTranslations('wishlist')
 
   // Derive variant from color/size selection and call onVariantChange
   useEffect(() => {
@@ -142,18 +144,29 @@ export function ProductInfo({
     }
   }
 
-  const handleAddToWishlist = () => {
-    addToWishlist({
-      productId: product.id,
-      name: product.name,
-      price: finalPrice,
-      image: product.images[0]?.url,
-      addedAt: new Date().toISOString(),
-    })
-    toast({
-      title: '♡ Ajouté aux favoris',
-      description: `${product.name} a été ajouté à vos favoris`,
-    })
+  const handleToggleWishlist = () => {
+    const inWishlist = isInWishlist(product.id)
+    
+    if (inWishlist) {
+      removeFromWishlist(product.id)
+      toast({
+        title: t('removedFromWishlist'),
+        description: t('removedFromWishlistDesc', { name: product.name }),
+      })
+    } else {
+      addToWishlist({
+        productId: product.id,
+        slug: product.slug,
+        name: product.name,
+        price: finalPrice,
+        image: product.images[0]?.url,
+        addedAt: new Date().toISOString(),
+      })
+      toast({
+        title: t('addedToWishlist'),
+        description: t('addedToWishlistDesc', { name: product.name }),
+      })
+    }
   }
 
   // Check if variant selection is complete
@@ -287,11 +300,15 @@ export function ProductInfo({
         </Tooltip>
 
         <button
-          onClick={handleAddToWishlist}
-          className="flex items-center justify-center w-14 h-14 border-2 border-platinum-300 hover:border-orange-500 rounded-lg transition-all flex-shrink-0"
-          aria-label="Ajouter aux favoris"
+          onClick={handleToggleWishlist}
+          className={`flex items-center justify-center w-14 h-14 border-2 rounded-lg transition-all flex-shrink-0 ${
+            isInWishlist(product.id) 
+              ? 'border-red-500 bg-red-50 hover:bg-red-100' 
+              : 'border-platinum-300 hover:border-orange-500'
+          }`}
+          aria-label={isInWishlist(product.id) ? t('removedFromWishlist') : t('addedToWishlist')}
         >
-          <Heart className={`w-6 h-6 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
+          <Heart className={`w-6 h-6 transition-all ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : 'text-anthracite-500 hover:text-orange-500'}`} />
         </button>
       </div>
 
@@ -341,7 +358,7 @@ export function ProductInfo({
       <SizeGuideModal
         isOpen={isSizeGuideOpen}
         onClose={() => setIsSizeGuideOpen(false)}
-        category={product.category.name}
+        sizeGuide={null}
       />
     </div>
   )

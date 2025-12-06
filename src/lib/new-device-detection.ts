@@ -43,22 +43,32 @@ export async function detectAndAlertNewDevice(
 
     if (isNewDevice) {
       // Get user info for email
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { name: true, email: true },
-      })
+      // User model has firstName/lastName, BetterAuthUser has name
+      const [user, authUser] = await Promise.all([
+        prisma.user.findUnique({
+          where: { id: userId },
+          select: { firstName: true, lastName: true, email: true },
+        }),
+        prisma.betterAuthUser.findFirst({
+          where: { id: userId },
+          select: { name: true },
+        }),
+      ])
 
       if (!user) {
         console.error('User not found for new device alert:', userId)
         return
       }
+      
+      // Construct display name from available sources
+      const displayName = authUser?.name || [user.firstName, user.lastName].filter(Boolean).join(' ') || 'User'
 
       // Parse device info from user agent
       const deviceInfo = parseDeviceInfo(userAgent)
 
       // Send security alert email (async, don't wait)
       sendSecurityAlertEmail({
-        name: user.name || 'User',
+        name: displayName,
         email: user.email,
         deviceInfo,
         location: `IP: ${ipAddress}`,

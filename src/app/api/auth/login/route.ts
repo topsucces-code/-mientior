@@ -123,8 +123,8 @@ export async function POST(request: NextRequest) {
     await clearAccountLockout(email)
     await clearFailedLoginAttempts(email)
 
-    // Check email verification status
-    const betterAuthUser = await prisma.user.findUnique({
+    // Check email verification status (emailVerified is on BetterAuthUser, not User)
+    const betterAuthUser = await prisma.betterAuthUser.findUnique({
       where: { id: authResponse.user.id },
       select: { emailVerified: true, email: true },
     })

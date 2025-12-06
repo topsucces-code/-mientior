@@ -44,14 +44,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if user exists
-    const user = await prisma.user.findUnique({
-      where: { email },
-    })
+    // Check if user exists in both User and BetterAuthUser tables
+    const [user, authUser] = await Promise.all([
+      prisma.user.findUnique({
+        where: { email },
+      }),
+      prisma.betterAuthUser.findUnique({
+        where: { email },
+        select: { emailVerified: true },
+      }),
+    ])
 
     // Always return success to prevent email enumeration
     // But only send email if user exists and is not verified
-    if (user && !user.emailVerified) {
+    // emailVerified is on BetterAuthUser, not User
+    if (user && authUser && !authUser.emailVerified) {
       // Invalidate any existing verification tokens
       await invalidateVerificationTokens(email)
 
@@ -63,8 +70,10 @@ export async function POST(request: NextRequest) {
       const verificationUrl = `${baseURL}/verify-email?token=${token}`
 
       // Send verification email
+      // User model has firstName/lastName, not name
+      const displayName = [user.firstName, user.lastName].filter(Boolean).join(' ') || 'User'
       await sendVerificationEmail({
-        name: user.name,
+        name: displayName,
         email,
         verificationUrl,
         expiresIn: '24 hours',

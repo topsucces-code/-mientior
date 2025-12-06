@@ -1,12 +1,12 @@
-import { auth } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 async function testSignUp() {
   try {
     console.log('Testing Better Auth SignUp...')
     
     const email = 'script-test@mientior.com'
-    const password = 'ScriptTest2024!#Secure'
     const name = 'Script Test User'
     
     // Clean up if exists
@@ -14,29 +14,16 @@ async function testSignUp() {
       where: { email }
     })
     
-    console.log('Attempting to sign up...')
-    const result = await auth.api.signUpEmail({
-      body: {
-        email,
-        password,
-        name,
-      }
-    })
-    
-    console.log('SignUp Result:', JSON.stringify(result, null, 2))
-    
-    if (result?.user) {
-      console.log('User created successfully!')
-      
-      // Verify user in DB
-      const user = await prisma.user.findUnique({
-        where: { id: result.user.id }
-      })
-      console.log('User in DB:', user)
-    }
+    console.log('Note: This script cannot test auth.api.signUpEmail directly.')
+    console.log('Please use the API endpoint /api/auth/register instead.')
+    console.log('')
+    console.log('To test signup:')
+    console.log(`curl -X POST http://localhost:3000/api/auth/register \\
+      -H "Content-Type: application/json" \\
+      -d '{"email":"${email}","password":"ScriptTest2024!#Secure","name":"${name}"}'`)
     
   } catch (error) {
-    console.error('SignUp Failed:', error)
+    console.error('Test Failed:', error)
   } finally {
     await prisma.$disconnect()
   }

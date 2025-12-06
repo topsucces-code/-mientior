@@ -12,7 +12,7 @@ import { logUpdate } from '@/lib/audit-logger'
 
 async function handleGET(
   request: NextRequest,
-  { params, adminSession }: { params: Record<string, string>, adminSession?: any }
+  { params, adminSession: _adminSession }: { params: Record<string, string>, adminSession?: import('@/lib/auth-admin').AdminSession | null }
 ) {
   try {
     const user = await prisma.user.findUnique({
@@ -40,7 +40,7 @@ async function handleGET(
           }
         }
       }
-    }) as any
+    })
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
@@ -75,7 +75,7 @@ async function handleGET(
 
 async function handlePUT(
   request: NextRequest,
-  { params, adminSession }: { params: Record<string, string>, adminSession?: any }
+  { params, adminSession }: { params: Record<string, string>, adminSession?: import('@/lib/auth-admin').AdminSession | null }
 ) {
   try {
     const body = await request.json()
@@ -131,15 +131,15 @@ async function handlePUT(
     })
 
     // Audit log the update (only if admin is making the change)
-    if (adminSession) {
-      await logUpdate({
-        resource: 'user',
-        resourceId: params.id,
-        before,
-        after: user,
-        adminUser: adminSession.adminUser,
+    if (adminSession && adminSession.adminUser) {
+      await logUpdate(
+        'user',
+        params.id,
+        before as unknown as Record<string, import('@prisma/client').Prisma.JsonValue>,
+        user as unknown as Record<string, import('@prisma/client').Prisma.JsonValue>,
+        adminSession.adminUser,
         request
-      })
+      )
     }
 
     // Transform to ensure correct shape with top-level fields (matching GET)
@@ -172,7 +172,7 @@ async function handlePUT(
 // GET can be accessed by users or admins
 export const GET = async (request: NextRequest, { params }: { params: { id: string } }) => {
   // Try to get admin session (won't throw if not admin)
-  const adminSession = await getAdminSession(request)
+  const adminSession = await getAdminSession()
 
   // If admin session exists, check permissions
   if (adminSession) {
@@ -186,7 +186,7 @@ export const GET = async (request: NextRequest, { params }: { params: { id: stri
 // PUT can be accessed by users (own profile) or admins (any profile)
 export const PUT = async (request: NextRequest, { params }: { params: { id: string } }) => {
   // Try to get admin session (won't throw if not admin)
-  const adminSession = await getAdminSession(request)
+  const adminSession = await getAdminSession()
 
   // If admin session exists, check permissions
   if (adminSession) {

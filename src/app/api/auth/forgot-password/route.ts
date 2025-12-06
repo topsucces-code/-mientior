@@ -87,8 +87,10 @@ export async function POST(request: NextRequest) {
       }
 
       // Requirement 4.2: Send password reset email with 1-hour token
+      // User model has firstName/lastName, not name - construct display name
+      const displayName = [user!.firstName, user!.lastName].filter(Boolean).join(' ') || 'User'
       await sendPasswordResetEmail({
-        name: user!.name,
+        name: displayName,
         email,
         resetUrl,
         expiresIn: '1 hour',

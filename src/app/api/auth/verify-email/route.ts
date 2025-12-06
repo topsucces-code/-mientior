@@ -41,20 +41,25 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Find the user by email
-    const user = await prisma.user.findUnique({
-      where: { email },
-    })
+    // Find the user and auth user by email
+    const [user, authUser] = await Promise.all([
+      prisma.user.findUnique({
+        where: { email },
+      }),
+      prisma.betterAuthUser.findUnique({
+        where: { email },
+      }),
+    ])
 
-    if (!user) {
+    if (!user || !authUser) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
       )
     }
 
-    // Check if already verified
-    if (user.emailVerified) {
+    // Check if already verified (emailVerified is on BetterAuthUser)
+    if (authUser.emailVerified) {
       return NextResponse.json(
         { 
           success: true,
@@ -65,9 +70,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Update user's emailVerified status
-    await prisma.user.update({
-      where: { id: user.id },
+    // Update auth user's emailVerified status (emailVerified is on BetterAuthUser)
+    await prisma.betterAuthUser.update({
+      where: { id: authUser.id },
       data: { emailVerified: true },
     })
 
@@ -75,7 +80,8 @@ export async function POST(request: NextRequest) {
     await deleteVerificationToken(token)
 
     // Send welcome email
-    const userName = user.name || email.split('@')[0] || 'User'
+    // User model has firstName/lastName, not name
+    const userName = [user.firstName, user.lastName].filter(Boolean).join(' ') || email.split('@')[0] || 'User'
     await sendWelcomeEmailAuth({
       name: userName,
       email: user.email,

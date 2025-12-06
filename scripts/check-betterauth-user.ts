@@ -6,8 +6,8 @@ async function checkBetterAuthUser() {
   try {
     const email = 'betterauth@mientior.com'
     
-    // Check better_auth_users
-    const authUser = await prisma.better_auth_users.findUnique({
+    // Check betterAuthUser
+    const authUser = await prisma.betterAuthUser.findUnique({
       where: { email },
     })
     

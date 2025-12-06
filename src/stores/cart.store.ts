@@ -25,11 +25,31 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { CartItem, SavedForLaterItem, CouponCode, AppliedPromotion, PromotionType } from '@/types'
+import { toast } from 'sonner'
+
+// Lazy load PostHog to avoid SSR issues
+type PostHogInstance = typeof import('posthog-js').default
+let posthog: PostHogInstance | null = null
+if (typeof window !== 'undefined') {
+  import('posthog-js').then((module) => {
+    posthog = module.default
+  })
+}
 
 interface CartData {
   items: CartItem[]
   savedForLater: SavedForLaterItem[]
   appliedCoupon?: CouponCode
+}
+
+type PendingOperation = 'add' | 'update' | 'remove' | 'save' | 'restore'
+
+interface CartError {
+  type: 'network' | 'stock' | 'validation' | 'unknown'
+  message: string
+  operation: PendingOperation
+  itemId?: string
+  retryCount?: number
 }
 
 type CartStore = {
@@ -39,6 +59,8 @@ type CartStore = {
   freeShippingThreshold: number
   isSyncing: boolean
   lastSyncedAt: Date | null
+  pendingOperations: Map<string, PendingOperation>
+  errors: CartError[]
 
   // Cart actions
   addItem: (item: CartItem) => void
@@ -62,6 +84,10 @@ type CartStore = {
   setIsSyncing: (value: boolean) => void
   setLastSyncedAt: (date: Date) => void
 
+  // Error handling
+  addError: (error: CartError) => void
+  clearErrors: () => void
+
   // Getters
   getTotalItems: () => number
   getSubtotal: () => number
@@ -71,7 +97,7 @@ type CartStore = {
   getTotal: () => number
   getFreeShippingProgress: () => { percentage: number; remaining: number; unlocked: boolean }
   getTotalPrice: () => number // Deprecated, use getTotal()
-  
+
   // Promotion helpers
   getItemPromotions: (itemId: string) => AppliedPromotion[]
   getAllPromotions: () => AppliedPromotion[]
@@ -79,6 +105,37 @@ type CartStore = {
 }
 
 const TAX_RATE = 0.18 // ~18% average VAT for African regions
+const MAX_RETRY_ATTEMPTS = 3
+const RETRY_DELAY_MS = 1000
+
+// Helper function to retry async operations with exponential backoff
+async function retryWithBackoff<T>(
+  operation: () => Promise<T>,
+  maxAttempts: number = MAX_RETRY_ATTEMPTS,
+  delayMs: number = RETRY_DELAY_MS
+): Promise<T> {
+  let lastError: Error | undefined
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      return await operation()
+    } catch (error) {
+      lastError = error as Error
+
+      // Don't retry on validation errors (4xx except 429) or auth errors (401)
+      if (error instanceof Response && error.status >= 400 && error.status < 500 && error.status !== 429) {
+        throw error
+      }
+
+      if (attempt < maxAttempts - 1) {
+        // Exponential backoff: 1s, 2s, 4s
+        await new Promise(resolve => setTimeout(resolve, delayMs * Math.pow(2, attempt)))
+      }
+    }
+  }
+
+  throw lastError
+}
 
 export const useCartStore = create<CartStore>()(
   persist(
@@ -89,23 +146,251 @@ export const useCartStore = create<CartStore>()(
       freeShippingThreshold: 5000, // $50.00 in cents
       isSyncing: false,
       lastSyncedAt: null,
+      pendingOperations: new Map(),
+      errors: [],
 
       addItem: (item) => {
+        const itemKey = `${item.id}-${JSON.stringify(item.variant || {})}`
         const items = get().items.slice()
         const idx = items.findIndex((i) => i.id === item.id && JSON.stringify(i.variant) === JSON.stringify(item.variant))
-        if (idx > -1) {
-          items[idx]!.quantity += item.quantity
-        } else {
-          items.push(item)
+
+        // Determine available stock (prioritize inStock boolean, fallback to stock number)
+        const availableStock = item.stock ?? 0
+        const existingQuantity = idx > -1 ? items[idx]!.quantity : 0
+        let requestedQuantity = item.quantity
+
+        // Stock validation: clamp to available stock
+        if (existingQuantity + requestedQuantity > availableStock) {
+          const maxAllowed = Math.max(0, availableStock - existingQuantity)
+          requestedQuantity = maxAllowed
+
+          // Record stock limitation error
+          get().addError({
+            type: 'stock',
+            message: `Stock limité à ${availableStock} unités pour cet article.`,
+            operation: 'add',
+            itemId: item.id,
+          })
+
+          // Optionally notify user
+          if (requestedQuantity === 0) {
+            toast.warning("Stock insuffisant", {
+              description: "Cet article n'a plus de stock disponible.",
+            })
+          } else {
+            toast.warning("Quantité ajustée", {
+              description: `Seulement ${requestedQuantity} unité(s) disponible(s).`,
+            })
+          }
         }
-        set({ items })
+
+        // Only proceed if we can add at least 1 item
+        if (requestedQuantity <= 0 && existingQuantity >= availableStock) {
+          return
+        }
+
+        // Optimistic update
+        if (idx > -1) {
+          items[idx]!.quantity += requestedQuantity
+        } else {
+          items.push({ ...item, quantity: requestedQuantity })
+        }
+
+        // Mark as pending
+        const pendingOps = new Map(get().pendingOperations)
+        pendingOps.set(itemKey, 'add')
+
+        set({ items, pendingOperations: pendingOps })
+
+        // Track analytics event
+        if (posthog) {
+          posthog.capture('cart_item_added', {
+            productId: item.productId,
+            productName: item.productName,
+            variantId: item.variant?.sku,
+            variantSize: item.variant?.size,
+            variantColor: item.variant?.color,
+            quantity: item.quantity,
+            price: item.price,
+            currency: 'USD',
+          })
+        }
+
+        // Async sync with retry
+        retryWithBackoff(() => get().syncToServer())
+          .then(() => {
+            const pending = new Map(get().pendingOperations)
+            pending.delete(itemKey)
+            set({ pendingOperations: pending })
+          })
+          .catch((error) => {
+            // Rollback on failure
+            const rolledBackItems = get().items.filter(i => {
+              const key = `${i.id}-${JSON.stringify(i.variant || {})}`
+              return key !== itemKey
+            })
+
+            set({ items: rolledBackItems })
+
+            const pending = new Map(get().pendingOperations)
+            pending.delete(itemKey)
+            set({ pendingOperations: pending })
+
+            get().addError({
+              type: error instanceof Response && error.status >= 500 ? 'network' : 'unknown',
+              message: "Échec de l'ajout au panier. Veuillez réessayer.",
+              operation: 'add',
+              itemId: item.id,
+            })
+
+            // Track failed cart sync
+            if (posthog) {
+              posthog.capture('cart_sync_failed', {
+                operation: 'add',
+                productId: item.productId,
+                error: error instanceof Error ? error.message : 'Unknown error',
+              })
+            }
+
+            toast.error("Échec de l'ajout au panier", {
+              description: "Une erreur s'est produite. Veuillez réessayer.",
+            })
+          })
       },
 
-      removeItem: (id) => set({ items: get().items.filter((i) => i.id !== id) }),
+      removeItem: (id) => {
+        const item = get().items.find((i) => i.id === id)
+        if (!item) return
+
+        const itemKey = `${item.id}-${JSON.stringify(item.variant || {})}`
+        const previousItems = get().items.slice()
+
+        // Optimistic update
+        set({ items: get().items.filter((i) => i.id !== id) })
+
+        // Mark as pending
+        const pendingOps = new Map(get().pendingOperations)
+        pendingOps.set(itemKey, 'remove')
+        set({ pendingOperations: pendingOps })
+
+        // Track analytics event
+        if (posthog) {
+          posthog.capture('cart_item_removed', {
+            productId: item.productId,
+            productName: item.productName,
+            reason: 'user',
+          })
+        }
+
+        // Async sync with retry
+        retryWithBackoff(() => get().syncToServer())
+          .then(() => {
+            const pending = new Map(get().pendingOperations)
+            pending.delete(itemKey)
+            set({ pendingOperations: pending })
+          })
+          .catch((error) => {
+            // Rollback on failure
+            set({ items: previousItems })
+
+            const pending = new Map(get().pendingOperations)
+            pending.delete(itemKey)
+            set({ pendingOperations: pending })
+
+            get().addError({
+              type: error instanceof Response && error.status >= 500 ? 'network' : 'unknown',
+              message: "Échec de la suppression du panier. Veuillez réessayer.",
+              operation: 'remove',
+              itemId: item.id,
+            })
+
+            // Track failed cart sync
+            if (posthog) {
+              posthog.capture('cart_sync_failed', {
+                operation: 'remove',
+                productId: item.productId,
+                error: error instanceof Error ? error.message : 'Unknown error',
+              })
+            }
+
+            toast.error("Échec de la suppression du panier", {
+              description: "Une erreur s'est produite. Veuillez réessayer.",
+            })
+          })
+      },
 
       updateQuantity: (id, quantity) => {
-        const items = get().items.map((i) => (i.id === id ? { ...i, quantity } : i))
+        const item = get().items.find((i) => i.id === id)
+        if (!item) return
+
+        const itemKey = `${item.id}-${JSON.stringify(item.variant || {})}`
+        const previousItems = get().items.slice()
+
+        // Stock validation: clamp to available stock
+        const availableStock = item.stock ?? 0
+        let finalQuantity = quantity
+
+        if (quantity > availableStock) {
+          finalQuantity = availableStock
+
+          // Record stock limitation error
+          get().addError({
+            type: 'stock',
+            message: `Stock limité à ${availableStock} unités pour cet article.`,
+            operation: 'update',
+            itemId: item.id,
+          })
+
+          // Notify user
+          toast.warning("Quantité ajustée", {
+            description: `Stock limité à ${availableStock} unité(s).`,
+          })
+        }
+
+        // Optimistic update
+        const items = get().items.map((i) => (i.id === id ? { ...i, quantity: finalQuantity } : i))
         set({ items })
+
+        // Mark as pending
+        const pendingOps = new Map(get().pendingOperations)
+        pendingOps.set(itemKey, 'update')
+        set({ pendingOperations: pendingOps })
+
+        // Async sync with retry
+        retryWithBackoff(() => get().syncToServer())
+          .then(() => {
+            const pending = new Map(get().pendingOperations)
+            pending.delete(itemKey)
+            set({ pendingOperations: pending })
+          })
+          .catch((error) => {
+            // Rollback on failure
+            set({ items: previousItems })
+
+            const pending = new Map(get().pendingOperations)
+            pending.delete(itemKey)
+            set({ pendingOperations: pending })
+
+            get().addError({
+              type: error instanceof Response && error.status >= 500 ? 'network' : 'unknown',
+              message: "Échec de la mise à jour de la quantité. Veuillez réessayer.",
+              operation: 'update',
+              itemId: item.id,
+            })
+
+            // Track failed cart sync
+            if (posthog) {
+              posthog.capture('cart_sync_failed', {
+                operation: 'update',
+                productId: item.productId,
+                error: error instanceof Error ? error.message : 'Unknown error',
+              })
+            }
+
+            toast.error("Échec de la mise à jour de la quantité", {
+              description: "La modification a été annulée. Veuillez réessayer.",
+            })
+          })
       },
 
       clearCart: () => set({ items: [], appliedCoupon: undefined }),
@@ -163,6 +448,16 @@ export const useCartStore = create<CartStore>()(
 
       applyCoupon: (coupon) => {
         set({ appliedCoupon: coupon })
+
+        // Track analytics event
+        if (posthog) {
+          posthog.capture('cart_coupon_applied', {
+            code: coupon.code,
+            discount: coupon.discount,
+            type: coupon.type,
+            scope: coupon.scope,
+          })
+        }
       },
 
       removeCoupon: () => {
@@ -377,6 +672,13 @@ export const useCartStore = create<CartStore>()(
             body: JSON.stringify({ items, savedForLater, appliedCoupon })
           })
 
+          // If user is not authenticated (401), silently skip sync
+          // Cart data is persisted locally and will sync when user logs in
+          if (response.status === 401) {
+            set({ isSyncing: false })
+            return // Silent return - don't throw, don't log error
+          }
+
           if (!response.ok) {
             throw new Error('Failed to sync cart')
           }
@@ -486,7 +788,14 @@ export const useCartStore = create<CartStore>()(
 
       setIsSyncing: (value) => set({ isSyncing: value }),
 
-      setLastSyncedAt: (date) => set({ lastSyncedAt: date })
+      setLastSyncedAt: (date) => set({ lastSyncedAt: date }),
+
+      addError: (error) => {
+        const errors = [...get().errors, error]
+        set({ errors })
+      },
+
+      clearErrors: () => set({ errors: [] })
     }),
     {
       name: 'cart-storage',
