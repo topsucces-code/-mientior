@@ -28,7 +28,7 @@ const envSchema = z.object({
 
   // Email Service
   RESEND_API_KEY: z.string().startsWith('re_', 'Invalid Resend API key format'),
-  EMAIL_FROM: z.string().email('Invalid sender email address'),
+  EMAIL_FROM: z.string().min(1, 'Email sender is required'),
 
   // Application URLs
   NEXT_PUBLIC_APP_URL: z.string().url('Invalid app URL'),
