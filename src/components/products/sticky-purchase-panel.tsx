@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { PDP_CONFIG } from '@/lib/constants'
 import type { Product, ProductVariant } from '@/types'
+import { useTranslations } from 'next-intl'
 import { useCartStore } from '@/stores/cart.store'
 import { useWishlistStore } from '@/stores/wishlist.store'
 import { useToast } from '@/hooks/use-toast'
@@ -38,8 +39,9 @@ export function StickyPurchasePanel({
   const [internalQuantity, setInternalQuantity] = useState(1)
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const { addItem: addToCart } = useCartStore()
-  const { addItem: addToWishlist, isInWishlist } = useWishlistStore()
+  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
   const { toast } = useToast()
+  const t = useTranslations('wishlist')
 
   // Use external quantity if provided, otherwise use internal
   const quantity = externalQuantity ?? internalQuantity
@@ -95,18 +97,29 @@ export function StickyPurchasePanel({
     }
   }
 
-  const handleAddToWishlist = () => {
-    addToWishlist({
-      productId: product.id,
-      name: product.name,
-      price: finalPrice,
-      image: product.images[0]?.url,
-      addedAt: new Date().toISOString(),
-    })
-    toast({
-      title: 'Ajouté aux favoris',
-      description: `${product.name} a été ajouté à vos favoris`,
-    })
+  const handleToggleWishlist = () => {
+    const inWishlist = isInWishlist(product.id)
+    
+    if (inWishlist) {
+      removeFromWishlist(product.id)
+      toast({
+        title: t('removedFromWishlist'),
+        description: t('removedFromWishlistDesc', { name: product.name }),
+      })
+    } else {
+      addToWishlist({
+        productId: product.id,
+        slug: product.slug,
+        name: product.name,
+        price: finalPrice,
+        image: product.images[0]?.url,
+        addedAt: new Date().toISOString(),
+      })
+      toast({
+        title: t('addedToWishlist'),
+        description: t('addedToWishlistDesc', { name: product.name }),
+      })
+    }
   }
 
   const handleShare = async () => {
@@ -118,7 +131,7 @@ export function StickyPurchasePanel({
       })
     } else {
       await navigator.clipboard.writeText(window.location.href)
-      toast({ title: 'Lien copié!', description: 'Le lien a été copié dans le presse-papier' })
+      toast({ title: t('shareCopied'), description: t('shareCopied') })
     }
   }
 
@@ -257,17 +270,17 @@ export function StickyPurchasePanel({
             <div className="flex items-center gap-2">
               {/* Wishlist Button */}
               <button
-                onClick={handleAddToWishlist}
+                onClick={handleToggleWishlist}
                 className={cn(
                   'hidden md:flex items-center justify-center w-12 h-12 rounded-lg border-2 transition-all',
                   isInWishlist(product.id)
-                    ? 'border-red-500 bg-red-50 text-red-500'
+                    ? 'border-red-500 bg-red-50 text-red-500 hover:bg-red-100'
                     : 'border-platinum-300 hover:border-orange-500'
                 )}
-                aria-label="Add to wishlist"
+                aria-label={isInWishlist(product.id) ? t('removedFromWishlist') : t('addedToWishlist')}
               >
                 <Heart
-                  className={cn('w-5 h-5', isInWishlist(product.id) && 'fill-current')}
+                  className={cn('w-5 h-5 transition-all', isInWishlist(product.id) && 'fill-current')}
                 />
               </button>
 
@@ -275,7 +288,7 @@ export function StickyPurchasePanel({
               <button
                 onClick={handleShare}
                 className="hidden lg:flex items-center justify-center w-12 h-12 rounded-lg border-2 border-platinum-300 hover:border-orange-500 transition-all"
-                aria-label="Share product"
+                aria-label={t('share')}
               >
                 <Share2 className="w-5 h-5" />
               </button>

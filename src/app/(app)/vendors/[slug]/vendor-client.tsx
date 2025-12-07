@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { useCartStore } from '@/stores/cart.store'
 import { useWishlistStore } from '@/stores/wishlist.store'
 import { toast } from '@/hooks/use-toast'
+import { useTranslations } from 'next-intl'
 
 interface VendorProduct {
   id: string
@@ -44,7 +45,8 @@ export function VendorPageClient({ vendor }: VendorPageClientProps) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [sortBy, setSortBy] = useState<'newest' | 'price-asc' | 'price-desc' | 'rating'>('newest')
   const { addItem: addToCart } = useCartStore()
-  const { addItem: addToWishlist, isInWishlist } = useWishlistStore()
+  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
+  const t = useTranslations('wishlist')
 
   const sortedProducts = [...vendor.products].sort((a, b) => {
     switch (sortBy) {
@@ -78,7 +80,13 @@ export function VendorPageClient({ vendor }: VendorPageClientProps) {
   }
 
   const handleToggleWishlist = (product: VendorProduct) => {
-    if (!isInWishlist(product.id)) {
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id)
+      toast({
+        title: t('removedFromWishlist'),
+        description: t('removedFromWishlistDesc', { name: product.name }),
+      })
+    } else {
       addToWishlist({
         productId: product.id,
         slug: product.slug,
@@ -87,7 +95,10 @@ export function VendorPageClient({ vendor }: VendorPageClientProps) {
         image: product.image,
         addedAt: new Date().toISOString(),
       })
-      toast({ title: 'Added to wishlist' })
+      toast({
+        title: t('addedToWishlist'),
+        description: t('addedToWishlistDesc', { name: product.name }),
+      })
     }
   }
 

@@ -1,31 +1,61 @@
 'use client'
 
 import * as React from 'react'
+import { useRouter } from 'next/navigation'
+import QRCode from 'qrcode'
 import { SessionList, type SessionInfo } from '@/components/account/session-list'
 import { useToast } from '@/hooks/use-toast'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Shield, AlertTriangle, Smartphone, Key, Loader2, CheckCircle, XCircle } from 'lucide-react'
+import { Shield, AlertTriangle, Smartphone, Key, Loader2, CheckCircle, XCircle, Lock, Trash2, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 export function SecurityPageClient() {
+  const router = useRouter()
   const [sessions, setSessions] = React.useState<SessionInfo[]>([])
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const { toast } = useToast()
-  
+
   // 2FA State
   const [twoFAEnabled, setTwoFAEnabled] = React.useState(false)
   const [twoFALoading, setTwoFALoading] = React.useState(false)
   const [setupData, setSetupData] = React.useState<{ secret: string; uri: string; backupCodes: string[] } | null>(null)
   const [verifyCode, setVerifyCode] = React.useState('')
   const [showBackupCodes, setShowBackupCodes] = React.useState(false)
+  const [qrCodeUrl, setQrCodeUrl] = React.useState<string>('')
+
+  // Password Change State
+  const [passwordLoading, setPasswordLoading] = React.useState(false)
+  const [currentPassword, setCurrentPassword] = React.useState('')
+  const [newPassword, setNewPassword] = React.useState('')
+  const [confirmPassword, setConfirmPassword] = React.useState('')
+
+  // Delete Account State
+  const [deleteLoading, setDeleteLoading] = React.useState(false)
 
   // Fetch sessions on mount
   React.useEffect(() => {
     fetchSessions()
   }, [])
+
+  // Generate QR code when setup data is available
+  React.useEffect(() => {
+    if (setupData?.uri) {
+      QRCode.toDataURL(setupData.uri, { width: 256 })
+        .then(setQrCodeUrl)
+        .catch((err) => {
+          console.error('Error generating QR code:', err)
+          toast({
+            title: 'Erreur',
+            description: 'Impossible de générer le QR code',
+            variant: 'destructive',
+          })
+        })
+    }
+  }, [setupData, toast])
 
   const fetchSessions = async () => {
     setIsLoading(true)
@@ -98,6 +128,102 @@ export function SecurityPageClient() {
         description: err instanceof Error ? err.message : 'Failed to log out all sessions',
         variant: 'destructive',
       })
+    }
+  }
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: 'Erreur',
+        description: 'Les mots de passe ne correspondent pas',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    setPasswordLoading(true)
+    try {
+      const response = await fetch('/api/account/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error?.message || 'Failed to change password')
+      }
+
+      toast({
+        title: 'Mot de passe changé',
+        description: 'Votre mot de passe a été modifié avec succès',
+      })
+
+      // Reset form
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+    } catch (error) {
+      toast({
+        title: 'Erreur',
+        description: error instanceof Error ? error.message : 'Impossible de changer le mot de passe',
+        variant: 'destructive',
+      })
+    } finally {
+      setPasswordLoading(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    const password = prompt('Entrez votre mot de passe pour confirmer la suppression')
+    if (!password) return
+
+    const confirmation = prompt('Tapez DELETE en majuscules pour confirmer')
+    if (confirmation !== 'DELETE') {
+      toast({
+        title: 'Annulé',
+        description: 'Suppression du compte annulée',
+      })
+      return
+    }
+
+    setDeleteLoading(true)
+    try {
+      const response = await fetch('/api/account/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password, confirmation }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error?.message || 'Failed to delete account')
+      }
+
+      toast({
+        title: 'Compte supprimé',
+        description: 'Votre compte a été supprimé avec succès',
+      })
+
+      // Redirect to homepage after 2 seconds
+      setTimeout(() => {
+        router.push('/')
+      }, 2000)
+    } catch (error) {
+      toast({
+        title: 'Erreur',
+        description: error instanceof Error ? error.message : 'Impossible de supprimer le compte',
+        variant: 'destructive',
+      })
+    } finally {
+      setDeleteLoading(false)
     }
   }
 
@@ -196,10 +322,41 @@ export function SecurityPageClient() {
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="font-medium mb-2">1. Scannez ce QR code avec votre application d'authentification</p>
                 <div className="flex justify-center p-4 bg-white rounded border">
-                  {/* QR Code would be rendered here - using text for now */}
-                  <div className="text-center">
-                    <Key className="h-16 w-16 mx-auto text-gray-400 mb-2" />
-                    <p className="text-xs text-gray-500 break-all max-w-xs">{setupData.secret}</p>
+                  {qrCodeUrl ? (
+                    <div className="text-center">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={qrCodeUrl}
+                        alt="QR Code 2FA"
+                        className="w-64 h-64 mx-auto"
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        Scannez avec Google Authenticator, Authy ou une application similaire
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <Loader2 className="h-16 w-16 mx-auto text-gray-400 mb-2 animate-spin" />
+                      <p className="text-xs text-gray-500">Génération du QR code...</p>
+                    </div>
+                  )}
+                </div>
+                <div className="mt-4 p-3 bg-white rounded border">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 mb-1">Clé secrète (si vous ne pouvez pas scanner)</p>
+                      <code className="text-sm font-mono text-gray-700 break-all">{setupData.secret}</code>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        navigator.clipboard.writeText(setupData.secret)
+                        toast({ title: 'Copié !', description: 'La clé secrète a été copiée dans le presse-papier' })
+                      }}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -282,6 +439,120 @@ export function SecurityPageClient() {
               </Button>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Password Change Card */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-purple-100 p-2 text-purple-600">
+              <Lock className="h-6 w-6" />
+            </div>
+            <div>
+              <CardTitle>Changer le mot de passe</CardTitle>
+              <CardDescription>
+                Mettez à jour votre mot de passe régulièrement pour plus de sécurité
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handlePasswordChange} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="currentPassword">Mot de passe actuel</Label>
+              <Input
+                id="currentPassword"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Entrez votre mot de passe actuel"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">Nouveau mot de passe</Label>
+              <Input
+                id="newPassword"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Entrez votre nouveau mot de passe"
+                required
+                minLength={8}
+              />
+              <p className="text-sm text-nuanced-500">
+                Au moins 8 caractères avec majuscules, minuscules, chiffres et caractères spéciaux
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirmer le nouveau mot de passe</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirmez votre nouveau mot de passe"
+                required
+              />
+            </div>
+            <Button type="submit" disabled={passwordLoading}>
+              {passwordLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Changement en cours...
+                </>
+              ) : (
+                <>
+                  <Lock className="h-4 w-4 mr-2" />
+                  Changer le mot de passe
+                </>
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Delete Account Card */}
+      <Card className="border-red-200">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-red-100 p-2 text-red-600">
+              <Trash2 className="h-6 w-6" />
+            </div>
+            <div>
+              <CardTitle className="text-red-600">Supprimer le compte</CardTitle>
+              <CardDescription>
+                Supprimez définitivement votre compte et toutes vos données
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Cette action est irréversible. Toutes vos commandes, avis et données personnelles seront supprimés.
+              Les informations de commande nécessaires à la comptabilité seront anonymisées.
+            </AlertDescription>
+          </Alert>
+          <Button
+            variant="destructive"
+            onClick={handleDeleteAccount}
+            disabled={deleteLoading}
+          >
+            {deleteLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Suppression en cours...
+              </>
+            ) : (
+              <>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Supprimer mon compte
+              </>
+            )}
+          </Button>
         </CardContent>
       </Card>
 

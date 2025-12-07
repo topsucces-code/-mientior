@@ -523,11 +523,11 @@ export function AdminSidebar({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <strong style={{ fontSize: '20px', color: '#f97316' }}>
+          <strong style={{ fontSize: '20px', color: '#0891B2' }}>
             {collapsed && !isMobile ? 'M' : 'Mientior'}
           </strong>
           {(!collapsed || isMobile) && (
-            <Badge count="Admin" style={{ backgroundColor: '#3b82f6' }} />
+            <Badge count="Admin" style={{ backgroundColor: '#F97316' }} />
           )}
         </div>
         {isMobile && (
@@ -569,10 +569,10 @@ export function AdminSidebar({
         >
           <div>v1.0.0</div>
           <div style={{ marginTop: '4px' }}>
-            <a href="#" style={{ color: '#3b82f6', marginRight: '8px' }}>
+            <a href="#" style={{ color: '#0891B2', marginRight: '8px' }}>
               {t('menu.docs', 'Documentation')}
             </a>
-            <a href="#" style={{ color: '#3b82f6' }}>
+            <a href="#" style={{ color: '#0891B2' }}>
               {t('menu.support', 'Support')}
             </a>
           </div>

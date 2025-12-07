@@ -20,6 +20,11 @@ import {
   Input,
   InputNumber,
   message,
+  Progress,
+  Statistic,
+  Tabs,
+  Select,
+  DatePicker,
 } from "antd";
 import {
   CheckOutlined,
@@ -32,33 +37,49 @@ import {
   EditOutlined,
   UserOutlined,
   MailOutlined,
+  DownloadOutlined,
+  LineChartOutlined,
+  StarOutlined,
+  TrophyOutlined,
 } from "@ant-design/icons";
-import { useState } from "react";
+import { useState, use, useMemo } from "react";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
+import { DocumentUploader, VendorDocument } from "@/components/admin/document-uploader";
 
 const { Title, Text, Paragraph } = Typography;
+const { RangePicker } = DatePicker;
 
-export default function VendorShow({ params }: { params: { id: string } }) {
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function VendorShow({ params }: PageProps) {
+  const { id } = use(params);
+  const { t } = useTranslation(["admin", "common"]);
   const { query } = useShow({
     resource: "vendors",
-    id: params.id,
+    id,
   });
 
   const { mutate: updateVendor } = useUpdate();
   const [form] = Form.useForm();
   const [notesModalVisible, setNotesModalVisible] = useState(false);
   const [payoutModalVisible, setPayoutModalVisible] = useState(false);
+  const [payoutFilter, setPayoutFilter] = useState<string>("all");
 
   const { data, isLoading } = query;
   const record = data?.data;
+  const [documentFilter, setDocumentFilter] = useState<string>("all");
 
+  // Remove duplicate declaration
   const handleApprove = () => {
     updateVendor({
       resource: "vendors",
-      id: params.id,
+      id,
       values: { status: "ACTIVE" },
       successNotification: {
-        message: "Vendor approved successfully",
+        message: t("admin:vendors.messages.approveSuccess"),
         type: "success",
       },
     });
@@ -66,15 +87,15 @@ export default function VendorShow({ params }: { params: { id: string } }) {
 
   const handleSuspend = () => {
     Modal.confirm({
-      title: "Suspend Vendor",
-      content: "Are you sure you want to suspend this vendor?",
+      title: t("admin:vendors.actions.suspend"),
+      content: t("admin:vendors.messages.suspendConfirm"),
       onOk: () => {
         updateVendor({
           resource: "vendors",
-          id: params.id,
+          id,
           values: { status: "SUSPENDED" },
           successNotification: {
-            message: "Vendor suspended successfully",
+            message: t("admin:vendors.messages.suspendSuccess"),
             type: "success",
           },
         });
@@ -84,24 +105,129 @@ export default function VendorShow({ params }: { params: { id: string } }) {
 
   const handleProcessPayout = async (values: { amount: number; period: string }) => {
     try {
-      const response = await fetch(`/api/vendors/${params.id}/payout`, {
+      const response = await fetch(`/api/vendors/${id}/payout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
 
       if (response.ok) {
-        message.success("Payout processed successfully");
+        message.success(t("admin:vendors.messages.payoutSuccess"));
         setPayoutModalVisible(false);
         form.resetFields();
         query.refetch();
       } else {
-        message.error("Failed to process payout");
+        message.error(t("admin:vendors.messages.payoutError"));
       }
     } catch (error) {
-      message.error("Failed to process payout");
+      message.error(t("admin:vendors.messages.payoutError"));
     }
   };
+
+  // Handle document updates
+  const handleDocumentsChange = async (documents: VendorDocument[]) => {
+    try {
+      await fetch(`/api/vendors/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documents }),
+      });
+      query.refetch();
+    } catch (error) {
+      message.error(t("admin:vendors.messages.updateError"));
+    }
+  };
+
+  // Export payouts to CSV
+  const handleExportPayouts = () => {
+    const payouts = record?.payouts || [];
+    const csv = [
+      ["Period", "Amount", "Status", "Paid At", "Created At"].join(","),
+      ...payouts.map((p: any) =>
+        [
+          p.period,
+          p.amount,
+          p.status,
+          p.paidAt || "",
+          new Date(p.createdAt).toLocaleDateString(),
+        ].join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `vendor-${id}-payouts.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  // Calculate performance metrics
+  const performanceMetrics = useMemo(() => {
+    if (!record) return null;
+
+    const orders = record.orders || [];
+    const products = record.products || [];
+    const reviews = products.flatMap((p: any) => p.reviews || []);
+
+    const totalSales = orders.reduce((sum: number, o: any) => sum + (o.total || 0), 0);
+    const avgOrderValue = orders.length > 0 ? totalSales / orders.length : 0;
+    const avgRating = reviews.length > 0
+      ? reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length
+      : 0;
+
+    // Monthly sales data for chart
+    const monthlySales: Record<string, number> = {};
+    orders.forEach((order: any) => {
+      const month = new Date(order.createdAt).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+      });
+      monthlySales[month] = (monthlySales[month] || 0) + (order.total || 0);
+    });
+
+    // Top products
+    const productSales: Record<string, { name: string; sales: number; revenue: number }> = {};
+    orders.forEach((order: any) => {
+      (order.items || []).forEach((item: any) => {
+        const pid = item.productId;
+        if (!productSales[pid]) {
+          productSales[pid] = { name: item.productName || "Unknown", sales: 0, revenue: 0 };
+        }
+        productSales[pid].sales += item.quantity;
+        productSales[pid].revenue += item.price * item.quantity;
+      });
+    });
+
+    const topProducts = Object.values(productSales)
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+
+    return {
+      totalSales,
+      avgOrderValue,
+      avgRating,
+      reviewCount: reviews.length,
+      monthlySales,
+      topProducts,
+      conversionRate: products.length > 0 ? (orders.length / products.length) * 100 : 0,
+    };
+  }, [record]);
+
+  // Filter payouts
+  const filteredPayouts = useMemo(() => {
+    const payouts = record?.payouts || [];
+    if (payoutFilter === "all") return payouts;
+    return payouts.filter((p: any) => p.status === payoutFilter);
+  }, [record?.payouts, payoutFilter]);
+
+  // Filter documents
+  const filteredDocuments = useMemo(() => {
+    const docs = record?.documents || [];
+    if (documentFilter === "all") return docs;
+    return docs.filter((d: any) => d.status === documentFilter);
+  }, [record?.documents, documentFilter]);
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
@@ -345,7 +471,7 @@ export default function VendorShow({ params }: { params: { id: string } }) {
               Suspend
             </Button>
           )}
-          <Link href={`/admin/vendors/edit/${params.id}`}>
+          <Link href={`/admin/vendors/edit/${id}`}>
             <Button icon={<EditOutlined />}>Edit</Button>
           </Link>
           <Button icon={<MailOutlined />}>Message</Button>
@@ -434,18 +560,31 @@ export default function VendorShow({ params }: { params: { id: string } }) {
         )}
       </Descriptions>
 
-      {/* Documents */}
-      <Card title="Documents" style={{ marginBottom: 24 }}>
-        <Table
-          dataSource={record?.documents || []}
-          columns={documentColumns}
-          rowKey="type"
-          pagination={false}
-          locale={{ emptyText: "No documents uploaded" }}
+      {/* Documents - Enhanced */}
+      <Card
+        title={t("admin:vendors.sections.documents")}
+        style={{ marginBottom: 24 }}
+        extra={
+          <Space>
+            <Select
+              value={documentFilter}
+              onChange={setDocumentFilter}
+              style={{ width: 120 }}
+            >
+              <Select.Option value="all">{t("common:labels.all")}</Select.Option>
+              <Select.Option value="PENDING">{t("admin:vendors.status.PENDING")}</Select.Option>
+              <Select.Option value="APPROVED">{t("admin:vendors.status.APPROVED")}</Select.Option>
+              <Select.Option value="REJECTED">{t("admin:vendors.status.REJECTED")}</Select.Option>
+            </Select>
+          </Space>
+        }
+      >
+        <DocumentUploader
+          documents={filteredDocuments}
+          onChange={handleDocumentsChange}
+          showActions={true}
+          readOnly={false}
         />
-        <Upload style={{ marginTop: 16 }}>
-          <Button icon={<UploadOutlined />}>Upload Document</Button>
-        </Upload>
       </Card>
 
       {/* Products */}
@@ -468,26 +607,147 @@ export default function VendorShow({ params }: { params: { id: string } }) {
         />
       </Card>
 
-      {/* Payouts */}
+      {/* Payouts - Enhanced */}
       <Card
-        title="Payouts"
+        title={t("admin:vendors.sections.payouts")}
         extra={
-          <Button
-            type="primary"
-            onClick={() => setPayoutModalVisible(true)}
-          >
-            Process Payout
-          </Button>
+          <Space>
+            <Select
+              value={payoutFilter}
+              onChange={setPayoutFilter}
+              style={{ width: 120 }}
+            >
+              <Select.Option value="all">{t("common:labels.all")}</Select.Option>
+              <Select.Option value="PENDING">{t("admin:vendors.status.PENDING")}</Select.Option>
+              <Select.Option value="PROCESSING">{t("admin:vendors.status.PROCESSING")}</Select.Option>
+              <Select.Option value="PAID">{t("admin:vendors.status.PAID")}</Select.Option>
+              <Select.Option value="FAILED">{t("admin:vendors.status.FAILED")}</Select.Option>
+            </Select>
+            <Button icon={<DownloadOutlined />} onClick={handleExportPayouts}>
+              {t("common:buttons.export")}
+            </Button>
+            <Button
+              type="primary"
+              onClick={() => setPayoutModalVisible(true)}
+            >
+              {t("admin:vendors.actions.processPayout")}
+            </Button>
+          </Space>
         }
         style={{ marginBottom: 24 }}
       >
         <Table
-          dataSource={record?.payouts || []}
+          dataSource={filteredPayouts}
           columns={payoutColumns}
           rowKey="id"
           pagination={{ pageSize: 5 }}
         />
       </Card>
+
+      {/* Performance Section - NEW */}
+      {performanceMetrics && (
+        <Card
+          title={
+            <Space>
+              <LineChartOutlined />
+              {t("admin:vendors.sections.performance")}
+            </Space>
+          }
+          style={{ marginBottom: 24 }}
+        >
+          <Row gutter={16} style={{ marginBottom: 24 }}>
+            <Col span={6}>
+              <Statistic
+                title={t("admin:vendors.metrics.totalSales")}
+                value={performanceMetrics.totalSales}
+                precision={2}
+                prefix="$"
+              />
+            </Col>
+            <Col span={6}>
+              <Statistic
+                title={t("admin:vendors.metrics.avgOrderValue")}
+                value={performanceMetrics.avgOrderValue}
+                precision={2}
+                prefix="$"
+              />
+            </Col>
+            <Col span={6}>
+              <Statistic
+                title={t("admin:vendors.metrics.avgRating")}
+                value={performanceMetrics.avgRating}
+                precision={1}
+                suffix={`/ 5 (${performanceMetrics.reviewCount} ${t("admin:vendors.metrics.reviews")})`}
+                prefix={<StarOutlined />}
+              />
+            </Col>
+            <Col span={6}>
+              <Statistic
+                title={t("admin:vendors.metrics.conversionRate")}
+                value={performanceMetrics.conversionRate}
+                precision={1}
+                suffix="%"
+              />
+            </Col>
+          </Row>
+
+          <Tabs
+            items={[
+              {
+                key: "topProducts",
+                label: t("admin:vendors.tabs.topProducts"),
+                children: (
+                  <Table
+                    dataSource={performanceMetrics.topProducts}
+                    columns={[
+                      {
+                        title: t("admin:vendors.fields.product"),
+                        dataIndex: "name",
+                        key: "name",
+                      },
+                      {
+                        title: t("admin:vendors.fields.sales"),
+                        dataIndex: "sales",
+                        key: "sales",
+                      },
+                      {
+                        title: t("admin:vendors.fields.revenue"),
+                        dataIndex: "revenue",
+                        key: "revenue",
+                        render: (v: number) => `$${v.toFixed(2)}`,
+                      },
+                    ]}
+                    rowKey="name"
+                    pagination={false}
+                    size="small"
+                  />
+                ),
+              },
+              {
+                key: "monthlySales",
+                label: t("admin:vendors.tabs.monthlySales"),
+                children: (
+                  <div className="space-y-2">
+                    {Object.entries(performanceMetrics.monthlySales).map(([month, amount]) => (
+                      <div key={month} className="flex items-center gap-4">
+                        <span className="w-24">{month}</span>
+                        <Progress
+                          percent={Math.min(
+                            100,
+                            (amount / Math.max(...Object.values(performanceMetrics.monthlySales))) * 100
+                          )}
+                          format={() => `$${amount.toFixed(2)}`}
+                          strokeColor="#0891B2"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ),
+              },
+            ]}
+          />
+        </Card>
+      )}
 
       {/* Internal Notes */}
       <Card

@@ -3,11 +3,13 @@
 import * as React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Package, ChevronRight, Search, Calendar } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Package, ChevronRight, Search, Calendar, ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { OrdersQuery } from '@/lib/validations/orders'
 
 interface OrderItem {
   id: string
@@ -37,8 +39,17 @@ interface Order {
   itemCount: number
 }
 
+interface PaginationInfo {
+  page: number
+  limit: number
+  total: number
+  hasMore: boolean
+}
+
 interface OrderHistoryClientProps {
   orders: Order[]
+  pagination: PaginationInfo
+  filters: OrdersQuery
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
@@ -56,21 +67,55 @@ const PAYMENT_STATUS_CONFIG: Record<string, { label: string; color: string }> = 
   REFUNDED: { label: 'Remboursé', color: 'text-purple-600' },
 }
 
-export function OrderHistoryClient({ orders }: OrderHistoryClientProps) {
-  const [searchQuery, setSearchQuery] = React.useState('')
-  const [statusFilter, setStatusFilter] = React.useState<string>('all')
+export function OrderHistoryClient({ orders, pagination, filters }: OrderHistoryClientProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [searchQuery, setSearchQuery] = React.useState(filters.search || '')
+  const [statusFilter, setStatusFilter] = React.useState<string>(filters.status || 'all')
+  const searchTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
 
-  const filteredOrders = React.useMemo(() => {
-    return orders.filter((order) => {
-      const matchesSearch =
-        order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.items.some((item) =>
-          item.productName.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      const matchesStatus = statusFilter === 'all' || order.status === statusFilter
-      return matchesSearch && matchesStatus
+  const updateFilters = React.useCallback((updates: Partial<OrdersQuery>) => {
+    const params = new URLSearchParams(searchParams.toString())
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === '' || value === 'all') {
+        params.delete(key)
+      } else {
+        params.set(key, String(value))
+      }
     })
-  }, [orders, searchQuery, statusFilter])
+
+    // Reset to page 1 when filters change
+    if (!('page' in updates)) {
+      params.delete('page')
+    }
+
+    router.push(`/account/orders?${params.toString()}`)
+  }, [router, searchParams])
+
+  const handleSearch = React.useCallback((query: string) => {
+    setSearchQuery(query)
+
+    // Clear existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+
+    // Set new timeout
+    searchTimeoutRef.current = setTimeout(() => {
+      updateFilters({ search: query })
+      searchTimeoutRef.current = null
+    }, 500) // Debounce 500ms
+  }, [updateFilters])
+
+  const handleStatusFilter = React.useCallback((status: string) => {
+    setStatusFilter(status)
+    updateFilters({ status: status === 'all' ? undefined : status as "PENDING" | "CANCELLED" | "DELIVERED" | "PROCESSING" | "SHIPPED" })
+  }, [updateFilters])
+
+  const handlePageChange = React.useCallback((page: number) => {
+    updateFilters({ page })
+  }, [updateFilters])
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -106,14 +151,14 @@ export function OrderHistoryClient({ orders }: OrderHistoryClientProps) {
               type="text"
               placeholder="Rechercher par n° de commande ou produit..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
               className="pl-10"
             />
           </div>
           <div className="flex gap-2">
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => handleStatusFilter(e.target.value)}
               className="px-4 py-2 border border-platinum-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value="all">Tous les statuts</option>
@@ -128,18 +173,18 @@ export function OrderHistoryClient({ orders }: OrderHistoryClientProps) {
       </div>
 
       {/* Orders List */}
-      {filteredOrders.length === 0 ? (
+      {orders.length === 0 ? (
         <div className="bg-white rounded-xl border border-platinum-200 p-12 text-center">
           <Package className="w-16 h-16 mx-auto text-platinum-300 mb-4" />
           <h3 className="text-lg font-semibold text-anthracite-900 mb-2">
-            {orders.length === 0 ? 'Aucune commande' : 'Aucun résultat'}
+            Aucune commande
           </h3>
           <p className="text-nuanced-600 mb-6">
-            {orders.length === 0
+            {pagination.total === 0
               ? "Vous n'avez pas encore passé de commande."
               : 'Aucune commande ne correspond à votre recherche.'}
           </p>
-          {orders.length === 0 && (
+          {pagination.total === 0 && (
             <Link href="/products">
               <Button>Découvrir nos produits</Button>
             </Link>
@@ -147,7 +192,7 @@ export function OrderHistoryClient({ orders }: OrderHistoryClientProps) {
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredOrders.map((order) => {
+          {orders.map((order) => {
             const statusConfig = STATUS_CONFIG[order.status] || { label: 'En attente', color: 'text-amber-700', bgColor: 'bg-amber-100' }
             const paymentConfig = PAYMENT_STATUS_CONFIG[order.paymentStatus] || { label: 'En attente', color: 'text-amber-600' }
 
@@ -265,11 +310,78 @@ export function OrderHistoryClient({ orders }: OrderHistoryClientProps) {
         </div>
       )}
 
-      {/* Summary */}
-      {orders.length > 0 && (
-        <div className="mt-6 text-center text-sm text-nuanced-500">
-          {filteredOrders.length} commande{filteredOrders.length > 1 ? 's' : ''} sur{' '}
-          {orders.length}
+      {/* Pagination */}
+      {pagination.total > 0 && (
+        <div className="mt-6 flex items-center justify-between">
+          <p className="text-sm text-nuanced-600">
+            Affichage de {(pagination.page - 1) * pagination.limit + 1}-
+            {Math.min(pagination.page * pagination.limit, pagination.total)} sur{' '}
+            {pagination.total} commande{pagination.total > 1 ? 's' : ''}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(pagination.page - 1)}
+              disabled={pagination.page === 1}
+            >
+              <ChevronLeft className="w-4 h-4 mr-1" />
+              Précédent
+            </Button>
+            <div className="flex gap-1">
+              {Array.from(
+                { length: Math.ceil(pagination.total / pagination.limit) },
+                (_, i) => i + 1
+              )
+                .filter((page) => {
+                  const totalPages = Math.ceil(pagination.total / pagination.limit)
+                  if (totalPages <= 5) return true
+                  if (page === 1 || page === totalPages) return true
+                  if (
+                    page >= pagination.page - 1 &&
+                    page <= pagination.page + 1
+                  )
+                    return true
+                  return false
+                })
+                .map((page, index, arr) => {
+                  if (index > 0 && arr[index - 1] !== page - 1) {
+                    return (
+                      <React.Fragment key={`ellipsis-${page}`}>
+                        <span className="px-2 py-1">...</span>
+                        <Button
+                          key={page}
+                          variant={page === pagination.page ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => handlePageChange(page)}
+                        >
+                          {page}
+                        </Button>
+                      </React.Fragment>
+                    )
+                  }
+                  return (
+                    <Button
+                      key={page}
+                      variant={page === pagination.page ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => handlePageChange(page)}
+                    >
+                      {page}
+                    </Button>
+                  )
+                })}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(pagination.page + 1)}
+              disabled={!pagination.hasMore}
+            >
+              Suivant
+              <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
         </div>
       )}
     </div>

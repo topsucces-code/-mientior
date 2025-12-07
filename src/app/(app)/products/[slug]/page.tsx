@@ -149,9 +149,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
 
   // Fetch reviews and review stats
-  // TODO: Implement review API endpoint
-  const reviews: Review[] = []
-  const reviewStats = undefined
+  const reviewsResponse = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/reviews/products/${slug}/reviews?page=1&sort=recent`,
+    { cache: 'no-store' }
+  )
+    .then((res) => (res.ok ? res.json() : { reviews: [], stats: undefined }))
+    .catch(() => ({ reviews: [], stats: undefined }))
+
+  const reviews: Review[] = reviewsResponse.reviews || []
+  const reviewStats = reviewsResponse.stats
 
   // Prepare product data for client component
   const productData = {

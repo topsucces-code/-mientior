@@ -68,7 +68,7 @@ export function UserAccountDropdown() {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 z-50 animate-slide-down">
+                <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 z-[110] animate-slide-down">
                     <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-emerald-50 to-taupe-50">
                         <div className="flex items-center gap-3">
                             <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-lg">

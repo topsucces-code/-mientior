@@ -148,6 +148,38 @@
     "codeApplied": "Code promo appliqué",
     "invalidCode": "Code promo invalide"
   },
+  "wishlist": {
+    "title": "Ma Liste de Souhaits",
+    "empty": "Votre liste de souhaits est vide",
+    "emptyText": "Ajoutez des produits que vous aimez pour les retrouver facilement",
+    "continueShopping": "Découvrir nos produits",
+    "itemCount": "{count} produit(s)",
+    "addedToWishlist": "♡ Ajouté aux favoris",
+    "addedToWishlistDesc": "{name} a été ajouté à vos favoris",
+    "removedFromWishlist": "Retiré des favoris",
+    "removedFromWishlistDesc": "{name} a été retiré de vos favoris",
+    "addToCart": "Ajouter au panier",
+    "addAllToCart": "Tout ajouter au panier",
+    "remove": "Retirer",
+    "clearAll": "Vider la liste",
+    "clearConfirm": "Êtes-vous sûr de vouloir vider votre liste de souhaits ?",
+    "clearConfirmTitle": "Vider la liste de souhaits ?",
+    "clearConfirmDesc": "Vous êtes sur le point de supprimer tous les articles de votre liste de souhaits. Cette action est irréversible.",
+    "confirmClear": "Oui, vider la liste",
+    "wishlistCleared": "Liste vidée",
+    "wishlistClearedDesc": "Tous les articles ont été supprimés de votre liste",
+    "share": "Partager ma liste",
+    "shareCopied": "Lien copié dans le presse-papier",
+    "syncSuccess": "Liste de souhaits synchronisée",
+    "syncSuccessDesc": "Votre liste de souhaits a été synchronisée avec succès",
+    "syncError": "Erreur de synchronisation",
+    "syncErrorDesc": "Impossible de synchroniser votre liste de souhaits",
+    "loginRequired": "Connexion requise",
+    "loginRequiredDesc": "Connectez-vous pour synchroniser votre liste de souhaits",
+    "outOfStock": "Rupture de stock",
+    "priceDropAlert": "Alerte baisse de prix",
+    "backInStockAlert": "Alerte retour en stock"
+  },
   "checkout": {
     "title": "Paiement",
     "shipping": "Livraison",
@@ -445,5 +477,252 @@
       "cod": "Paiement à la livraison"
     },
     "mobileMoneyInstructions": "Vous recevrez une notification sur votre téléphone pour confirmer le paiement."
+  },
+  "admin": {
+    "vendors": {
+      "create": "Créer un vendeur",
+      "edit": "Modifier le vendeur",
+      "tabs": {
+        "general": "Informations générales",
+        "documents": "Documents KYC",
+        "banking": "Coordonnées bancaires",
+        "topProducts": "Meilleurs produits",
+        "monthlySales": "Ventes mensuelles"
+      },
+      "fields": {
+        "businessName": "Nom de l'entreprise",
+        "slug": "Slug",
+        "email": "Email",
+        "phone": "Téléphone",
+        "logo": "Logo",
+        "description": "Description",
+        "commissionRate": "Taux de commission",
+        "status": "Statut",
+        "rating": "Note",
+        "accountName": "Nom du titulaire",
+        "accountNumber": "Numéro de compte",
+        "bankName": "Nom de la banque",
+        "swiftCode": "Code SWIFT",
+        "iban": "IBAN",
+        "mobileMoneyProvider": "Opérateur Mobile Money",
+        "mobileMoneyNumber": "Numéro Mobile Money",
+        "products": "Produits",
+        "orders": "Commandes",
+        "createdAt": "Créé le",
+        "product": "Produit",
+        "sales": "Ventes",
+        "revenue": "Revenus"
+      },
+      "status": {
+        "PENDING": "En attente",
+        "ACTIVE": "Actif",
+        "SUSPENDED": "Suspendu",
+        "BANNED": "Banni",
+        "APPROVED": "Approuvé",
+        "REJECTED": "Rejeté",
+        "PROCESSING": "En cours",
+        "PAID": "Payé",
+        "FAILED": "Échoué"
+      },
+      "actions": {
+        "create": "Créer le vendeur",
+        "approve": "Approuver",
+        "suspend": "Suspendre",
+        "reactivate": "Réactiver",
+        "processPayout": "Traiter le paiement"
+      },
+      "messages": {
+        "createSuccess": "Vendeur créé avec succès",
+        "updateSuccess": "Vendeur mis à jour avec succès",
+        "approveSuccess": "Vendeur approuvé avec succès",
+        "suspendSuccess": "Vendeur suspendu avec succès",
+        "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce vendeur ?",
+        "deleteWarning": "Cette action est irréversible.",
+        "deleteSuccess": "Vendeur supprimé avec succès",
+        "notFound": "Vendeur non trouvé",
+        "emailExists": "Cet email est déjà utilisé"
+      },
+      "documents": {
+        "description": "Téléchargez les documents KYC requis pour la vérification",
+        "noDocuments": "Aucun document téléchargé",
+        "pending": "En attente",
+        "approved": "Approuvé",
+        "rejected": "Rejeté",
+        "approveAll": "Tout approuver",
+        "downloadAll": "Tout télécharger",
+        "approve": "Approuver",
+        "reject": "Rejeter",
+        "rejectTitle": "Rejeter le document",
+        "rejectMessage": "Veuillez indiquer la raison du rejet"
+      },
+      "sections": {
+        "documents": "Documents KYC",
+        "payouts": "Paiements",
+        "performance": "Performance"
+      },
+      "metrics": {
+        "totalSales": "Ventes totales",
+        "avgOrderValue": "Panier moyen",
+        "avgRating": "Note moyenne",
+        "conversionRate": "Taux de conversion",
+        "reviews": "avis"
+      }
+    },
+    "campaigns": {
+      "create": "Créer une campagne",
+      "edit": "Modifier la campagne",
+      "steps": {
+        "details": "Détails",
+        "detailsDesc": "Nom et type de campagne",
+        "content": "Contenu",
+        "contentDesc": "Contenu de l'email ou du message",
+        "audience": "Audience",
+        "audienceDesc": "Sélectionner le segment cible",
+        "schedule": "Planification",
+        "scheduleDesc": "Quand envoyer",
+        "review": "Révision",
+        "reviewDesc": "Confirmer et envoyer"
+      },
+      "fields": {
+        "name": "Nom de la campagne",
+        "type": "Type",
+        "subject": "Objet",
+        "preheader": "Pré-en-tête",
+        "content": "Contenu",
+        "message": "Message",
+        "segment": "Segment cible",
+        "scheduledAt": "Planifié pour",
+        "sentAt": "Envoyé le",
+        "status": "Statut",
+        "estimatedRecipients": "Destinataires estimés"
+      },
+      "types": {
+        "EMAIL": "Email",
+        "SMS": "SMS",
+        "PUSH": "Notification push"
+      },
+      "segments": {
+        "all": "Tous les utilisateurs",
+        "platinum": "Membres Platinum",
+        "inactive": "Utilisateurs inactifs (90+ jours)",
+        "highValue": "Clients à forte valeur"
+      },
+      "actions": {
+        "send": "Envoyer la campagne",
+        "sendNow": "Envoyer maintenant",
+        "sendTest": "Envoyer un test",
+        "preview": "Aperçu",
+        "duplicate": "Dupliquer",
+        "cancel": "Annuler la campagne"
+      },
+      "messages": {
+        "saved": "Campagne enregistrée",
+        "sent": "Campagne envoyée avec succès",
+        "duplicated": "Campagne dupliquée",
+        "cancelled": "Campagne annulée",
+        "cancelConfirm": "Annuler cette campagne ?",
+        "cancelWarning": "Cette action est irréversible.",
+        "notFound": "Campagne non trouvée",
+        "testSent": "Email de test envoyé",
+        "sendConfirmTitle": "Prêt à envoyer ?",
+        "sendConfirmDesc": "Cela enverra la campagne à tous les destinataires."
+      },
+      "tabs": {
+        "details": "Détails",
+        "performance": "Performance",
+        "recipients": "Destinataires"
+      },
+      "stats": {
+        "sent": "Envoyés",
+        "delivered": "Délivrés",
+        "opens": "Ouvertures",
+        "clicks": "Clics",
+        "conversions": "Conversions",
+        "revenue": "Revenus",
+        "bounces": "Rebonds",
+        "bounceRate": "Taux de rebond",
+        "unsubscribes": "Désabonnements",
+        "funnel": "Entonnoir de conversion"
+      },
+      "charts": {
+        "performance": "Performance dans le temps",
+        "devices": "Répartition par appareil",
+        "locations": "Top localisations",
+        "links": "Performance des liens",
+        "noData": "Aucune donnée disponible"
+      }
+    },
+    "promoCodes": {
+      "create": "Créer un code promo",
+      "edit": "Modifier le code promo",
+      "fields": {
+        "code": "Code",
+        "type": "Type",
+        "value": "Valeur",
+        "status": "Statut",
+        "scope": "Portée",
+        "usageLimit": "Limite d'utilisation",
+        "usageCount": "Utilisations",
+        "perUserLimit": "Limite par utilisateur",
+        "validFrom": "Valide à partir de",
+        "validTo": "Valide jusqu'au",
+        "validDates": "Période de validité",
+        "minPurchase": "Achat minimum",
+        "maxDiscount": "Réduction maximum",
+        "categories": "Catégories",
+        "products": "Produits",
+        "firstOrderOnly": "Première commande uniquement"
+      },
+      "types": {
+        "percentage": "Pourcentage",
+        "fixed": "Montant fixe",
+        "freeShipping": "Livraison gratuite"
+      },
+      "scopes": {
+        "cart": "Panier entier",
+        "shipping": "Livraison uniquement",
+        "category": "Catégories spécifiques",
+        "product": "Produits spécifiques"
+      },
+      "status": {
+        "active": "Actif",
+        "disabled": "Désactivé",
+        "expired": "Expiré",
+        "scheduled": "Planifié",
+        "exhausted": "Épuisé"
+      },
+      "actions": {
+        "duplicate": "Dupliquer",
+        "enable": "Activer",
+        "disable": "Désactiver"
+      },
+      "messages": {
+        "copied": "Code copié",
+        "enabled": "Code promo activé",
+        "disabled": "Code promo désactivé",
+        "duplicated": "Code promo dupliqué",
+        "deleted": "Code promo supprimé",
+        "deleteConfirm": "Supprimer ce code promo ?",
+        "deleteWarning": "Cette action est irréversible.",
+        "notFound": "Code promo non trouvé"
+      },
+      "generateCode": "Générer un code",
+      "tabs": {
+        "details": "Détails",
+        "usage": "Historique d'utilisation",
+        "analytics": "Analytiques"
+      },
+      "stats": {
+        "usageCount": "Utilisations",
+        "totalDiscount": "Réduction totale accordée",
+        "totalOrders": "Total commandes",
+        "avgOrderValue": "Panier moyen"
+      },
+      "analytics": {
+        "usageOverTime": "Utilisation dans le temps",
+        "uses": "utilisations",
+        "noData": "Pas encore de données"
+      }
+    }
   }
 }

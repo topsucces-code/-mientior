@@ -12,6 +12,8 @@ import { useCartStore } from '@/stores/cart.store'
 import { useWishlistStore } from '@/stores/wishlist.store'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
+import { toast } from '@/hooks/use-toast'
+import { useTranslations } from 'next-intl'
 
 export interface ProductCardProps {
   id: string
@@ -58,6 +60,7 @@ export function ProductCard({
   const [imageLoaded, setImageLoaded] = React.useState(false)
   const prefersReducedMotion = useReducedMotion()
   const { ref: cardRef, isIntersecting: isVisible } = useIntersectionObserver<HTMLDivElement>({ threshold: 0.1 })
+  const t = useTranslations('wishlist')
 
   const addToCart = useCartStore((state) => state.addItem)
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
@@ -92,13 +95,22 @@ export function ProductCard({
 
     if (inWishlist) {
       removeFromWishlist(id)
+      toast({
+        title: t('removedFromWishlist'),
+        description: t('removedFromWishlistDesc', { name }),
+      })
     } else {
       addToWishlist({
         productId: id,
+        slug,
         name,
         price,
         image,
         addedAt: new Date().toISOString(),
+      })
+      toast({
+        title: t('addedToWishlist'),
+        description: t('addedToWishlistDesc', { name }),
       })
     }
   }
@@ -112,6 +124,7 @@ export function ProductCard({
   return (
     <div
       ref={cardRef}
+      data-testid="product-card"
       className={cn(
         'group relative flex flex-col overflow-hidden rounded-lg bg-white transition-all duration-300',
         'border border-platinum-300 hover:border-platinum-400',

@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import { useCartStore } from '@/stores/cart.store'
 import { useWishlistStore } from '@/stores/wishlist.store'
 import { useToast } from '@/hooks/use-toast'
+import { useTranslations } from 'next-intl'
 import { cn, extractReturnDays } from '@/lib/utils'
 import { CART_CONFIG, PDP_CONFIG } from '@/lib/constants'
 import type { Product, ProductVariant, ShippingInfo } from '@/types'
@@ -38,6 +39,7 @@ export function DesktopStickySidebar({
   const { addItem: addToCart } = useCartStore()
   const { items: wishlistItems, addItem: addToWishlist, removeItem: removeFromWishlist } = useWishlistStore()
   const { toast } = useToast()
+  const t = useTranslations('wishlist')
   const [isAddingToCart, setIsAddingToCart] = useState(false)
 
   const isWishlisted = wishlistItems.some(item => item.productId === product.id)
@@ -118,8 +120,8 @@ export function DesktopStickySidebar({
         removeFromWishlist(wishlistItem.productId)
       }
       toast({
-        title: 'Retiré des favoris',
-        description: `${product.name} a été retiré de vos favoris.`,
+        title: t('removedFromWishlist'),
+        description: t('removedFromWishlistDesc', { name: product.name }),
       })
     } else {
       addToWishlist({
@@ -131,8 +133,8 @@ export function DesktopStickySidebar({
         addedAt: new Date().toISOString(),
       })
       toast({
-        title: 'Ajouté aux favoris',
-        description: `${product.name} a été ajouté à vos favoris.`,
+        title: t('addedToWishlist'),
+        description: t('addedToWishlistDesc', { name: product.name }),
       })
     }
   }

@@ -91,15 +91,46 @@ export function useTheme() {
   return context;
 }
 
-// Ant Design theme configuration
+// Ant Design theme configuration - Palette "Frais & Confiant" (Turquoise/Orange)
 export function useAntdTheme() {
   const { isDark } = useTheme();
+
+  // Branding colors
+  const colors = {
+    turquoise: {
+      primary: '#0891B2',    // turquoise-600
+      light: '#06B6D4',      // turquoise-500
+      dark: '#0E7490',       // turquoise-700
+      bg: '#ECFEFF',         // turquoise-50
+    },
+    orange: {
+      primary: '#F97316',    // orange-500
+      light: '#FB923C',      // orange-400
+      dark: '#EA580C',       // orange-600
+    },
+    success: '#10B981',
+    error: '#EF4444',
+    warning: '#F59E0B',
+  };
 
   return {
     algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
     token: {
-      colorPrimary: '#1890ff',
+      // Primary color: Turquoise (confiance)
+      colorPrimary: colors.turquoise.primary,
+      colorLink: colors.turquoise.primary,
+      colorLinkHover: colors.turquoise.light,
+      colorLinkActive: colors.turquoise.dark,
+      
+      // Success/Error/Warning
+      colorSuccess: colors.success,
+      colorError: colors.error,
+      colorWarning: colors.warning,
+      
+      // Border radius
       borderRadius: 6,
+      
+      // Dark mode overrides
       ...(isDark ? {
         colorBgContainer: '#141414',
         colorBgElevated: '#1f1f1f',
@@ -110,13 +141,26 @@ export function useAntdTheme() {
     },
     components: {
       Layout: {
-        siderBg: isDark ? '#141414' : '#001529',
+        siderBg: isDark ? '#141414' : '#fff',
         headerBg: isDark ? '#141414' : '#fff',
-        bodyBg: isDark ? '#000000' : '#f0f2f5',
+        bodyBg: isDark ? '#000000' : '#f5f5f5',
       },
       Menu: {
-        darkItemBg: isDark ? '#141414' : '#001529',
-        darkSubMenuItemBg: isDark ? '#1f1f1f' : '#000c17',
+        itemSelectedBg: isDark ? colors.turquoise.dark : colors.turquoise.bg,
+        itemSelectedColor: isDark ? colors.turquoise.light : colors.turquoise.primary,
+        itemHoverBg: isDark ? '#1f1f1f' : colors.turquoise.bg,
+        darkItemBg: isDark ? '#141414' : '#fff',
+        darkSubMenuItemBg: isDark ? '#1f1f1f' : '#fafafa',
+      },
+      Button: {
+        primaryColor: '#fff',
+        colorPrimary: colors.turquoise.primary,
+        colorPrimaryHover: colors.turquoise.light,
+        colorPrimaryActive: colors.turquoise.dark,
+        // Orange for danger/CTA actions
+        colorError: colors.orange.primary,
+        colorErrorHover: colors.orange.light,
+        colorErrorActive: colors.orange.dark,
       },
       Card: {
         colorBgContainer: isDark ? '#141414' : '#fff',
@@ -124,10 +168,59 @@ export function useAntdTheme() {
       Table: {
         colorBgContainer: isDark ? '#141414' : '#fff',
         headerBg: isDark ? '#1f1f1f' : '#fafafa',
+        rowHoverBg: isDark ? '#1f1f1f' : colors.turquoise.bg,
       },
       Modal: {
         contentBg: isDark ? '#1f1f1f' : '#fff',
         headerBg: isDark ? '#1f1f1f' : '#fff',
+      },
+      Badge: {
+        colorError: colors.orange.primary,
+      },
+      Tag: {
+        colorSuccess: colors.success,
+        colorError: colors.error,
+        colorWarning: colors.warning,
+        colorInfo: colors.turquoise.primary,
+      },
+      Tabs: {
+        inkBarColor: colors.turquoise.primary,
+        itemSelectedColor: colors.turquoise.primary,
+        itemHoverColor: colors.turquoise.light,
+      },
+      Switch: {
+        colorPrimary: colors.turquoise.primary,
+        colorPrimaryHover: colors.turquoise.light,
+      },
+      Checkbox: {
+        colorPrimary: colors.turquoise.primary,
+        colorPrimaryHover: colors.turquoise.light,
+      },
+      Radio: {
+        colorPrimary: colors.turquoise.primary,
+        colorPrimaryHover: colors.turquoise.light,
+      },
+      Input: {
+        activeBorderColor: colors.turquoise.primary,
+        hoverBorderColor: colors.turquoise.light,
+      },
+      Select: {
+        optionSelectedBg: colors.turquoise.bg,
+        optionSelectedColor: colors.turquoise.primary,
+      },
+      DatePicker: {
+        activeBorderColor: colors.turquoise.primary,
+        hoverBorderColor: colors.turquoise.light,
+      },
+      Pagination: {
+        itemActiveBg: colors.turquoise.primary,
+        itemActiveColorDisabled: colors.turquoise.light,
+      },
+      Progress: {
+        defaultColor: colors.turquoise.primary,
+      },
+      Spin: {
+        colorPrimary: colors.turquoise.primary,
       },
     },
   };

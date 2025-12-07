@@ -12,7 +12,7 @@ function HeaderContent() {
   return (
     <>
       <header
-        className={`fixed left-0 right-0 top-0 z-50 w-full transition-transform duration-300 ease-smooth ${isHidden ? '-translate-y-full' : 'translate-y-0'
+        className={`fixed left-0 right-0 top-0 z-[100] w-full transition-transform duration-300 ease-smooth ${isHidden ? '-translate-y-full' : 'translate-y-0'
           }`}
       >
         {/* Tier 1: Promotional Banner (40px) */}

@@ -183,7 +183,7 @@ function InstagramPostCard({ post, className, style }: InstagramPostCardProps) {
       style={style}
     >
       {/* Image */}
-      <div className="relative aspect-square">
+      <div className="relative aspect-square w-full overflow-hidden">
         <Image
           src={post.imageUrl}
           alt={post.caption || 'Instagram post'}

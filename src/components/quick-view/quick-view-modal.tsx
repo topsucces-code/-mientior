@@ -14,6 +14,9 @@ import { StarRating } from '@/components/ui/star-rating'
 import { useCartStore } from '@/stores/cart.store'
 import { useWishlistStore } from '@/stores/wishlist.store'
 import { cn } from '@/lib/utils'
+import { toast } from '@/hooks/use-toast'
+import { useTranslations } from 'next-intl'
+import { formatPrice } from '@/lib/currency-utils'
 import type { CartItem } from '@/types'
 
 interface QuickViewModalProps {
@@ -75,6 +78,7 @@ export function QuickViewModal({ productId, isOpen, onClose, onAddToCart }: Quic
   const [selectedVariants, setSelectedVariants] = React.useState<Record<string, string>>({})
   const [quantity, setQuantity] = React.useState(1)
   const [isAddingToCart, setIsAddingToCart] = React.useState(false)
+  const t = useTranslations('wishlist')
 
   const addToCart = useCartStore((state) => state.addItem)
   const { items: wishlistItems, addItem: addToWishlist, removeItem: removeFromWishlist } = useWishlistStore()
@@ -121,22 +125,24 @@ export function QuickViewModal({ productId, isOpen, onClose, onAddToCart }: Quic
 
     if (isInWishlist) {
       removeFromWishlist(product.id)
+      toast({
+        title: t('removedFromWishlist'),
+        description: t('removedFromWishlistDesc', { name: product.name }),
+      })
     } else {
       addToWishlist({
         productId: product.id,
+        slug: product.slug,
         name: product.name,
         price: product.price,
         image: product.images[0]?.url || '/images/placeholder.svg',
         addedAt: new Date().toISOString(),
       })
+      toast({
+        title: t('addedToWishlist'),
+        description: t('addedToWishlistDesc', { name: product.name }),
+      })
     }
-  }
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR',
-    }).format(price / 100)
   }
 
   const discountPercentage = product?.compareAtPrice

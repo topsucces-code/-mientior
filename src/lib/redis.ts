@@ -452,3 +452,38 @@ export async function invalidateAllUserPreferencesCache(): Promise<void> {
     console.warn('[redis] Error invalidating all preferences cache:', error)
   }
 }
+
+// ==================== SESSION CACHE ====================
+
+/**
+ * Invalidate session cache for a specific user by querying their active sessions
+ * and invalidating each session cache key individually. This is more targeted than
+ * invalidating all session:* keys globally.
+ *
+ * @param userId - User ID to invalidate sessions for
+ */
+export async function invalidateUserSessions(userId: string): Promise<void> {
+  if (!redis) return
+
+  try {
+    const { prisma } = await import('@/lib/prisma')
+
+    // Find all active sessions for this user
+    const userSessions = await prisma.session.findMany({
+      where: {
+        userId,
+        expiresAt: { gt: new Date() },
+      },
+      select: { token: true },
+    })
+
+    // Invalidate each session cache key
+    if (userSessions.length > 0) {
+      const sessionKeys = userSessions.map(s => `session:${s.token}`)
+      await redis.del(...sessionKeys)
+      console.log(`[redis] Invalidated ${sessionKeys.length} session cache entries for user ${userId}`)
+    }
+  } catch (error) {
+    console.warn(`[redis] Error invalidating user sessions for ${userId}:`, error)
+  }
+}

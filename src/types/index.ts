@@ -194,6 +194,15 @@ export interface User {
 
 // ==================== REVIEW TYPES ====================
 
+/**
+ * Merchant response to a customer review
+ */
+export interface MerchantResponse {
+  text: string
+  respondedAt: string | Date
+  respondedBy?: string
+}
+
 export interface Review {
   id: string
   productId: string
@@ -209,11 +218,7 @@ export interface Review {
   helpful: number
   notHelpful: number
   createdAt: Date
-  response?: {
-    text: string
-    respondedAt: Date
-    respondedBy: string
-  }
+  response?: MerchantResponse
 }
 
 export interface ReviewStats {

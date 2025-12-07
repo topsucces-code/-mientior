@@ -84,8 +84,13 @@ export const NotificationsBell: React.FC = () => {
     const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY
     const pusherCluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER || 'us2'
 
-    if (!pusherKey) {
-      console.warn('Pusher key not configured')
+    // Check for placeholder values that indicate unconfigured Pusher
+    const isConfigured = pusherKey && 
+      !pusherKey.includes('your_pusher') && 
+      !pusherCluster.includes('your_pusher')
+
+    if (!isConfigured) {
+      // Silently skip Pusher initialization if not configured
       return
     }
 

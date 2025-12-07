@@ -12,6 +12,7 @@ import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
 import { useQuickView } from '@/contexts/quick-view-context'
 import { useCartStore } from '@/stores/cart.store'
+import { useWishlistStore } from '@/stores/wishlist.store'
 import { toast } from 'sonner'
 import { useHeaderSafe } from '@/contexts/header-context'
 
@@ -42,6 +43,7 @@ export default function FlashDeal({
   const prefersReducedMotion = useReducedMotion()
   const { openQuickView } = useQuickView()
   const addToCart = useCartStore((state) => state.addItem)
+  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
   const headerContext = useHeaderSafe()
 
   const handleAddToCart = (product: Omit<ProductCardProps, 'onQuickView'> & { stock?: number }) => {
@@ -153,6 +155,27 @@ export default function FlashDeal({
     openQuickView(productId)
   }
 
+  const handleWishlistToggle = (product: Omit<ProductCardProps, 'onQuickView'> & { stock?: number }) => {
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id)
+      toast.success('Retiré des favoris', {
+        description: `${product.name} a été retiré de vos favoris.`,
+      })
+    } else {
+      addToWishlist({
+        productId: product.id,
+        slug: product.slug,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        addedAt: new Date().toISOString(),
+      })
+      toast.success('Ajouté aux favoris', {
+        description: `${product.name} a été ajouté à vos favoris.`,
+      })
+    }
+  }
+
   if (!products || products.length === 0) {
     return null
   }
@@ -228,6 +251,8 @@ export default function FlashDeal({
                     badge={{ text: 'FLASH', variant: 'flash' }}
                     onQuickView={handleQuickView}
                     onAddToCart={() => handleAddToCart(product)}
+                    onWishlistToggle={() => handleWishlistToggle(product)}
+                    isInWishlist={isInWishlist(product.id)}
                     priority={index < 6}
                     className={cn(
                       'border-2 border-orange-200',

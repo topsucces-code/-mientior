@@ -9,7 +9,9 @@ import { cn } from '@/lib/utils'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
 import { useCartStore } from '@/stores/cart.store'
+import { useWishlistStore } from '@/stores/wishlist.store'
 import { useToast } from '@/hooks/use-toast'
+import { toast as sonnerToast } from 'sonner'
 
 interface FeaturedProductsProps {
   products: (Omit<ProductCardProps, 'onQuickView'> & { stock?: number })[]
@@ -29,6 +31,7 @@ export default function FeaturedProducts({
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
   const addToCart = useCartStore((state) => state.addItem)
+  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
   const { toast } = useToast()
 
   // TODO: Implement quick view modal
@@ -52,6 +55,27 @@ export default function FeaturedProducts({
        title: "Ajouté au panier",
        description: `${product.name} a été ajouté à votre panier.`,
      })
+  }
+
+  const handleWishlistToggle = (product: any) => {
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id)
+      sonnerToast.success('Retiré des favoris', {
+        description: `${product.name} a été retiré de vos favoris.`,
+      })
+    } else {
+      addToWishlist({
+        productId: product.id,
+        slug: product.slug,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        addedAt: new Date().toISOString(),
+      })
+      sonnerToast.success('Ajouté aux favoris', {
+        description: `${product.name} a été ajouté à vos favoris.`,
+      })
+    }
   }
 
   if (!products || products.length === 0) {
@@ -100,6 +124,8 @@ export default function FeaturedProducts({
               inStock={product.stock !== undefined ? product.stock > 0 : product.inStock}
               onQuickView={handleQuickView}
               onAddToCart={() => handleAddToCart(product)}
+              onWishlistToggle={() => handleWishlistToggle(product)}
+              isInWishlist={isInWishlist(product.id)}
               className={cn(
                 !prefersReducedMotion && isVisible && 'animate-fade-in-up',
               )}

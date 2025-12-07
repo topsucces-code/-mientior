@@ -19,7 +19,7 @@ export function TopBar() {
 
     return (
         <div
-            className="bg-taupe-50 border-b border-taupe-200 transition-all duration-300 animate-slide-down"
+            className="bg-turquoise-600 text-white transition-all duration-300 animate-slide-down"
             style={{ height: HEADER_CONFIG.heights.topBar }}
         >
             <div className="container mx-auto px-4 h-full flex items-center justify-between">
@@ -27,12 +27,12 @@ export function TopBar() {
                 <div className="flex items-center gap-6">
                     <GeolocationSelector />
 
-                    <div className="hidden lg:flex items-center gap-4 text-xs text-gray-600">
-                        <Link href="/livraison" className="flex items-center gap-1.5 hover:text-emerald-600 transition-colors">
+                    <div className="hidden lg:flex items-center gap-4 text-xs text-white/90">
+                        <Link href="/livraison" className="flex items-center gap-1.5 hover:text-white transition-colors">
                             <Truck className="w-3.5 h-3.5" />
                             <span>{t('freeShipping', { amount: '50€' })}</span>
                         </Link>
-                        <Link href="/garantie" className="flex items-center gap-1.5 hover:text-emerald-600 transition-colors">
+                        <Link href="/garantie" className="flex items-center gap-1.5 hover:text-white transition-colors">
                             <Shield className="w-3.5 h-3.5" />
                             <span>{t('warranty')}</span>
                         </Link>
@@ -50,7 +50,7 @@ export function TopBar() {
 
                     <Link
                         href="/aide"
-                        className="flex items-center gap-1.5 text-sm hover:text-emerald-600 transition-colors"
+                        className="flex items-center gap-1.5 text-sm hover:text-white/80 transition-colors"
                     >
                         <HelpCircle className="w-4 h-4" />
                         <span className="hidden md:inline font-medium">{t('help')}</span>

@@ -17,6 +17,7 @@ import {
   message,
   Badge,
   Tooltip,
+  Checkbox,
 } from "antd";
 import {
   PlusOutlined,
@@ -35,18 +36,21 @@ const { RangePicker } = DatePicker;
 interface PromoCode {
   id: string;
   code: string;
-  type: "PERCENTAGE" | "FIXED" | "FREE_SHIPPING";
+  type: "PERCENTAGE" | "FIXED_AMOUNT" | "FREE_SHIPPING";
   value: number;
   usageCount: number;
   usageLimit?: number;
   validFrom: string;
-  validUntil: string;
+  validTo: string;
   isActive: boolean;
+  minOrderAmount?: number;
+  maxDiscount?: number;
   conditions?: {
-    minPurchase?: number;
-    maxDiscount?: number;
-    products?: string[];
-    categories?: string[];
+    scope?: string;
+    categoryIds?: string[];
+    productIds?: string[];
+    perUserLimit?: number;
+    firstOrderOnly?: boolean;
   };
 }
 
@@ -80,7 +84,7 @@ export default function PromoCodesList() {
   const getTypeColor = (type: string) => {
     const colors: Record<string, string> = {
       PERCENTAGE: "blue",
-      FIXED: "green",
+      FIXED_AMOUNT: "green",
       FREE_SHIPPING: "purple",
     };
     return colors[type] || "default";
@@ -88,7 +92,7 @@ export default function PromoCodesList() {
 
   const formatValue = (type: string, value: number) => {
     if (type === "PERCENTAGE") return `${value}%`;
-    if (type === "FIXED") return `$${value}`;
+    if (type === "FIXED_AMOUNT") return `$${value}`;
     return "Free Shipping";
   };
 
@@ -121,7 +125,7 @@ export default function PromoCodesList() {
       render: (type: string) => <Tag color={getTypeColor(type)}>{type}</Tag>,
       filters: [
         { text: "Percentage", value: "PERCENTAGE" },
-        { text: "Fixed Amount", value: "FIXED" },
+        { text: "Fixed Amount", value: "FIXED_AMOUNT" },
         { text: "Free Shipping", value: "FREE_SHIPPING" },
       ],
     },
@@ -167,8 +171,8 @@ export default function PromoCodesList() {
     },
     {
       title: "Valid Until",
-      dataIndex: "validUntil",
-      key: "validUntil",
+      dataIndex: "validTo",
+      key: "validTo",
       render: (date: string) => dayjs(date).format("MMM D, YYYY"),
     },
     {
@@ -178,8 +182,8 @@ export default function PromoCodesList() {
       render: (isActive: boolean, record: PromoCode) => {
         const now = dayjs();
         const validFrom = dayjs(record.validFrom);
-        const validUntil = dayjs(record.validUntil);
-        const isExpired = now.isAfter(validUntil);
+        const validTo = dayjs(record.validTo);
+        const isExpired = now.isAfter(validTo);
         const isNotYetValid = now.isBefore(validFrom);
 
         if (!isActive) {
@@ -243,9 +247,14 @@ export default function PromoCodesList() {
       type: code.type,
       value: code.value,
       usageLimit: code.usageLimit,
-      validDates: [dayjs(code.validFrom), dayjs(code.validUntil)],
-      minPurchase: code.conditions?.minPurchase,
-      maxDiscount: code.conditions?.maxDiscount,
+      validDates: [dayjs(code.validFrom), dayjs(code.validTo)],
+      minPurchase: code.minOrderAmount,
+      maxDiscount: code.maxDiscount,
+      scope: code.conditions?.scope || "CART",
+      categoryIds: code.conditions?.categoryIds || [],
+      productIds: code.conditions?.productIds || [],
+      perUserLimit: code.conditions?.perUserLimit,
+      firstOrderOnly: code.conditions?.firstOrderOnly || false,
     });
     setEditingCode(code);
     setModalVisible(true);
@@ -274,11 +283,16 @@ export default function PromoCodesList() {
         value: values.value,
         usageLimit: values.usageLimit || null,
         validFrom: dates[0].toISOString(),
-        validUntil: dates[1].toISOString(),
+        validTo: dates[1].toISOString(),
         isActive: true,
+        minOrderAmount: values.minPurchase || null,
+        maxDiscount: values.maxDiscount || null,
         conditions: {
-          minPurchase: values.minPurchase || null,
-          maxDiscount: values.maxDiscount || null,
+          scope: values.scope || "CART",
+          categoryIds: values.categoryIds || null,
+          productIds: values.productIds || null,
+          perUserLimit: values.perUserLimit || null,
+          firstOrderOnly: values.firstOrderOnly || false,
         },
       };
 
@@ -436,7 +450,7 @@ export default function PromoCodesList() {
           >
             <Select>
               <Select.Option value="PERCENTAGE">Percentage Discount</Select.Option>
-              <Select.Option value="FIXED">Fixed Amount</Select.Option>
+              <Select.Option value="FIXED_AMOUNT">Fixed Amount</Select.Option>
               <Select.Option value="FREE_SHIPPING">Free Shipping</Select.Option>
             </Select>
           </Form.Item>
@@ -490,6 +504,100 @@ export default function PromoCodesList() {
             extra={t("admin:promoCodes.maxDiscountHint")}
           >
             <InputNumber style={{ width: "100%" }} min={0} prefix="$" />
+          </Form.Item>
+
+          {/* Scope Selection */}
+          <Form.Item
+            label={t("admin:promoCodes.fields.scope")}
+            name="scope"
+            initialValue="CART"
+          >
+            <Select>
+              <Select.Option value="CART">{t("admin:promoCodes.scopes.cart")}</Select.Option>
+              <Select.Option value="SHIPPING">{t("admin:promoCodes.scopes.shipping")}</Select.Option>
+              <Select.Option value="CATEGORY">{t("admin:promoCodes.scopes.category")}</Select.Option>
+              <Select.Option value="PRODUCT">{t("admin:promoCodes.scopes.product")}</Select.Option>
+            </Select>
+          </Form.Item>
+
+          {/* Category Selection (conditional) */}
+          <Form.Item
+            noStyle
+            shouldUpdate={(prevValues, currentValues) =>
+              prevValues.scope !== currentValues.scope
+            }
+          >
+            {({ getFieldValue }) =>
+              getFieldValue("scope") === "CATEGORY" && (
+                <Form.Item
+                  label={t("admin:promoCodes.fields.categories")}
+                  name="categoryIds"
+                  rules={[{ required: true, message: t("admin:promoCodes.messages.categoryRequired") }]}
+                >
+                  <Select
+                    mode="multiple"
+                    placeholder={t("admin:promoCodes.selectCategories")}
+                    style={{ width: "100%" }}
+                  >
+                    {/* Categories would be loaded from API */}
+                    <Select.Option value="electronics">Electronics</Select.Option>
+                    <Select.Option value="clothing">Clothing</Select.Option>
+                    <Select.Option value="home">Home & Garden</Select.Option>
+                    <Select.Option value="beauty">Beauty</Select.Option>
+                  </Select>
+                </Form.Item>
+              )
+            }
+          </Form.Item>
+
+          {/* Product Selection (conditional) */}
+          <Form.Item
+            noStyle
+            shouldUpdate={(prevValues, currentValues) =>
+              prevValues.scope !== currentValues.scope
+            }
+          >
+            {({ getFieldValue }) =>
+              getFieldValue("scope") === "PRODUCT" && (
+                <Form.Item
+                  label={t("admin:promoCodes.fields.products")}
+                  name="productIds"
+                  rules={[{ required: true, message: t("admin:promoCodes.messages.productRequired") }]}
+                >
+                  <Select
+                    mode="multiple"
+                    placeholder={t("admin:promoCodes.selectProducts")}
+                    style={{ width: "100%" }}
+                    showSearch
+                    filterOption={(input, option) =>
+                      (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase())
+                    }
+                  >
+                    {/* Products would be loaded from API */}
+                    <Select.Option value="prod-1">Product 1</Select.Option>
+                    <Select.Option value="prod-2">Product 2</Select.Option>
+                    <Select.Option value="prod-3">Product 3</Select.Option>
+                  </Select>
+                </Form.Item>
+              )
+            }
+          </Form.Item>
+
+          {/* Per User Limit */}
+          <Form.Item
+            label={t("admin:promoCodes.fields.perUserLimit")}
+            name="perUserLimit"
+            extra={t("admin:promoCodes.perUserLimitHint")}
+          >
+            <InputNumber style={{ width: "100%" }} min={1} placeholder="Unlimited" />
+          </Form.Item>
+
+          {/* First Order Only */}
+          <Form.Item
+            name="firstOrderOnly"
+            valuePropName="checked"
+          >
+            <Checkbox>{t("admin:promoCodes.fields.firstOrderOnly")}</Checkbox>
           </Form.Item>
         </Form>
       </Modal>

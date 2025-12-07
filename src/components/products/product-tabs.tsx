@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { FileText, ListChecks, MessageSquare, ThumbsUp, ThumbsDown, HelpCircle, Truck, X, ChevronLeft, ChevronRight, Search, MessageSquarePlus, ShieldCheck, MessageCircle, RotateCcw, Globe, Check } from 'lucide-react'
+import { FileText, ListChecks, MessageSquare, ThumbsUp, ThumbsDown, HelpCircle, Truck, X, ChevronLeft, ChevronRight, Search, MessageSquarePlus, ShieldCheck, MessageCircle, RotateCcw, Globe, Check, Store } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { StarRating } from '@/components/ui/star-rating'
 import { Avatar } from '@/components/ui/avatar'
@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { useToast } from '@/hooks/use-toast'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { PDP_CONFIG } from '@/lib/constants'
@@ -75,8 +76,15 @@ function parseSpecifications(specs: Record<string, string> | undefined): Array<{
 
 export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shippingInfo }: ProductTabsProps) {
   const [reviewSort, setReviewSort] = useState<'recent' | 'helpful' | 'rating'>('recent')
-  const [filters, setFilters] = useState<{ photos: boolean; videos: boolean; verified: boolean }>({ photos: false, videos: false, verified: false })
+  const [filters, setFilters] = useState<{ photos: boolean; videos: boolean; verified: boolean; rating: number | null }>({ photos: false, videos: false, verified: false, rating: null })
   const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false)
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [allReviews, setAllReviews] = useState(reviews)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const { toast } = useToast()
   
   // Q&A state
   const [searchQuery, setSearchQuery] = useState('')
@@ -87,8 +95,62 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
   // Parse specifications
   const specificationGroups = parseSpecifications(product.specifications)
 
+  // Initialize reviews when they change
+  useEffect(() => {
+    setAllReviews(reviews)
+    setCurrentPage(1)
+    setHasMore(reviewStats ? reviews.length < reviewStats.total : false)
+  }, [reviews, reviewStats])
+
+  // Reset pagination when filters or sort change
+  useEffect(() => {
+    setCurrentPage(1)
+    setAllReviews(reviews)
+    setHasMore(reviewStats ? reviews.length < reviewStats.total : false)
+  }, [filters, reviewSort, reviews, reviewStats])
+
+  // Load more reviews handler
+  const loadMoreReviews = async () => {
+    if (loadingMore || !hasMore) return
+
+    setLoadingMore(true)
+    try {
+      const nextPage = currentPage + 1
+      const params = new URLSearchParams({
+        page: nextPage.toString(),
+        sort: reviewSort,
+      })
+
+      if (filters.photos) params.append('withPhotos', 'true')
+      if (filters.videos) params.append('withVideos', 'true')
+      if (filters.verified) params.append('verified', 'true')
+      if (filters.rating !== null) params.append('rating', filters.rating.toString())
+
+      const response = await fetch(`/api/reviews/products/${product.slug}/reviews?${params.toString()}`)
+
+      if (!response.ok) {
+        throw new Error('Failed to load more reviews')
+      }
+
+      const data = await response.json()
+
+      setAllReviews(prev => [...prev, ...data.reviews])
+      setCurrentPage(nextPage)
+      setHasMore(data.reviews.length === 10 && allReviews.length + data.reviews.length < data.totalCount)
+    } catch (error) {
+      console.error('Error loading more reviews:', error)
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de charger plus d\'avis',
+        variant: 'destructive',
+      })
+    } finally {
+      setLoadingMore(false)
+    }
+  }
+
   // Sort reviews based on selected option
-  const sortedReviews = [...reviews].sort((a, b) => {
+  const sortedReviews = [...allReviews].sort((a, b) => {
     switch (reviewSort) {
       case 'helpful':
         return b.helpful - a.helpful
@@ -109,6 +171,9 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
       return false
     }
     if (filters.verified && !review.verified) {
+      return false
+    }
+    if (filters.rating !== null && review.rating !== filters.rating) {
       return false
     }
     return true
@@ -310,7 +375,13 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
                   const percentage = reviewStats.total > 0 ? (count / reviewStats.total) * 100 : 0
 
                   return (
-                    <div key={rating} className="flex items-center gap-3">
+                    <button
+                      key={rating}
+                      type="button"
+                      onClick={() => setFilters(prev => ({ ...prev, rating: prev.rating === rating ? null : rating }))}
+                      className={`flex items-center gap-3 w-full hover:bg-platinum-100 rounded px-2 py-1 transition-colors ${filters.rating === rating ? 'bg-orange-50' : ''}`}
+                      data-testid={`filter-rating-${rating}`}
+                    >
                       <span className="text-sm font-medium text-anthracite-900 w-12">
                         {rating} étoiles
                       </span>
@@ -323,7 +394,7 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
                       <span className="text-sm text-nuanced-600 w-12 text-right">
                         {count}
                       </span>
-                    </div>
+                    </button>
                   )
                 })}
               </div>
@@ -353,10 +424,11 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm text-nuanced-600 mr-2">Filtrer par:</span>
             <Button
-              variant={!filters.photos && !filters.videos && !filters.verified ? 'default' : 'outline'}
+              variant={!filters.photos && !filters.videos && !filters.verified && filters.rating === null ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setFilters({ photos: false, videos: false, verified: false })}
-              className={!filters.photos && !filters.videos && !filters.verified ? 'bg-orange-600 hover:bg-orange-700' : ''}
+              onClick={() => setFilters({ photos: false, videos: false, verified: false, rating: null })}
+              className={!filters.photos && !filters.videos && !filters.verified && filters.rating === null ? 'bg-orange-600 hover:bg-orange-700' : ''}
+              data-testid="filter-all"
             >
               Tous
             </Button>
@@ -365,6 +437,7 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
               size="sm"
               onClick={() => setFilters(prev => ({ ...prev, photos: !prev.photos }))}
               className={filters.photos ? 'bg-orange-600 hover:bg-orange-700' : ''}
+              data-testid="filter-photos"
             >
               Avec photos
             </Button>
@@ -373,6 +446,7 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
               size="sm"
               onClick={() => setFilters(prev => ({ ...prev, videos: !prev.videos }))}
               className={filters.videos ? 'bg-orange-600 hover:bg-orange-700' : ''}
+              data-testid="filter-videos"
             >
               Avec vidéos
             </Button>
@@ -381,6 +455,7 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
               size="sm"
               onClick={() => setFilters(prev => ({ ...prev, verified: !prev.verified }))}
               className={filters.verified ? 'bg-orange-600 hover:bg-orange-700' : ''}
+              data-testid="filter-verified"
             >
               Achat vérifié
             </Button>
@@ -412,18 +487,18 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
         )}
 
         {/* Reviews List */}
-        <div className="space-y-6">
+        <div className="space-y-6" data-testid="reviews-list">
           {filteredReviews.length > 0 ? (
             filteredReviews.map((review) => (
               <ReviewItem key={review.id} review={review} />
             ))
           ) : reviews.length > 0 ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12" data-testid="no-results-message">
               <MessageSquare className="w-12 h-12 text-nuanced-400 mx-auto mb-4" />
               <p className="text-nuanced-600 mb-4">Aucun avis ne correspond à vos filtres.</p>
-              <Button 
+              <Button
                 variant="outline"
-                onClick={() => setFilters({ photos: false, videos: false, verified: false })}
+                onClick={() => setFilters({ photos: false, videos: false, verified: false, rating: null })}
               >
                 Réinitialiser les filtres
               </Button>
@@ -443,11 +518,22 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
         </div>
 
         {/* Load More Button */}
-        {reviews.length > 5 && (
+        {hasMore && filteredReviews.length > 0 && reviewStats && allReviews.length < reviewStats.total && (
           <div className="text-center pt-4">
-            <Button variant="outline" className="min-w-[200px]">
-              Voir plus d'avis
+            <Button
+              variant="outline"
+              className="min-w-[200px]"
+              onClick={loadMoreReviews}
+              disabled={loadingMore}
+              data-testid="load-more-reviews"
+            >
+              {loadingMore ? 'Chargement...' : 'Voir plus d\'avis'}
             </Button>
+            {reviewStats && (
+              <p className="text-sm text-nuanced-500 mt-2">
+                {allReviews.length} sur {reviewStats.total} avis affichés
+              </p>
+            )}
           </div>
         )}
       </TabsContent>
@@ -665,15 +751,69 @@ function WriteReviewModal({ product, onClose }: WriteReviewModalProps) {
   const [rating, setRating] = useState(5)
   const [title, setTitle] = useState('')
   const [comment, setComment] = useState('')
-  const images: string[] = [] // Placeholder for future image upload implementation
+  const [images, setImages] = useState<File[]>([])
+  const [videos, setVideos] = useState<File[]>([])
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const [videoPreviews, setVideoPreviews] = useState<string[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const { toast } = useToast()
 
-  const handleSubmit = () => {
-    // TODO: Implement actual review submission
-    console.log('Review submitted:', { rating, title, comment, images, productId: product.id })
-    
-    // Show success message (would use useToast in production)
-    alert('Avis soumis avec succès !')
-    onClose()
+  // Validation
+  const isValid = rating > 0 && title.trim().length > 0 && comment.trim().length >= 10 && comment.length <= 2000
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true)
+    setError(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('rating', rating.toString())
+      formData.append('title', title)
+      formData.append('comment', comment)
+
+      // Ajouter les images si présentes
+      images.forEach((file, index) => {
+        formData.append(`images[${index}]`, file)
+      })
+
+      // Ajouter les vidéos si présentes
+      videos.forEach((file, index) => {
+        formData.append(`videos[${index}]`, file)
+      })
+
+      const response = await fetch(`/api/reviews/products/${product.slug}/reviews`, {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur lors de la soumission')
+      }
+
+      // Afficher un toast de succès
+      toast({
+        title: 'Avis soumis !',
+        description: 'Votre avis est en attente de modération.',
+      })
+
+      onClose()
+
+      // Optionnel : Rafraîchir la page pour afficher le nouvel avis (si approuvé automatiquement)
+      // window.location.reload()
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue'
+      setError(errorMessage)
+      toast({
+        title: 'Erreur',
+        description: errorMessage,
+        variant: 'destructive',
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -727,18 +867,113 @@ function WriteReviewModal({ product, onClose }: WriteReviewModalProps) {
         />
       </div>
 
-      {/* Image Upload Placeholder */}
+      {/* Media Upload (Images and Videos) */}
       <div>
         <label className="block text-sm font-medium text-anthracite-900 mb-2">
-          Ajouter des photos (optionnel)
+          Ajouter des photos ou vidéos (optionnel)
         </label>
         <div className="border-2 border-dashed border-platinum-300 rounded-lg p-8 text-center">
-          <p className="text-sm text-nuanced-500">
-            Ajoutez jusqu'à 5 photos de votre produit
-          </p>
-          <Button variant="outline" size="sm" className="mt-3" disabled>
-            Choisir des fichiers
-          </Button>
+          <input
+            type="file"
+            id="review-media"
+            accept="image/jpeg,image/jpg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
+            multiple
+            onChange={(e) => {
+              const files = Array.from(e.target.files || [])
+              const imageFiles: File[] = []
+              const videoFiles: File[] = []
+
+              // Séparer les images et les vidéos
+              files.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                  imageFiles.push(file)
+                } else if (file.type.startsWith('video/')) {
+                  videoFiles.push(file)
+                }
+              })
+
+              // Limiter à 5 fichiers au total
+              const totalFiles = images.length + videos.length + imageFiles.length + videoFiles.length
+              if (totalFiles > 5) {
+                toast({
+                  title: 'Limite dépassée',
+                  description: 'Vous ne pouvez ajouter que 5 fichiers au total (images + vidéos)',
+                  variant: 'destructive',
+                })
+                return
+              }
+
+              // Ajouter les nouvelles images
+              if (imageFiles.length > 0) {
+                setImages(prev => [...prev, ...imageFiles])
+                const newPreviews = imageFiles.map(file => URL.createObjectURL(file))
+                setImagePreviews(prev => [...prev, ...newPreviews])
+              }
+
+              // Ajouter les nouvelles vidéos
+              if (videoFiles.length > 0) {
+                setVideos(prev => [...prev, ...videoFiles])
+                const newPreviews = videoFiles.map(file => URL.createObjectURL(file))
+                setVideoPreviews(prev => [...prev, ...newPreviews])
+              }
+
+              // Réinitialiser l'input pour permettre de sélectionner les mêmes fichiers à nouveau
+              e.target.value = ''
+            }}
+            className="hidden"
+          />
+          <label htmlFor="review-media" className="cursor-pointer">
+            <p className="text-sm text-nuanced-500 mb-3">
+              Ajoutez jusqu'à 5 fichiers au total (photos et vidéos)
+            </p>
+            <p className="text-xs text-nuanced-400 mb-3">
+              Images: JPG, PNG, WebP (max 10MB) • Vidéos: MP4, WebM, MOV (max 50MB)
+            </p>
+            <Button variant="outline" size="sm" type="button">
+              Choisir des fichiers
+            </Button>
+          </label>
+
+          {/* Afficher les previews d'images */}
+          {(imagePreviews.length > 0 || videoPreviews.length > 0) && (
+            <div className="flex gap-2 mt-4 flex-wrap justify-center">
+              {imagePreviews.map((preview, index) => (
+                <div key={`img-${index}`} className="relative">
+                  <img src={preview} alt={`Image ${index + 1}`} className="w-20 h-20 object-cover rounded" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImages(prev => prev.filter((_, i) => i !== index))
+                      setImagePreviews(prev => prev.filter((_, i) => i !== index))
+                    }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              {videoPreviews.map((preview, index) => (
+                <div key={`vid-${index}`} className="relative">
+                  <video src={preview} className="w-20 h-20 object-cover rounded" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded">
+                    <div className="w-6 h-6 rounded-full bg-white/90 flex items-center justify-center">
+                      <div className="w-0 h-0 border-l-[6px] border-l-anthracite-900 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-0.5" />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setVideos(prev => prev.filter((_, i) => i !== index))
+                      setVideoPreviews(prev => prev.filter((_, i) => i !== index))
+                    }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs z-10"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -762,10 +997,10 @@ function WriteReviewModal({ product, onClose }: WriteReviewModalProps) {
         </Button>
         <Button
           onClick={handleSubmit}
-          disabled={!rating || !title.trim() || !comment.trim()}
+          disabled={!isValid || isSubmitting}
           className="flex-1 bg-orange-600 hover:bg-orange-700"
         >
-          Publier mon avis
+          {isSubmitting ? 'Envoi en cours...' : 'Publier mon avis'}
         </Button>
       </div>
     </div>
@@ -781,12 +1016,21 @@ function ReviewItem({ review }: { review: Review }) {
   const [userVote, setUserVote] = useState<'helpful' | 'not-helpful' | null>(null)
   const [selectedMediaIndex, setSelectedMediaIndex] = useState<number | null>(null)
   const [selectedMediaType, setSelectedMediaType] = useState<'image' | 'video' | null>(null)
+  const { toast } = useToast()
 
   // Combine images and videos into a single media array
   const allMedia = React.useMemo(() => [
     ...(review.images || []).map(url => ({ type: 'image' as const, url })),
     ...(review.videos || []).map(url => ({ type: 'video' as const, url }))
   ], [review.images, review.videos])
+
+  // Load saved vote from localStorage on mount
+  useEffect(() => {
+    const savedVote = localStorage.getItem(`review-vote-${review.id}`)
+    if (savedVote === 'helpful' || savedVote === 'not-helpful') {
+      setUserVote(savedVote)
+    }
+  }, [review.id])
 
   // Keyboard navigation for lightbox
   useEffect(() => {
@@ -811,34 +1055,43 @@ function ReviewItem({ review }: { review: Review }) {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [selectedMediaIndex, allMedia])
 
-  const handleVote = (type: 'helpful' | 'not-helpful') => {
-    if (userVote === type) {
-      // Remove vote
-      if (type === 'helpful') {
-        setHelpful((prev) => prev - 1)
-      } else {
-        setNotHelpful((prev) => prev - 1)
-      }
-      setUserVote(null)
-    } else {
-      // Add or change vote
-      if (userVote === 'helpful') {
-        setHelpful((prev) => prev - 1)
-      } else if (userVote === 'not-helpful') {
-        setNotHelpful((prev) => prev - 1)
+  const handleVote = async (type: 'helpful' | 'not-helpful') => {
+    if (userVote === type) return // Déjà voté
+
+    try {
+      const response = await fetch(`/api/reviews/${review.id}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          voteType: type === 'helpful' ? 'helpful' : 'notHelpful'
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to vote')
       }
 
-      if (type === 'helpful') {
-        setHelpful((prev) => prev + 1)
-      } else {
-        setNotHelpful((prev) => prev + 1)
-      }
+      const data = await response.json()
+
+      // Mettre à jour l'état local
+      setHelpful(data.helpful)
+      setNotHelpful(data.notHelpful)
       setUserVote(type)
+
+      // Sauvegarder dans localStorage pour éviter les votes multiples
+      localStorage.setItem(`review-vote-${review.id}`, type)
+    } catch (error) {
+      console.error('Vote error:', error)
+      toast({
+        title: 'Erreur',
+        description: 'Impossible d\'enregistrer votre vote',
+        variant: 'destructive'
+      })
     }
   }
 
   return (
-    <div className="border border-platinum-200 rounded-lg p-6 space-y-4">
+    <div className="border border-platinum-200 rounded-lg p-6 space-y-4" data-testid="review-item">
       {/* Review Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -875,7 +1128,9 @@ function ReviewItem({ review }: { review: Review }) {
             </p>
           </div>
         </div>
-        <StarRating rating={review.rating} size="sm" />
+        <div data-testid="review-rating">
+          <StarRating rating={review.rating} size="sm" />
+        </div>
       </div>
 
       {/* Review Title */}
@@ -1046,13 +1301,27 @@ function ReviewItem({ review }: { review: Review }) {
         </div>
       </div>
 
-      {/* Seller Response */}
+      {/* Merchant Response */}
       {review.response && (
-        <div className="bg-platinum-50 rounded-lg p-4 border-l-4 border-orange-500">
-          <p className="text-sm font-medium text-anthracite-900 mb-2">
-            Réponse du vendeur - {new Date(review.response.respondedAt).toLocaleDateString('fr-FR')}
-          </p>
-          <p className="text-sm text-nuanced-700">{review.response.text}</p>
+        <div className="mt-4 bg-orange-50 border-l-4 border-orange-500 p-4 rounded">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0">
+              <div className="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center">
+                <Store className="w-4 h-4 text-white" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-anthracite-900 mb-1">
+                Réponse du vendeur
+              </p>
+              <p className="text-sm text-nuanced-700">
+                {review.response.text}
+              </p>
+              <p className="text-xs text-nuanced-500 mt-2">
+                {new Date(review.response.respondedAt).toLocaleDateString('fr-FR')}
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </div>

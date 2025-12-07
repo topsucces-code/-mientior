@@ -59,119 +59,119 @@ export default {
                     DEFAULT: 'hsl(var(--card))',
                     foreground: 'hsl(var(--card-foreground))',
                 },
-                // L'Opulence Organique - Luxe Naturel Branding
-                // Vert Émeraude Profond (Primary) - Richesse, héritage, nature précieuse
-                emerald: {
-                    50: '#ECFDF5',
-                    100: '#D1FAE5',
-                    200: '#A7F3D0',
-                    300: '#6EE7B7',
-                    400: '#34D399',
-                    500: '#047857',  // Vert Émeraude Profond
-                    600: '#065F46',
-                    700: '#064E3B',
-                    800: '#022C22',
-                    900: '#014737',
+                // ============================================
+                // 🎨 MIENTIOR - Palette "Frais & Confiant"
+                // Turquoise/Orange - Confiance + Action
+                // ============================================
+                
+                // Turquoise (Primary) - Confiance, fiabilité, modernité
+                turquoise: {
+                    50: '#ECFEFF',   // Fond neutre clair
+                    100: '#CFFAFE',
+                    200: '#A5F3FC',
+                    300: '#67E8F9',
+                    400: '#22D3EE',
+                    500: '#06B6D4',  // Turquoise clair (hover, badges, icônes)
+                    600: '#0891B2',  // Turquoise primaire (header, navigation, liens)
+                    700: '#0E7490',
+                    800: '#155E75',
+                    900: '#164E63',
+                    950: '#083344',
                 },
-                // Beige Doré / Taupe (Secondary) - Chaleur, élégance, confort
-                taupe: {
-                    50: '#FAF8F5',
-                    100: '#F5F0E8',
-                    200: '#E8DFD0',
-                    300: '#D4C4A8',
-                    400: '#C4A77D',
-                    500: '#A68B5B',  // Beige Doré principal
-                    600: '#8B7355',
-                    700: '#6B5B45',
-                    800: '#4A3F30',
-                    900: '#2D2620',
+                // Orange CTA - Urgence, action, conversions
+                orange: {
+                    50: '#FFF7ED',
+                    100: '#FFEDD5',
+                    200: '#FED7AA',
+                    300: '#FDBA74',
+                    400: '#FB923C',
+                    500: '#F97316',  // Orange CTA (boutons d'achat, promotions)
+                    600: '#EA580C',
+                    700: '#C2410C',
+                    800: '#9A3412',
+                    900: '#7C2D12',
+                    950: '#431407',
                 },
-                // Cuivre / Or Rose (Accent) - Touche métallique chaude et contemporaine
-                copper: {
-                    50: '#FDF4F0',
-                    100: '#FCE8E0',
-                    200: '#F9D0C0',
-                    300: '#F0A890',
-                    400: '#E07850',
-                    500: '#B87333',  // Cuivre principal
-                    600: '#9A5D2A',
-                    700: '#7A4A22',
-                    800: '#5C381A',
-                    900: '#3D2512',
+                // Gris (Textes et UI)
+                gray: {
+                    50: '#F9FAFB',
+                    100: '#F3F4F6',
+                    200: '#E5E7EB',
+                    300: '#D1D5DB',
+                    400: '#9CA3AF',
+                    500: '#6B7280',  // Gris moyen (textes secondaires)
+                    600: '#4B5563',
+                    700: '#374151',
+                    800: '#1F2937',  // Gris foncé (textes principaux)
+                    900: '#111827',
+                    950: '#030712',
                 },
-                // Or Rose pour les accents luxueux
-                rosegold: {
-                    50: '#FFF5F5',
-                    100: '#FFEBE8',
-                    200: '#FFD6D0',
-                    300: '#FFB8AD',
-                    400: '#E8A090',
-                    500: '#B76E79',  // Or Rose principal
-                    600: '#9A5A64',
-                    700: '#7D474F',
-                    800: '#60353B',
-                    900: '#432428',
-                },
-                // Neutral palette - tons naturels
+                // Neutral palette - tons clairs
                 platinum: {
-                    50: '#FAFAF9',
+                    50: '#ECFEFF',   // Fond neutre (backgrounds sections)
                     100: '#F5F5F4',
                     200: '#E7E5E4',
                     300: '#D6D3D1',
                     400: '#A8A29E',
                     500: '#78716C',
                 },
-                anthracite: {
-                    500: '#44403C',
-                    600: '#292524',
-                    700: '#1C1917',
+                // Legacy aliases pour compatibilité
+                emerald: {
+                    50: '#ECFEFF',
+                    100: '#CFFAFE',
+                    200: '#A5F3FC',
+                    300: '#67E8F9',
+                    400: '#22D3EE',
+                    500: '#06B6D4',
+                    600: '#0891B2',
+                    700: '#0E7490',
+                    800: '#155E75',
+                    900: '#164E63',
                 },
-                nuanced: {
-                    500: '#78716C',
-                    600: '#57534E',
-                    700: '#44403C',
+                taupe: {
+                    50: '#F9FAFB',
+                    100: '#F3F4F6',
+                    200: '#E5E7EB',
+                    300: '#D1D5DB',
+                    400: '#9CA3AF',
+                    500: '#6B7280',
+                    600: '#4B5563',
+                    700: '#374151',
+                    800: '#1F2937',
+                    900: '#111827',
                 },
-                // Alias pour compatibilité (orange -> copper)
-                orange: {
-                    50: '#FDF4F0',
-                    100: '#FCE8E0',
-                    200: '#F9D0C0',
-                    300: '#F0A890',
-                    400: '#E07850',
-                    500: '#B87333',
-                    600: '#9A5D2A',
-                    700: '#7A4A22',
-                    800: '#5C381A',
-                    900: '#3D2512',
+                copper: {
+                    50: '#FFF7ED',
+                    100: '#FFEDD5',
+                    200: '#FED7AA',
+                    300: '#FDBA74',
+                    400: '#FB923C',
+                    500: '#F97316',
+                    600: '#EA580C',
+                    700: '#C2410C',
+                    800: '#9A3412',
+                    900: '#7C2D12',
                 },
-                // Blue for info states (keeping for semantic purposes)
-                blue: {
-                    50: '#EFF6FF',
-                    100: '#DBEAFE',
-                    200: '#BFDBFE',
-                    300: '#93C5FD',
-                    400: '#60A5FA',
-                    500: '#3B82F6',
-                    600: '#2563EB',
-                    700: '#1D4ED8',
-                    800: '#1E40AF',
-                    900: '#1E3A8A',
-                },
-                // Semantic colors with proper contrast
+                // Semantic colors
                 success: {
                     light: '#D1FAE5',
-                    DEFAULT: '#10b981',
-                    dark: '#047857',
+                    DEFAULT: '#10B981',  // Vert succès (stock disponible, validation)
+                    dark: '#059669',
                 },
                 warning: {
                     light: '#FEF3C7',
-                    DEFAULT: '#f59e0b',
+                    DEFAULT: '#F59E0B',
                     dark: '#D97706',
                 },
                 error: {
                     light: '#FEE2E2',
-                    DEFAULT: '#ef4444',
+                    DEFAULT: '#EF4444',  // Rouge alerte (stock limité, erreurs)
                     dark: '#DC2626',
+                },
+                info: {
+                    light: '#ECFEFF',
+                    DEFAULT: '#0891B2',
+                    dark: '#0E7490',
                 },
             },
             fontFamily: {

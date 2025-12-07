@@ -55,7 +55,7 @@ export function LanguageCurrencySelector() {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 min-w-[280px] z-50 animate-slide-down">
+                <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 min-w-[280px] z-[110] animate-slide-down">
                     <div className="mb-4">
                         <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">{t('language')}</h3>
                         <div className="space-y-1">

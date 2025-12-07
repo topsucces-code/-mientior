@@ -12,6 +12,7 @@ import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
 import { useQuickView } from '@/contexts/quick-view-context'
 import { useCartStore } from '@/stores/cart.store'
+import { useWishlistStore } from '@/stores/wishlist.store'
 import { toast } from 'sonner'
 import { useHeaderSafe } from '@/contexts/header-context'
 import type { Filter, AvailableFilters } from '@/types'
@@ -45,6 +46,7 @@ export default function MainProductGrid({
   const prefersReducedMotion = useReducedMotion()
   const { openQuickView } = useQuickView()
   const addToCart = useCartStore((state) => state.addItem)
+  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
   const headerContext = useHeaderSafe()
 
   // Check if on mobile (simplified for now)
@@ -58,6 +60,27 @@ export default function MainProductGrid({
 
   const handleQuickView = (productId: string) => {
     openQuickView(productId)
+  }
+
+  const handleWishlistToggle = (product: Omit<ProductCardProps, 'onQuickView'> & { stock?: number }) => {
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id)
+      toast.success('Retiré des favoris', {
+        description: `${product.name} a été retiré de vos favoris.`,
+      })
+    } else {
+      addToWishlist({
+        productId: product.id,
+        slug: product.slug,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        addedAt: new Date().toISOString(),
+      })
+      toast.success('Ajouté aux favoris', {
+        description: `${product.name} a été ajouté à vos favoris.`,
+      })
+    }
   }
 
   const handleAddToCart = (product: Omit<ProductCardProps, 'onQuickView'> & { stock?: number }) => {
@@ -283,6 +306,8 @@ export default function MainProductGrid({
                   inStock={product.stock !== undefined ? product.stock > 0 : product.inStock}
                   onQuickView={handleQuickView}
                   onAddToCart={() => handleAddToCart(product)}
+                  onWishlistToggle={() => handleWishlistToggle(product)}
+                  isInWishlist={isInWishlist(product.id)}
                   priority={index < 12}
                   className={cn(
                     !prefersReducedMotion && isVisible && 'animate-fade-in-up'

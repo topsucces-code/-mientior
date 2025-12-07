@@ -285,7 +285,7 @@ export function AdvancedSearchBar() {
 
             {/* Search History */}
             {showHistory && history.length > 0 && (
-                <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 animate-slide-down">
+                <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-[110] animate-slide-down">
                     {history.map((query, index) => (
                         <div
                             key={`history-${index}`}
@@ -326,7 +326,7 @@ export function AdvancedSearchBar() {
 
             {/* Search Suggestions */}
             {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50 animate-slide-down">
+                <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-[110] animate-slide-down">
                     {suggestions.map((suggestion, index) => (
                         <button
                             key={`${suggestion.type}-${index}`}

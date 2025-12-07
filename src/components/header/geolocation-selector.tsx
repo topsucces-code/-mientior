@@ -82,7 +82,7 @@ export function GeolocationSelector() {
             </button>
 
             {isOpen && (
-                <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 w-80 z-50 animate-slide-down">
+                <div className="absolute left-0 top-full mt-2 bg-white rounded-lg shadow-xl border border-gray-200 w-80 z-[110] animate-slide-down">
                     {/* Search Input */}
                     <div className="p-4 border-b border-gray-200">
                         <div className="relative">

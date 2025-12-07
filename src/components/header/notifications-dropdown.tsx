@@ -101,16 +101,25 @@ export function NotificationsDropdown() {
 
     // Initialize Pusher connection and subscribe to real-time notifications
     useEffect(() => {
-        // Only initialize Pusher if environment variables are available
-        if (!process.env.NEXT_PUBLIC_PUSHER_KEY || !process.env.NEXT_PUBLIC_PUSHER_CLUSTER) {
-            console.warn('Pusher environment variables not configured. Real-time notifications disabled.')
+        const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY
+        const pusherCluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER
+        
+        // Only initialize Pusher if environment variables are properly configured
+        // Check for placeholder values that indicate unconfigured Pusher
+        const isConfigured = pusherKey && 
+            pusherCluster && 
+            !pusherKey.includes('your_pusher') && 
+            !pusherCluster.includes('your_pusher')
+        
+        if (!isConfigured) {
+            // Silently skip Pusher initialization in development if not configured
             return
         }
 
         // Initialize Pusher client
         if (!pusherRef.current) {
-            pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
-                cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
+            pusherRef.current = new Pusher(pusherKey, {
+                cluster: pusherCluster,
                 forceTLS: true,
             })
         }
@@ -239,7 +248,7 @@ export function NotificationsDropdown() {
                     id="notifications-dropdown"
                     role="menu"
                     aria-label="Menu des notifications"
-                    className="absolute right-0 top-full mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 animate-slide-down"
+                    className="absolute right-0 top-full mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-[110] animate-slide-down"
                 >
                     <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                         <h3 className="font-semibold">Notifications</h3>

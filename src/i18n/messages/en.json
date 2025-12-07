@@ -25,7 +25,28 @@
     "viewAll": "View all",
     "learnMore": "Learn more",
     "seeMore": "See more",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "buttons": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "edit": "Edit",
+      "view": "View",
+      "back": "Back",
+      "next": "Next",
+      "previous": "Previous",
+      "send": "Send",
+      "export": "Export",
+      "refresh": "Refresh",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "labels": {
+      "all": "All",
+      "total": "Total",
+      "items": "items",
+      "unlimited": "Unlimited"
+    }
   },
   "nav": {
     "home": "Home",
@@ -147,6 +168,38 @@
     "applyCode": "Apply",
     "codeApplied": "Promo code applied",
     "invalidCode": "Invalid promo code"
+  },
+  "wishlist": {
+    "title": "My Wishlist",
+    "empty": "Your wishlist is empty",
+    "emptyText": "Add products you love to find them easily",
+    "continueShopping": "Discover our products",
+    "itemCount": "{count} item(s)",
+    "addedToWishlist": "♡ Added to wishlist",
+    "addedToWishlistDesc": "{name} has been added to your wishlist",
+    "removedFromWishlist": "Removed from wishlist",
+    "removedFromWishlistDesc": "{name} has been removed from your wishlist",
+    "addToCart": "Add to cart",
+    "addAllToCart": "Add all to cart",
+    "remove": "Remove",
+    "clearAll": "Clear wishlist",
+    "clearConfirm": "Are you sure you want to clear your wishlist?",
+    "clearConfirmTitle": "Clear your wishlist?",
+    "clearConfirmDesc": "You are about to remove all items from your wishlist. This action cannot be undone.",
+    "confirmClear": "Yes, clear wishlist",
+    "wishlistCleared": "Wishlist cleared",
+    "wishlistClearedDesc": "All items have been removed from your wishlist",
+    "share": "Share my wishlist",
+    "shareCopied": "Link copied to clipboard",
+    "syncSuccess": "Wishlist synced",
+    "syncSuccessDesc": "Your wishlist has been synced successfully",
+    "syncError": "Sync error",
+    "syncErrorDesc": "Unable to sync your wishlist",
+    "loginRequired": "Login required",
+    "loginRequiredDesc": "Log in to sync your wishlist",
+    "outOfStock": "Out of stock",
+    "priceDropAlert": "Price drop alert",
+    "backInStockAlert": "Back in stock alert"
   },
   "checkout": {
     "title": "Checkout",
@@ -445,5 +498,380 @@
       "cod": "Cash on Delivery"
     },
     "mobileMoneyInstructions": "You will receive a notification on your phone to confirm the payment."
+  },
+  "admin": {
+    "vendors": {
+      "create": "Create Vendor",
+      "edit": "Edit Vendor",
+      "tabs": {
+        "general": "General Information",
+        "documents": "KYC Documents",
+        "banking": "Banking Details",
+        "topProducts": "Top Products",
+        "monthlySales": "Monthly Sales"
+      },
+      "fields": {
+        "businessName": "Business Name",
+        "slug": "Slug",
+        "email": "Email",
+        "phone": "Phone",
+        "logo": "Logo",
+        "description": "Description",
+        "commissionRate": "Commission Rate",
+        "status": "Status",
+        "rating": "Rating",
+        "accountName": "Account Name",
+        "accountNumber": "Account Number",
+        "bankName": "Bank Name",
+        "swiftCode": "SWIFT Code",
+        "iban": "IBAN",
+        "mobileMoneyProvider": "Mobile Money Provider",
+        "mobileMoneyNumber": "Mobile Money Number",
+        "products": "Products",
+        "orders": "Orders",
+        "createdAt": "Created At",
+        "product": "Product",
+        "sales": "Sales",
+        "revenue": "Revenue"
+      },
+      "placeholders": {
+        "businessName": "Enter business name",
+        "slug": "auto-generated-slug",
+        "description": "Describe the vendor...",
+        "accountName": "Account holder name",
+        "accountNumber": "Account number",
+        "bankName": "Bank name",
+        "mobileMoneyProvider": "Select provider"
+      },
+      "help": {
+        "slug": "URL-friendly identifier (auto-generated)",
+        "slugReadOnly": "Slug cannot be changed after creation",
+        "logo": "Upload vendor logo (max 1 image)",
+        "description": "Detailed description of the vendor",
+        "commissionRate": "Platform commission percentage",
+        "iban": "Optional - International Bank Account Number",
+        "ratingDisabled": "Rating is calculated from reviews",
+        "tip1": "Fill in all required fields",
+        "tip2": "Upload KYC documents for verification",
+        "tip3": "Banking details are required for payouts"
+      },
+      "status": {
+        "PENDING": "Pending",
+        "ACTIVE": "Active",
+        "SUSPENDED": "Suspended",
+        "BANNED": "Banned",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected",
+        "PROCESSING": "Processing",
+        "PAID": "Paid",
+        "FAILED": "Failed"
+      },
+      "actions": {
+        "create": "Create Vendor",
+        "approve": "Approve Vendor",
+        "suspend": "Suspend Vendor",
+        "reactivate": "Reactivate Vendor",
+        "processPayout": "Process Payout"
+      },
+      "messages": {
+        "businessNameRequired": "Business name is required",
+        "slugRequired": "Slug is required",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email",
+        "emailExists": "This email is already registered",
+        "phoneRequired": "Phone number is required",
+        "commissionRequired": "Commission rate is required",
+        "createSuccess": "Vendor created successfully",
+        "createError": "Failed to create vendor",
+        "updateSuccess": "Vendor updated successfully",
+        "updateError": "Failed to update vendor",
+        "approveSuccess": "Vendor approved successfully",
+        "suspendSuccess": "Vendor suspended successfully",
+        "suspendConfirm": "Are you sure you want to suspend this vendor?",
+        "deleteConfirm": "Are you sure you want to delete this vendor?",
+        "deleteWarning": "This action cannot be undone.",
+        "deleteSuccess": "Vendor deleted successfully",
+        "deleteError": "Failed to delete vendor",
+        "notFound": "Vendor not found",
+        "hasActiveOrders": "This vendor has active orders",
+        "hasActiveOrdersDesc": "Some fields cannot be modified while orders are in progress.",
+        "vendorBanned": "This vendor is banned and cannot be edited",
+        "payoutSuccess": "Payout processed successfully",
+        "payoutError": "Failed to process payout"
+      },
+      "sidebar": {
+        "publish": "Publish",
+        "status": "Status",
+        "help": "Help"
+      },
+      "banking": {
+        "bankAccount": "Bank Account",
+        "mobileMoney": "Mobile Money"
+      },
+      "documents": {
+        "description": "Upload required KYC documents for verification",
+        "uploadSuccess": "Document uploaded successfully",
+        "uploadError": "Failed to upload document",
+        "deleteConfirm": "Are you sure you want to delete this document?",
+        "deleteSuccess": "Document deleted successfully",
+        "invalidType": "Only PDF and image files are allowed",
+        "fileTooLarge": "File must be less than 10MB",
+        "documentType": "Document Type",
+        "upload": "Upload Document",
+        "uploadHint": "PDF or images, max 10MB",
+        "noDocuments": "No documents uploaded",
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "approveAll": "Approve All",
+        "downloadAll": "Download All",
+        "approve": "Approve",
+        "reject": "Reject",
+        "approveSuccess": "Document approved",
+        "approveError": "Failed to approve document",
+        "rejectSuccess": "Document rejected",
+        "rejectError": "Failed to reject document",
+        "rejectTitle": "Reject Document",
+        "rejectMessage": "Please provide a reason for rejection",
+        "rejectionReasonPlaceholder": "Enter rejection reason...",
+        "reason": "Reason",
+        "preview": "Document Preview",
+        "approveAllSuccess": "All documents approved",
+        "downloadStarted": "Download started..."
+      },
+      "sections": {
+        "documents": "KYC Documents",
+        "payouts": "Payouts",
+        "performance": "Performance"
+      },
+      "metrics": {
+        "totalSales": "Total Sales",
+        "avgOrderValue": "Avg. Order Value",
+        "avgRating": "Average Rating",
+        "conversionRate": "Conversion Rate",
+        "reviews": "reviews"
+      }
+    },
+    "campaigns": {
+      "create": "Create Campaign",
+      "edit": "Edit Campaign",
+      "steps": {
+        "details": "Details",
+        "detailsDesc": "Campaign name and type",
+        "content": "Content",
+        "contentDesc": "Email or message content",
+        "audience": "Audience",
+        "audienceDesc": "Select target segment",
+        "schedule": "Schedule",
+        "scheduleDesc": "When to send",
+        "review": "Review",
+        "reviewDesc": "Confirm and send"
+      },
+      "fields": {
+        "name": "Campaign Name",
+        "type": "Type",
+        "subject": "Subject",
+        "preheader": "Preheader",
+        "content": "Content",
+        "message": "Message",
+        "segment": "Target Segment",
+        "scheduledAt": "Scheduled At",
+        "sentAt": "Sent At",
+        "createdAt": "Created At",
+        "status": "Status",
+        "estimatedRecipients": "Estimated Recipients",
+        "schedule": "Schedule"
+      },
+      "types": {
+        "EMAIL": "Email",
+        "SMS": "SMS",
+        "PUSH": "Push Notification"
+      },
+      "segments": {
+        "all": "All Users",
+        "platinum": "Platinum Members",
+        "inactive": "Inactive Users (90+ days)",
+        "highValue": "High Value Customers"
+      },
+      "actions": {
+        "send": "Send Campaign",
+        "sendNow": "Send Now",
+        "sendTest": "Send Test Email",
+        "preview": "Preview",
+        "duplicate": "Duplicate",
+        "cancel": "Cancel Campaign"
+      },
+      "messages": {
+        "saved": "Campaign saved",
+        "saveError": "Failed to save campaign",
+        "sent": "Campaign sent successfully",
+        "sendError": "Failed to send campaign",
+        "scheduled": "Campaign scheduled",
+        "duplicated": "Campaign duplicated",
+        "duplicateError": "Failed to duplicate campaign",
+        "cancelled": "Campaign cancelled",
+        "cancelConfirm": "Cancel this campaign?",
+        "cancelWarning": "This action cannot be undone.",
+        "notFound": "Campaign not found",
+        "readOnly": "This campaign cannot be edited",
+        "pastDate": "Scheduled date cannot be in the past",
+        "emailRequired": "Email is required",
+        "testSent": "Test email sent",
+        "testFailed": "Failed to send test email",
+        "testEmailDescription": "Enter an email address to send a test",
+        "sendConfirmTitle": "Ready to send?",
+        "sendConfirmDesc": "This will send the campaign to all recipients."
+      },
+      "sendNow": "Send Immediately",
+      "scheduleLater": "Schedule for Later",
+      "sendImmediately": "Send immediately",
+      "selectSegment": "Select a segment",
+      "contentPlaceholder": "Write your email content here...",
+      "estimatedCost": "Estimated Cost",
+      "schedule": "Schedule",
+      "send": "Send Now",
+      "tabs": {
+        "details": "Details",
+        "performance": "Performance",
+        "recipients": "Recipients"
+      },
+      "searchRecipients": "Search recipients...",
+      "recipients": {
+        "email": "Email",
+        "name": "Name",
+        "status": "Status",
+        "openedAt": "Opened At",
+        "clickedAt": "Clicked At"
+      },
+      "preview": {
+        "title": "Email Preview",
+        "desktop": "Desktop",
+        "mobile": "Mobile",
+        "variables": "Available Variables"
+      },
+      "stats": {
+        "sent": "Sent",
+        "delivered": "Delivered",
+        "opens": "Opens",
+        "opened": "Opened",
+        "clicks": "Clicks",
+        "clicked": "Clicked",
+        "conversions": "Conversions",
+        "converted": "Converted",
+        "revenue": "Revenue",
+        "bounces": "Bounces",
+        "bounceRate": "Bounce Rate",
+        "unsubscribes": "Unsubscribes",
+        "unsubscribeRate": "Unsubscribe Rate",
+        "sentAt": "Sent at",
+        "avgOrderValue": "Avg. Order Value",
+        "funnel": "Conversion Funnel"
+      },
+      "charts": {
+        "performance": "Performance Over Time",
+        "devices": "Device Breakdown",
+        "locations": "Top Locations",
+        "links": "Link Performance",
+        "noData": "No data available",
+        "noLinks": "No links tracked",
+        "country": "Country",
+        "opens": "Opens",
+        "url": "URL",
+        "totalClicks": "Total Clicks",
+        "uniqueClicks": "Unique Clicks",
+        "clickRate": "Click Rate"
+      }
+    },
+    "promoCodes": {
+      "create": "Create Promo Code",
+      "edit": "Edit Promo Code",
+      "fields": {
+        "code": "Code",
+        "type": "Type",
+        "value": "Value",
+        "status": "Status",
+        "scope": "Scope",
+        "usageLimit": "Usage Limit",
+        "usageCount": "Usage Count",
+        "perUserLimit": "Per User Limit",
+        "validFrom": "Valid From",
+        "validTo": "Valid Until",
+        "validDates": "Validity Period",
+        "minPurchase": "Minimum Purchase",
+        "maxDiscount": "Maximum Discount",
+        "categories": "Categories",
+        "products": "Products",
+        "firstOrderOnly": "First Order Only",
+        "createdAt": "Created At",
+        "updatedAt": "Updated At"
+      },
+      "types": {
+        "percentage": "Percentage Discount",
+        "fixed": "Fixed Amount",
+        "freeShipping": "Free Shipping"
+      },
+      "scopes": {
+        "cart": "Entire Cart",
+        "shipping": "Shipping Only",
+        "category": "Specific Categories",
+        "product": "Specific Products"
+      },
+      "status": {
+        "active": "Active",
+        "disabled": "Disabled",
+        "expired": "Expired",
+        "scheduled": "Scheduled",
+        "exhausted": "Exhausted"
+      },
+      "actions": {
+        "duplicate": "Duplicate",
+        "enable": "Enable",
+        "disable": "Disable"
+      },
+      "messages": {
+        "copied": "Code copied to clipboard",
+        "enabled": "Promo code enabled",
+        "disabled": "Promo code disabled",
+        "duplicated": "Promo code duplicated",
+        "deleted": "Promo code deleted",
+        "deleteConfirm": "Delete this promo code?",
+        "deleteWarning": "This action cannot be undone.",
+        "deleteError": "Failed to delete promo code",
+        "notFound": "Promo code not found",
+        "categoryRequired": "Please select at least one category",
+        "productRequired": "Please select at least one product"
+      },
+      "generateCode": "Generate Code",
+      "usageLimitHint": "Leave empty for unlimited usage",
+      "minPurchaseHint": "Minimum order amount required",
+      "maxDiscountHint": "Maximum discount amount (for percentage discounts)",
+      "perUserLimitHint": "Maximum uses per user",
+      "selectCategories": "Select categories",
+      "selectProducts": "Select products",
+      "searchUsage": "Search by order or email...",
+      "tabs": {
+        "details": "Details",
+        "usage": "Usage History",
+        "analytics": "Analytics"
+      },
+      "stats": {
+        "usageCount": "Usage",
+        "totalDiscount": "Total Discount Given",
+        "totalOrders": "Total Orders",
+        "avgOrderValue": "Avg. Order Value"
+      },
+      "usage": {
+        "orderNumber": "Order",
+        "user": "User",
+        "discountAmount": "Discount",
+        "orderTotal": "Order Total",
+        "usedAt": "Used At"
+      },
+      "analytics": {
+        "usageOverTime": "Usage Over Time",
+        "uses": "uses",
+        "noData": "No usage data yet"
+      }
+    }
   }
 }

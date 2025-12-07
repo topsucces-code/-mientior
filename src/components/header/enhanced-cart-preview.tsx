@@ -55,7 +55,7 @@ export function EnhancedCartPreview() {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 top-full mt-2 w-[420px] bg-white rounded-lg shadow-xl border border-gray-200 z-50 animate-slide-down">
+                <div className="absolute right-0 top-full mt-2 w-[420px] bg-white rounded-lg shadow-xl border border-gray-200 z-[110] animate-slide-down">
                     <div className="p-4 border-b border-gray-200">
                         <h3 className="font-semibold">Mon Panier</h3>
                         <p className="text-sm text-gray-500 mt-1">

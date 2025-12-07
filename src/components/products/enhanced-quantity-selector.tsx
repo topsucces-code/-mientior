@@ -1,6 +1,7 @@
 'use client';
 
-import { Minus, Plus } from 'lucide-react';
+import * as React from 'react';
+import { Minus, Plus, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface EnhancedQuantitySelectorProps {
@@ -9,6 +10,7 @@ interface EnhancedQuantitySelectorProps {
   max?: number;
   onChange: (value: number) => void;
   disabled?: boolean;
+  debounceMs?: number;
 }
 
 export function EnhancedQuantitySelector({
@@ -17,34 +19,78 @@ export function EnhancedQuantitySelector({
   max = 10,
   onChange,
   disabled = false,
+  debounceMs = 500,
 }: EnhancedQuantitySelectorProps) {
+  const [localValue, setLocalValue] = React.useState(value);
+  const [isSaving, setIsSaving] = React.useState(false);
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  // Sync local value with prop value
+  React.useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  // Debounced onChange handler
+  const debouncedOnChange = React.useCallback((newValue: number) => {
+    setLocalValue(newValue);
+    setIsSaving(true);
+
+    // Clear existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    // Set new timeout
+    timeoutRef.current = setTimeout(() => {
+      onChange(newValue);
+      setIsSaving(false);
+    }, debounceMs);
+  }, [onChange, debounceMs]);
+
+  // Cleanup timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleDecrement = () => {
-    if (value > min) {
-      onChange(value - 1);
+    if (localValue > min) {
+      debouncedOnChange(localValue - 1);
     }
   };
 
   const handleIncrement = () => {
-    if (value < max) {
-      onChange(value + 1);
+    if (localValue < max) {
+      debouncedOnChange(localValue + 1);
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseInt(e.target.value, 10);
     if (!isNaN(newValue) && newValue >= min && newValue <= max) {
-      onChange(newValue);
+      debouncedOnChange(newValue);
     }
   };
 
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-graphite-900">Quantité</label>
+      <div className="flex items-center justify-between">
+        <label className="text-sm font-medium text-graphite-900">Quantité</label>
+        {isSaving && (
+          <span className="flex items-center gap-1 text-xs text-nuanced-500">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            Enregistrement...
+          </span>
+        )}
+      </div>
       <div className="inline-flex items-center border-2 border-platinum-300 rounded-lg overflow-hidden">
         <button
           type="button"
           onClick={handleDecrement}
-          disabled={disabled || value <= min}
+          disabled={disabled || localValue <= min}
           className={cn(
             'h-11 w-11 flex items-center justify-center transition-all duration-150',
             'hover:bg-platinum-100 hover:text-orange-600',
@@ -57,7 +103,7 @@ export function EnhancedQuantitySelector({
         </button>
         <input
           type="number"
-          value={value}
+          value={localValue}
           onChange={handleInputChange}
           min={min}
           max={max}
@@ -74,7 +120,7 @@ export function EnhancedQuantitySelector({
         <button
           type="button"
           onClick={handleIncrement}
-          disabled={disabled || value >= max}
+          disabled={disabled || localValue >= max}
           className={cn(
             'h-11 w-11 flex items-center justify-center transition-all duration-150',
             'hover:bg-platinum-100 hover:text-orange-600',

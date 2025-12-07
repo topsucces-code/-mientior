@@ -49,16 +49,16 @@ export function WishlistDropdown() {
                 aria-label="Liste de souhaits"
                 aria-expanded={isOpen}
             >
-                <Heart className="w-6 h-6" />
+                <Heart className={`w-6 h-6 transition-colors ${totalItems > 0 ? 'text-orange-500' : ''}`} />
                 {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-rosegold-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                        {totalItems > 9 ? '9+' : totalItems}
+                    <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow-sm">
+                        {totalItems > 99 ? '99+' : totalItems}
                     </span>
                 )}
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 animate-slide-down">
+                <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-[110] animate-slide-down">
                     <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                         <h3 className="font-semibold">Ma Liste de Souhaits</h3>
                         <span className="text-sm text-gray-500">{totalItems} article{totalItems > 1 ? 's' : ''}</span>

@@ -77,7 +77,7 @@ export function AdminLoginForm({ redirectTo, error: initialError }: AdminLoginFo
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="flex items-center justify-center mb-6">
-        <ShieldCheck className="h-12 w-12 text-blue-600" />
+        <ShieldCheck className="h-12 w-12 text-turquoise-600" />
       </div>
 
       {error && (

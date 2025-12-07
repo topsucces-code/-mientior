@@ -26,9 +26,15 @@ export function MobileNav() {
   const [touchStart, setTouchStart] = React.useState<number | null>(null)
   const [touchEnd, setTouchEnd] = React.useState<number | null>(null)
   const [isVisible, setIsVisible] = React.useState(true)
+  const [mounted, setMounted] = React.useState(false)
 
-  const cartCount = getTotalItems()
-  const wishlistCount = wishlistItems.length
+  // Handle hydration - only show counts after mount
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const cartCount = mounted ? getTotalItems() : 0
+  const wishlistCount = mounted ? wishlistItems.length : 0
 
   // Minimum swipe distance (in px) to trigger a swipe action
   const minSwipeDistance = 50

@@ -23,7 +23,7 @@ interface Review {
   verified: boolean;
   helpful: number;
   notHelpful: number;
-  response?: { text: string; date: string };
+  response?: { text: string; respondedAt: string };
   productId: string;
   product: {
     id: string;
@@ -82,10 +82,10 @@ export default function ReviewsPage() {
 
   const handleSubmitResponse = () => {
     if (!selectedReview) return;
-    updateReview({ 
-      resource: 'reviews', 
-      id: selectedReview.id, 
-      values: { response: { text: responseText, date: new Date().toISOString() } } 
+    updateReview({
+      resource: 'reviews',
+      id: selectedReview.id,
+      values: { response: { text: responseText, respondedAt: new Date().toISOString() } }
     }, {
       onSuccess: () => {
         message.success('Response saved');
@@ -298,7 +298,7 @@ export default function ReviewsPage() {
               <div style={{ marginTop: 16, padding: 16, background: '#f5f5f5', borderRadius: 8 }}>
                 <Text strong>Store Response:</Text>
                 <Paragraph style={{ marginTop: 8 }}>{selectedReview.response.text}</Paragraph>
-                <Text type="secondary">{dayjs(selectedReview.response.date).format('DD/MM/YYYY')}</Text>
+                <Text type="secondary">{dayjs(selectedReview.response.respondedAt).format('DD/MM/YYYY')}</Text>
               </div>
             )}
           </div>

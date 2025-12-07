@@ -1,6 +1,6 @@
 /**
  * Order History Page
- * Displays all orders for the authenticated user
+ * Displays all orders for the authenticated user with pagination and filters
  */
 
 import type { Metadata } from 'next'
@@ -8,6 +8,7 @@ import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth-server'
 import { prisma } from '@/lib/prisma'
 import { OrderHistoryClient } from './orders-client'
+import { ordersQuerySchema } from '@/lib/validations/orders'
 
 export const metadata: Metadata = {
   title: 'Mes Commandes | Mientior',
@@ -17,29 +18,83 @@ export const metadata: Metadata = {
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
-async function getOrders(userId: string) {
-  const orders = await prisma.order.findMany({
-    where: { userId },
-    orderBy: { createdAt: 'desc' },
-    include: {
-      items: {
-        include: {
-          product: {
-            select: {
-              name: true,
-              slug: true,
-              images: {
-                take: 1,
-                orderBy: { order: 'asc' },
+export default async function OrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[]>>
+}) {
+  const session = await getSession()
+
+  if (!session) {
+    redirect('/login?redirect=/account/orders')
+  }
+
+  // Parse and validate searchParams
+  const params = await searchParams
+  const query = ordersQuerySchema.parse({
+    page: params.page,
+    limit: params.limit,
+    status: params.status,
+    dateFrom: params.dateFrom,
+    dateTo: params.dateTo,
+    search: params.search,
+  })
+
+  // Build where clause for Prisma
+  const where = {
+    userId: session.user.id,
+    ...(query.status && { status: query.status }),
+    ...(query.dateFrom || query.dateTo
+      ? {
+          createdAt: {
+            ...(query.dateFrom && { gte: query.dateFrom }),
+            ...(query.dateTo && { lte: query.dateTo }),
+          },
+        }
+      : {}),
+    ...(query.search && {
+      OR: [
+        { orderNumber: { contains: query.search, mode: 'insensitive' as const } },
+        {
+          items: {
+            some: {
+              productName: { contains: query.search, mode: 'insensitive' as const },
+            },
+          },
+        },
+      ],
+    }),
+  }
+
+  // Fetch orders with pagination
+  const [orders, total] = await Promise.all([
+    prisma.order.findMany({
+      where,
+      skip: (query.page - 1) * query.limit,
+      take: query.limit,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        items: {
+          include: {
+            product: {
+              select: {
+                name: true,
+                slug: true,
+                images: {
+                  take: 1,
+                  orderBy: { order: 'asc' },
+                },
               },
             },
           },
         },
       },
-    },
-  })
+    }),
+    prisma.order.count({ where }),
+  ])
 
-  return orders.map((order) => ({
+  // Transform orders for client
+  const transformedOrders = orders.map((order) => ({
     id: order.id,
     orderNumber: order.orderNumber,
     status: order.status,
@@ -58,27 +113,29 @@ async function getOrders(userId: string) {
       productId: item.productId,
       productName: item.productName || item.product?.name || 'Produit',
       productSlug: item.product?.slug,
-      productImage: item.productImage || item.product?.images[0]?.url || '/images/placeholder.svg',
+      productImage:
+        item.productImage ||
+        item.product?.images[0]?.url ||
+        '/images/placeholder.svg',
       quantity: item.quantity,
       price: item.price,
     })),
     itemCount: order.items.reduce((sum, item) => sum + item.quantity, 0),
   }))
-}
-
-export default async function OrdersPage() {
-  const session = await getSession()
-
-  if (!session) {
-    redirect('/login?redirect=/account/orders')
-  }
-
-  const orders = await getOrders(session.user.id)
 
   return (
     <div className="min-h-screen bg-platinum-50">
       <div className="container mx-auto px-4 py-8">
-        <OrderHistoryClient orders={orders} />
+        <OrderHistoryClient
+          orders={transformedOrders}
+          pagination={{
+            page: query.page,
+            limit: query.limit,
+            total,
+            hasMore: query.page * query.limit < total,
+          }}
+          filters={query}
+        />
       </div>
     </div>
   )

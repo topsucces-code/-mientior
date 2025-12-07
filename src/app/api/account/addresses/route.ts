@@ -1,13 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth-server'
+import { validateRequest } from '@/lib/api-validation'
+import { apiSuccess, apiError, ErrorCodes } from '@/lib/api-response'
+import { addressSchema } from '@/lib/validations/address'
 
 // GET /api/account/addresses - List user addresses
 export async function GET() {
   try {
     const session = await getSession()
     if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return apiError('Unauthorized', ErrorCodes.UNAUTHORIZED, 401)
     }
 
     const addresses = await prisma.savedAddress.findMany({
@@ -15,10 +18,14 @@ export async function GET() {
       orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
     })
 
-    return NextResponse.json(addresses)
+    return apiSuccess(addresses)
   } catch (error) {
     console.error('Error fetching addresses:', error)
-    return NextResponse.json({ error: 'Failed to fetch addresses' }, { status: 500 })
+    return apiError(
+      'Failed to fetch addresses',
+      ErrorCodes.INTERNAL_ERROR,
+      500
+    )
   }
 }
 
@@ -27,11 +34,26 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getSession()
     if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return apiError('Unauthorized', ErrorCodes.UNAUTHORIZED, 401)
     }
 
-    const body = await request.json()
-    const { firstName, lastName, line1, line2, city, postalCode, country, phone, isDefault } = body
+    // Validate request body
+    const validation = await validateRequest(request, addressSchema)
+    if (!validation.success) {
+      return validation.response
+    }
+
+    const {
+      firstName,
+      lastName,
+      line1,
+      line2,
+      city,
+      postalCode,
+      country,
+      phone,
+      isDefault,
+    } = validation.data
 
     // If this is set as default, unset other defaults
     if (isDefault) {
@@ -50,15 +72,19 @@ export async function POST(request: NextRequest) {
         line2: line2 || null,
         city,
         postalCode,
-        country: country || 'FR',
-        phone: phone || '',
-        isDefault: isDefault || false,
+        country,
+        phone: phone ?? '',
+        isDefault,
       },
     })
 
-    return NextResponse.json(address, { status: 201 })
+    return apiSuccess(address, undefined, 201)
   } catch (error) {
     console.error('Error creating address:', error)
-    return NextResponse.json({ error: 'Failed to create address' }, { status: 500 })
+    return apiError(
+      'Failed to create address',
+      ErrorCodes.INTERNAL_ERROR,
+      500
+    )
   }
 }

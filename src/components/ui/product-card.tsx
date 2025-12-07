@@ -64,6 +64,15 @@ export function ProductCard({
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0)
   const [isImageLoaded, setIsImageLoaded] = React.useState(false)
   const [isAddedToCart, setIsAddedToCart] = React.useState(false)
+  const [isMounted, setIsMounted] = React.useState(false)
+
+  // Prevent hydration mismatch - wishlist state comes from localStorage
+  React.useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  // Only show wishlist state after client hydration to prevent mismatch
+  const showAsWishlisted = isMounted && isInWishlist
 
   const allImages = [image, ...images].filter(Boolean) as string[]
   const displayImage = allImages[currentImageIndex] || '/placeholder-product.jpg'
@@ -159,12 +168,12 @@ export function ProductCard({
           className={cn(
             'absolute right-1.5 top-1.5 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-all duration-300',
             'hover:bg-white hover:scale-110 hover:shadow-elevation-2',
-            isInWishlist && 'bg-orange-500 text-white hover:bg-orange-600'
+            showAsWishlisted && 'bg-orange-500 text-white hover:bg-orange-600'
           )}
-          aria-label={isInWishlist ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          aria-label={showAsWishlisted ? 'Retirer des favoris' : 'Ajouter aux favoris'}
         >
           <Heart
-            className={cn('h-4 w-4 transition-all', isInWishlist && 'fill-current')}
+            className={cn('h-4 w-4 transition-all', showAsWishlisted && 'fill-current')}
           />
         </button>
 

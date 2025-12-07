@@ -12,7 +12,9 @@ import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
 import { useQuickView } from '@/contexts/quick-view-context'
 import { useCartStore } from '@/stores/cart.store'
+import { useWishlistStore } from '@/stores/wishlist.store'
 import { useToast } from '@/hooks/use-toast'
+import { toast as sonnerToast } from 'sonner'
 
 export interface CollectionData {
   id: string
@@ -51,6 +53,7 @@ export default function CuratedCollection({
   const prefersReducedMotion = useReducedMotion()
   const { openQuickView } = useQuickView()
   const addToCart = useCartStore((state) => state.addItem)
+  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
   const { toast } = useToast()
 
   const displayProducts = showAllProducts
@@ -78,6 +81,27 @@ export default function CuratedCollection({
      })
   }
 
+  const handleWishlistToggle = (product: any) => {
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id)
+      sonnerToast.success('Retiré des favoris', {
+        description: `${product.name} a été retiré de vos favoris.`,
+      })
+    } else {
+      addToWishlist({
+        productId: product.id,
+        slug: product.slug,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        addedAt: new Date().toISOString(),
+      })
+      sonnerToast.success('Ajouté aux favoris', {
+        description: `${product.name} a été ajouté à vos favoris.`,
+      })
+    }
+  }
+
   if (!collection || !collection.products || collection.products.length === 0) {
     return null
   }
@@ -90,6 +114,8 @@ export default function CuratedCollection({
         isVisible={isVisible}
         prefersReducedMotion={prefersReducedMotion}
         onQuickView={handleQuickView}
+        onWishlistToggle={handleWishlistToggle}
+        isInWishlist={isInWishlist}
         className={className}
         {...props}
       />
@@ -145,6 +171,8 @@ export default function CuratedCollection({
                 inStock={product.stock !== undefined ? product.stock > 0 : product.inStock}
                 onQuickView={handleQuickView}
                 onAddToCart={() => handleAddToCart(product)}
+                onWishlistToggle={() => handleWishlistToggle(product)}
+                isInWishlist={isInWishlist(product.id)}
                 className={cn(
                   'h-full',
                   !prefersReducedMotion && isVisible && 'animate-fade-in-up'
@@ -162,6 +190,8 @@ export default function CuratedCollection({
               inStock={product.stock !== undefined ? product.stock > 0 : product.inStock}
               onQuickView={handleQuickView}
               onAddToCart={() => handleAddToCart(product)}
+              onWishlistToggle={() => handleWishlistToggle(product)}
+              isInWishlist={isInWishlist(product.id)}
               className={cn(
                 !prefersReducedMotion && isVisible && 'animate-fade-in-up'
               )}
@@ -183,6 +213,8 @@ interface HeroLayoutProps {
   isVisible: boolean
   prefersReducedMotion: boolean
   onQuickView: (id: string) => void
+  onWishlistToggle: (product: Omit<ProductCardProps, 'onQuickView'> & { stock?: number }) => void
+  isInWishlist: (id: string) => boolean
   className?: string
 }
 
@@ -192,8 +224,9 @@ function HeroLayout({
   isVisible,
   prefersReducedMotion,
   onQuickView,
+  onWishlistToggle,
+  isInWishlist,
   className,
-  ...props
 }: HeroLayoutProps) {
   const [isImageLoaded, setIsImageLoaded] = React.useState(false)
   const theme = collection.theme || {
@@ -224,7 +257,7 @@ function HeroLayout({
   }
 
   return (
-    <section className={cn('py-10 md:py-14', className)} {...props}>
+    <section className={cn('py-10 md:py-14', className)}>
       <div className="container mx-auto px-3 md:px-4 lg:px-6">
         {/* Hero Banner */}
         <div
@@ -327,6 +360,8 @@ function HeroLayout({
               inStock={product.stock !== undefined ? product.stock > 0 : product.inStock}
               onQuickView={onQuickView}
               onAddToCart={() => handleAddToCart(product)}
+              onWishlistToggle={() => onWishlistToggle(product)}
+              isInWishlist={isInWishlist(product.id)}
               className={cn(
                 !prefersReducedMotion && isVisible && 'animate-fade-in-up'
               )}

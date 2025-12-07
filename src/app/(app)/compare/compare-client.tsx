@@ -10,6 +10,7 @@ import { useComparatorStore } from '@/stores/comparator.store'
 import { useCartStore } from '@/stores/cart.store'
 import { useWishlistStore } from '@/stores/wishlist.store'
 import { toast } from '@/hooks/use-toast'
+import { useTranslations } from 'next-intl'
 
 interface CompareProduct {
   id: string
@@ -30,9 +31,10 @@ export function ComparePageClient() {
   const router = useRouter()
   const { items, removeItem, clearAll } = useComparatorStore()
   const { addItem: addToCart } = useCartStore()
-  const { addItem: addToWishlist, isInWishlist } = useWishlistStore()
+  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
   const [products, setProducts] = useState<CompareProduct[]>([])
   const [loading, setLoading] = useState(true)
+  const t = useTranslations('wishlist')
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -94,7 +96,11 @@ export function ComparePageClient() {
 
   const handleToggleWishlist = (product: CompareProduct) => {
     if (isInWishlist(product.id)) {
-      toast({ title: 'Already in wishlist' })
+      removeFromWishlist(product.id)
+      toast({
+        title: t('removedFromWishlist'),
+        description: t('removedFromWishlistDesc', { name: product.name }),
+      })
     } else {
       addToWishlist({
         productId: product.id,
@@ -104,7 +110,10 @@ export function ComparePageClient() {
         image: product.image,
         addedAt: new Date().toISOString(),
       })
-      toast({ title: 'Added to wishlist' })
+      toast({
+        title: t('addedToWishlist'),
+        description: t('addedToWishlistDesc', { name: product.name }),
+      })
     }
   }
 

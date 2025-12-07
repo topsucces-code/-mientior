@@ -135,22 +135,35 @@ export async function GET(
     }
 
     // Transform reviews to match frontend types
-    const transformedReviews = reviews.map((review) => ({
-      id: review.id,
-      productId: review.productId,
-      userId: review.userId,
-      userName: review.userName,
-      userAvatar: review.userAvatar || undefined,
-      rating: review.rating,
-      title: review.title || undefined,
-      comment: review.comment,
-      images: review.images,
-      verified: review.verified,
-      helpful: review.helpful,
-      notHelpful: review.notHelpful,
-      createdAt: review.createdAt,
-      response: review.response ? review.response : undefined,
-    }))
+    const transformedReviews = reviews.map((review) => {
+      // Normalize response field to handle both legacy 'date' and new 'respondedAt' fields
+      let normalizedResponse = undefined
+      if (review.response) {
+        const response = review.response as any
+        normalizedResponse = {
+          text: response.text,
+          respondedAt: response.respondedAt || response.date || null,
+        }
+      }
+
+      return {
+        id: review.id,
+        productId: review.productId,
+        userId: review.userId,
+        userName: review.userName,
+        userAvatar: review.userAvatar || undefined,
+        rating: review.rating,
+        title: review.title || undefined,
+        comment: review.comment,
+        images: review.images,
+        videos: review.videos,
+        verified: review.verified,
+        helpful: review.helpful,
+        notHelpful: review.notHelpful,
+        createdAt: review.createdAt,
+        response: normalizedResponse,
+      }
+    })
 
     return NextResponse.json({
       reviews: transformedReviews,
@@ -240,32 +253,78 @@ export async function POST(
 
     const verified = !!purchasedOrder
 
-    // Handle image uploads (optional)
+    // Handle media uploads (images and videos)
     const images: string[] = []
+    const videos: string[] = []
     const imageFiles: File[] = []
+    const videoFiles: File[] = []
 
     formData.forEach((value, key) => {
       if (key.startsWith('images[') && value instanceof File) {
         imageFiles.push(value)
+      } else if (key.startsWith('videos[') && value instanceof File) {
+        videoFiles.push(value)
       }
     })
 
+    // Validate total media count (max 5 combined)
+    const totalMediaFiles = imageFiles.length + videoFiles.length
+    if (totalMediaFiles > 5) {
+      return NextResponse.json(
+        { error: 'Maximum 5 media files (images + videos) allowed.' },
+        { status: 400 }
+      )
+    }
+
     // Upload images to media collection if any
     if (imageFiles.length > 0) {
-      for (const file of imageFiles.slice(0, 5)) {
-        // Max 5 images
+      for (const file of imageFiles) {
+        // Validate file size (max 10MB for images)
+        if (file.size > 10 * 1024 * 1024) {
+          return NextResponse.json(
+            { error: 'Image file size must be less than 10MB.' },
+            { status: 400 }
+          )
+        }
+
         // Create media entry
         const media = await prisma.media.create({
           data: {
             url: '', // Placeholder - in production, upload to cloud storage
             alt: `Review image for ${product.name}`,
-            type: file.type.startsWith('image/') ? 'IMAGE' : 'VIDEO',
+            type: 'IMAGE',
           },
         })
 
         // In production, upload the file to cloud storage and update the URL
         // For now, we just store the media ID as placeholder
         images.push(media.id)
+      }
+    }
+
+    // Upload videos to media collection if any
+    if (videoFiles.length > 0) {
+      for (const file of videoFiles) {
+        // Validate file size (max 50MB for videos)
+        if (file.size > 50 * 1024 * 1024) {
+          return NextResponse.json(
+            { error: 'Video file size must be less than 50MB.' },
+            { status: 400 }
+          )
+        }
+
+        // Create media entry
+        const media = await prisma.media.create({
+          data: {
+            url: '', // Placeholder - in production, upload to cloud storage
+            alt: `Review video for ${product.name}`,
+            type: 'VIDEO',
+          },
+        })
+
+        // In production, upload the file to cloud storage and update the URL
+        // For now, we just store the media ID as placeholder
+        videos.push(media.id)
       }
     }
 
@@ -290,6 +349,7 @@ export async function POST(
         title: title || undefined,
         comment,
         images,
+        videos,
         verified,
         helpful: 0,
         notHelpful: 0,
@@ -301,7 +361,7 @@ export async function POST(
       success: true,
       data: {
         id: review.id,
-        status: 'pending',
+        status: review.status,
         message: 'Your review has been submitted and is pending approval.',
       },
     })

@@ -71,7 +71,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                     id="megamenu-dropdown"
                     role="menu"
                     aria-label="Menu des catégories"
-                    className="absolute left-0 top-full mt-2 w-screen max-w-6xl bg-white rounded-lg shadow-2xl border border-gray-200 z-50 animate-slide-down"
+                    className="absolute left-0 top-full mt-2 w-screen max-w-6xl bg-white rounded-lg shadow-2xl border border-gray-200 z-[110] animate-slide-down"
                 >
                     <div className="flex">
                         {/* Left sidebar - Category list */}

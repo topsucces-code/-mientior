@@ -4,11 +4,25 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ProductImage } from '@/components/ui/product-image'
 import { useRouter } from 'next/navigation'
-import { Heart, ShoppingCart, Trash2, Share2, Grid, List, ArrowLeft, Package } from 'lucide-react'
+import { Heart, ShoppingCart, Trash2, Share2, Grid, List, ArrowLeft, Package, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { useWishlistStore } from '@/stores/wishlist.store'
 import { useCartStore } from '@/stores/cart.store'
 import { toast } from '@/hooks/use-toast'
+import { useTranslations } from 'next-intl'
+import { formatPrice } from '@/lib/currency-utils'
 
 interface WishlistProduct {
   id: string
@@ -29,6 +43,10 @@ export function WishlistPageClient() {
   const [products, setProducts] = useState<WishlistProduct[]>([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
+  const t = useTranslations('wishlist')
+  const tCart = useTranslations('cart')
+  const tCommon = useTranslations('common')
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -42,7 +60,7 @@ export function WishlistPageClient() {
         const response = await fetch('/api/products/by-ids', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ids: items }),
+          body: JSON.stringify({ ids: items.map(item => item.productId) }),
         })
 
         if (response.ok) {
@@ -62,8 +80,8 @@ export function WishlistPageClient() {
   const handleAddToCart = (product: WishlistProduct) => {
     if (product.stock <= 0) {
       toast({
-        title: 'Out of stock',
-        description: 'This product is currently unavailable',
+        title: t('outOfStock'),
+        description: tCart('outOfStockDesc') || 'This product is currently unavailable',
         variant: 'destructive',
       })
       return
@@ -83,7 +101,7 @@ export function WishlistPageClient() {
     })
 
     toast({
-      title: 'Added to cart',
+      title: tCart('itemAdded'),
       description: `${product.name} has been added to your cart`,
     })
   }
@@ -91,8 +109,8 @@ export function WishlistPageClient() {
   const handleRemove = (productId: string, productName: string) => {
     removeItem(productId)
     toast({
-      title: 'Removed from wishlist',
-      description: `${productName} has been removed`,
+      title: t('removedFromWishlist'),
+      description: t('removedFromWishlistDesc', { name: productName }),
     })
   }
 
@@ -101,7 +119,7 @@ export function WishlistPageClient() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'My Wishlist',
+          title: t('title'),
           url,
         })
       } catch {
@@ -110,8 +128,8 @@ export function WishlistPageClient() {
     } else {
       await navigator.clipboard.writeText(url)
       toast({
-        title: 'Link copied',
-        description: 'Wishlist link copied to clipboard',
+        title: t('shareCopied'),
+        description: t('shareCopied'),
       })
     }
   }
@@ -120,8 +138,8 @@ export function WishlistPageClient() {
     const inStockProducts = products.filter(p => p.stock > 0)
     if (inStockProducts.length === 0) {
       toast({
-        title: 'No products available',
-        description: 'All products in your wishlist are out of stock',
+        title: t('noProductsAvailable'),
+        description: t('allOutOfStock'),
         variant: 'destructive',
       })
       return
@@ -143,8 +161,8 @@ export function WishlistPageClient() {
     })
 
     toast({
-      title: 'Added to cart',
-      description: `${inStockProducts.length} products added to your cart`,
+      title: tCart('itemAdded'),
+      description: t('itemsAddedToCart', { count: inStockProducts.length }),
     })
   }
 
@@ -167,13 +185,13 @@ export function WishlistPageClient() {
         <div className="mb-6 rounded-full bg-platinum-100 p-6">
           <Heart className="h-12 w-12 text-platinum-400" />
         </div>
-        <h1 className="mb-2 text-2xl font-bold text-anthracite-700">Your wishlist is empty</h1>
+        <h1 className="mb-2 text-2xl font-bold text-anthracite-700">{t('empty')}</h1>
         <p className="mb-6 text-nuanced-600">
-          Save products you love by clicking the heart icon
+          {t('emptyText')}
         </p>
         <Button onClick={() => router.push('/products')}>
           <Package className="mr-2 h-4 w-4" />
-          Browse Products
+          {t('continueShopping')}
         </Button>
       </div>
     )
@@ -189,12 +207,12 @@ export function WishlistPageClient() {
             className="mb-2 flex items-center text-sm text-nuanced-600 hover:text-anthracite-700"
           >
             <ArrowLeft className="mr-1 h-4 w-4" />
-            Back
+            {tCommon('back')}
           </button>
           <h1 className="text-2xl font-bold text-anthracite-700">
-            My Wishlist
+            {t('title')}
             <span className="ml-2 text-lg font-normal text-nuanced-600">
-              ({items.length} {items.length === 1 ? 'item' : 'items'})
+              ({t('itemCount', { count: items.length })})
             </span>
           </h1>
         </div>
@@ -218,17 +236,47 @@ export function WishlistPageClient() {
 
           <Button variant="outline" size="sm" onClick={handleShare}>
             <Share2 className="mr-2 h-4 w-4" />
-            Share
+            {t('share')}
           </Button>
 
-          <Button variant="outline" size="sm" onClick={() => clearWishlist()}>
-            <Trash2 className="mr-2 h-4 w-4" />
-            Clear All
-          </Button>
+          <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Trash2 className="mr-2 h-4 w-4" />
+                {t('clearAll')}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-orange-500" />
+                  {t('clearConfirmTitle')}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t('clearConfirmDesc')}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    clearWishlist()
+                    toast({
+                      title: t('wishlistCleared'),
+                      description: t('wishlistClearedDesc'),
+                    })
+                  }}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {t('confirmClear')}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           <Button onClick={handleAddAllToCart}>
             <ShoppingCart className="mr-2 h-4 w-4" />
-            Add All to Cart
+            {t('addAllToCart')}
           </Button>
         </div>
       </div>
@@ -261,7 +309,7 @@ export function WishlistPageClient() {
                   {product.stock <= 0 && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                       <span className="rounded bg-white px-3 py-1 text-sm font-medium text-anthracite-700">
-                        Out of Stock
+                        {t('outOfStock')}
                       </span>
                     </div>
                   )}
@@ -296,14 +344,19 @@ export function WishlistPageClient() {
                 )}
 
                 {/* Price */}
-                <div className="mb-4 flex items-center gap-2">
+                <div className="mb-4 flex flex-wrap items-center gap-2">
                   <span className="text-lg font-bold text-anthracite-700">
-                    €{product.price.toFixed(2)}
+                    {formatPrice(product.price)}
                   </span>
                   {product.compareAtPrice && product.compareAtPrice > product.price && (
-                    <span className="text-sm text-nuanced-500 line-through">
-                      €{product.compareAtPrice.toFixed(2)}
-                    </span>
+                    <>
+                      <span className="text-sm text-nuanced-500 line-through">
+                        {formatPrice(product.compareAtPrice)}
+                      </span>
+                      <Badge variant="destructive" className="bg-red-500 text-xs">
+                        -{Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)}%
+                      </Badge>
+                    </>
                   )}
                 </div>
 
@@ -314,7 +367,7 @@ export function WishlistPageClient() {
                   disabled={product.stock <= 0}
                 >
                   <ShoppingCart className="mr-2 h-4 w-4" />
-                  {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                  {product.stock > 0 ? t('addToCart') : t('outOfStock')}
                 </Button>
               </div>
             </div>
@@ -355,14 +408,19 @@ export function WishlistPageClient() {
                       </span>
                     </div>
                   )}
-                  <div className="mt-2 flex items-center gap-2">
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
                     <span className="text-lg font-bold text-anthracite-700">
-                      €{product.price.toFixed(2)}
+                      {formatPrice(product.price)}
                     </span>
                     {product.compareAtPrice && product.compareAtPrice > product.price && (
-                      <span className="text-sm text-nuanced-500 line-through">
-                        €{product.compareAtPrice.toFixed(2)}
-                      </span>
+                      <>
+                        <span className="text-sm text-nuanced-500 line-through">
+                          {formatPrice(product.compareAtPrice)}
+                        </span>
+                        <Badge variant="destructive" className="bg-red-500 text-xs">
+                          -{Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)}%
+                        </Badge>
+                      </>
                     )}
                   </div>
                 </div>
@@ -374,14 +432,16 @@ export function WishlistPageClient() {
                     disabled={product.stock <= 0}
                   >
                     <ShoppingCart className="mr-2 h-4 w-4" />
-                    {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                    {product.stock > 0 ? t('addToCart') : t('outOfStock')}
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleRemove(product.id, product.name)}
+                    className="text-red-500 hover:bg-red-50 hover:text-red-600 hover:border-red-200"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    {t('remove')}
                   </Button>
                 </div>
               </div>

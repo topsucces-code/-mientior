@@ -4,77 +4,78 @@
 
 @layer base {
   :root {
-    /* Background and foreground - tons naturels */
-    --background: 40 20% 99%;
-    --foreground: 24 10% 10%;
+    /* ============================================
+       🎨 MIENTIOR - Palette "Frais & Confiant"
+       Turquoise/Orange - Confiance + Action
+       ============================================ */
+    
+    /* Background and foreground */
+    --background: 0 0% 100%;           /* #FFFFFF - Fond principal */
+    --foreground: 220 13% 18%;         /* #1F2937 - Gris foncé textes */
 
-    /* L'Opulence Organique - Luxe Naturel */
-    /* Vert Émeraude Profond (Primary) - Richesse, héritage, nature précieuse */
-    --emerald-primary: 160 96% 18%; /* #047857 */
-    --emerald-light: 158 64% 52%; /* #34D399 */
-    --emerald-dark: 163 94% 15%; /* #064E3B */
+    /* Turquoise (Primary) - Confiance, fiabilité */
+    --turquoise-primary: 189 94% 37%;  /* #0891B2 - Header, navigation, liens */
+    --turquoise-light: 187 92% 43%;    /* #06B6D4 - Hover, badges, icônes */
+    --turquoise-dark: 186 91% 29%;     /* #0E7490 */
+    --turquoise-bg: 183 100% 96%;      /* #ECFEFF - Fond neutre sections */
     
-    /* Beige Doré / Taupe (Secondary) - Chaleur, élégance, confort */
-    --taupe-primary: 36 30% 50%; /* #A68B5B */
-    --taupe-light: 38 35% 75%; /* #D4C4A8 */
-    --taupe-dark: 33 25% 35%; /* #6B5B45 */
-    
-    /* Cuivre (Accent) - Touche métallique chaude */
-    --copper-primary: 28 55% 46%; /* #B87333 */
-    --copper-light: 20 60% 75%; /* #F0A890 */
-    --copper-dark: 25 55% 30%; /* #7A4A22 */
-    
-    /* Or Rose (Luxury accent) */
-    --rosegold-primary: 350 30% 57%; /* #B76E79 */
-    --rosegold-light: 5 100% 84%; /* #FFB8AD */
+    /* Orange CTA - Urgence, action, conversions (+30% clics) */
+    --orange-cta: 25 95% 53%;          /* #F97316 - Boutons d'achat, promos */
+    --orange-light: 27 96% 61%;        /* #FB923C */
+    --orange-dark: 21 90% 48%;         /* #EA580C */
 
-    /* Neutral palette - tons naturels chauds */
-    --gray-platinum: 30 10% 98%; /* #FAFAF9 */
-    --gray-platinum-2: 30 6% 90%; /* #E7E5E4 */
-    --gray-anthracite: 24 9% 23%; /* #44403C */
-    --gray-nuanced: 25 6% 45%; /* #78716C */
+    /* Gris - Textes et UI */
+    --gray-dark: 220 13% 18%;          /* #1F2937 - Textes principaux */
+    --gray-medium: 220 9% 46%;         /* #6B7280 - Textes secondaires */
+    --gray-light: 220 14% 96%;         /* #F3F4F6 */
+    --gray-border: 220 13% 91%;        /* #E5E7EB */
+
+    /* Semantic colors */
+    --success: 160 84% 39%;            /* #10B981 - Stock dispo, validation */
+    --error: 0 84% 60%;                /* #EF4444 - Stock limité, erreurs */
+    --warning: 38 92% 50%;             /* #F59E0B */
 
     /* Component tokens */
-    --card: 40 20% 99%;
-    --card-foreground: 24 10% 10%;
-    --popover: 40 20% 99%;
-    --popover-foreground: 24 10% 10%;
-    --primary: var(--emerald-primary);
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 18%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 18%;
+    --primary: var(--turquoise-primary);
     --primary-foreground: 0 0% 100%;
-    --secondary: var(--taupe-primary);
-    --secondary-foreground: 0 0% 100%;
-    --muted: var(--gray-platinum);
-    --muted-foreground: var(--gray-nuanced);
-    --accent: var(--copper-primary);
+    --secondary: var(--gray-light);
+    --secondary-foreground: 220 13% 18%;
+    --muted: var(--turquoise-bg);
+    --muted-foreground: var(--gray-medium);
+    --accent: var(--orange-cta);
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: var(--error);
     --destructive-foreground: 0 0% 100%;
-    --border: var(--gray-platinum-2);
-    --input: var(--gray-platinum-2);
-    --ring: var(--emerald-primary);
+    --border: var(--gray-border);
+    --input: var(--gray-border);
+    --ring: var(--turquoise-primary);
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 24 10% 8%;
-    --foreground: 40 20% 95%;
-    --card: 24 10% 10%;
-    --card-foreground: 40 20% 95%;
-    --popover: 24 10% 10%;
-    --popover-foreground: 40 20% 95%;
-    --primary: var(--emerald-light);
-    --primary-foreground: 24 10% 10%;
-    --secondary: var(--taupe-light);
-    --secondary-foreground: 24 10% 10%;
-    --muted: 24 10% 15%;
-    --muted-foreground: 25 6% 60%;
-    --accent: var(--copper-light);
-    --accent-foreground: 24 10% 10%;
+    --background: 220 13% 8%;
+    --foreground: 220 14% 96%;
+    --card: 220 13% 10%;
+    --card-foreground: 220 14% 96%;
+    --popover: 220 13% 10%;
+    --popover-foreground: 220 14% 96%;
+    --primary: var(--turquoise-light);
+    --primary-foreground: 220 13% 8%;
+    --secondary: 220 13% 18%;
+    --secondary-foreground: 220 14% 96%;
+    --muted: 220 13% 15%;
+    --muted-foreground: 220 9% 60%;
+    --accent: var(--orange-light);
+    --accent-foreground: 220 13% 8%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 40 20% 95%;
-    --border: 24 10% 18%;
-    --input: 24 10% 18%;
-    --ring: var(--emerald-light);
+    --destructive-foreground: 220 14% 96%;
+    --border: 220 13% 18%;
+    --input: 220 13% 18%;
+    --ring: var(--turquoise-light);
   }
 }
 
@@ -117,8 +118,8 @@
     background: linear-gradient(135deg, #B87333 0%, #E07850 100%);
   }
 
-  .gradient-rosegold {
-    background: linear-gradient(135deg, #B76E79 0%, #E8A090 100%);
+  .gradient-orange {
+    background: linear-gradient(135deg, #F97316 0%, #FB923C 100%);
   }
 
   .gradient-luxury {
@@ -270,7 +271,7 @@
   /* Custom scrollbar styles */
   .custom-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--gray-nuanced) / 0.3) transparent;
+    scrollbar-color: hsl(var(--gray-medium) / 0.3) transparent;
   }
 
   .custom-scrollbar::-webkit-scrollbar {
@@ -283,12 +284,12 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: hsl(var(--gray-nuanced) / 0.3);
+    background: hsl(var(--gray-medium) / 0.3);
     border-radius: 3px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--gray-nuanced) / 0.5);
+    background: hsl(var(--gray-medium) / 0.5);
   }
 
   .custom-scrollbar-horizontal {
@@ -774,7 +775,7 @@
 }
 
 .auth-toast-warning .auth-toast-action {
-  @apply bg-copper-500 text-anthracite-700 hover:bg-copper-600 focus:ring-copper-500;
+  @apply bg-orange-500 text-gray-800 hover:bg-orange-600 focus:ring-orange-500;
 }
 
 /* Info variant - Blue with proper contrast */
@@ -800,15 +801,15 @@
 
 /* Loading variant - Neutral with spinner */
 .auth-toast-loading {
-  @apply bg-platinum-50 border-nuanced-500 text-anthracite-700;
+  @apply bg-gray-50 border-gray-400 text-gray-800;
 }
 
 .auth-toast-loading .auth-toast-title {
-  @apply text-anthracite-700;
+  @apply text-gray-800;
 }
 
 .auth-toast-loading .auth-toast-description {
-  @apply text-nuanced-600;
+  @apply text-gray-600;
 }
 
 /* Toast animations */
@@ -943,7 +944,7 @@
 }
 
 .dark .auth-toast-loading {
-  @apply bg-anthracite-700/80 border-nuanced-500 text-platinum-50;
+  @apply bg-gray-800/80 border-gray-500 text-gray-50;
 }
 
 /* Keyboard navigation: Tab focus order (Requirement 6.5) */
