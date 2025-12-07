@@ -23,8 +23,8 @@ const envSchema = z.object({
   NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: z.string().startsWith('pk_', 'Invalid Paystack public key format'),
 
   // Payment Gateways - Flutterwave (Secondary)
-  FLUTTERWAVE_SECRET_KEY: z.string().startsWith('FLWSECK-', 'Invalid Flutterwave secret key format'),
-  NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY: z.string().startsWith('FLWPUBK-', 'Invalid Flutterwave public key format'),
+  FLUTTERWAVE_SECRET_KEY: z.string().regex(/^FLWSECK[_-]/, 'Invalid Flutterwave secret key format'),
+  NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY: z.string().regex(/^FLWPUBK[_-]/, 'Invalid Flutterwave public key format'),
 
   // Email Service
   RESEND_API_KEY: z.string().startsWith('re_', 'Invalid Resend API key format'),
