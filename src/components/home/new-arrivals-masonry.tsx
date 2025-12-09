@@ -3,13 +3,13 @@
 import * as React from 'react'
 import Link from 'next/link'
 import useEmblaCarousel from 'embla-carousel-react'
-import { ChevronLeft, ChevronRight, TrendingUp, Flame, Sparkles } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Sparkles, Star } from 'lucide-react'
 import { ProductCardUnified } from '@/components/ui/product-card-unified'
 import { cn } from '@/lib/utils'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
 
-interface TrendingProduct {
+interface Product {
   id: string
   name: string
   slug: string
@@ -21,36 +21,32 @@ interface TrendingProduct {
   reviewCount?: number
   salesCount?: number
   brand?: string
-  stock?: number
+  vendor?: string
+  badge?: string | { text: string; variant: string }
   inStock?: boolean
+  stock?: number
   isVerifiedSeller?: boolean
   isOfficialStore?: boolean
   freeShipping?: boolean
   deliveryDays?: number
 }
 
-interface TrendingNowCarouselProps extends React.HTMLAttributes<HTMLElement> {
-  products: TrendingProduct[]
+interface NewArrivalsMasonryProps {
+  products: Product[]
   title?: string
   subtitle?: string
-  autoplayDelay?: number
 }
 
-export default function TrendingNowCarousel({
+export default function NewArrivalsMasonry({
   products,
-  title = 'Tendances du Moment',
-  subtitle = 'Les produits les plus populaires cette semaine',
-  autoplayDelay = 4000,
-  className,
-  ...props
-}: TrendingNowCarouselProps) {
+  title = 'Nouveautés',
+  subtitle = 'Découvrez nos dernières arrivées',
+}: NewArrivalsMasonryProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
-    slidesToScroll: 1,
     align: 'start',
     dragFree: true,
   })
-  const [isPaused, setIsPaused] = React.useState(false)
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
 
@@ -62,17 +58,6 @@ export default function TrendingNowCarousel({
     if (emblaApi) emblaApi.scrollNext()
   }, [emblaApi])
 
-  // Autoplay with pause on hover
-  React.useEffect(() => {
-    if (!emblaApi || prefersReducedMotion || isPaused) return
-
-    const interval = setInterval(() => {
-      emblaApi.scrollNext()
-    }, autoplayDelay)
-
-    return () => clearInterval(interval)
-  }, [emblaApi, autoplayDelay, prefersReducedMotion, isPaused])
-
   if (!products || products.length === 0) {
     return null
   }
@@ -80,13 +65,7 @@ export default function TrendingNowCarousel({
   return (
     <section
       ref={sectionRef}
-      className={cn(
-        'py-8 sm:py-10 md:py-14 bg-gradient-to-br from-purple-50 via-white to-orange-50',
-        className
-      )}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-      {...props}
+      className={cn('py-8 sm:py-10 md:py-14 bg-gradient-to-br from-emerald-50 via-white to-teal-50')}
     >
       <div className="container mx-auto px-3 sm:px-4 lg:px-6">
         {/* Header - Style Temu */}
@@ -97,13 +76,13 @@ export default function TrendingNowCarousel({
           )}
         >
           <div className="flex items-center gap-3 sm:gap-4">
-            {/* Trending Icon with Animation */}
+            {/* Icon with Animation */}
             <div className="relative">
-              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 shadow-lg">
-                <Flame className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg">
+                <Star className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
               </div>
-              <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white animate-bounce">
-                HOT
+              <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-yellow-400 text-[10px] font-bold text-yellow-900 animate-pulse">
+                NEW
               </div>
             </div>
 
@@ -113,7 +92,7 @@ export default function TrendingNowCarousel({
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
                   {title}
                 </h2>
-                <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500" />
+                <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-500" />
               </div>
               <p className="text-sm sm:text-base text-gray-500 mt-0.5">{subtitle}</p>
             </div>
@@ -122,8 +101,8 @@ export default function TrendingNowCarousel({
           {/* Navigation & View All */}
           <div className="flex items-center gap-3">
             <Link
-              href="/products?sort=trending"
-              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors"
+              href="/products?filter=new"
+              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
             >
               <Sparkles className="h-4 w-4" />
               Voir tout
@@ -131,14 +110,14 @@ export default function TrendingNowCarousel({
             <div className="flex items-center gap-2">
               <button
                 onClick={scrollPrev}
-                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition-all shadow-sm"
+                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all shadow-sm"
                 aria-label="Précédent"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
                 onClick={scrollNext}
-                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition-all shadow-sm"
+                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all shadow-sm"
                 aria-label="Suivant"
               >
                 <ChevronRight className="h-5 w-5" />
@@ -168,8 +147,8 @@ export default function TrendingNowCarousel({
                     rating={product.rating}
                     reviewCount={product.reviewCount}
                     salesCount={product.salesCount}
-                    brand={product.brand}
-                    badge={{ text: '🔥 Trending', variant: 'trending' }}
+                    brand={product.brand || product.vendor}
+                    badge={{ text: '✨ Nouveau', variant: 'new' }}
                     isVerifiedSeller={product.isVerifiedSeller}
                     isOfficialStore={product.isOfficialStore}
                     freeShipping={product.freeShipping}
@@ -186,11 +165,11 @@ export default function TrendingNowCarousel({
         {/* Mobile View All */}
         <div className="mt-6 text-center sm:hidden">
           <Link
-            href="/products?sort=trending"
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-semibold rounded-full hover:shadow-lg transition-all"
+            href="/products?filter=new"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-semibold rounded-full hover:shadow-lg transition-all"
           >
             <Sparkles className="h-4 w-4" />
-            Voir toutes les tendances
+            Voir toutes les nouveautés
           </Link>
         </div>
       </div>

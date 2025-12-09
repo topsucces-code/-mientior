@@ -20,14 +20,21 @@ export interface ProductCardProps extends React.HTMLAttributes<HTMLDivElement> {
   images?: string[]
   rating?: number
   reviewCount?: number
+  salesCount?: number // Extracted to prevent DOM warning
   badge?: {
     text: string
     variant: 'flash' | 'urgent' | 'bestseller' | 'trending' | 'new'
   } | string
   onSale?: boolean
   inStock?: boolean
+  stock?: number // Extracted to prevent DOM warning
   freeShipping?: boolean
+  deliveryDays?: number // Extracted to prevent DOM warning
   compact?: boolean
+  brand?: string // Extracted to prevent DOM warning
+  vendor?: string // Extracted to prevent DOM warning
+  isVerifiedSeller?: boolean // Extracted to prevent DOM warning
+  isOfficialStore?: boolean // Extracted to prevent DOM warning
   onAddToCart?: (id: string) => void
   onQuickView?: (id: string) => void
   onWishlistToggle?: (id: string) => void
@@ -47,10 +54,18 @@ export function ProductCard({
   images = [],
   rating = 0,
   reviewCount = 0,
+  salesCount: _salesCount, // Destructure to prevent DOM warning (unused)
   badge,
   onSale: _onSale,
   inStock = true,
+  stock: _stock, // Destructure to prevent DOM warning (unused)
   freeShipping = false,
+  deliveryDays: _deliveryDays, // Destructure to prevent DOM warning (unused)
+  compact: _compact, // Destructure to prevent DOM warning (unused)
+  brand: _brand, // Destructure to prevent DOM warning (unused)
+  vendor: _vendor, // Destructure to prevent DOM warning (unused)
+  isVerifiedSeller: _isVerifiedSeller, // Destructure to prevent DOM warning (unused)
+  isOfficialStore: _isOfficialStore, // Destructure to prevent DOM warning (unused)
   onAddToCart,
   onQuickView,
   onWishlistToggle,

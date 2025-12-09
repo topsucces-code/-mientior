@@ -13,10 +13,10 @@ import { Prisma } from '@prisma/client'
 // GET /api/products/[slug]/reviews
 export async function GET(
   request: NextRequest,
-  { params }: { params: Record<string, string> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params
+    const { slug } = await params
     const searchParams = request.nextUrl.searchParams
 
     const page = parseInt(searchParams.get('page') || '1')
@@ -182,10 +182,10 @@ export async function GET(
 // POST /api/products/[slug]/reviews
 export async function POST(
   request: NextRequest,
-  { params }: { params: Record<string, string> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params
+    const { slug } = await params
     const session = await getSession()
 
     if (!session?.user) {

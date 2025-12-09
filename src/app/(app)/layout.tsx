@@ -13,7 +13,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <QuickViewProvider>
       <div className="flex min-h-screen flex-col">
         <Header />
-        <main id="main-content" className="flex-1 pb-20 md:pb-0">{children}</main>
+        <main id="main-content" className="flex-1 pb-20 md:pb-0 relative z-0">{children}</main>
         <Footer />
         <MobileNav />
         <InstallPrompt />

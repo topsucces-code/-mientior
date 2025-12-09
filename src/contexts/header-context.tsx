@@ -16,6 +16,11 @@ interface HeaderContextValue {
     searchQuery: string
     setSearchQuery: (query: string) => void
     getVisibleHeight: () => number
+    // Mobile states
+    isMobileMenuOpen: boolean
+    setMobileMenuOpen: (open: boolean) => void
+    isMobileSearchOpen: boolean
+    setMobileSearchOpen: (open: boolean) => void
 }
 
 const HeaderContext = createContext<HeaderContextValue | undefined>(undefined)
@@ -26,6 +31,8 @@ export function HeaderProvider({ children }: { children: React.ReactNode }) {
     const [isHidden, setIsHidden] = useState(false)
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
     const [searchQuery, setSearchQuery] = useState('')
+    const [isMobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const [isMobileSearchOpen, setMobileSearchOpen] = useState(false)
 
     const lastScrollY = useRef(0)
     const ticking = useRef(false)
@@ -68,10 +75,15 @@ export function HeaderProvider({ children }: { children: React.ReactNode }) {
         setActiveDropdown('cart')
     }, [])
 
-    // Close dropdowns on scroll
+    // Close dropdowns on significant scroll (not just any scroll)
+    const lastScrollYForDropdown = useRef(0)
     useEffect(() => {
-        if (scrollY > 0 && activeDropdown) {
+        // Only close if user scrolled more than 50px since dropdown opened
+        if (activeDropdown && Math.abs(scrollY - lastScrollYForDropdown.current) > 50) {
             closeAllDropdowns()
+        }
+        if (!activeDropdown) {
+            lastScrollYForDropdown.current = scrollY
         }
     }, [scrollY, activeDropdown, closeAllDropdowns])
 
@@ -113,7 +125,12 @@ export function HeaderProvider({ children }: { children: React.ReactNode }) {
         openCart,
         searchQuery,
         setSearchQuery,
-        getVisibleHeight
+        getVisibleHeight,
+        // Mobile states
+        isMobileMenuOpen,
+        setMobileMenuOpen,
+        isMobileSearchOpen,
+        setMobileSearchOpen
     }
 
     return <HeaderContext.Provider value={value}>{children}</HeaderContext.Provider>

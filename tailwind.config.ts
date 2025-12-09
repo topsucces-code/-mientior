@@ -291,7 +291,17 @@ export default {
                 'slide-down': {
                     from: {
                         opacity: '0',
-                        transform: 'translateY(-10px)',
+                        transform: 'translateY(-4px)',
+                    },
+                    to: {
+                        opacity: '1',
+                        transform: 'translateY(0)',
+                    },
+                },
+                'dropdown-open': {
+                    from: {
+                        opacity: '0',
+                        transform: 'translateY(-6px)',
                     },
                     to: {
                         opacity: '1',
@@ -355,12 +365,20 @@ export default {
                 'slide-up-stagger': 'slide-up-stagger 400ms cubic-bezier(0.4, 0.0, 0.2, 1)',
                 'accordion-down': 'accordion-down 0.2s ease-out',
                 'accordion-up': 'accordion-up 0.2s ease-out',
-                'slide-down': 'slide-down 200ms cubic-bezier(0.4, 0.0, 0.2, 1)',
-                'slide-up': 'slide-up 200ms cubic-bezier(0.4, 0.0, 0.2, 1)',
+                'slide-down': 'slide-down 200ms ease-out',
+                'slide-up': 'slide-up 200ms ease-out',
+                'dropdown-open': 'dropdown-open 220ms ease-out',
                 'fade-slide-horizontal': 'fade-slide-horizontal 300ms cubic-bezier(0.4, 0.0, 0.2, 1)',
                 'bounce-subtle': 'bounce-subtle 1.5s ease-in-out infinite',
                 'pulse-ring': 'pulse-ring 2s cubic-bezier(0.4, 0.0, 0.2, 1) infinite',
                 'float': 'float 3s ease-in-out infinite',
+                'marquee-scroll': 'marquee-scroll 30s linear infinite',
+                'banner-shine': 'bannerShine 3s infinite',
+                'separator-blink': 'separatorBlink 1s infinite',
+                'icon-rotate': 'iconRotate 2s infinite',
+                'badge-shake': 'badgeShake 0.5s infinite',
+                'discount-pulse': 'discountPulse 1.5s infinite',
+                'feature-pulse': 'featurePulse 2s infinite',
             },
             transitionDuration: {
                 'fast': '200ms',

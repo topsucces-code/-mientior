@@ -4,16 +4,18 @@ import type { HeaderConfig, Language, Currency, RotatingMessage } from '@/types'
 
 export const HEADER_CONFIG: HeaderConfig = {
     heights: {
-        promotionalBanner: 40,
-        topBar: 36,
-        mainHeader: 72,
-        categoryNavBar: 48,
-        total: 196, // 40 + 36 + 72 + 48
-        compact: 120 // mainHeader + categoryNavBar when compact
+        topBar: 36,           // NIVEAU 1: Top Bar Utility
+        mainHeader: 80,       // NIVEAU 2: Main Header
+        categoryNavBar: 56,   // NIVEAU 3: Category Bar (sticky)
+        promotionalBanner: 44, // NIVEAU 4: Promo Banner (collapsible)
+        total: 216,           // 36 + 80 + 56 + 44
+        compact: 64,          // Main header when sticky/compact
+        stickyOffset: 120     // categoryNavBar top position when sticky
     },
     scrollThresholds: {
-        hide: 50, // Hide promotional banner
-        compact: 100 // Compact header mode
+        hide: 50,     // Hide top bar
+        compact: 100, // Compact header mode
+        hideHeader: 200 // Hide entire header on scroll down
     }
 }
 

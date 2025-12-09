@@ -798,16 +798,18 @@ export interface PaginatedResponse<T> {
 
 export interface HeaderConfig {
   heights: {
-    promotionalBanner: number
-    topBar: number
-    mainHeader: number
-    categoryNavBar: number
-    total: number
-    compact: number
+    topBar: number           // NIVEAU 1: Top Bar Utility (36px)
+    mainHeader: number       // NIVEAU 2: Main Header (80px)
+    categoryNavBar: number   // NIVEAU 3: Category Bar (56px)
+    promotionalBanner: number // NIVEAU 4: Promo Banner (44px)
+    total: number            // Sum of all heights
+    compact: number          // Main header when sticky/compact
+    stickyOffset: number     // Category bar top position when sticky
   }
   scrollThresholds: {
-    hide: number
-    compact: number
+    hide: number             // Hide top bar threshold
+    compact: number          // Compact header mode threshold
+    hideHeader: number       // Hide entire header on scroll down
   }
 }
 

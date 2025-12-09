@@ -41,10 +41,41 @@ export function WishlistDropdown() {
     const totalItems = mounted ? items.length : 0
     const recentItems = mounted ? items.slice(0, 5) : []
 
+    // Use a timeout to allow mouse to move to dropdown
+    const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+    const handleMouseEnter = () => {
+        if (closeTimeoutRef.current) {
+            clearTimeout(closeTimeoutRef.current)
+            closeTimeoutRef.current = null
+        }
+        setActiveDropdown('wishlist')
+    }
+
+    const handleMouseLeave = () => {
+        closeTimeoutRef.current = setTimeout(() => {
+            setActiveDropdown(null)
+        }, 150)
+    }
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (closeTimeoutRef.current) {
+                clearTimeout(closeTimeoutRef.current)
+            }
+        }
+    }, [])
+
     return (
-        <div className="relative" ref={dropdownRef}>
+        <div 
+            className="relative" 
+            ref={dropdownRef}
+        >
             <button
                 onClick={() => setActiveDropdown(isOpen ? null : 'wishlist')}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
                 className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
                 aria-label="Liste de souhaits"
                 aria-expanded={isOpen}
@@ -58,7 +89,12 @@ export function WishlistDropdown() {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-[110] animate-slide-down">
+                <div 
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={() => setActiveDropdown(null)}
+                    className="absolute right-0 top-[calc(100%+8px)] w-96 bg-white rounded-xl shadow-[0_16px_48px_rgba(0,0,0,0.12)] border border-gray-100 z-[9999]"
+                    style={{ animation: 'fadeIn 150ms ease-out' }}
+                >
                     <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                         <h3 className="font-semibold">Ma Liste de Souhaits</h3>
                         <span className="text-sm text-gray-500">{totalItems} article{totalItems > 1 ? 's' : ''}</span>

@@ -3,7 +3,8 @@
 import * as React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Sparkles, Crown, Leaf, Zap, Gift, Star, ChevronLeft, ChevronRight } from 'lucide-react'
+import useEmblaCarousel from 'embla-carousel-react'
 import { cn } from '@/lib/utils'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
@@ -15,6 +16,10 @@ export interface CategoryShowcaseData {
   slug: string
   image: string
   theme?: 'light' | 'dark'
+  icon?: 'sparkles' | 'crown' | 'leaf' | 'zap' | 'gift' | 'star'
+  gradient?: string
+  productCount?: number
+  discount?: string
 }
 
 interface CategoryShowcaseProps extends React.HTMLAttributes<HTMLElement> {
@@ -23,14 +28,26 @@ interface CategoryShowcaseProps extends React.HTMLAttributes<HTMLElement> {
   subtitle?: string
 }
 
+const iconMap = {
+  sparkles: Sparkles,
+  crown: Crown,
+  leaf: Leaf,
+  zap: Zap,
+  gift: Gift,
+  star: Star,
+}
+
 const defaultCategories: CategoryShowcaseData[] = [
   {
     id: '1',
-    title: 'Nouveau',
+    title: 'Nouveautés',
     subtitle: 'Les dernières tendances',
     slug: 'nouveautes',
     image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80',
     theme: 'dark',
+    icon: 'sparkles',
+    gradient: 'from-purple-500 to-pink-500',
+    productCount: 245,
   },
   {
     id: '2',
@@ -39,6 +56,10 @@ const defaultCategories: CategoryShowcaseData[] = [
     slug: 'bestsellers',
     image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=800&q=80',
     theme: 'dark',
+    icon: 'crown',
+    gradient: 'from-orange-500 to-red-500',
+    productCount: 189,
+    discount: '-30%',
   },
   {
     id: '3',
@@ -47,6 +68,21 @@ const defaultCategories: CategoryShowcaseData[] = [
     slug: 'eco-responsable',
     image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80',
     theme: 'dark',
+    icon: 'leaf',
+    gradient: 'from-green-500 to-teal-500',
+    productCount: 156,
+  },
+  {
+    id: '4',
+    title: 'Flash Deals',
+    subtitle: 'Offres limitées',
+    slug: 'flash-deals',
+    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80',
+    theme: 'dark',
+    icon: 'zap',
+    gradient: 'from-yellow-500 to-orange-500',
+    productCount: 78,
+    discount: '-50%',
   },
 ]
 
@@ -57,8 +93,21 @@ export default function CategoryShowcase({
   className,
   ...props
 }: CategoryShowcaseProps) {
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: true,
+    align: 'start',
+    dragFree: true,
+  })
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
+
+  const scrollPrev = React.useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev()
+  }, [emblaApi])
+
+  const scrollNext = React.useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext()
+  }, [emblaApi])
 
   if (!categories || categories.length === 0) {
     return null
@@ -67,37 +116,90 @@ export default function CategoryShowcase({
   return (
     <section
       ref={sectionRef}
-      className={cn('py-10 md:py-14', className)}
+      className={cn('py-8 sm:py-10 md:py-14 bg-gradient-to-b from-gray-50 to-white', className)}
       {...props}
     >
-      <div className="container mx-auto px-3 md:px-4 lg:px-6">
-        {/* Header */}
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6">
+        {/* Header - Style Temu */}
         <div
           className={cn(
-            'mb-8 text-center',
+            'mb-6 sm:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4',
             isVisible && !prefersReducedMotion && 'animate-fade-in-up'
           )}
         >
-          <h2 className="mb-3 font-display text-display-md md:text-display-lg text-anthracite-700">
-            {title}
-          </h2>
-          <p className="text-lg text-nuanced-600">{subtitle}</p>
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-turquoise-500 to-blue-500 shadow-lg">
+              <Crown className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
+                {title}
+              </h2>
+              <p className="text-sm sm:text-base text-gray-500">{subtitle}</p>
+            </div>
+          </div>
+          
+          {/* Navigation & View All */}
+          <div className="flex items-center gap-3">
+            <Link
+              href="/categories"
+              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-turquoise-600 hover:text-turquoise-700 hover:bg-turquoise-50 rounded-lg transition-colors"
+            >
+              Voir tout
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={scrollPrev}
+                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-turquoise-500 hover:text-white hover:border-turquoise-500 transition-all shadow-sm"
+                aria-label="Précédent"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                onClick={scrollNext}
+                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-turquoise-500 hover:text-white hover:border-turquoise-500 transition-all shadow-sm"
+                aria-label="Suivant"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {categories.map((category, index) => (
-            <CategoryShowcaseCard
-              key={category.id}
-              category={category}
-              className={cn(
-                !prefersReducedMotion && isVisible && 'animate-fade-in-up'
-              )}
-              style={{
-                animationDelay: !prefersReducedMotion ? `${index * 100}ms` : undefined,
-              }}
-            />
-          ))}
+        {/* Carousel */}
+        <div className="relative -mx-3 sm:mx-0 px-3 sm:px-0">
+          <div className="embla overflow-hidden" ref={emblaRef}>
+            <div className="embla__container flex gap-3 sm:gap-4">
+              {categories.map((category, index) => (
+                <div
+                  key={category.id}
+                  className="embla__slide flex-[0_0_200px] sm:flex-[0_0_240px] md:flex-[0_0_280px] lg:flex-[0_0_300px]"
+                >
+                  <CategoryShowcaseCard
+                    category={category}
+                    className={cn(
+                      !prefersReducedMotion && isVisible && 'animate-fade-in-up'
+                    )}
+                    style={{
+                      animationDelay: !prefersReducedMotion ? `${index * 100}ms` : undefined,
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile View All */}
+        <div className="mt-6 text-center sm:hidden">
+          <Link
+            href="/categories"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-turquoise-500 to-blue-500 text-white text-sm font-semibold rounded-full hover:shadow-lg transition-all"
+          >
+            <Crown className="h-4 w-4" />
+            Voir toutes les collections
+          </Link>
         </div>
       </div>
     </section>
@@ -113,100 +215,99 @@ interface CategoryShowcaseCardProps {
 function CategoryShowcaseCard({ category, className, style }: CategoryShowcaseCardProps) {
   const [isImageLoaded, setIsImageLoaded] = React.useState(false)
   const [isHovered, setIsHovered] = React.useState(false)
-  const isDark = category.theme === 'dark'
-
-  const handleMouseEnter = React.useCallback(() => {
-    setIsHovered(true)
-  }, [])
-
-  const handleMouseLeave = React.useCallback(() => {
-    setIsHovered(false)
-  }, [])
+  
+  const IconComponent = category.icon ? iconMap[category.icon] : Sparkles
 
   return (
     <Link
       href={`/categories/${category.slug}`}
       className={cn(
-        'group relative overflow-hidden rounded-2xl transition-all duration-500',
-        'hover:shadow-elevation-4 hover:-translate-y-2',
+        'group relative overflow-hidden rounded-xl sm:rounded-2xl transition-all duration-300',
+        'hover:shadow-xl hover:-translate-y-1',
+        'bg-white border border-gray-100',
         className
       )}
       style={style}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image Container */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-platinum-100">
+      <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
         <Image
           src={category.image}
           alt={category.title}
           fill
           className={cn(
-            'object-cover transition-all duration-700',
-            isHovered && 'scale-105',
+            'object-cover transition-all duration-500',
+            isHovered && 'scale-110',
             !isImageLoaded && 'blur-sm',
             isImageLoaded && 'blur-0'
           )}
-          sizes="(max-width: 768px) 100vw, 33vw"
+          sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, 25vw"
           onLoad={() => setIsImageLoaded(true)}
           onError={(e) => {
-            // Fallback gradient if image fails to load
             e.currentTarget.style.display = 'none'
           }}
         />
 
-        {/* Fallback Gradient (if image fails to load) */}
-        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-orange-200 via-orange-300 to-blue-300" />
+        {/* Fallback Gradient */}
+        <div className={cn(
+          'absolute inset-0 -z-10 bg-gradient-to-br',
+          category.gradient || 'from-turquoise-400 to-blue-500'
+        )} />
 
-        {/* Overlay Gradient */}
-        <div
-          className={cn(
-            'absolute inset-0 bg-gradient-to-t transition-opacity duration-500',
-            isDark
-              ? 'from-black/80 via-black/40 to-transparent'
-              : 'from-white/80 via-white/40 to-transparent',
-            isHovered && 'opacity-90'
-          )}
-        />
+        {/* Overlay */}
+        <div className={cn(
+          'absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-300',
+          isHovered && 'from-black/70'
+        )} />
 
-        {/* Content */}
-        <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
-          {/* Subtitle */}
-          <p
-            className={cn(
-              'mb-2 text-sm font-medium uppercase tracking-wider transition-all duration-300',
-              isDark ? 'text-platinum-200' : 'text-nuanced-600',
-              isHovered && 'translate-y-[-4px]'
-            )}
-          >
-            {category.subtitle}
-          </p>
+        {/* Discount Badge */}
+        {category.discount && (
+          <div className="absolute top-2 right-2 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-lg shadow-lg animate-pulse">
+            {category.discount}
+          </div>
+        )}
 
-          {/* Title */}
-          <h3
-            className={cn(
-              'mb-4 font-display text-3xl md:text-4xl font-bold transition-all duration-300',
-              isDark ? 'text-white' : 'text-anthracite-700',
-              isHovered && 'translate-y-[-4px]'
-            )}
-          >
+        {/* Icon Badge */}
+        <div className={cn(
+          'absolute top-2 left-2 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg transition-transform duration-300',
+          category.gradient || 'from-turquoise-500 to-blue-500',
+          isHovered && 'scale-110'
+        )}>
+          <IconComponent className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+        </div>
+
+        {/* Content Overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
+          <h3 className="text-base sm:text-lg font-bold text-white mb-0.5 line-clamp-1">
             {category.title}
           </h3>
-
-          {/* CTA Button */}
-          <span
-            className={cn(
-              'inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-300',
-              isDark
-                ? 'border border-white/30 text-white hover:bg-white/10 backdrop-blur-sm'
-                : 'border border-anthracite-700/30 text-anthracite-700 hover:bg-anthracite-700/10',
-              isHovered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-            )}
-          >
-            Découvrir
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </span>
+          <p className="text-xs sm:text-sm text-white/80 line-clamp-1">
+            {category.subtitle}
+          </p>
         </div>
+      </div>
+
+      {/* Bottom Info Bar */}
+      <div className="p-2.5 sm:p-3 flex items-center justify-between bg-white">
+        <div className="flex items-center gap-1.5">
+          {category.productCount && (
+            <span className="text-xs sm:text-sm text-gray-500">
+              <span className="font-semibold text-gray-700">{category.productCount}</span> produits
+            </span>
+          )}
+        </div>
+        <span className={cn(
+          'inline-flex items-center gap-1 text-xs sm:text-sm font-medium transition-all duration-300',
+          'text-turquoise-600 group-hover:text-turquoise-700'
+        )}>
+          Explorer
+          <ArrowRight className={cn(
+            'h-3.5 w-3.5 transition-transform duration-300',
+            isHovered && 'translate-x-1'
+          )} />
+        </span>
       </div>
     </Link>
   )
