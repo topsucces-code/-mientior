@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -17,9 +18,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
-import { updateProfileSchema } from '@/lib/validations/profile'
-
-type ProfileFormData = z.infer<typeof updateProfileSchema>
+import { createUpdateProfileSchema } from '@/lib/validations/profile'
 
 interface Profile {
   id: string
@@ -40,15 +39,25 @@ interface ProfilePageClientProps {
 
 export function ProfilePageClient({ initialProfile }: ProfilePageClientProps) {
   const router = useRouter()
+  const t = useTranslations('account.profile')
+  const tValidation = useTranslations('account.profile.validation')
   const { toast } = useToast()
   const [loading, setLoading] = React.useState(false)
+
+  // Create the validation schema with translations
+  const profileSchema = React.useMemo(
+    () => createUpdateProfileSchema(tValidation),
+    [tValidation]
+  )
+
+  type ProfileFormData = z.infer<typeof profileSchema>
 
   const {
     register,
     handleSubmit,
     formState: { errors, isDirty },
   } = useForm<ProfileFormData>({
-    resolver: zodResolver(updateProfileSchema),
+    resolver: zodResolver(profileSchema),
     defaultValues: {
       firstName: initialProfile.firstName || '',
       lastName: initialProfile.lastName || '',
@@ -75,8 +84,8 @@ export function ProfilePageClient({ initialProfile }: ProfilePageClientProps) {
       }
 
       toast({
-        title: 'Profil mis à jour',
-        description: 'Vos informations ont été enregistrées avec succès',
+        title: t('messages.success'),
+        description: t('messages.successDescription'),
       })
 
       // Refresh the page to get updated data
@@ -84,11 +93,11 @@ export function ProfilePageClient({ initialProfile }: ProfilePageClientProps) {
     } catch (error) {
       console.error('Error updating profile:', error)
       toast({
-        title: 'Erreur',
+        title: t('messages.error'),
         description:
           error instanceof Error
             ? error.message
-            : 'Impossible de mettre à jour le profil',
+            : t('messages.errorDescription'),
         variant: 'destructive',
       })
     } finally {
@@ -101,10 +110,10 @@ export function ProfilePageClient({ initialProfile }: ProfilePageClientProps) {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-anthracite-900 mb-2">
-          Mon Profil
+          {t('title')}
         </h1>
         <p className="text-nuanced-600">
-          Gérez vos informations personnelles et vos préférences
+          {t('subtitle')}
         </p>
       </div>
 
@@ -114,20 +123,20 @@ export function ProfilePageClient({ initialProfile }: ProfilePageClientProps) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="w-5 h-5" />
-              Informations personnelles
+              {t('personalInfo.title')}
             </CardTitle>
             <CardDescription>
-              Vos informations de base et coordonnées
+              {t('personalInfo.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">Prénom</Label>
+                <Label htmlFor="firstName">{t('personalInfo.firstName')}</Label>
                 <Input
                   id="firstName"
                   {...register('firstName')}
-                  placeholder="John"
+                  placeholder={t('personalInfo.firstNamePlaceholder')}
                 />
                 {errors.firstName && (
                   <p className="text-sm text-red-600">
@@ -137,11 +146,11 @@ export function ProfilePageClient({ initialProfile }: ProfilePageClientProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="lastName">Nom</Label>
+                <Label htmlFor="lastName">{t('personalInfo.lastName')}</Label>
                 <Input
                   id="lastName"
                   {...register('lastName')}
-                  placeholder="Doe"
+                  placeholder={t('personalInfo.lastNamePlaceholder')}
                 />
                 {errors.lastName && (
                   <p className="text-sm text-red-600">
@@ -152,7 +161,7 @@ export function ProfilePageClient({ initialProfile }: ProfilePageClientProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('personalInfo.email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -161,24 +170,23 @@ export function ProfilePageClient({ initialProfile }: ProfilePageClientProps) {
                 className="bg-platinum-100"
               />
               <p className="text-sm text-nuanced-500">
-                L'email ne peut pas être modifié ici. Contactez le support si
-                vous devez le changer.
+                {t('personalInfo.emailHint')}
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Téléphone</Label>
+              <Label htmlFor="phone">{t('personalInfo.phone')}</Label>
               <Input
                 id="phone"
                 type="tel"
                 {...register('phone')}
-                placeholder="+33612345678"
+                placeholder={t('personalInfo.phonePlaceholder')}
               />
               {errors.phone && (
                 <p className="text-sm text-red-600">{errors.phone.message}</p>
               )}
               <p className="text-sm text-nuanced-500">
-                Format international recommandé (ex: +33612345678)
+                {t('personalInfo.phoneHint')}
               </p>
             </div>
           </CardContent>
@@ -187,15 +195,15 @@ export function ProfilePageClient({ initialProfile }: ProfilePageClientProps) {
         {/* Preferences */}
         <Card>
           <CardHeader>
-            <CardTitle>Préférences</CardTitle>
+            <CardTitle>{t('preferences.title')}</CardTitle>
             <CardDescription>
-              Langue, pays et devise préférés
+              {t('preferences.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="locale">Langue</Label>
+                <Label htmlFor="locale">{t('preferences.language')}</Label>
                 <select
                   id="locale"
                   {...register('locale')}
@@ -211,7 +219,7 @@ export function ProfilePageClient({ initialProfile }: ProfilePageClientProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="countryCode">Pays</Label>
+                <Label htmlFor="countryCode">{t('preferences.country')}</Label>
                 <select
                   id="countryCode"
                   {...register('countryCode')}
@@ -235,7 +243,7 @@ export function ProfilePageClient({ initialProfile }: ProfilePageClientProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="currency">Devise</Label>
+                <Label htmlFor="currency">{t('preferences.currency')}</Label>
                 <select
                   id="currency"
                   {...register('currency')}
@@ -264,21 +272,21 @@ export function ProfilePageClient({ initialProfile }: ProfilePageClientProps) {
         {initialProfile.loyaltyLevel && (
           <Card>
             <CardHeader>
-              <CardTitle>Programme de fidélité</CardTitle>
+              <CardTitle>{t('loyalty.title')}</CardTitle>
               <CardDescription>
-                Votre statut et vos points de fidélité
+                {t('loyalty.subtitle')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 bg-platinum-50 rounded-lg">
-                  <p className="text-sm text-nuanced-600 mb-1">Niveau</p>
+                  <p className="text-sm text-nuanced-600 mb-1">{t('loyalty.level')}</p>
                   <p className="text-2xl font-bold text-anthracite-900">
                     {initialProfile.loyaltyLevel}
                   </p>
                 </div>
                 <div className="p-4 bg-platinum-50 rounded-lg">
-                  <p className="text-sm text-nuanced-600 mb-1">Points</p>
+                  <p className="text-sm text-nuanced-600 mb-1">{t('loyalty.points')}</p>
                   <p className="text-2xl font-bold text-orange-600">
                     {initialProfile.loyaltyPoints.toLocaleString()}
                   </p>
@@ -296,18 +304,18 @@ export function ProfilePageClient({ initialProfile }: ProfilePageClientProps) {
             onClick={() => router.back()}
             disabled={loading}
           >
-            Annuler
+            {t('actions.cancel')}
           </Button>
           <Button type="submit" disabled={loading || !isDirty}>
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Enregistrement...
+                {t('actions.saving')}
               </>
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Enregistrer
+                {t('actions.save')}
               </>
             )}
           </Button>

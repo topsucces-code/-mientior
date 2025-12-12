@@ -302,8 +302,20 @@ export default function MainProductGrid({
               {products.map((product, index) => (
                 <ProductCard
                   key={product.id}
-                  {...product}
+                  id={product.id}
+                  name={product.name}
+                  slug={product.slug}
+                  price={product.price}
+                  compareAtPrice={product.compareAtPrice}
+                  image={product.image || '/placeholder-product.jpg'}
+                  images={product.images || []}
+                  rating={product.rating}
+                  reviewCount={product.reviewCount}
+                  badge={product.badge}
+                  stock={product.stock}
                   inStock={product.stock !== undefined ? product.stock > 0 : product.inStock}
+                  vendor={(product as any).vendor?.name || (typeof product.vendor === 'string' ? product.vendor : undefined)}
+                  freeShipping={product.price > 5000} // Mock rule
                   onQuickView={handleQuickView}
                   onAddToCart={() => handleAddToCart(product)}
                   onWishlistToggle={() => handleWishlistToggle(product)}

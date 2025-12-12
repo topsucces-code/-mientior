@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { MapPin, Plus, Edit2, Trash2, Check, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/hooks/use-toast'
@@ -61,6 +62,7 @@ const countries = [
 
 export function AddressesPageClient({ initialAddresses }: AddressesPageClientProps) {
   const router = useRouter()
+  const t = useTranslations('account.addresses')
   const [addresses, setAddresses] = useState<Address[]>(initialAddresses)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -116,24 +118,24 @@ export function AddressesPageClient({ initialAddresses }: AddressesPageClientPro
 
       if (response.ok) {
         const savedAddress = await response.json()
-        
+
         if (editingId) {
           setAddresses(prev => prev.map(a => a.id === editingId ? savedAddress : a))
-          toast({ title: 'Address updated', description: 'Your address has been updated successfully' })
+          toast({ title: t('messages.updated'), description: t('messages.updatedDescription') })
         } else {
           setAddresses(prev => [...prev, savedAddress])
-          toast({ title: 'Address added', description: 'Your new address has been saved' })
+          toast({ title: t('messages.added'), description: t('messages.addedDescription') })
         }
-        
+
         handleCancel()
         router.refresh()
       } else {
         throw new Error('Failed to save address')
       }
     } catch {
-      toast({ 
-        title: 'Error', 
-        description: 'Failed to save address. Please try again.',
+      toast({
+        title: t('messages.error'),
+        description: t('messages.errorDescription'),
         variant: 'destructive',
       })
     } finally {
@@ -142,23 +144,23 @@ export function AddressesPageClient({ initialAddresses }: AddressesPageClientPro
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this address?')) return
-    
+    if (!confirm(t('messages.confirmDelete'))) return
+
     setDeleting(id)
     try {
       const response = await fetch(`/api/account/addresses/${id}`, { method: 'DELETE' })
-      
+
       if (response.ok) {
         setAddresses(prev => prev.filter(a => a.id !== id))
-        toast({ title: 'Address deleted', description: 'The address has been removed' })
+        toast({ title: t('messages.deleted'), description: t('messages.deletedDescription') })
         router.refresh()
       } else {
         throw new Error('Failed to delete')
       }
     } catch {
-      toast({ 
-        title: 'Error', 
-        description: 'Failed to delete address',
+      toast({
+        title: t('messages.error'),
+        description: t('messages.errorDescription'),
         variant: 'destructive',
       })
     } finally {
@@ -169,19 +171,19 @@ export function AddressesPageClient({ initialAddresses }: AddressesPageClientPro
   const handleSetDefault = async (id: string) => {
     try {
       const response = await fetch(`/api/account/addresses/${id}/default`, { method: 'POST' })
-      
+
       if (response.ok) {
         setAddresses(prev => prev.map(a => ({
           ...a,
           isDefault: a.id === id,
         })))
-        toast({ title: 'Default address updated' })
+        toast({ title: t('messages.setDefault'), description: t('messages.setDefaultDescription') })
         router.refresh()
       }
     } catch {
-      toast({ 
-        title: 'Error', 
-        description: 'Failed to update default address',
+      toast({
+        title: t('messages.error'),
+        description: t('messages.errorDescription'),
         variant: 'destructive',
       })
     }
@@ -196,17 +198,17 @@ export function AddressesPageClient({ initialAddresses }: AddressesPageClientPro
           className="mb-4 flex items-center text-sm text-nuanced-600 hover:text-anthracite-700"
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
-          Back to Account
+          {t('backToAccount')}
         </button>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-anthracite-700">My Addresses</h1>
-            <p className="text-nuanced-600">Manage your shipping and billing addresses</p>
+            <h1 className="text-2xl font-bold text-anthracite-700">{t('title')}</h1>
+            <p className="text-nuanced-600">{t('subtitle')}</p>
           </div>
           {!showForm && (
             <Button onClick={() => setShowForm(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              Add Address
+              {t('addAddress')}
             </Button>
           )}
         </div>
@@ -216,14 +218,14 @@ export function AddressesPageClient({ initialAddresses }: AddressesPageClientPro
       {showForm && (
         <div className="mb-8 rounded-lg border border-platinum-200 bg-white p-6">
           <h2 className="mb-4 text-lg font-semibold text-anthracite-700">
-            {editingId ? 'Edit Address' : 'New Address'}
+            {editingId ? t('editAddress') : t('newAddress')}
           </h2>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm font-medium text-anthracite-700">
-                  First Name *
+                  {t('form.firstName')} *
                 </label>
                 <input
                   type="text"
@@ -236,7 +238,7 @@ export function AddressesPageClient({ initialAddresses }: AddressesPageClientPro
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-anthracite-700">
-                  Last Name *
+                  {t('form.lastName')} *
                 </label>
                 <input
                   type="text"
@@ -251,7 +253,7 @@ export function AddressesPageClient({ initialAddresses }: AddressesPageClientPro
 
             <div>
               <label className="mb-1 block text-sm font-medium text-anthracite-700">
-                Address Line 1 *
+                {t('form.line1')} *
               </label>
               <input
                 type="text"
@@ -265,7 +267,7 @@ export function AddressesPageClient({ initialAddresses }: AddressesPageClientPro
 
             <div>
               <label className="mb-1 block text-sm font-medium text-anthracite-700">
-                Address Line 2 (optional)
+                {t('form.line2')}
               </label>
               <input
                 type="text"
@@ -279,7 +281,7 @@ export function AddressesPageClient({ initialAddresses }: AddressesPageClientPro
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm font-medium text-anthracite-700">
-                  City *
+                  {t('form.city')} *
                 </label>
                 <input
                   type="text"
@@ -292,7 +294,7 @@ export function AddressesPageClient({ initialAddresses }: AddressesPageClientPro
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-anthracite-700">
-                  Postal Code *
+                  {t('form.postalCode')} *
                 </label>
                 <input
                   type="text"
@@ -308,7 +310,7 @@ export function AddressesPageClient({ initialAddresses }: AddressesPageClientPro
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm font-medium text-anthracite-700">
-                  Country *
+                  {t('form.country')} *
                 </label>
                 <select
                   name="country"
@@ -324,7 +326,7 @@ export function AddressesPageClient({ initialAddresses }: AddressesPageClientPro
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-anthracite-700">
-                  Phone (optional)
+                  {t('form.phone')}
                 </label>
                 <input
                   type="tel"
@@ -346,17 +348,17 @@ export function AddressesPageClient({ initialAddresses }: AddressesPageClientPro
                     onChange={handleInputChange}
                     className="h-4 w-4 rounded border-platinum-300 text-orange-500 focus:ring-orange-500"
                   />
-                  <span className="text-sm text-anthracite-700">Set as default address</span>
+                  <span className="text-sm text-anthracite-700">{t('form.setDefault')}</span>
                 </label>
               </div>
             </div>
 
             <div className="flex gap-3 pt-4">
               <Button type="submit" disabled={loading}>
-                {loading ? 'Saving...' : (editingId ? 'Update Address' : 'Save Address')}
+                {loading ? t('actions.saving') : (editingId ? t('actions.update') : t('actions.save'))}
               </Button>
               <Button type="button" variant="outline" onClick={handleCancel}>
-                Cancel
+                {t('actions.cancel')}
               </Button>
             </div>
           </form>
@@ -369,11 +371,11 @@ export function AddressesPageClient({ initialAddresses }: AddressesPageClientPro
           <div className="mb-4 rounded-full bg-platinum-100 p-4">
             <MapPin className="h-8 w-8 text-platinum-400" />
           </div>
-          <h3 className="mb-2 text-lg font-medium text-anthracite-700">No addresses yet</h3>
-          <p className="mb-4 text-nuanced-600">Add your first address to speed up checkout</p>
+          <h3 className="mb-2 text-lg font-medium text-anthracite-700">{t('empty.title')}</h3>
+          <p className="mb-4 text-nuanced-600">{t('empty.subtitle')}</p>
           <Button onClick={() => setShowForm(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Add Address
+            {t('addAddress')}
           </Button>
         </div>
       ) : (
@@ -390,7 +392,7 @@ export function AddressesPageClient({ initialAddresses }: AddressesPageClientPro
                 <div className="absolute right-2 top-2">
                   <span className="inline-flex items-center rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-700">
                     <Check className="mr-1 h-3 w-3" />
-                    Default
+                    {t('default.badge')}
                   </span>
                 </div>
               )}
@@ -423,7 +425,7 @@ export function AddressesPageClient({ initialAddresses }: AddressesPageClientPro
                   onClick={() => handleEdit(address)}
                 >
                   <Edit2 className="mr-1 h-3 w-3" />
-                  Edit
+                  {t('actions.edit')}
                 </Button>
                 {!address.isDefault && (
                   <Button
@@ -431,7 +433,7 @@ export function AddressesPageClient({ initialAddresses }: AddressesPageClientPro
                     size="sm"
                     onClick={() => handleSetDefault(address.id)}
                   >
-                    Set Default
+                    {t('actions.setDefault')}
                   </Button>
                 )}
                 <Button

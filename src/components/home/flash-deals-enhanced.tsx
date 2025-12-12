@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Zap, ArrowRight, ChevronLeft, ChevronRight, Clock, Flame, Timer } from 'lucide-react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { ProductCardUnified } from '@/components/ui/product-card-unified'
-import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 interface FlashProduct {
   id: string
@@ -39,6 +39,7 @@ export default function FlashDealsEnhanced({
   totalStock = 1000,
   soldCount = 650,
 }: FlashDealsEnhancedProps) {
+  const t = useTranslations('home.flashDeals')
   const [timeLeft, setTimeLeft] = React.useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
   const [emblaRef, emblaApi] = useEmblaCarousel({ align: 'start', loop: true, dragFree: true })
 
@@ -102,14 +103,14 @@ export default function FlashDealsEnhanced({
             <div className="text-white">
               <div className="flex items-center gap-2">
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-wide">
-                  Ventes Flash
+                  {t('title')}
                 </h2>
                 <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-400 text-yellow-900 text-xs font-bold rounded-full animate-pulse">
                   <Flame className="w-3 h-3" />
                   HOT
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-white/90">Offres limitées, ne les manquez pas !</p>
+              <p className="text-xs sm:text-sm text-white/90">{t('subtitle')}</p>
             </div>
           </div>
 
@@ -118,10 +119,10 @@ export default function FlashDealsEnhanced({
             <Clock className="w-5 h-5 text-white/80 hidden sm:block" />
             <div className="flex gap-1.5 sm:gap-2">
               {[
-                { value: timeLeft.days, label: 'J' },
-                { value: timeLeft.hours, label: 'H' },
-                { value: timeLeft.minutes, label: 'M' },
-                { value: timeLeft.seconds, label: 'S' },
+                { value: timeLeft.days, label: t('days').charAt(0).toUpperCase() },
+                { value: timeLeft.hours, label: t('hours').charAt(0).toUpperCase() },
+                { value: timeLeft.minutes, label: t('minutes').charAt(0).toUpperCase() },
+                { value: timeLeft.seconds, label: t('seconds').charAt(0).toUpperCase() },
               ].map((item, i) => (
                 <React.Fragment key={item.label}>
                   <div className="flex flex-col items-center bg-white rounded-xl px-2.5 py-1.5 sm:px-4 sm:py-2 min-w-[44px] sm:min-w-[56px] shadow-lg">
@@ -148,7 +149,7 @@ export default function FlashDealsEnhanced({
               href="/products?filter=flash" 
               className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-orange-500 text-sm font-bold rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
             >
-              Voir tout
+              {t('viewAll')}
               <ArrowRight className="w-4 h-4" />
             </Link>
             <div className="flex items-center gap-2">
@@ -175,9 +176,9 @@ export default function FlashDealsEnhanced({
           <div className="flex justify-between text-xs sm:text-sm text-white mb-2">
             <span className="flex items-center gap-1.5 font-semibold">
               <Flame className="w-4 h-4 text-yellow-400" />
-              {soldPercentage}% vendus
+              {soldPercentage}% {t('sold')}
             </span>
-            <span className="text-white/80">Plus que {totalStock - soldCount} en stock</span>
+            <span className="text-white/80">{totalStock - soldCount} {t('remaining')}</span>
           </div>
           <div className="h-3 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
             <div 
@@ -192,11 +193,11 @@ export default function FlashDealsEnhanced({
         {/* Products Carousel */}
         <div className="relative -mx-3 sm:mx-0 px-3 sm:px-0">
           <div className="embla overflow-hidden" ref={emblaRef}>
-            <div className="embla__container flex gap-3 sm:gap-4">
+            <div className="embla__container flex gap-2">
               {products.map((product, index) => (
                 <div 
                   key={product.id} 
-                  className="embla__slide flex-[0_0_170px] sm:flex-[0_0_200px] md:flex-[0_0_220px] lg:flex-[0_0_240px]"
+                  className="embla__slide flex-[0_0_180px] sm:flex-[0_0_210px] md:flex-[0_0_240px] lg:flex-[0_0_260px]"
                 >
                   <ProductCardUnified
                     id={product.id}
@@ -232,7 +233,7 @@ export default function FlashDealsEnhanced({
             className="inline-flex items-center gap-2 px-6 py-2.5 bg-white text-orange-500 text-sm font-bold rounded-full shadow-lg"
           >
             <Zap className="h-4 w-4" />
-            Voir toutes les offres flash
+            {t('viewAll')}
           </Link>
         </div>
       </div>

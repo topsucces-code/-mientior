@@ -37,10 +37,7 @@ import {
   MapPin,
   Loader2
 } from 'lucide-react'
-import { validateFrenchPhone, validateFrenchPostalCode } from '@/lib/checkout-utils'
-import { PostalCodeAutocomplete } from './postal-code-autocomplete'
 import { useFieldValidation, validationRules } from '@/lib/checkout-validation'
-import type { City } from '@/lib/checkout-validation'
 import type { Address, SavedAddress as SavedAddressType } from '@/types'
 
 // Fetcher for SWR with caching
@@ -53,7 +50,7 @@ const swrConfig = {
   dedupingInterval: 60000, // 1 minute
 }
 
-// Address validation schema with French validation
+// Address validation schema - international support
 const addressSchema = z.object({
   // Contact section
   email: z.string().email('Adresse email invalide'),
@@ -65,15 +62,11 @@ const addressSchema = z.object({
   line1: z.string().min(1, 'L\'adresse est requise').max(100),
   line2: z.string().max(100).optional(),
   city: z.string().min(1, 'La ville est requise').max(50),
-  postalCode: z.string().min(1, 'Le code postal est requis').refine(
-    (val) => validateFrenchPostalCode(val),
-    'Code postal invalide (format: 75001)'
-  ),
+  // Flexible postal code validation (some African countries don't use postal codes)
+  postalCode: z.string().max(20).optional().or(z.literal('')),
   country: z.string().min(1, 'Le pays est requis'),
-  phone: z.string().min(1, 'Le téléphone est requis').refine(
-    (val) => validateFrenchPhone(val),
-    'Numéro de téléphone invalide (format: 06 12 34 56 78)'
-  ),
+  // Flexible phone validation for international numbers
+  phone: z.string().min(8, 'Le téléphone doit contenir au moins 8 chiffres').max(20),
 
   // Save address option
   saveAddress: z.boolean(),
@@ -95,16 +88,124 @@ interface ShippingFormProps {
 }
 
 const countries = [
-  { value: 'FR', label: 'France' },
-  { value: 'BE', label: 'Belgique' },
-  { value: 'CH', label: 'Suisse' },
-  { value: 'LU', label: 'Luxembourg' },
-  { value: 'DE', label: 'Allemagne' },
-  { value: 'IT', label: 'Italie' },
-  { value: 'ES', label: 'Espagne' },
-  { value: 'GB', label: 'Royaume-Uni' },
-  { value: 'US', label: 'États-Unis' },
+  // Europe
+  { value: 'FR', label: 'France', phonePrefix: '+33', region: 'europe' },
+  { value: 'BE', label: 'Belgique', phonePrefix: '+32', region: 'europe' },
+  { value: 'CH', label: 'Suisse', phonePrefix: '+41', region: 'europe' },
+  { value: 'LU', label: 'Luxembourg', phonePrefix: '+352', region: 'europe' },
+  { value: 'DE', label: 'Allemagne', phonePrefix: '+49', region: 'europe' },
+  { value: 'IT', label: 'Italie', phonePrefix: '+39', region: 'europe' },
+  { value: 'ES', label: 'Espagne', phonePrefix: '+34', region: 'europe' },
+  { value: 'GB', label: 'Royaume-Uni', phonePrefix: '+44', region: 'europe' },
+  { value: 'US', label: 'États-Unis', phonePrefix: '+1', region: 'americas' },
+  
+  // Afrique de l'Ouest
+  { value: 'CI', label: "Côte d'Ivoire", phonePrefix: '+225', region: 'africa' },
+  { value: 'SN', label: 'Sénégal', phonePrefix: '+221', region: 'africa' },
+  { value: 'ML', label: 'Mali', phonePrefix: '+223', region: 'africa' },
+  { value: 'BF', label: 'Burkina Faso', phonePrefix: '+226', region: 'africa' },
+  { value: 'BJ', label: 'Bénin', phonePrefix: '+229', region: 'africa' },
+  { value: 'TG', label: 'Togo', phonePrefix: '+228', region: 'africa' },
+  { value: 'NE', label: 'Niger', phonePrefix: '+227', region: 'africa' },
+  { value: 'GN', label: 'Guinée', phonePrefix: '+224', region: 'africa' },
+  { value: 'GH', label: 'Ghana', phonePrefix: '+233', region: 'africa' },
+  { value: 'NG', label: 'Nigeria', phonePrefix: '+234', region: 'africa' },
+  
+  // Afrique Centrale
+  { value: 'CM', label: 'Cameroun', phonePrefix: '+237', region: 'africa' },
+  { value: 'GA', label: 'Gabon', phonePrefix: '+241', region: 'africa' },
+  { value: 'CG', label: 'Congo', phonePrefix: '+242', region: 'africa' },
+  { value: 'CD', label: 'RD Congo', phonePrefix: '+243', region: 'africa' },
+  { value: 'TD', label: 'Tchad', phonePrefix: '+235', region: 'africa' },
+  { value: 'CF', label: 'Centrafrique', phonePrefix: '+236', region: 'africa' },
+  
+  // Afrique du Nord
+  { value: 'MA', label: 'Maroc', phonePrefix: '+212', region: 'africa' },
+  { value: 'TN', label: 'Tunisie', phonePrefix: '+216', region: 'africa' },
+  { value: 'DZ', label: 'Algérie', phonePrefix: '+213', region: 'africa' },
+  
+  // Afrique de l'Est
+  { value: 'RW', label: 'Rwanda', phonePrefix: '+250', region: 'africa' },
+  { value: 'BI', label: 'Burundi', phonePrefix: '+257', region: 'africa' },
+  { value: 'MG', label: 'Madagascar', phonePrefix: '+261', region: 'africa' },
+  { value: 'MU', label: 'Maurice', phonePrefix: '+230', region: 'africa' },
 ]
+
+// Major cities by country (for African countries mainly)
+const citiesByCountry: Record<string, string[]> = {
+  // Côte d'Ivoire
+  CI: [
+    'Abidjan', 'Yamoussoukro', 'Bouaké', 'San-Pédro', 'Daloa', 
+    'Korhogo', 'Man', 'Gagnoa', 'Divo', 'Grand-Bassam',
+    'Abengourou', 'Agboville', 'Bondoukou', 'Séguéla', 'Odienné',
+    'Ferkessédougou', 'Soubré', 'Issia', 'Sassandra', 'Duékoué'
+  ],
+  // Sénégal
+  SN: [
+    'Dakar', 'Thiès', 'Saint-Louis', 'Kaolack', 'Ziguinchor',
+    'Rufisque', 'Mbour', 'Diourbel', 'Tambacounda', 'Matam'
+  ],
+  // Mali
+  ML: [
+    'Bamako', 'Sikasso', 'Koutiala', 'Mopti', 'Ségou',
+    'Kayes', 'Gao', 'Tombouctou', 'Kidal', 'Niono'
+  ],
+  // Burkina Faso
+  BF: [
+    'Ouagadougou', 'Bobo-Dioulasso', 'Koudougou', 'Banfora', 'Ouahigouya',
+    'Kaya', 'Tenkodogo', 'Fada N\'Gourma', 'Dédougou', 'Ziniaré'
+  ],
+  // Cameroun
+  CM: [
+    'Douala', 'Yaoundé', 'Garoua', 'Bamenda', 'Maroua',
+    'Bafoussam', 'Ngaoundéré', 'Bertoua', 'Kribi', 'Limbé'
+  ],
+  // Nigeria
+  NG: [
+    'Lagos', 'Abuja', 'Kano', 'Ibadan', 'Port Harcourt',
+    'Benin City', 'Enugu', 'Kaduna', 'Onitsha', 'Jos'
+  ],
+  // Ghana
+  GH: [
+    'Accra', 'Kumasi', 'Tamale', 'Takoradi', 'Ashaiman',
+    'Cape Coast', 'Tema', 'Sunyani', 'Ho', 'Koforidua'
+  ],
+  // Maroc
+  MA: [
+    'Casablanca', 'Rabat', 'Fès', 'Marrakech', 'Tanger',
+    'Agadir', 'Meknès', 'Oujda', 'Salé', 'Tétouan'
+  ],
+  // Tunisie
+  TN: [
+    'Tunis', 'Sfax', 'Sousse', 'Kairouan', 'Bizerte',
+    'Gabès', 'Ariana', 'Gafsa', 'Monastir', 'Ben Arous'
+  ],
+  // Gabon
+  GA: [
+    'Libreville', 'Port-Gentil', 'Franceville', 'Oyem', 'Moanda',
+    'Mouila', 'Lambaréné', 'Tchibanga', 'Koulamoutou', 'Makokou'
+  ],
+  // Congo
+  CG: [
+    'Brazzaville', 'Pointe-Noire', 'Dolisie', 'Nkayi', 'Ouesso',
+    'Madingou', 'Owando', 'Sibiti', 'Impfondo', 'Mossendjo'
+  ],
+  // RD Congo
+  CD: [
+    'Kinshasa', 'Lubumbashi', 'Mbuji-Mayi', 'Kananga', 'Kisangani',
+    'Bukavu', 'Goma', 'Tshikapa', 'Kolwezi', 'Likasi'
+  ],
+  // Bénin
+  BJ: [
+    'Cotonou', 'Porto-Novo', 'Parakou', 'Djougou', 'Bohicon',
+    'Abomey-Calavi', 'Natitingou', 'Lokossa', 'Kandi', 'Ouidah'
+  ],
+  // Togo
+  TG: [
+    'Lomé', 'Sokodé', 'Kara', 'Kpalimé', 'Atakpamé',
+    'Bassar', 'Tsévié', 'Aného', 'Mango', 'Dapaong'
+  ],
+}
 
 export function ShippingForm({
   defaultValues,
@@ -117,7 +218,6 @@ export function ShippingForm({
 }: ShippingFormProps) {
   const [useExistingAddress, setUseExistingAddress] = React.useState(false)
   const [selectedAddressId, setSelectedAddressId] = React.useState<string>('')
-  const [isAutoCompleting, setIsAutoCompleting] = React.useState(false)
 
   // Initialize form BEFORE using it
   const form = useForm<AddressFormValues>({
@@ -130,7 +230,7 @@ export function ShippingForm({
       line2: defaultValues?.line2 || '',
       city: defaultValues?.city || '',
       postalCode: defaultValues?.postalCode || '',
-      country: defaultValues?.country || 'FR',
+      country: defaultValues?.country || 'CI', // Default to Côte d'Ivoire
       phone: defaultValues?.phone || '',
       email: defaultValues?.email || userEmail || '',
       emailOffers: false,
@@ -138,6 +238,18 @@ export function ShippingForm({
       orderNotes: defaultValues?.orderNotes || '',
     },
   })
+
+  // Watch country to show city dropdown
+  const selectedCountry = form.watch('country')
+  const availableCities = citiesByCountry[selectedCountry] || []
+  const hasPresetCities = availableCities.length > 0
+
+  // Reset city when country changes
+  React.useEffect(() => {
+    if (hasPresetCities) {
+      form.setValue('city', '')
+    }
+  }, [selectedCountry, hasPresetCities, form])
 
   // Real-time validation with debouncing (800ms) - currently for display, can be extended
   const phoneValue = form.watch('phone')
@@ -160,7 +272,7 @@ export function ShippingForm({
   }, [phoneValidation.error, phoneValue, form])
 
   // Fetch saved addresses if user is authenticated (with caching)
-  const { data: addressesData, error: addressesError } = useSWR<{ data: SavedAddressType[], success: boolean }>(
+  const { data: addressesData } = useSWR<{ data: SavedAddressType[], success: boolean }>(
     isAuthenticated ? '/api/user/addresses' : null,
     fetcher,
     swrConfig
@@ -183,33 +295,6 @@ export function ShippingForm({
       form.setValue('postalCode', address.postalCode)
       form.setValue('country', address.country)
       form.setValue('phone', address.phone)
-    }
-  }
-
-  // Auto-complete city when postal code is entered
-  const handlePostalCodeChange = async (value: string) => {
-    form.setValue('postalCode', value)
-
-    if (value.length === 5 && validateFrenchPostalCode(value)) {
-      setIsAutoCompleting(true)
-      try {
-        const response = await fetch(`/api/checkout/validate-address?postalCode=${value}`)
-        const data = await response.json()
-
-        if (data.city) {
-          // If single city returned
-          if (typeof data.city === 'string') {
-            form.setValue('city', data.city)
-          } else if (Array.isArray(data.cities) && data.cities.length === 1) {
-            form.setValue('city', data.cities[0])
-          }
-          // If multiple cities, user needs to select manually (could be enhanced with a Select dropdown)
-        }
-      } catch (error) {
-        console.error('Failed to autocomplete city:', error)
-      } finally {
-        setIsAutoCompleting(false)
-      }
     }
   }
 
@@ -434,62 +519,105 @@ export function ShippingForm({
                   )}
                 />
 
-                {/* Postal Code, City, Country */}
+                {/* Country, City, Postal Code */}
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <FormField
-                    control={form.control}
-                    name="postalCode"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Code postal *</FormLabel>
-                        <FormControl>
-                          <PostalCodeAutocomplete
-                            value={field.value}
-                            onChange={field.onChange}
-                            onCitySelect={(city: City) => {
-                              // Auto-fill city when selected
-                              form.setValue('city', city.name)
-                            }}
-                            placeholder="75001"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Ville *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Paris" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {/* Country - First so city dropdown updates */}
                   <FormField
                     control={form.control}
                     name="country"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Pays *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Sélectionner un pays" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
-                            {countries.map((country) => (
+                          <SelectContent className="max-h-80">
+                            <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50">Europe</div>
+                            {countries.filter(c => c.region === 'europe').map((country) => (
+                              <SelectItem key={country.value} value={country.value}>
+                                {country.label}
+                              </SelectItem>
+                            ))}
+                            <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50">Afrique de l&apos;Ouest</div>
+                            {countries.filter(c => c.region === 'africa' && ['CI', 'SN', 'ML', 'BF', 'BJ', 'TG', 'NE', 'GN', 'GH', 'NG'].includes(c.value)).map((country) => (
+                              <SelectItem key={country.value} value={country.value}>
+                                {country.label}
+                              </SelectItem>
+                            ))}
+                            <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50">Afrique Centrale</div>
+                            {countries.filter(c => c.region === 'africa' && ['CM', 'GA', 'CG', 'CD', 'TD', 'CF'].includes(c.value)).map((country) => (
+                              <SelectItem key={country.value} value={country.value}>
+                                {country.label}
+                              </SelectItem>
+                            ))}
+                            <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50">Afrique du Nord</div>
+                            {countries.filter(c => c.region === 'africa' && ['MA', 'TN', 'DZ'].includes(c.value)).map((country) => (
+                              <SelectItem key={country.value} value={country.value}>
+                                {country.label}
+                              </SelectItem>
+                            ))}
+                            <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50">Autres</div>
+                            {countries.filter(c => c.region === 'americas' || ['RW', 'BI', 'MG', 'MU'].includes(c.value)).map((country) => (
                               <SelectItem key={country.value} value={country.value}>
                                 {country.label}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* City - Dropdown for African countries, input for others */}
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ville *</FormLabel>
+                        {hasPresetCities ? (
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Sélectionner une ville" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="max-h-60">
+                              {availableCities.map((city) => (
+                                <SelectItem key={city} value={city}>
+                                  {city}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <FormControl>
+                            <Input placeholder="Votre ville" {...field} />
+                          </FormControl>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Postal Code - Optional for African countries */}
+                  <FormField
+                    control={form.control}
+                    name="postalCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Code postal {hasPresetCities ? '(optionnel)' : '*'}</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder={hasPresetCities ? 'BP 1234' : '75001'} 
+                            {...field}
+                            value={field.value || ''}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

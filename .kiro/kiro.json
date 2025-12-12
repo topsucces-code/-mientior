@@ -1,0 +1,57 @@
+{
+  "version": "1.20.0",
+  "project": {
+    "name": "Mientior",
+    "description": "Premium e-commerce marketplace platform for French market",
+    "type": "web-application",
+    "framework": "nextjs",
+    "language": "typescript"
+  },
+  "context": {
+    "steering": {
+      "enabled": true,
+      "files": [
+        ".kiro/steering/structure.md",
+        ".kiro/steering/tech.md",
+        ".kiro/steering/product.md"
+      ]
+    },
+    "codebase": {
+      "include": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "prisma/schema.prisma",
+        "package.json",
+        "tsconfig.json",
+        "tailwind.config.ts",
+        "next.config.js"
+      ],
+      "exclude": [
+        "node_modules/**",
+        ".next/**",
+        "dist/**",
+        "build/**",
+        "coverage/**",
+        "*.log"
+      ]
+    }
+  },
+  "tools": {
+    "testsprite": {
+      "enabled": true,
+      "config": {
+        "localPort": 3000,
+        "type": "frontend",
+        "testScope": "codebase"
+      }
+    }
+  },
+  "ai": {
+    "model": "claude-3-5-sonnet-20241022",
+    "temperature": 0.1,
+    "maxTokens": 4096
+  },
+  "workspace": {
+    "rootPath": "/home/yao-elisee/Documents/mientior",
+    "packageManager": "npm"
+  }
+}

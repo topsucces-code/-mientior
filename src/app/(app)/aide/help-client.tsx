@@ -90,7 +90,7 @@ export default function HelpClient() {
     if (!acc[faq.category]) {
       acc[faq.category] = []
     }
-    acc[faq.category].push({ ...faq, originalIndex: index })
+    acc[faq.category]!.push({ ...faq, originalIndex: index })
     return acc
   }, {} as Record<string, Array<FAQItem & { originalIndex: number }>>)
 

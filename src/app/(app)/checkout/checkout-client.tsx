@@ -3,6 +3,7 @@
 import * as React from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { useCartStore } from '@/stores/cart.store'
 import { ProgressStepper, type CheckoutStep } from '@/components/checkout/progress-stepper'
 import { CheckoutHeader } from '@/components/checkout/checkout-header'
@@ -66,6 +67,7 @@ interface CheckoutPageClientProps {
 
 export function CheckoutPageClient({ userEmail, isAuthenticated = false }: CheckoutPageClientProps) {
   const router = useRouter()
+  const t = useTranslations('checkout')
   const { items, clearCart, getTotalPrice } = useCartStore()
 
   const [currentStep, setCurrentStep] = React.useState<CheckoutStep>('shipping')
@@ -233,11 +235,11 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
       setDiscount(result.data.discount) // Update discount from server calculation
     } catch (error) {
       console.error('[Checkout] Error calculating totals:', error)
-      setCalculationError(error instanceof Error ? error.message : 'Erreur de calcul')
+      setCalculationError(error instanceof Error ? error.message : t('errors.calculationError'))
     } finally {
       setIsCalculating(false)
     }
-  }, [shippingAddress, selectedShippingOption, appliedCoupon, items])
+  }, [shippingAddress, selectedShippingOption, appliedCoupon, items, t])
 
   // Debounced totals calculation
   React.useEffect(() => {
@@ -270,7 +272,7 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
       const data = await response.json()
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Code promo invalide')
+        throw new Error(data.error || t('summary.invalidCode'))
       }
 
       // Update state with discount
@@ -315,12 +317,12 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
 
   const handleShippingOptionContinue = async () => {
     if (!selectedShippingOption) {
-      alert('Veuillez sélectionner une option de livraison')
+      alert(t('shippingOptions.selectOption'))
       return
     }
 
     if (!shippingAddress) {
-      alert('Adresse de livraison manquante')
+      alert(t('shippingOptions.addressMissing'))
       return
     }
 
@@ -371,7 +373,7 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
     } catch (error) {
       console.error('Error initializing order:', error)
       trackCheckoutError(error instanceof Error ? error.message : 'Unknown error')
-      alert('Échec d\'initialisation de la commande. Veuillez réessayer.')
+      alert(t('shippingOptions.initError'))
     } finally {
       setIsLoading(false)
     }
@@ -419,7 +421,7 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
     } catch (error) {
       console.error('Error completing order:', error)
       trackCheckoutError(error instanceof Error ? error.message : 'Unknown error')
-      alert('Échec de finalisation de la commande. Veuillez réessayer.')
+      alert(t('payment.completeError'))
     } finally {
       setIsLoading(false)
     }
@@ -570,7 +572,7 @@ export function CheckoutPageClient({ userEmail, isAuthenticated = false }: Check
         total={total / 100} // Convert to euros
         itemCount={items.length}
         onContinue={handleMobileCtaClick}
-        ctaLabel={currentStep === 'payment' ? 'Payer' : 'Continuer'}
+        ctaLabel={currentStep === 'payment' ? t('mobile.pay') : t('mobile.continue')}
         disabled={isLoading || (currentStep === 'shipping' && !selectedShippingOption)}
       >
         {/* Order summary content shown in mobile drawer */}

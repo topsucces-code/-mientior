@@ -14,6 +14,7 @@ import { useReducedMotion } from '@/hooks/use-reduced-motion'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { toast } from '@/hooks/use-toast'
 import { useTranslations } from 'next-intl'
+import { useCurrency } from '@/hooks/use-currency'
 
 export interface ProductCardProps {
   id: string
@@ -61,6 +62,7 @@ export function ProductCard({
   const prefersReducedMotion = useReducedMotion()
   const { ref: cardRef, isIntersecting: isVisible } = useIntersectionObserver<HTMLDivElement>({ threshold: 0.1 })
   const t = useTranslations('wishlist')
+  const { formatPrice } = useCurrency()
 
   const addToCart = useCartStore((state) => state.addItem)
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
@@ -273,11 +275,11 @@ export function ProductCard({
         )}>
           <div className="flex items-baseline gap-2">
             <span className="text-lg font-bold text-orange-500">
-              ${(price / 100).toFixed(2)}
+              {formatPrice(price)}
             </span>
             {hasDiscount && (
               <span className="text-sm text-nuanced-500 line-through">
-                ${(compareAtPrice / 100).toFixed(2)}
+                {formatPrice(compareAtPrice)}
               </span>
             )}
           </div>

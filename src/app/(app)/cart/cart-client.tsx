@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { useCartStore } from '@/stores/cart.store'
 import { CartItem } from '@/components/cart/cart-item'
 import { CartSummary } from '@/components/cart/cart-summary'
@@ -22,6 +23,7 @@ interface CartPageClientProps {
 }
 
 export function CartPageClient({ isAuthenticated = false }: CartPageClientProps) {
+  const t = useTranslations('cart.page')
   const router = useRouter()
   const {
     items,
@@ -60,19 +62,19 @@ export function CartPageClient({ isAuthenticated = false }: CartPageClientProps)
   }, [items.length, total, trackViewCart, items])
 
   const handleCheckout = () => {
-    announce('Proceeding to checkout', 'polite')
+    announce(t('proceedingToCheckout'), 'polite')
     trackBeginCheckout(items, total)
     router.push('/checkout')
   }
 
   const handleMoveToCart = (id: string) => {
     moveToCart(id)
-    announce('Item moved to cart', 'polite')
+    announce(t('itemMovedToCart'), 'polite')
   }
 
   const handleRemoveSaved = (id: string) => {
     removeSavedItem(id)
-    announce('Item removed from saved items', 'polite')
+    announce(t('itemRemovedFromSaved'), 'polite')
   }
 
   // Loading state
@@ -93,9 +95,9 @@ export function CartPageClient({ isAuthenticated = false }: CartPageClientProps)
     <div className="container mx-auto px-4 py-8">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-anthracite-700">Mon Panier</h1>
+        <h1 className="text-3xl font-bold text-anthracite-700">{t('title')}</h1>
         <p className="text-nuanced-600 mt-1">
-          {totalItems} {totalItems === 1 ? 'article' : 'articles'} dans votre panier
+          {t('itemCount', { count: totalItems })}
         </p>
       </div>
 
@@ -124,7 +126,7 @@ export function CartPageClient({ isAuthenticated = false }: CartPageClientProps)
             <div className="pt-2">
               <Button variant="outline" asChild>
                 <Link href="/products">
-                  Continuer mes achats
+                  {t('continueShopping')}
                 </Link>
               </Button>
             </div>

@@ -1,12 +1,13 @@
 'use client'
 
 import * as React from 'react'
-import { Clock, Package, Truck, Zap } from 'lucide-react'
+import { Clock, Package, Truck, Zap, Loader2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { ShippingOption } from '@/types'
 
 interface ShippingOptionsProps {
@@ -17,6 +18,7 @@ interface ShippingOptionsProps {
   onBack?: () => void
   isLoading?: boolean
   className?: string
+  currency?: string
 }
 
 const getShippingIcon = (name: string) => {
@@ -58,14 +60,54 @@ export function ShippingOptions({
     <Card className={cn('shadow-elevation-2', className)}>
       <CardHeader>
         <CardTitle className="text-lg font-semibold text-anthracite-700">
-          Shipping Method
+          Mode de livraison
         </CardTitle>
         <p className="text-sm text-nuanced-500">
-          Choose your preferred delivery option
+          Choisissez votre option de livraison préférée
         </p>
       </CardHeader>
       <CardContent>
-        <RadioGroup value={selected} onValueChange={handleSelect} className="space-y-3">
+        {/* Loading State */}
+        {isLoading && options.length === 0 && (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-start gap-4 rounded-lg border-2 border-platinum-300 p-4">
+                <Skeleton className="h-4 w-4 rounded-full" />
+                <div className="flex flex-1 items-start gap-3">
+                  <Skeleton className="h-10 w-10 rounded-lg" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-3 w-24" />
+                  </div>
+                  <Skeleton className="h-5 w-16" />
+                </div>
+              </div>
+            ))}
+            <div className="flex items-center justify-center gap-2 py-4 text-nuanced-500">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">Chargement des options de livraison...</span>
+            </div>
+          </div>
+        )}
+
+        {/* No Options Available */}
+        {!isLoading && options.length === 0 && (
+          <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
+            <AlertCircle className="h-12 w-12 text-orange-400" />
+            <div>
+              <p className="font-medium text-anthracite-700">
+                Aucune option de livraison disponible
+              </p>
+              <p className="mt-1 text-sm text-nuanced-500">
+                Veuillez vérifier votre adresse ou réessayer plus tard.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Shipping Options List */}
+        <RadioGroup value={selected} onValueChange={handleSelect} className={cn("space-y-3", options.length === 0 && "hidden")}>
           {options.map((option) => {
             const Icon = getShippingIcon(option.name)
             const isSelected = selected === option.id
@@ -108,10 +150,10 @@ export function ShippingOptions({
                         </div>
                         <p className="flex-shrink-0 text-right font-semibold">
                           {isFree ? (
-                            <span className="text-success">Free</span>
+                            <span className="text-success">Gratuit</span>
                           ) : (
                             <span className="text-anthracite-700">
-                              ${(option.price / 100).toFixed(2)}
+                              {(option.price / 100).toFixed(2)} €
                             </span>
                           )}
                         </p>
@@ -125,12 +167,12 @@ export function ShippingOptions({
                         <Clock className="h-3 w-3" />
                         <span>
                           {option.estimatedDays === 1
-                            ? '1 business day'
-                            : `${option.estimatedDays} business days`}
+                            ? '1 jour ouvré'
+                            : `${option.estimatedDays} jours ouvrés`}
                         </span>
                         {option.cutoffTime && (
                           <span className="text-nuanced-500">
-                            (Order before {option.cutoffTime})
+                            (Commander avant {option.cutoffTime})
                           </span>
                         )}
                       </div>
@@ -146,10 +188,10 @@ export function ShippingOptions({
         {selectedOptionData && (
           <div className="mt-4 rounded-lg bg-platinum-100 p-4">
             <p className="text-sm font-medium text-anthracite-700">
-              Selected shipping: {selectedOptionData.name}
+              Livraison sélectionnée : {selectedOptionData.name}
             </p>
             <p className="mt-1 text-xs text-nuanced-500">
-              Estimated delivery: {selectedOptionData.estimatedDays === 1 ? '1 day' : `${selectedOptionData.estimatedDays} days`}
+              Délai estimé : {selectedOptionData.estimatedDays === 1 ? '1 jour' : `${selectedOptionData.estimatedDays} jours`}
             </p>
           </div>
         )}
@@ -164,7 +206,7 @@ export function ShippingOptions({
               disabled={isLoading}
               className="sm:w-auto"
             >
-              Back
+              Retour
             </Button>
           )}
           <Button
@@ -174,7 +216,7 @@ export function ShippingOptions({
             disabled={!selected || isLoading}
             className="sm:ml-auto sm:w-auto"
           >
-            {isLoading ? 'Processing...' : 'Continue to Payment'}
+            {isLoading ? 'Traitement...' : 'Continuer vers le paiement'}
           </Button>
         </div>
       </CardContent>

@@ -14,6 +14,7 @@ interface TrustBadgesProps {
   estimatedDelivery?: { min: Date; max: Date };
   shippingOrigin?: string;
   internationalShipping?: boolean;
+  onDeliveryClick?: () => void;
 }
 
 export function TrustBadges({
@@ -21,6 +22,7 @@ export function TrustBadges({
   estimatedDelivery,
   shippingOrigin = 'France',
   internationalShipping = true,
+  onDeliveryClick,
 }: TrustBadgesProps) {
   const formatDeliveryDate = (date: Date) => {
     return new Intl.DateTimeFormat('fr-FR', {
@@ -68,15 +70,26 @@ export function TrustBadges({
       {/* Shipping Information */}
       {estimatedDelivery && (
         <div className="border-t border-platinum-200 pt-4 space-y-2">
-          <div className="flex items-center gap-2 text-sm text-nuanced-700">
-            <Truck className="w-4 h-4 text-success" />
+          <div 
+            onClick={onDeliveryClick}
+            className={cn(
+                "flex items-center gap-2 text-sm text-nuanced-700 transition-colors group",
+                onDeliveryClick && "cursor-pointer hover:bg-gray-50 p-2 -ml-2 rounded-lg"
+            )}
+          >
+            <Truck className={cn("w-4 h-4 text-success", onDeliveryClick && "group-hover:text-orange-500")} />
             <span>
               <strong>Livraison estimée:</strong>{' '}
               {formatDeliveryDate(estimatedDelivery.min)} -{' '}
               {formatDeliveryDate(estimatedDelivery.max)}
             </span>
+            {onDeliveryClick && (
+                <span className="text-orange-500 text-xs font-bold ml-auto border border-orange-200 bg-orange-50 px-2 py-0.5 rounded">
+                    Options ›
+                </span>
+            )}
           </div>
-          <div className="flex items-center gap-2 text-sm text-nuanced-700">
+          <div className="flex items-center gap-2 text-sm text-nuanced-700 px-2">
             <Package className="w-4 h-4 text-success" />
             <span>
               <strong>Expédié depuis:</strong> {shippingOrigin}

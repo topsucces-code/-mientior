@@ -25,7 +25,28 @@
     "viewAll": "Voir tout",
     "learnMore": "En savoir plus",
     "seeMore": "Voir plus",
-    "showLess": "Voir moins"
+    "showLess": "Voir moins",
+    "buttons": {
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "edit": "Modifier",
+      "view": "Voir",
+      "back": "Retour",
+      "next": "Suivant",
+      "previous": "Précédent",
+      "send": "Envoyer",
+      "export": "Exporter",
+      "refresh": "Actualiser",
+      "yes": "Oui",
+      "no": "Non"
+    },
+    "labels": {
+      "all": "Tout",
+      "total": "Total",
+      "items": "articles",
+      "unlimited": "Illimité"
+    }
   },
   "nav": {
     "home": "Accueil",
@@ -48,16 +69,39 @@
     "register": "Inscription",
     "logout": "Déconnexion",
     "freeShipping": "Livraison gratuite dès {amount}",
+    "freeShippingShort": "Livraison",
+    "freeShippingLabel": "GRATUITE",
+    "freeShippingAmount": "dès 15 000 F",
     "warranty": "Garantie 2 ans",
     "guarantee": "Garantie 2 ans",
     "location": "Votre localisation",
     "help": "Aide",
+    "support": "Support",
+    "app": "App",
+    "pickupPoints": "Points de retrait",
     "notifications": "Notifications",
     "language": "Langue",
-    "currency": "Devise"
+    "currency": "Devise",
+    "searchCurrency": "Rechercher une devise...",
+    "noCurrencyFound": "Aucune devise trouvée",
+    "selectLanguageCurrency": "Sélection langue et devise",
+    "menu": "Menu",
+    "categories": "Catégories",
+    "allCategories": "Toutes les catégories",
+    "viewAll": "Voir tout",
+    "new": "Nouveau",
+    "promo": "Promo",
+    "myOrders": "Mes commandes",
+    "myWishlist": "Ma liste de souhaits",
+    "myAddresses": "Mes adresses",
+    "paymentMethods": "Moyens de paiement",
+    "settings": "Paramètres",
+    "security": "Sécurité & 2FA",
+    "supportHelp": "Support & Aide",
+    "user": "Utilisateur"
   },
   "footer": {
-    "description": "Votre destination premium pour des produits artisanaux de qualité et un service exceptionnel.",
+    "description": "Votre destination premium pour des produits de qualité et un service exceptionnel. Nous vous offrons la meilleure sélection avec un service client inégalé.",
     "shop": "Boutique",
     "company": "Entreprise",
     "support": "Support",
@@ -67,7 +111,206 @@
     "subscribe": "S'inscrire",
     "emailPlaceholder": "Votre email",
     "copyright": "© {year} Mientior. Tous droits réservés.",
-    "paymentMethods": "Nous acceptons"
+    "paymentMethods": "Nous acceptons",
+    "links": {
+      "allProducts": "Tous les produits",
+      "categories": "Catégories",
+      "deals": "Offres & Promotions",
+      "newArrivals": "Nouveautés",
+      "bestsellers": "Meilleures ventes",
+      "aboutUs": "À propos",
+      "careers": "Carrières",
+      "blog": "Blog",
+      "press": "Presse",
+      "sustainability": "Durabilité",
+      "becomeSeller": "Devenir partenaire/vendeur",
+      "contactUs": "Nous contacter",
+      "faq": "FAQ",
+      "shipping": "Livraison",
+      "returns": "Retours & Garantie",
+      "trackOrder": "Suivre ma commande",
+      "privacy": "Politique de confidentialité",
+      "terms": "Conditions d'utilisation",
+      "cookies": "Politique des cookies",
+      "legalInfo": "Informations légales"
+    },
+    "trust": {
+      "securePayment": "Paiement sécurisé",
+      "fastDelivery": "Livraison rapide",
+      "easyReturns": "Retours faciles",
+      "flexiblePayment": "Paiement flexible"
+    }
+  },
+  "becomeSeller": {
+    "meta": {
+      "title": "Devenir Partenaire/Vendeur | Mientior",
+      "description": "Rejoignez la marketplace Mientior et vendez vos produits à des millions de clients en Afrique."
+    },
+    "hero": {
+      "badge": "Rejoignez +5000 vendeurs",
+      "title": "Vendez sur Mientior",
+      "subtitle": "Développez votre activité en touchant des millions de clients à travers l'Afrique. Inscription gratuite, commencez à vendre dès aujourd'hui.",
+      "stats": {
+        "clients": "+2M clients actifs",
+        "countries": "28 pays couverts",
+        "payments": "Paiements sécurisés"
+      }
+    },
+    "benefits": {
+      "title": "Pourquoi vendre sur Mientior ?",
+      "subtitle": "Profitez de notre plateforme optimisée pour le marché africain avec des outils adaptés à vos besoins.",
+      "items": {
+        "clients": {
+          "title": "Accès à des millions de clients",
+          "description": "Vendez vos produits à travers toute l'Afrique avec notre réseau de livraison étendu."
+        },
+        "mobileMoney": {
+          "title": "Paiements Mobile Money",
+          "description": "Acceptez Orange Money, MTN MoMo, Wave, M-Pesa et plus encore."
+        },
+        "protection": {
+          "title": "Protection vendeur",
+          "description": "Bénéficiez de notre garantie de paiement et protection contre les fraudes."
+        },
+        "growth": {
+          "title": "Outils de croissance",
+          "description": "Analytics, promotions et outils marketing pour développer votre activité."
+        },
+        "support": {
+          "title": "Support dédié",
+          "description": "Une équipe dédiée pour vous accompagner dans votre succès."
+        },
+        "logistics": {
+          "title": "Logistique simplifiée",
+          "description": "Expédition et livraison gérées par nos partenaires logistiques."
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "Comment ça marche ?",
+      "subtitle": "Commencez à vendre en 4 étapes simples",
+      "steps": {
+        "register": {
+          "number": "01",
+          "title": "Inscrivez-vous",
+          "description": "Remplissez le formulaire avec vos informations commerciales."
+        },
+        "verification": {
+          "number": "02",
+          "title": "Vérification",
+          "description": "Notre équipe vérifie vos informations sous 24-48h."
+        },
+        "setup": {
+          "number": "03",
+          "title": "Configuration",
+          "description": "Configurez votre boutique et ajoutez vos produits."
+        },
+        "sell": {
+          "number": "04",
+          "title": "Commencez à vendre",
+          "description": "Recevez vos premières commandes et développez votre activité."
+        }
+      }
+    },
+    "form": {
+      "title": "Inscrivez-vous maintenant",
+      "subtitle": "Remplissez le formulaire ci-dessous pour soumettre votre demande",
+      "sections": {
+        "business": "Informations sur l'entreprise",
+        "contact": "Informations de contact",
+        "products": "Vos produits"
+      },
+      "fields": {
+        "businessName": "Nom de l'entreprise",
+        "businessType": "Type d'entreprise",
+        "registrationNumber": "Numéro d'enregistrement (optionnel)",
+        "registrationNumberHint": "Si vous avez un numéro d'enregistrement commercial",
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "email": "Email",
+        "phone": "Téléphone",
+        "country": "Pays",
+        "city": "Ville",
+        "productCategory": "Catégorie principale",
+        "estimatedProducts": "Nombre de produits estimé",
+        "productDescription": "Décrivez vos produits",
+        "productDescriptionPlaceholder": "Décrivez les types de produits que vous souhaitez vendre...",
+        "productDescriptionHint": "Minimum 20 caractères"
+      },
+      "businessTypes": {
+        "individual": "Entrepreneur individuel",
+        "company": "Société (SARL, SA, etc.)",
+        "cooperative": "Coopérative",
+        "artisan": "Artisan",
+        "manufacturer": "Fabricant / Producteur"
+      },
+      "productCategories": {
+        "fashion": "Mode & Vêtements",
+        "electronics": "Électronique",
+        "beauty": "Beauté & Cosmétiques",
+        "home": "Maison & Décoration",
+        "food": "Alimentation",
+        "health": "Santé & Bien-être",
+        "sports": "Sports & Loisirs",
+        "kids": "Enfants & Bébés",
+        "art": "Art & Artisanat",
+        "other": "Autre"
+      },
+      "productEstimates": {
+        "1-10": "1 à 10 produits",
+        "11-50": "11 à 50 produits",
+        "51-100": "51 à 100 produits",
+        "101-500": "101 à 500 produits",
+        "500+": "Plus de 500 produits"
+      },
+      "terms": {
+        "acceptTerms": "J'accepte les <termsLink>conditions générales de vente</termsLink> et la <privacyLink>politique de confidentialité</privacyLink>",
+        "acceptCommission": "J'accepte la politique de commission (5-15% selon la catégorie)"
+      },
+      "submit": "Soumettre ma demande",
+      "submitting": "Envoi en cours...",
+      "select": "Sélectionner",
+      "selectCountry": "Sélectionner un pays",
+      "selectCategory": "Sélectionner une catégorie"
+    },
+    "success": {
+      "title": "Demande envoyée avec succès !",
+      "message": "Merci pour votre intérêt à rejoindre Mientior. Notre équipe examinera votre demande et vous contactera sous 24-48 heures.",
+      "emailSent": "Un email de confirmation a été envoyé à votre adresse.",
+      "backHome": "Retour à l'accueil"
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "questions": {
+        "cost": {
+          "question": "Combien coûte l'inscription ?",
+          "answer": "L'inscription est entièrement gratuite. Vous ne payez qu'une commission sur les ventes réalisées (entre 5% et 15% selon la catégorie de produits)."
+        },
+        "payment": {
+          "question": "Comment suis-je payé ?",
+          "answer": "Vous recevez vos paiements par virement bancaire ou Mobile Money (Orange Money, MTN MoMo, Wave) selon votre préférence, généralement sous 7 jours après la livraison confirmée."
+        },
+        "delivery": {
+          "question": "Qui gère la livraison ?",
+          "answer": "Vous pouvez choisir de gérer vous-même la livraison ou d'utiliser nos partenaires logistiques. Nous proposons des tarifs préférentiels avec DHL, La Poste et des transporteurs locaux."
+        }
+      }
+    },
+    "validation": {
+      "businessNameMin": "Le nom de l'entreprise doit contenir au moins 2 caractères",
+      "businessTypeRequired": "Veuillez sélectionner un type d'entreprise",
+      "firstNameMin": "Le prénom doit contenir au moins 2 caractères",
+      "lastNameMin": "Le nom doit contenir au moins 2 caractères",
+      "emailInvalid": "Adresse email invalide",
+      "phoneMin": "Le téléphone doit contenir au moins 8 chiffres",
+      "countryRequired": "Veuillez sélectionner un pays",
+      "cityRequired": "La ville est requise",
+      "categoryRequired": "Veuillez sélectionner une catégorie",
+      "descriptionMin": "Décrivez vos produits en au moins 20 caractères",
+      "estimateRequired": "Veuillez sélectionner une estimation",
+      "termsRequired": "Vous devez accepter les conditions",
+      "commissionRequired": "Vous devez accepter la politique de commission"
+    }
   },
   "auth": {
     "login": "Connexion",
@@ -92,7 +335,57 @@
     "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
     "verifyEmail": "Vérifiez votre email",
     "verifyEmailText": "Un email de vérification a été envoyé à {email}",
-    "resendVerification": "Renvoyer l'email de vérification"
+    "resendVerification": "Renvoyer l'email de vérification",
+    "forgotPasswordPage": {
+      "title": "Mot de passe oublié",
+      "subtitle": "Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe",
+      "emailLabel": "Adresse Email",
+      "emailPlaceholder": "vous@exemple.com",
+      "sendButton": "Envoyer le lien",
+      "sendingButton": "Envoi...",
+      "backToLogin": "Retour à la connexion",
+      "success": "Lien envoyé !",
+      "successDescription": "Si un compte existe avec cet email, vous recevrez bientôt les instructions de réinitialisation.",
+      "error": "Échec de l'envoi du lien",
+      "invalidEmail": "Veuillez entrer une adresse email valide"
+    },
+    "resetPasswordPage": {
+      "title": "Réinitialiser le mot de passe",
+      "subtitle": "Entrez votre nouveau mot de passe ci-dessous",
+      "newPasswordLabel": "Nouveau mot de passe",
+      "confirmPasswordLabel": "Confirmer le mot de passe",
+      "passwordPlaceholder": "••••••••",
+      "resetButton": "Réinitialiser",
+      "resettingButton": "Réinitialisation...",
+      "success": "Mot de passe réinitialisé !",
+      "successDescription": "Votre mot de passe a été modifié. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+      "error": "Échec de la réinitialisation",
+      "invalidToken": "Lien invalide ou expiré. Veuillez en demander un nouveau.",
+      "passwordsDoNotMatch": "Les mots de passe ne correspondent pas"
+    },
+    "twoFactor": {
+      "title": "Authentification à deux facteurs",
+      "subtitle": "Entrez le code de votre application d'authentification ou un code de secours",
+      "codeLabel": "Code de vérification",
+      "codePlaceholder": "000000",
+      "verifyButton": "Vérifier",
+      "verifyingButton": "Vérification...",
+      "backButton": "Retour à la connexion",
+      "invalidCode": "Code de vérification invalide",
+      "helpText": "Ouvrez votre application d'authentification (Google Authenticator, Authy, etc.) et entrez le code à 6 chiffres",
+      "backupCodesTitle": "Codes de secours :",
+      "backupCodesText": "Si vous n'avez pas accès à votre application d'authentification, utilisez l'un de vos codes de secours à 8 caractères."
+    },
+    "verification": {
+      "bannerTitle": "Vérifiez votre adresse email",
+      "bannerText": "Nous avons envoyé un lien de vérification à {email}. Cliquez sur le lien dans l'email pour vérifier votre compte.",
+      "resendButton": "Renvoyer l'email",
+      "resendingButton": "Envoi...",
+      "resendSuccess": "Email de vérification envoyé ! Veuillez vérifier votre boîte de réception.",
+      "resendCountdown": "Renvoyer dans {seconds}s",
+      "dismissButton": "Ignorer",
+      "spamNote": "Vous n'avez pas reçu l'email ? Vérifiez vos spams."
+    }
   },
   "products": {
     "title": "Nos Produits",
@@ -103,7 +396,7 @@
     "addToCart": "Ajouter au panier",
     "addToWishlist": "Ajouter aux favoris",
     "removeFromWishlist": "Retirer des favoris",
-    "compare": "Comparer",
+    "compareAction": "Comparer",
     "quickView": "Aperçu rapide",
     "outOfStock": "Rupture de stock",
     "inStock": "En stock",
@@ -125,13 +418,281 @@
     "sortBy": "Trier par",
     "priceRange": "Fourchette de prix",
     "rating": "Note",
-    "availability": "Disponibilité"
+    "availability": "Disponibilité",
+    "catalog": {
+      "breadcrumbs": {
+        "home": "Accueil",
+        "products": "Produits",
+        "allProducts": "Tous les Produits"
+      },
+      "hero": {
+        "title": "Tous les Produits",
+        "description": "Découvrez notre collection complète de produits de qualité",
+        "productsAvailable": "{count} produits disponibles"
+      },
+      "quickFilters": {
+        "new": "Nouveautés",
+        "sale": "En promotion",
+        "bestseller": "Bestsellers"
+      },
+      "toolbar": {
+        "productsFound": "{count} produits trouvés",
+        "sortBy": "Trier par:",
+        "viewGrid": "Vue grille",
+        "viewList": "Vue liste",
+        "show": "Afficher:",
+        "sortOptions": {
+          "relevance": "Pertinence",
+          "priceAsc": "Prix croissant",
+          "priceDesc": "Prix décroissant",
+          "rating": "Meilleures notes",
+          "newest": "Nouveautés",
+          "bestseller": "Bestsellers"
+        }
+      },
+      "filters": {
+        "title": "FILTRER PAR",
+        "search": "Rechercher dans les résultats...",
+        "price": "Prix",
+        "min": "Min",
+        "max": "Max",
+        "categories": "Catégories",
+        "brands": "Marques",
+        "colors": "Couleurs",
+        "sizes": "Tailles",
+        "rating": "Note minimum",
+        "availability": "Disponibilité",
+        "inStock": "En stock",
+        "onSale": "En promotion",
+        "showMore": "+ {count} autres",
+        "showLess": "- Voir moins",
+        "noBrandsFound": "Aucune marque trouvée",
+        "showAvailableSizes": "Afficher uniquement tailles disponibles",
+        "allRatings": "Toutes les notes",
+        "andUp": "et plus",
+        "reset": "Réinitialiser les filtres"
+      },
+      "activeFilters": {
+        "count": "{count} filtre actif",
+        "countPlural": "{count} filtres actifs",
+        "priceRange": "Prix: {min}€ - {max}€",
+        "size": "Taille: {size}",
+        "remove": "Retirer le filtre {label}",
+        "clearAll": "Tout effacer"
+      },
+      "grid": {
+        "outOfStock": "Rupture de stock",
+        "unavailable": "Ce produit n'est plus disponible",
+        "addedToCart": "Ajouté au panier !",
+        "addedDesc": "{name} a été ajouté à votre panier",
+        "viewCart": "Voir le panier",
+        "loading": "Chargement...",
+        "loadMore": "CHARGER {count} PRODUITS DE PLUS",
+        "showing": "Affichage {displayed} sur {total} produits"
+      }
+    },
+    "card": {
+      "outOfStock": "Épuisé",
+      "addToCart": "Ajouter au panier",
+      "added": "Ajouté",
+      "addedToCart": "Ajouté au panier",
+      "addToWishlist": "Ajouter aux favoris",
+      "removeFromWishlist": "Retirer des favoris",
+      "quickView": "Aperçu rapide",
+      "sales": "ventes",
+      "verifiedSeller": "Vendeur vedette",
+      "officialStore": "Magasin officiel de",
+      "brand": "Marque :",
+      "delivery": "Arrive en",
+      "workingDays": "JOURS OUVRÉS OU PLUS",
+      "lowStock": "Plus que {count} en stock !"
+    },
+    "pdp": {
+      "reviewsBadge": "{rating} ({count} avis)",
+      "installment": "Ou 3x {price}€ sans frais",
+      "totalPrice": "Prix total: {total}€",
+      "outOfStock": "RUPTURE DE STOCK",
+      "adding": "Ajout en cours...",
+      "addToCart": "AJOUTER AU PANIER",
+      "selectSize": "Sélectionnez une taille",
+      "selectSizeDesc": "Veuillez choisir une taille avant d'ajouter au panier",
+      "selectColor": "Sélectionnez une couleur",
+      "selectColorDesc": "Veuillez choisir une couleur avant d'ajouter au panier",
+      "addedSuccess": "✓ Ajouté au panier",
+      "addedSuccessDesc": "{name} a été ajouté à votre panier",
+      "trustBadges": {
+        "freeShipping": "Livraison gratuite dès 25€",
+        "freeReturns": "Retour gratuit sous 30 jours",
+        "warranty": "Garantie 2 ans constructeur",
+        "securePayment": "Paiement 100% sécurisé"
+      },
+      "delivery": {
+        "title": "Livraison",
+        "tabs": {
+            "standard": "Standard",
+            "relay": "Point Relais",
+            "express": "Express"
+        },
+        "banner": {
+            "partner": "Mientior x Colissimo",
+            "slogan": "Pour une meilleure livraison ensemble"
+        },
+        "table": {
+            "delay": "Délai de livraison",
+            "rate": "Tarifs",
+            "guarantee": "Garantie d'expédition",
+            "free": "GRATUIT",
+            "creditDelay": "{amount} de crédit en cas de retard",
+            "refundNoUpdate": "Remboursement pour absence de mise à jour pendant 15 jours",
+            "refundNoDelivery": "Remboursement pour non livraison sous 30 jours"
+        },
+        "disclaimer": "Ce qui précède ne concerne que les articles qui ne sont pas expédiés par les entrepôts locaux. Si livré après le {date}, vous recevrez {credit} de crédit dans les 48 heures.",
+        "fastestDelivery": "Livraison la plus rapide en {days} jours ouvrés",
+        "comingSoon": "Les options de livraison {type} seront bientôt disponibles.",
+        "understood": "Compris"
+      },
+      "fbt": {
+        "title": "Complétez votre look",
+        "subtitle": "Les clients qui ont acheté ce produit ont aussi commandé ces articles",
+        "summaryTitle": "Récapitulatif du lot",
+        "itemsCount": "{count} article(s)",
+        "savings": "Économie",
+        "total": "Total",
+        "addToCart": "Ajouter au panier",
+        "packAdded": "Pack ajouté au panier",
+        "packAddedDesc": "Vous avez économisé {amount}€ sur ce pack !",
+        "thisProduct": "Ce produit",
+        "bundleOffer": "Offre Bundle: -{discount}%"
+      },
+      "tabs": {
+        "description": "Description",
+        "specs": "Caractéristiques",
+        "reviews": "Avis ({count})",
+        "qa": "Questions & Réponses ({count})",
+        "shipping": "Livraison & Retours",
+        "noDescription": "Aucune description disponible pour ce produit.",
+        "keyPoints": "Points clés",
+        "generalSpecs": "Caractéristiques générales",
+        "noSpecs": "Aucune caractéristique technique disponible pour ce produit.",
+        "shippingOptions": "Modes de livraison",
+        "estimatedDelivery": "Livraison estimée : {days} jours ouvrés",
+        "freeShippingThreshold": "Livraison gratuite pour les commandes de plus de {amount} €",
+        "freeReturnsTitle": "Retours gratuits",
+        "returnsPolicy": "Retours gratuits sous 30 jours",
+        "refundGuarantee": "Remboursement intégral garanti",
+        "prepaidLabel": "Étiquette de retour prépayée",
+        "returnInstructions": "Instructions de retour :",
+        "returnStep1": "Connectez-vous à votre compte et accédez à vos commandes",
+        "returnStep2": "Sélectionnez l'article à retourner et indiquez la raison",
+        "returnStep3": "Téléchargez et imprimez l'étiquette de retour",
+        "returnStep4": "Emballez l'article dans son emballage d'origine",
+        "returnStep5": "Déposez le colis dans un point relais",
+        "learnMoreReturns": "En savoir plus sur les retours",
+        "internationalTitle": "Livraison internationale",
+        "internationalDesc": "Nous expédions dans de nombreux pays à travers le monde. Les frais et délais de livraison varient selon la destination.",
+        "viewCountries": "Voir les pays et tarifs",
+        "noShippingInfo": "Informations de livraison non disponibles."
+      },
+      "reviews": {
+        "summaryBase": "Basé sur {count} avis",
+        "writeReview": "Écrire un avis",
+        "writeReviewTitle": "Écrire un avis pour {productName}",
+        "filterBy": "Filtrer par:",
+        "filterAll": "Tous",
+        "filterPhotos": "Avec photos",
+        "filterVideos": "Avec vidéos",
+        "filterVerified": "Achat vérifié",
+        "sortBy": "Trier par:",
+        "sortRecent": "Plus récents",
+        "sortHelpful": "Plus utiles",
+        "sortRating": "Note la plus élevée",
+        "showingCount": "{count} sur {total} avis affichés",
+        "noResults": "Aucun avis ne correspond à vos filtres.",
+        "resetFilters": "Réinitialiser les filtres",
+        "noReviews": "Aucun avis pour ce produit.",
+        "beFirst": "Soyez le premier à donner votre avis",
+        "loadMore": "Voir plus d'avis",
+        "loading": "Chargement...",
+        "errorTitle": "Erreur",
+        "errorLoadingMore": "Impossible de charger plus d'avis",
+        "noResultsFiltersDesc": "Essayez de modifier vos filtres pour voir plus d'avis."
+      },
+      "qa": {
+        "searchPlaceholder": "Rechercher dans les questions...",
+        "askQuestion": "Poser une question",
+        "noResults": "Aucune question ne correspond à votre recherche",
+        "noQuestions": "Aucune question pour le moment"
+      }
+    },
+    "compare": {
+      "title": "Comparer les Produits",
+      "back": "Retour",
+      "clearAll": "Tout effacer",
+      "addMore": "Ajouter plus",
+      "noProducts": "Aucun produit à comparer",
+      "addProductsDesc": "Ajoutez des produits à comparer en cliquant sur l'icône de comparaison sur les cartes produit",
+      "browseProducts": "Parcourir les produits",
+      "productsCount": "({count} produits)",
+      "product": "Produit",
+      "rating": "Note",
+      "noReviews": "Aucun avis",
+      "availability": "Disponibilité",
+      "inStock": "En stock ({count})",
+      "outOfStock": "Rupture de stock",
+      "category": "Catégorie",
+      "specifications": "Caractéristiques",
+      "add": "Ajouter",
+      "out": "Épuisé",
+      "addProduct": "Ajouter un produit",
+      "outOfStockTitle": "Rupture de stock",
+      "outOfStockDesc": "Ce produit n'est actuellement pas disponible",
+      "addedToCart": "Ajouté au panier",
+      "addedToCartDesc": "{name} a été ajouté à votre panier"
+    },
+    "search": {
+      "placeholder": "Rechercher des produits, marques, articles...",
+      "resultsFor": "Résultats de recherche pour \"{query}\"",
+      "resultsCount": "{count} résultat",
+      "resultsCountPlural": "{count} résultats",
+      "found": "trouvés",
+      "correctedResults": "Résultats pour",
+      "searchInstead": "Rechercher plutôt",
+      "noResults": "Aucun résultat trouvé",
+      "noResultsDesc": "Nous n'avons pas trouvé de résultats pour \"{query}\". Essayez des mots-clés différents ou parcourez nos catégories.",
+      "browseAll": "Parcourir tous les produits",
+      "tabs": {
+        "products": "Produits",
+        "brands": "Marques",
+        "articles": "Articles"
+      },
+      "noProducts": "Aucun produit trouvé",
+      "noBrands": "Aucune marque trouvée",
+      "noArticles": "Aucun article trouvé",
+      "productCount": "{count} produit",
+      "productCountPlural": "{count} produits",
+      "view": "Voir",
+      "readMore": "Lire la suite →"
+    },
+    "seo": {
+      "aboutCollection": "À propos de notre collection",
+      "discoverTitle": "Découvrez Notre Collection Premium",
+      "discoverDesc": "Explorez notre sélection complète de produits soigneusement choisis pour leur qualité exceptionnelle. Nous travaillons avec les meilleurs vendeurs pour vous offrir une expérience d'achat incomparable.",
+      "qualityTitle": "Qualité Garantie",
+      "qualityDesc": "Tous nos produits sont vérifiés et approuvés par notre équipe avant d'être mis en vente. Nous garantissons la satisfaction de nos clients avec une politique de retour flexible.",
+      "deliveryTitle": "Livraison Rapide",
+      "deliveryDesc": "Profitez de notre service de livraison rapide partout en France. La livraison est gratuite pour toute commande supérieure à 50€."
+    }
   },
   "cart": {
     "title": "Mon Panier",
-    "empty": "Votre panier est vide",
+    "emptyMessage": "Votre panier est vide",
     "emptyText": "Ajoutez des produits pour commencer",
     "continueShopping": "Continuer mes achats",
+    "items": "articles",
+    "addToCart": "Ajouter au panier",
+    "addedToCart": "Ajouté au panier",
+    "emptyWishlist": "Votre liste de souhaits est vide",
+    "addFavorites": "Ajoutez vos produits préférés",
     "subtotal": "Sous-total",
     "shipping": "Livraison",
     "tax": "Taxes",
@@ -141,12 +702,93 @@
     "update": "Mettre à jour",
     "itemAdded": "Produit ajouté au panier",
     "itemRemoved": "Produit retiré du panier",
-    "freeShipping": "Livraison gratuite",
-    "shippingCalculated": "Calculée à l'étape suivante",
+    "freeShippingLabel": "Livraison gratuite",
+    "freeShippingProgress": "Plus que {amount} pour la livraison gratuite!",
+    "shippingCalculated": "À calculer",
+    "viewCart": "Voir le panier",
+    "fastDelivery": "Livraison rapide",
+    "securePayment": "Paiement sécurisé",
+    "freeReturns": "Retours gratuits",
     "promoCode": "Code promo",
     "applyCode": "Appliquer",
     "codeApplied": "Code promo appliqué",
-    "invalidCode": "Code promo invalide"
+    "invalidCode": "Code promo invalide",
+    "item": {
+      "size": "Taille",
+      "color": "Couleur",
+      "inStock": "En stock",
+      "outOfStock": "Rupture de stock",
+      "freeShipping": "Livraison gratuite",
+      "save": "Économisez",
+      "saveForLater": "Sauvegarder pour plus tard",
+      "quantity": "Qté",
+      "increaseQuantity": "Augmenter la quantité",
+      "decreaseQuantity": "Diminuer la quantité",
+      "removeItem": "Retirer",
+      "maxQuantityReached": "Quantité maximale atteinte",
+      "maxQuantityDesc": "Vous ne pouvez commander que {max} unités de ce produit.",
+      "each": "ch."
+    },
+    "summary": {
+      "title": "Résumé de la commande",
+      "promoCode": "Code promo",
+      "enterCode": "Entrer le code",
+      "apply": "Appliquer",
+      "remove": "Retirer",
+      "invalidCode": "Code promo invalide",
+      "codeApplied": "Code promo appliqué !",
+      "savings": "Vous économisez {amount} sur votre commande.",
+      "subtotal": "Sous-total",
+      "shipping": "Livraison",
+      "shippingTooltip": "La livraison est gratuite à partir d'un certain montant.",
+      "free": "Gratuit",
+      "tax": "TVA (estimée)",
+      "taxTooltip": "Le taux de TVA dépend de votre pays de livraison.",
+      "discount": "Réduction",
+      "total": "Total",
+      "youSave": "Vous économisez {amount}",
+      "taxNotice": "TVA calculée selon votre localisation",
+      "securePayment": "Paiement sécurisé",
+      "freeReturns": "Retours gratuits sous 30 jours",
+      "satisfaction": "Garantie satisfaction 100%",
+      "placeOrder": "Passer la commande",
+      "acceptedPayments": "Visa, Mastercard, PayPal, Apple Pay acceptés"
+    },
+    "empty": {
+      "title": "Votre panier est vide",
+      "description": "Découvrez nos produits exceptionnels et commencez votre shopping dès maintenant",
+      "discoverProducts": "Découvrir nos produits",
+      "loginPrompt": "Ou connectez-vous pour retrouver vos articles sauvegardés",
+      "login": "Se connecter",
+      "recentlyViewed": "Articles récemment vus",
+      "suggestions": "Suggestions pour vous",
+      "previousProduct": "Produit précédent",
+      "nextProduct": "Produit suivant"
+    },
+    "freeShipping": {
+      "unlocked": "Livraison gratuite débloquée !",
+      "remaining": "Plus que {amount} pour la livraison gratuite",
+      "addMore": "Ajoutez {amount} de plus pour profiter de la livraison gratuite"
+    },
+    "saved": {
+      "title": "Articles sauvegardés ({count})",
+      "outOfStock": "Article en rupture de stock",
+      "outOfStockDesc": "Cet article n'est pas disponible actuellement.",
+      "addedToCart": "Article ajouté au panier",
+      "addedDesc": "{name} a été déplacé vers votre panier.",
+      "removed": "Article supprimé",
+      "removedDesc": "{name} a été retiré de vos articles sauvegardés.",
+      "addToCart": "Ajouter au panier",
+      "noImage": "Aucune image"
+    },
+    "page": {
+      "title": "Mon Panier",
+      "itemCount": "{count} article(s) dans votre panier",
+      "continueShopping": "Continuer mes achats",
+      "proceedingToCheckout": "Redirection vers le paiement",
+      "itemMovedToCart": "Article déplacé vers le panier",
+      "itemRemovedFromSaved": "Article retiré des sauvegardés"
+    }
   },
   "wishlist": {
     "title": "Ma Liste de Souhaits",
@@ -182,10 +824,10 @@
   },
   "checkout": {
     "title": "Paiement",
-    "shipping": "Livraison",
-    "payment": "Paiement",
+    "shippingLabel": "Livraison",
+    "paymentLabel": "Paiement",
     "review": "Récapitulatif",
-    "confirmation": "Confirmation",
+    "confirmationLabel": "Confirmation",
     "shippingAddress": "Adresse de livraison",
     "billingAddress": "Adresse de facturation",
     "sameAsShipping": "Identique à l'adresse de livraison",
@@ -225,6 +867,195 @@
       "standard": "Livraison standard",
       "express": "Livraison express",
       "pickup": "Retrait en point relais"
+    },
+    "page": {
+      "title": "Paiement"
+    },
+    "progress": {
+      "step": "Étape {current} sur {total}",
+      "label": "Progression du paiement",
+      "shipping": {
+        "label": "Livraison",
+        "description": "Adresse & mode de livraison"
+      },
+      "payment": {
+        "label": "Paiement",
+        "description": "Informations bancaires"
+      },
+      "review": {
+        "label": "Confirmation",
+        "description": "Vérification finale"
+      }
+    },
+    "shipping": {
+      "title": "Informations de livraison",
+      "contact": "Contact",
+      "email": "Adresse email",
+      "emailPlaceholder": "jean@exemple.fr",
+      "emailOffers": "M'envoyer des offres et promotions par email",
+      "deliveryAddress": "Adresse de livraison",
+      "firstName": "Prénom",
+      "firstNamePlaceholder": "Jean",
+      "lastName": "Nom",
+      "lastNamePlaceholder": "Dupont",
+      "address": "Adresse",
+      "addressPlaceholder": "123 Rue de la Paix",
+      "addressLine2": "Complément d'adresse (Optionnel)",
+      "addressLine2Placeholder": "Appartement, bâtiment, étage...",
+      "postalCode": "Code postal",
+      "postalCodePlaceholder": "75001",
+      "city": "Ville",
+      "cityPlaceholder": "Paris",
+      "country": "Pays",
+      "countryPlaceholder": "Sélectionner un pays",
+      "phone": "Téléphone",
+      "phonePlaceholder": "06 12 34 56 78",
+      "phoneDescription": "Nécessaire pour la livraison",
+      "orderNotes": "Instructions de livraison (Optionnel)",
+      "orderNotesPlaceholder": "Ex: Laisser devant la porte, Appeler avant livraison...",
+      "orderNotesCount": "{count}/500",
+      "saveAddress": "Enregistrer cette adresse pour les prochaines commandes",
+      "useExisting": "Utiliser une adresse enregistrée",
+      "newAddress": "Nouvelle adresse",
+      "selectAddress": "Sélectionnez une adresse",
+      "default": "Par défaut",
+      "back": "Retour",
+      "continue": "Continuer vers la livraison",
+      "processing": "Traitement...",
+      "modify": "Modifier",
+      "deliveryInstructions": "Instructions de livraison",
+      "quickNotes": {
+        "leaveAtDoor": "Laisser devant la porte",
+        "callBefore": "Appeler avant livraison",
+        "ringBell": "Sonner à l'interphone",
+        "relayPoint": "Livraison en point relais préférée"
+      },
+      "validation": {
+        "emailRequired": "Adresse email invalide",
+        "firstNameMin": "Le prénom doit contenir au moins 2 caractères",
+        "lastNameMin": "Le nom doit contenir au moins 2 caractères",
+        "addressRequired": "L'adresse est requise",
+        "cityRequired": "La ville est requise",
+        "postalCodeRequired": "Le code postal est requis",
+        "postalCodeInvalid": "Code postal invalide (format: 75001)",
+        "countryRequired": "Le pays est requis",
+        "phoneRequired": "Le téléphone est requis",
+        "phoneInvalid": "Numéro de téléphone invalide (format: 06 12 34 56 78)",
+        "notesMax": "Les notes ne peuvent pas dépasser 500 caractères"
+      }
+    },
+    "shippingOptions": {
+      "title": "Mode de livraison",
+      "description": "Choisissez votre option de livraison préférée",
+      "via": "via",
+      "free": "Gratuit",
+      "businessDay": "jour ouvré",
+      "businessDays": "jours ouvrés",
+      "orderBefore": "Commandez avant {time}",
+      "selected": "Livraison sélectionnée: {method}",
+      "estimatedDelivery": "Livraison estimée: {days}",
+      "back": "Retour",
+      "continue": "Continuer vers le paiement",
+      "processing": "Traitement...",
+      "selectOption": "Veuillez sélectionner une option de livraison",
+      "addressMissing": "Adresse de livraison manquante",
+      "initError": "Échec d'initialisation de la commande. Veuillez réessayer."
+    },
+    "payment": {
+      "title": "Moyen de paiement",
+      "secure": "Vos informations de paiement sont sécurisées et cryptées",
+      "gateway": "Passerelle de paiement",
+      "billingAddress": "Adresse de facturation",
+      "sameAsShipping": "Souhaitez-vous utiliser la même adresse que la livraison ?",
+      "sameOption": "Même que la livraison",
+      "differentOption": "Utiliser une autre adresse",
+      "acceptTerms": "J'accepte les",
+      "termsLink": "conditions générales de vente",
+      "and": "et la",
+      "privacyLink": "politique de confidentialité",
+      "newsletter": "Je souhaite recevoir les offres et nouveautés par email",
+      "securePayment": "Paiement sécurisé",
+      "ssl": "SSL 256-bit",
+      "pciDss": "PCI-DSS",
+      "back": "Retour",
+      "initError": "Échec d'initialisation du paiement. Veuillez réessayer.",
+      "cancelled": "Paiement annulé",
+      "completeError": "Échec de finalisation de la commande. Veuillez réessayer.",
+      "pay": "Payer",
+      "initializing": "Initialisation du paiement..."
+    },
+    "summary": {
+      "title": "Résumé de la commande",
+      "viewAll": "Voir tous les articles ({count} de plus)",
+      "hideItems": "Masquer les articles",
+      "promoCode": "Code promo",
+      "promoTooltip": "Entrez votre code promo pour bénéficier d'une réduction.",
+      "enterCode": "Entrez votre code",
+      "apply": "Appliquer",
+      "invalidCode": "Code promo invalide",
+      "discount": "Réduction de {amount} appliquée",
+      "remove": "Retirer",
+      "subtotal": "Sous-total",
+      "subtotalTooltip": "Prix total des articles avant réductions",
+      "shipping": "Livraison",
+      "shippingTooltip": "Frais de port calculés selon votre adresse",
+      "free": "Gratuit",
+      "discountTooltip": "Total des réductions appliquées",
+      "tax": "TVA",
+      "taxTooltip": "Taux de TVA selon votre pays de livraison",
+      "total": "Total",
+      "savings": "Économies: {amount}",
+      "taxIncluded": "TVA incluse: {amount}",
+      "taxIncludedTooltip": "Montant total incluant toutes les taxes applicables",
+      "calculating": "Calcul en cours...",
+      "securePayment": "Paiement 100% sécurisé",
+      "freeReturns": "Retour gratuit sous 30 jours",
+      "satisfaction": "Garantie satisfait ou remboursé"
+    },
+    "confirmation": {
+      "thankYou": "Merci pour votre commande, {name} !",
+      "confirmed": "Votre commande a été confirmée et sera bientôt expédiée",
+      "orderNumber": "Numéro de commande",
+      "orderDate": "Date de commande",
+      "trackOrder": "Suivre ma commande",
+      "downloadInvoice": "Télécharger la facture",
+      "continueShopping": "Continuer mes achats",
+      "orderSummary": "Récapitulatif de la commande",
+      "quantity": "Quantité",
+      "subtotal": "Sous-total",
+      "shipping": "Livraison",
+      "discount": "Réduction",
+      "tax": "TVA",
+      "total": "Total",
+      "shippingAddress": "Adresse de livraison",
+      "shippingMethod": "Mode de livraison",
+      "estimatedDelivery": "Livraison estimée",
+      "deliveryInstructions": "Instructions de livraison",
+      "whatHappensNext": "Que se passe-t-il maintenant ?",
+      "preparing": "Préparation de votre commande",
+      "preparingDesc": "Nous préparons vos articles avec soin (24-48h)",
+      "shippingDesc": "Vous recevrez un email avec le numéro de suivi",
+      "delivery": "Livraison",
+      "deliveryDesc": "Réception de votre colis sous 3-5 jours ouvrés",
+      "needHelp": "Besoin d'aide ?",
+      "helpDesc": "Notre équipe est là pour vous assister",
+      "helpCenter": "Centre d'aide",
+      "contactUs": "Nous contacter",
+      "metaTitle": "Confirmation de commande - Mientior",
+      "metaDescription": "Votre commande a été confirmée avec succès"
+    },
+    "mobile": {
+      "total": "Total",
+      "items": "{count} article(s)",
+      "continue": "Continuer",
+      "pay": "Payer"
+    },
+    "errors": {
+      "calculationError": "Erreur de calcul",
+      "paymentFailed": "payment_failed",
+      "orderNotFound": "order_not_found",
+      "amountMismatch": "amount_mismatch",
+      "verificationFailed": "verification_failed"
     }
   },
   "account": {
@@ -252,6 +1083,104 @@
       "silver": "Argent",
       "gold": "Or",
       "platinum": "Platine"
+    },
+    "dashboard": {
+      "welcome": "Bienvenue, {name} !",
+      "stats": {
+        "totalOrders": "Total commandes",
+        "activeOrders": "Commandes actives",
+        "wishlist": "Liste de souhaits",
+        "loyaltyPoints": "Points fidélité",
+        "allTime": "Depuis toujours",
+        "inProgress": "En cours",
+        "savedItems": "Articles sauvegardés",
+        "available": "Disponibles"
+      },
+      "recentOrders": {
+        "title": "Commandes récentes",
+        "subtitle": "Vos derniers achats",
+        "viewAll": "Voir tout",
+        "noOrders": "Aucune commande",
+        "noOrdersSubtitle": "Commencez vos achats pour voir vos commandes ici",
+        "browseProducts": "Parcourir les produits",
+        "order": "Commande",
+        "placedOn": "Passée le",
+        "items": "{count} article",
+        "items_plural": "{count} articles",
+        "viewDetails": "Voir les détails"
+      },
+      "quickActions": {
+        "title": "Actions rapides",
+        "subtitle": "Gérez votre compte",
+        "viewWishlist": "Voir la liste de souhaits",
+        "manageAddresses": "Gérer les adresses",
+        "loyaltyProgram": "Programme fidélité"
+      },
+      "statuses": {
+        "pending": "En attente",
+        "processing": "En cours",
+        "shipped": "Expédié",
+        "delivered": "Livré",
+        "cancelled": "Annulé"
+      }
+    },
+    "sidebar": {
+      "title": "Mon Compte",
+      "subtitle": "Gérez vos paramètres",
+      "nav": {
+        "myAccount": "Mon compte",
+        "orders": "Mes commandes",
+        "wishlist": "Ma liste de souhaits",
+        "addresses": "Mes adresses",
+        "paymentMethods": "Moyens de paiement",
+        "security": "Sécurité",
+        "loyalty": "Programme fidélité",
+        "rewards": "Récompenses",
+        "settings": "Paramètres"
+      },
+      "signOut": "Déconnexion"
+    },
+    "orderDetail": {
+      "backToOrders": "Retour aux commandes",
+      "order": "Commande",
+      "copyNumber": "Copier le numéro",
+      "placedOn": "Passée le",
+      "tracking": {
+        "title": "Suivi de commande",
+        "estimatedDelivery": "Livraison estimée"
+      },
+      "statusSteps": {
+        "pending": "Commande reçue",
+        "processing": "En préparation",
+        "shipped": "Expédiée",
+        "delivered": "Livrée"
+      },
+      "items": {
+        "title": "Articles commandés",
+        "quantity": "Quantité",
+        "unitPrice": "Prix unitaire"
+      },
+      "summary": {
+        "title": "Récapitulatif",
+        "subtotal": "Sous-total",
+        "shipping": "Livraison",
+        "tax": "TVA",
+        "discount": "Réduction",
+        "total": "Total",
+        "free": "Gratuit"
+      },
+      "shippingAddress": "Adresse de livraison",
+      "payment": "Paiement",
+      "paymentStatus": {
+        "paid": "Payé",
+        "failed": "Échoué",
+        "refunded": "Remboursé",
+        "pending": "En attente"
+      },
+      "notes": "Notes de commande",
+      "actions": {
+        "needHelp": "Besoin d'aide ?"
+      }
     }
   },
   "reviews": {
@@ -477,6 +1406,231 @@
       "cod": "Paiement à la livraison"
     },
     "mobileMoneyInstructions": "Vous recevrez une notification sur votre téléphone pour confirmer le paiement."
+  },
+  "home": {
+    "hero": {
+      "title": "Découvrez l'Excellence",
+      "subtitle": "Des produits premium pour votre quotidien",
+      "cta": "Découvrir",
+      "shopNow": "Acheter maintenant",
+      "navigation": {
+        "previous": "Slide précédent",
+        "next": "Slide suivant",
+        "goToSlide": "Aller au slide {number}"
+      },
+      "slides": {
+        "1": {
+          "title": "Mode Automne 2025",
+          "subtitle": "NOUVELLE COLLECTION",
+          "description": "Découvrez les dernières tendances avec notre collection exclusive",
+          "discount": "-50%",
+          "price": "12 500 F",
+          "cta": {
+            "text": "Acheter maintenant"
+          },
+          "secondaryCta": {
+            "text": "En savoir plus"
+          },
+          "features": {
+            "freeShipping": "Livraison gratuite",
+            "returns": "Retour 30 jours"
+          }
+        },
+        "2": {
+          "title": "Électronique Premium",
+          "subtitle": "TECH & GADGETS",
+          "description": "Les meilleurs appareils aux meilleurs prix",
+          "discount": "-30%",
+          "price": "45 000 F",
+          "cta": {
+            "text": "Voir les offres"
+          },
+          "features": {
+            "securePayment": "Paiement sécurisé",
+            "expressDelivery": "Livraison express"
+          }
+        },
+        "3": {
+          "title": "Offres Exclusives",
+          "subtitle": "VENTES FLASH",
+          "description": "Profitez de nos promotions exceptionnelles",
+          "discount": "-70%",
+          "price": "8 990 F",
+          "cta": {
+            "text": "Voir les offres"
+          },
+          "features": {
+            "exclusiveGifts": "Cadeaux exclusifs",
+            "installments": "Paiement en 4x"
+          }
+        },
+        "4": {
+          "title": "Beauté & Bien-être",
+          "subtitle": "SOINS PREMIUM",
+          "description": "Prenez soin de vous avec nos produits de qualité",
+          "discount": "-40%",
+          "price": "15 000 F",
+          "cta": {
+            "text": "Découvrir"
+          },
+          "features": {
+            "authentic": "100% Authentique",
+            "natural": "Produits naturels"
+          }
+        }
+      }
+    },
+    "categories": {
+      "title": "Explorez nos Catégories",
+      "subtitle": "Trouvez exactement ce que vous cherchez",
+      "viewAll": "Voir tout",
+      "viewAllCategories": "Voir toutes les catégories",
+      "productsLabel": "produits",
+      "navigation": {
+        "previous": "Précédent",
+        "next": "Suivant"
+      }
+    },
+    "flashDeals": {
+      "title": "Ventes Flash",
+      "subtitle": "Offres limitées dans le temps",
+      "endsIn": "Se termine dans",
+      "days": "jours",
+      "hours": "heures",
+      "minutes": "min",
+      "seconds": "sec",
+      "sold": "vendus",
+      "remaining": "restants",
+      "hurry": "Dépêchez-vous !",
+      "almostGone": "Presque épuisé",
+      "viewAll": "Voir toutes les offres"
+    },
+    "featured": {
+      "title": "Produits Vedettes",
+      "subtitle": "Notre sélection des meilleurs produits",
+      "viewAll": "Voir tout",
+      "tabs": {
+        "all": "Tout",
+        "new": "Nouveautés",
+        "bestseller": "Meilleures ventes",
+        "sale": "Promotions"
+      }
+    },
+    "bestSellers": {
+      "title": "Meilleures Ventes",
+      "subtitle": "Les produits les plus populaires de notre boutique",
+      "viewAll": "Voir tout"
+    },
+    "newArrivals": {
+      "title": "Nouveautés",
+      "subtitle": "Découvrez nos dernières arrivées",
+      "viewAll": "Voir tout"
+    },
+    "trending": {
+      "title": "Tendances",
+      "subtitle": "Les produits du moment",
+      "viewAll": "Voir tout"
+    },
+    "brands": {
+      "title": "Nos Marques Partenaires",
+      "subtitle": "Découvrez les meilleures marques disponibles sur notre plateforme",
+      "viewAll": "Voir toutes les marques",
+      "productsLabel": "produits",
+      "official": "Officiel"
+    },
+    "testimonials": {
+      "title": "Ce que disent nos clients",
+      "subtitle": "Des milliers de clients satisfaits nous font confiance",
+      "stats": {
+        "customers": "50k+",
+        "customersLabel": "Clients satisfaits",
+        "rating": "4.9",
+        "ratingLabel": "Note moyenne",
+        "recommend": "98%",
+        "recommendLabel": "Recommandent"
+      },
+      "purchased": "A acheté:",
+      "verified": "✓ Vérifié"
+    },
+    "newsletter": {
+      "title": "Restez Connecté",
+      "subtitle": "Inscrivez-vous à notre newsletter et recevez nos dernières offres",
+      "placeholder": "votre@email.com",
+      "button": "S'inscrire",
+      "success": "Merci pour votre inscription !",
+      "privacy": "Vos données sont protégées. Consultez notre politique de confidentialité.",
+      "discount": "-10% sur votre première commande",
+      "successTitle": "Merci pour votre inscription !",
+      "successMessage": "Vérifiez votre boîte mail pour confirmer.",
+      "scanToDownload": "Scanner pour télécharger",
+      "downloadOn": "Télécharger sur"
+    },
+    "trustBadges": {
+      "freeShipping": "Livraison Gratuite",
+      "freeShippingDesc": "Dès 50€ d'achat",
+      "securePayment": "Paiement Sécurisé",
+      "securePaymentDesc": "Cryptage SSL 256-bit",
+      "support": "Support 24/7",
+      "supportDesc": "Assistance à votre écoute",
+      "returns": "Retours 30 Jours",
+      "returnsDesc": "Satisfait ou remboursé"
+    },
+    "socialProof": {
+      "customers": "clients satisfaits",
+      "orders": "commandes livrées",
+      "rating": "note moyenne",
+      "ordersToday": "🔥 {count} commandes aujourd'hui",
+      "ratingText": "⭐ {rating} ({count} avis)",
+      "delivery": "🚚 Livraison 48h",
+      "customersCount": "✓ +{count} clients",
+      "securePayment": "💳 Paiement sécurisé",
+      "returns": "↩️ Retours 30j",
+      "ariaLabel": "Indicateurs de confiance",
+      "ariaLabelPaused": "Indicateurs de confiance (en pause)"
+    },
+    "instagram": {
+      "title": "Suivez-Nous sur Instagram",
+      "subtitle": "Rejoignez notre communauté et partagez vos looks",
+      "followButton": "Suivre sur Instagram"
+    },
+    "banners": {
+      "title": "Collections Tendance",
+      "subtitle": "Les styles les plus populaires du moment",
+      "viewAll": "Voir toutes les collections"
+    },
+    "categoryShowcase": {
+      "title": "Collections Phares",
+      "subtitle": "Explorez nos sélections thématiques",
+      "viewAll": "Voir tout",
+      "productsLabel": "produits",
+      "explore": "Explorer",
+      "viewAllCollections": "Voir toutes les collections",
+      "navigation": {
+        "previous": "Précédent",
+        "next": "Suivant"
+      }
+    },
+    "badges": {
+      "new": "Nouveau",
+      "bestseller": "Best Seller",
+      "sale": "Promo",
+      "trending": "Tendance",
+      "local": "Local",
+      "verified": "Vendeur vérifié",
+      "official": "Boutique officielle",
+      "freeShipping": "Livraison gratuite"
+    },
+    "delivery": {
+      "days": "Livraison en {days} jours",
+      "free": "Livraison gratuite"
+    }
+  },
+  "actions": {
+    "apply": "Appliquer",
+    "addToCart": "Ajouter au panier",
+    "buyNow": "Acheter maintenant",
+    "viewDetails": "Voir les détails",
+    "quickView": "Aperçu rapide"
   },
   "admin": {
     "vendors": {

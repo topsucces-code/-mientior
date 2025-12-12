@@ -186,10 +186,11 @@ export function ExpressCheckout({
       } else {
         toast.error("Échec du paiement Google Pay");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Google Pay error:", error);
       // Don't show error if user cancelled
-      if (error.statusCode !== "CANCELED") {
+      const errorObj = error as { statusCode?: string };
+      if (errorObj.statusCode !== "CANCELED") {
         toast.error("Erreur Google Pay");
       }
     } finally {

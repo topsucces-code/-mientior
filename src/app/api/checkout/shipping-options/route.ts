@@ -19,10 +19,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // Validate address has minimum required fields
-    if (!address.country || !address.postalCode) {
+    // Validate address has minimum required fields (postal code is optional for some countries)
+    if (!address.country) {
       return NextResponse.json(
-        { error: 'Address must include country and postal code' },
+        { error: 'Address must include country' },
         { status: 400 }
       )
     }
@@ -76,21 +76,62 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Generate cache key based on address and subtotal
-    const zone = detectDeliveryZone(address)
-    const cacheKey = `shipping:options:${zone}:${address.postalCode.replace(/\s/g, '')}:${subtotal}`
+    // Check if this is an African country
+    const africanCountries = ['CI', 'SN', 'ML', 'BF', 'BJ', 'TG', 'NE', 'GN', 'GH', 'NG', 'CM', 'GA', 'CG', 'CD', 'TD', 'CF', 'MA', 'TN', 'DZ', 'RW', 'BI', 'MG', 'MU']
+    const isAfricanCountry = africanCountries.includes(address.country)
 
-    // Get shipping options with caching
-    const options = await getCachedData(
-      cacheKey,
-      async () => {
-        console.log(`[Shipping Options] Cache miss - calculating for zone: ${zone}`)
-        return getAvailableShippingOptions(address, cartItems, subtotal)
+    // Define default shipping options for African countries
+    const africanShippingOptions = [
+      {
+        id: 'standard-africa',
+        name: 'Livraison Standard',
+        price: subtotal >= 5000 ? 0 : 1500, // Free above 50€, else 15€
+        estimatedDays: 5,
+        description: subtotal >= 5000 ? 'Gratuit pour les commandes de plus de 50€' : 'Livraison en 5-7 jours ouvrés',
+        carrier: 'DHL Express',
       },
-      3600 // 1 hour TTL
-    )
+      {
+        id: 'express-africa',
+        name: 'Livraison Express',
+        price: 3000, // 30€
+        estimatedDays: 3,
+        description: 'Livraison rapide en 2-3 jours ouvrés',
+        carrier: 'DHL Express',
+      },
+      {
+        id: 'economy-africa',
+        name: 'Livraison Économique',
+        price: 800, // 8€
+        estimatedDays: 10,
+        description: 'Livraison économique en 7-10 jours ouvrés',
+        carrier: 'La Poste',
+      },
+    ]
 
-    console.log(`[Shipping Options] Zone: ${zone}, Options: ${options.length}`)
+    let options
+
+    if (isAfricanCountry) {
+      // Use predefined options for African countries
+      console.log(`[Shipping Options] African country: ${address.country}, using predefined options`)
+      options = africanShippingOptions
+    } else {
+      // Generate cache key based on address and subtotal
+      const zone = detectDeliveryZone(address)
+      const postalCode = address.postalCode || 'unknown'
+      const cacheKey = `shipping:options:${zone}:${postalCode.replace(/\s/g, '')}:${subtotal}`
+
+      // Get shipping options with caching
+      options = await getCachedData(
+        cacheKey,
+        async () => {
+          console.log(`[Shipping Options] Cache miss - calculating for zone: ${zone}`)
+          return getAvailableShippingOptions(address, cartItems, subtotal)
+        },
+        3600 // 1 hour TTL
+      )
+
+      console.log(`[Shipping Options] Zone: ${zone}, Options: ${options.length}`)
+    }
 
     // Add store pickup option if enabled
     const hasNearbyStores = process.env.ENABLE_STORE_PICKUP === 'true'

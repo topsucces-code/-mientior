@@ -153,7 +153,7 @@ async function handlePOST(request: NextRequest, { adminSession }: { adminSession
 
     // Audit log the creation
     if (adminSession.adminUser) {
-      await logCreate('category', category, adminSession.adminUser as AdminUser, request)
+      await logCreate('category', category as unknown as Record<string, import('@prisma/client').Prisma.JsonValue>, adminSession.adminUser as AdminUser, request)
     }
 
     return NextResponse.json(category, { status: 201 })

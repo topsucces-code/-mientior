@@ -4,6 +4,7 @@ import * as React from 'react'
 import Image from 'next/image'
 import useSWR from 'swr'
 import { Heart, MessageCircle, ExternalLink, Camera } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { RippleButton } from '@/components/ui/ripple-button'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
@@ -32,13 +33,17 @@ const fetcher = async (url: string) => {
 
 export default function InstagramFeed({
   instagramHandle = '@mientior',
-  title = 'Suivez-Nous sur Instagram',
-  subtitle = 'Rejoignez notre communauté et partagez vos looks',
+  title,
+  subtitle,
   className,
   ...props
 }: InstagramFeedProps) {
+  const t = useTranslations('home.instagram')
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
+
+  const displayTitle = title || t('title')
+  const displaySubtitle = subtitle || t('subtitle')
 
   // Fetch Instagram posts from API
   const { data, error, isLoading } = useSWR<{
@@ -59,9 +64,9 @@ export default function InstagramFeed({
         <div className="container mx-auto px-3 md:px-4 lg:px-6">
           <div className="mb-8 text-center">
             <h2 className="mb-3 font-display text-display-md md:text-display-lg text-anthracite-700">
-              {title}
+              {displayTitle}
             </h2>
-            <p className="text-lg text-nuanced-600">{subtitle}</p>
+            <p className="text-lg text-nuanced-600">{displaySubtitle}</p>
           </div>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -94,10 +99,10 @@ export default function InstagramFeed({
           <div className="mb-4 flex items-center gap-3">
             <Camera className="h-8 w-8 text-orange-500" />
             <h2 className="font-display text-display-md md:text-display-lg text-anthracite-700">
-              {title}
+              {displayTitle}
             </h2>
           </div>
-          <p className="mb-6 text-lg text-nuanced-600">{subtitle}</p>
+          <p className="mb-6 text-lg text-nuanced-600">{displaySubtitle}</p>
           <a
             href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
             target="_blank"
@@ -144,7 +149,7 @@ export default function InstagramFeed({
               className="group gap-2"
             >
               <Camera className="h-5 w-5" />
-              Suivre sur Instagram
+              {t('followButton')}
               <ExternalLink className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </RippleButton>
           </a>

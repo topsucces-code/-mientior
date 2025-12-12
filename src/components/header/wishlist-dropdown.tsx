@@ -5,7 +5,8 @@ import { useWishlistStore } from '@/stores/wishlist.store'
 import { useCartStore } from '@/stores/cart.store'
 import { useHeader } from '@/contexts/header-context'
 import { useToast } from '@/hooks/use-toast'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -14,70 +15,99 @@ export function WishlistDropdown() {
     const { addItem: addToCart } = useCartStore()
     const { activeDropdown, setActiveDropdown } = useHeader()
     const { toast } = useToast()
-    const dropdownRef = useRef<HTMLDivElement>(null)
+    const t = useTranslations('header')
+    const tCart = useTranslations('cart')
+    const containerRef = useRef<HTMLDivElement>(null)
+    const buttonRef = useRef<HTMLButtonElement>(null)
+    const panelRef = useRef<HTMLDivElement>(null)
     const [mounted, setMounted] = useState(false)
 
     const isOpen = activeDropdown === 'wishlist'
 
-    // Handle hydration - only show wishlist data after mount
+    // Handle hydration
     useEffect(() => {
         setMounted(true)
     }, [])
 
+    // Close dropdown when clicking outside - but NOT when clicking inside the dropdown
     useEffect(() => {
+        if (!isOpen) return
+
         const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setActiveDropdown(null)
+            const target = event.target as HTMLElement
+            
+            // If the target is no longer in the document (removed by React), don't close
+            // This happens when clicking remove button which removes the item from DOM
+            if (!document.body.contains(target)) {
+                return
             }
+            
+            // If click is inside the container (which includes the panel), don't close
+            if (containerRef.current?.contains(target)) {
+                return
+            }
+            
+            setActiveDropdown(null)
         }
 
-        if (isOpen) {
-            document.addEventListener('mousedown', handleClickOutside)
-        }
+        // Use click event instead of mousedown
+        const timeoutId = setTimeout(() => {
+            document.addEventListener('click', handleClickOutside)
+        }, 50)
 
-        return () => document.removeEventListener('mousedown', handleClickOutside)
+        return () => {
+            clearTimeout(timeoutId)
+            document.removeEventListener('click', handleClickOutside)
+        }
     }, [isOpen, setActiveDropdown])
 
     const totalItems = mounted ? items.length : 0
     const recentItems = mounted ? items.slice(0, 5) : []
 
-    // Use a timeout to allow mouse to move to dropdown
     const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    const handleMouseEnter = () => {
+    const cancelClose = useCallback(() => {
         if (closeTimeoutRef.current) {
             clearTimeout(closeTimeoutRef.current)
             closeTimeoutRef.current = null
         }
-        setActiveDropdown('wishlist')
-    }
+    }, [])
 
-    const handleMouseLeave = () => {
+    const scheduleClose = useCallback(() => {
+        cancelClose()
         closeTimeoutRef.current = setTimeout(() => {
             setActiveDropdown(null)
-        }, 150)
+        }, 400)
+    }, [setActiveDropdown, cancelClose])
+
+    const handleButtonClick = () => {
+        cancelClose()
+        setActiveDropdown(isOpen ? null : 'wishlist')
+    }
+
+    const handleDropdownMouseEnter = () => {
+        cancelClose()
+    }
+
+    const handleDropdownMouseLeave = () => {
+        scheduleClose()
     }
 
     // Cleanup timeout on unmount
     useEffect(() => {
-        return () => {
-            if (closeTimeoutRef.current) {
-                clearTimeout(closeTimeoutRef.current)
-            }
-        }
-    }, [])
+        return () => cancelClose()
+    }, [cancelClose])
 
     return (
         <div 
             className="relative" 
-            ref={dropdownRef}
+            ref={containerRef}
         >
             <button
-                onClick={() => setActiveDropdown(isOpen ? null : 'wishlist')}
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
+                ref={buttonRef}
+                onClick={handleButtonClick}
                 className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
-                aria-label="Liste de souhaits"
+                aria-label={t('wishlist')}
                 aria-expanded={isOpen}
             >
                 <Heart className={`w-6 h-6 transition-colors ${totalItems > 0 ? 'text-orange-500' : ''}`} />
@@ -90,14 +120,16 @@ export function WishlistDropdown() {
 
             {isOpen && (
                 <div 
-                    onMouseEnter={handleMouseEnter}
-                    onMouseLeave={() => setActiveDropdown(null)}
+                    ref={panelRef}
+                    onMouseEnter={handleDropdownMouseEnter}
+                    onMouseLeave={handleDropdownMouseLeave}
+                    onClick={(e) => e.stopPropagation()}
                     className="absolute right-0 top-[calc(100%+8px)] w-96 bg-white rounded-xl shadow-[0_16px_48px_rgba(0,0,0,0.12)] border border-gray-100 z-[9999]"
                     style={{ animation: 'fadeIn 150ms ease-out' }}
                 >
                     <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-                        <h3 className="font-semibold">Ma Liste de Souhaits</h3>
-                        <span className="text-sm text-gray-500">{totalItems} article{totalItems > 1 ? 's' : ''}</span>
+                        <h3 className="font-semibold">{t('myWishlist')}</h3>
+                        <span className="text-sm text-gray-500">{totalItems} {tCart('items')}</span>
                     </div>
 
                     <div className="max-h-96 overflow-y-auto">
@@ -130,7 +162,9 @@ export function WishlistDropdown() {
 
                                             <div className="flex items-center gap-2 mt-2">
                                                 <button
-                                                    onClick={() => {
+                                                    onMouseDown={(e) => e.stopPropagation()}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
                                                         addToCart({
                                                             id: item.productId,
                                                             productId: item.productId,
@@ -149,15 +183,19 @@ export function WishlistDropdown() {
                                                     className="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded-md hover:bg-emerald-700 transition-colors flex items-center gap-1"
                                                 >
                                                     <ShoppingCart className="w-3.5 h-3.5" />
-                                                    Ajouter au panier
+                                                    {tCart('addToCart')}
                                                 </button>
                                             </div>
                                         </div>
 
                                         <button
-                                            onClick={() => removeItem(item.productId)}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                removeItem(item.productId)
+                                            }}
                                             className="flex-shrink-0 p-1 hover:bg-gray-200 rounded-full transition-colors h-fit"
-                                            aria-label="Retirer"
+                                            aria-label={tCart('remove')}
                                         >
                                             <X className="w-4 h-4 text-gray-400" />
                                         </button>
@@ -167,8 +205,8 @@ export function WishlistDropdown() {
                         ) : (
                             <div className="p-8 text-center text-gray-500">
                                 <Heart className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                                <p className="font-medium">Votre liste de souhaits est vide</p>
-                                <p className="text-sm mt-1">Ajoutez vos produits préférés</p>
+                                <p className="font-medium">{tCart('emptyWishlist')}</p>
+                                <p className="text-sm mt-1">{tCart('addFavorites')}</p>
                             </div>
                         )}
                     </div>
@@ -179,7 +217,7 @@ export function WishlistDropdown() {
                                 href="/wishlist"
                                 className="block w-full text-center text-sm bg-rosegold-500 text-white py-2 rounded-lg hover:bg-rosegold-600 font-medium transition-colors"
                             >
-                                Voir ma liste ({totalItems})
+                                {t('viewAll')} ({totalItems})
                             </Link>
                         </div>
                     )}

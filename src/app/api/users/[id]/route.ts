@@ -134,7 +134,7 @@ async function handlePUT(
     if (adminSession && adminSession.adminUser) {
       await logUpdate(
         'user',
-        params.id,
+        params.id || '',
         before as unknown as Record<string, import('@prisma/client').Prisma.JsonValue>,
         user as unknown as Record<string, import('@prisma/client').Prisma.JsonValue>,
         adminSession.adminUser,

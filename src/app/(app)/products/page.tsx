@@ -5,6 +5,7 @@
 
 import { Metadata } from 'next'
 import { Suspense } from 'react'
+import { getTranslations } from 'next-intl/server'
 import { prisma } from '@/lib/prisma'
 import { ProductsPageClient } from './products-client'
 import type { Product, AvailableFilters } from '@/types'
@@ -192,39 +193,40 @@ async function getProductsData() {
 export default async function ProductsPage() {
   const { products, availableFilters } = await getProductsData()
 
+  // Get translations for catalog namespace
+  const t = await getTranslations('products.catalog')
+  const tSeo = await getTranslations('products.seo')
+
   // Build breadcrumb data
   const breadcrumbs = [
-    { label: 'Accueil', href: '/' },
-    { label: 'Produits' }
+    { label: t('breadcrumbs.home'), href: '/' },
+    { label: t('breadcrumbs.products') }
   ]
 
   // Build category hero data
   const categoryHeroData = {
-    title: 'Tous les Produits',
-    description: 'Découvrez notre collection complète de produits premium',
+    title: t('hero.title'),
+    description: t('hero.description'),
     productCount: products.length,
     quickFilters: [
-      { id: 'new', label: 'Nouveautés', value: 'newest' },
-      { id: 'sale', label: 'En promotion', value: 'onSale' },
-      { id: 'bestseller', label: 'Bestsellers', value: 'bestseller' }
+      { id: 'new', label: t('quickFilters.new'), value: 'newest' },
+      { id: 'sale', label: t('quickFilters.sale'), value: 'onSale' },
+      { id: 'bestseller', label: t('quickFilters.bestseller'), value: 'bestseller' }
     ]
   }
 
   // SEO content data
   const seoContent = {
-    title: 'À propos de notre collection',
+    title: tSeo('aboutCollection'),
     content: `
-      <h2>Découvrez Notre Collection Premium</h2>
-      <p>Explorez notre sélection complète de produits soigneusement choisis pour leur qualité exceptionnelle.
-      Nous travaillons avec les meilleurs vendeurs pour vous offrir une expérience d'achat incomparable.</p>
+      <h2>${tSeo('discoverTitle')}</h2>
+      <p>${tSeo('discoverDesc')}</p>
 
-      <h3>Qualité Garantie</h3>
-      <p>Tous nos produits sont vérifiés et approuvés par notre équipe avant d'être mis en vente.
-      Nous garantissons la satisfaction de nos clients avec une politique de retour flexible.</p>
+      <h3>${tSeo('qualityTitle')}</h3>
+      <p>${tSeo('qualityDesc')}</p>
 
-      <h3>Livraison Rapide</h3>
-      <p>Profitez de notre service de livraison rapide partout en France.
-      La livraison est gratuite pour toute commande supérieure à 50€.</p>
+      <h3>${tSeo('deliveryTitle')}</h3>
+      <p>${tSeo('deliveryDesc')}</p>
     `
   }
 

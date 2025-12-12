@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       }
     } else if (paymentGateway === 'FLUTTERWAVE') {
       try {
-        const verification = await verifyFlutterwaveTransaction(paymentReference) as any
+        const verification = await verifyFlutterwaveTransaction(paymentReference) as { status: string }
         if (verification.status !== 'successful') {
           return NextResponse.json({ error: 'Payment not confirmed' }, { status: 400 })
         }
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     // This ensures atomic stock decrements even under high concurrency
 
     let subtotal = 0 // in cents
-    const orderItems: any[] = []
+    const orderItems: Array<{ productId: string; productName: string; productImage: string; variantId?: string; quantity: number; price: number; subtotal: number; categoryId?: string }> = []
     const productIds = items.map(item => item.productId)
 
     // Step 1: Acquire distributed locks for all products in the order
@@ -162,13 +162,14 @@ export async function POST(request: NextRequest) {
       // Step 4: Release locks after successful stock updates
       await releaseMultipleStockLocks(lockedIds)
       console.log('All locks released successfully')
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Error occurred - release all locks
       await releaseMultipleStockLocks(lockedIds)
       console.error('Error during stock decrement:', error)
 
-      if (error.message?.includes('not found')) {
-        return NextResponse.json({ error: error.message, success: false }, { status: 404 })
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      if (errorMessage.includes('not found')) {
+        return NextResponse.json({ error: errorMessage, success: false }, { status: 404 })
       }
 
       return NextResponse.json(
@@ -286,8 +287,8 @@ export async function POST(request: NextRequest) {
         total: total / 100,
         promoCodeId,
         // loyaltyPointsUsed stored in metadata if needed
-        shippingAddress: shippingAddress as any,
-        billingAddress: (billingAddress || shippingAddress) as any,
+        shippingAddress: shippingAddress as unknown as import('@prisma/client').Prisma.InputJsonValue,
+        billingAddress: (billingAddress || shippingAddress) as unknown as import('@prisma/client').Prisma.InputJsonValue,
         estimatedDeliveryMin: estimatedDelivery.min,
         estimatedDeliveryMax: estimatedDelivery.max,
         notes: orderNotes || null,
@@ -370,8 +371,8 @@ export async function POST(request: NextRequest) {
         orderNumber: order.orderNumber,
         customerName: `${shippingAddr.firstName} ${shippingAddr.lastName}`,
         email: customerEmail,
-        items: order.items.map((item: any) => ({
-          name: item.name || item.productName || '',
+        items: order.items.map((item) => ({
+          name: item.productName || '',
           quantity: item.quantity,
           price: Math.round(item.price * 100), // Convert to cents
           image: item.productImage || '',
@@ -418,18 +419,19 @@ export async function POST(request: NextRequest) {
       },
       success: true,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Order creation error:', error)
 
     // Handle authentication errors
-    if (error.message === 'Unauthorized') {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    if (errorMessage === 'Unauthorized') {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
 
     return NextResponse.json(
       {
         error: 'Failed to create order',
-        details: error.message,
+        details: errorMessage,
         success: false,
       },
       { status: 500 }

@@ -4,6 +4,7 @@ import * as React from 'react'
 import Link from 'next/link'
 import useEmblaCarousel from 'embla-carousel-react'
 import { ChevronLeft, ChevronRight, Grid3X3, ArrowRight } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
@@ -37,9 +38,11 @@ interface CategoriesGridEnhancedProps {
 
 export default function CategoriesGridEnhanced({
   categories = defaultCategories,
-  title = 'Explorez nos Catégories',
-  subtitle = 'Trouvez exactement ce que vous cherchez',
+  title,
+  subtitle,
 }: CategoriesGridEnhancedProps) {
+  const t = useTranslations('home.categories')
+  const tBadges = useTranslations('home.badges')
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: 'start',
@@ -47,6 +50,9 @@ export default function CategoriesGridEnhanced({
   })
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
+
+  const displayTitle = title || t('title')
+  const displaySubtitle = subtitle || t('subtitle')
 
   const scrollPrev = React.useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev()
@@ -85,9 +91,9 @@ export default function CategoriesGridEnhanced({
             {/* Title & Subtitle */}
             <div>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
-                {title}
+                {displayTitle}
               </h2>
-              <p className="text-sm sm:text-base text-gray-500 mt-0.5">{subtitle}</p>
+              <p className="text-sm sm:text-base text-gray-500 mt-0.5">{displaySubtitle}</p>
             </div>
           </div>
 
@@ -97,21 +103,21 @@ export default function CategoriesGridEnhanced({
               href="/categories"
               className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-sky-600 hover:text-sky-700 hover:bg-sky-50 rounded-lg transition-colors"
             >
-              Voir tout
+              {t('viewAll')}
               <ArrowRight className="h-4 w-4" />
             </Link>
             <div className="flex items-center gap-2">
               <button
                 onClick={scrollPrev}
                 className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-sky-500 hover:text-white hover:border-sky-500 transition-all shadow-sm"
-                aria-label="Précédent"
+                aria-label={t('navigation.previous')}
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
                 onClick={scrollNext}
                 className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-sky-500 hover:text-white hover:border-sky-500 transition-all shadow-sm"
-                aria-label="Suivant"
+                aria-label={t('navigation.next')}
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
@@ -141,14 +147,14 @@ export default function CategoriesGridEnhanced({
                   >
                     {/* Badge */}
                     {category.badge && (
-                      <div 
+                      <div
                         className={cn(
                           "absolute top-2 right-2 px-2 py-0.5 text-[10px] font-bold uppercase rounded-full text-white",
                           category.badge === 'new' && "bg-emerald-500",
                           category.badge === 'hot' && "bg-red-500 animate-pulse"
                         )}
                       >
-                        {category.badge === 'new' ? 'New' : 'Hot'}
+                        {category.badge === 'new' ? tBadges('new') : tBadges('trending')}
                       </div>
                     )}
 
@@ -165,7 +171,7 @@ export default function CategoriesGridEnhanced({
                     {/* Product Count */}
                     {category.productCount && (
                       <p className="text-xs text-gray-400">
-                        {formatCount(category.productCount)} produits
+                        {formatCount(category.productCount)} {t('productsLabel')}
                       </p>
                     )}
                   </Link>
@@ -182,7 +188,7 @@ export default function CategoriesGridEnhanced({
             className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-sky-500 to-indigo-500 text-white text-sm font-semibold rounded-full hover:shadow-lg transition-all"
           >
             <Grid3X3 className="h-4 w-4" />
-            Voir toutes les catégories
+            {t('viewAllCategories')}
           </Link>
         </div>
       </div>

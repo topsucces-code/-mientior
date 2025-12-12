@@ -72,7 +72,7 @@ export function SavedForLater({ items, onMoveToCart, onRemove, className }: Save
                 {item.productImage ? (
                   <Image
                     src={item.productImage || ''}
-                    alt={item.productName}
+                    alt={item.productName || ''}
                     fill
                     className="object-cover transition-transform hover:scale-105"
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"

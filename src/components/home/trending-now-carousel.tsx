@@ -150,11 +150,11 @@ export default function TrendingNowCarousel({
         {/* Carousel */}
         <div className="relative -mx-3 sm:mx-0 px-3 sm:px-0">
           <div className="embla overflow-hidden" ref={emblaRef}>
-            <div className="embla__container flex gap-3 sm:gap-4">
+            <div className="embla__container flex gap-2">
               {products.map((product, index) => (
                 <div
                   key={product.id}
-                  className="embla__slide flex-[0_0_170px] sm:flex-[0_0_200px] md:flex-[0_0_220px] lg:flex-[0_0_240px]"
+                  className="embla__slide flex-[0_0_180px] sm:flex-[0_0_210px] md:flex-[0_0_240px] lg:flex-[0_0_260px]"
                 >
                   <ProductCardUnified
                     id={product.id}

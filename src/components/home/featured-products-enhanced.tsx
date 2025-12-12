@@ -2,12 +2,13 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight, Star, Sparkles, ArrowRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Star, Sparkles } from 'lucide-react'
 import useEmblaCarousel from 'embla-carousel-react'
 import { cn } from '@/lib/utils'
 import { ProductCardUnified } from '@/components/ui/product-card-unified'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
+import { useTranslations } from 'next-intl'
 
 interface Product {
   id: string
@@ -40,22 +41,28 @@ interface FeaturedProductsEnhancedProps {
   subtitle?: string
 }
 
-const tabs = [
-  { id: 'all', label: 'Tous', icon: '🎯' },
-  { id: 'new', label: 'Nouveautés', icon: '✨' },
-  { id: 'bestseller', label: 'Best Sellers', icon: '🏆' },
-  { id: 'sale', label: 'Promotions', icon: '🔥' },
-]
+// Tabs are now generated inside the component to use translations
 
 export default function FeaturedProductsEnhanced({
   products,
-  title = 'Produits Vedettes',
-  subtitle = 'Notre sélection des meilleurs produits',
+  title,
+  subtitle,
 }: FeaturedProductsEnhancedProps) {
+  const t = useTranslations('home.featured')
   const [activeTab, setActiveTab] = React.useState('all')
   const [emblaRef, emblaApi] = useEmblaCarousel({ align: 'start', loop: true, dragFree: true })
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
+
+  const displayTitle = title || t('title')
+  const displaySubtitle = subtitle || t('subtitle')
+
+  const tabs = [
+    { id: 'all', label: t('tabs.all'), icon: '🎯' },
+    { id: 'new', label: t('tabs.new'), icon: '✨' },
+    { id: 'bestseller', label: t('tabs.bestseller'), icon: '🏆' },
+    { id: 'sale', label: t('tabs.sale'), icon: '🔥' },
+  ]
 
   const scrollPrev = React.useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
   const scrollNext = React.useCallback(() => emblaApi?.scrollNext(), [emblaApi])
@@ -94,11 +101,11 @@ export default function FeaturedProductsEnhanced({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
-                  {title}
+                  {displayTitle}
                 </h2>
                 <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-violet-500" />
               </div>
-              <p className="text-sm sm:text-base text-gray-500 mt-0.5">{subtitle}</p>
+              <p className="text-sm sm:text-base text-gray-500 mt-0.5">{displaySubtitle}</p>
             </div>
           </div>
 
@@ -109,7 +116,7 @@ export default function FeaturedProductsEnhanced({
               className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-violet-600 hover:text-violet-700 hover:bg-violet-50 rounded-lg transition-colors"
             >
               <Sparkles className="h-4 w-4" />
-              Voir tout
+              {t('viewAll')}
             </Link>
             <div className="flex items-center gap-2">
               <button
@@ -154,11 +161,11 @@ export default function FeaturedProductsEnhanced({
         {/* Products Carousel */}
         <div className="relative -mx-3 sm:mx-0 px-3 sm:px-0">
           <div className="embla overflow-hidden" ref={emblaRef}>
-            <div className="embla__container flex gap-3 sm:gap-4">
+            <div className="embla__container flex gap-2">
               {(filteredProducts.length > 0 ? filteredProducts : products).map((product, index) => (
                 <div 
                   key={product.id} 
-                  className="embla__slide flex-[0_0_170px] sm:flex-[0_0_200px] md:flex-[0_0_220px] lg:flex-[0_0_240px]"
+                  className="embla__slide flex-[0_0_180px] sm:flex-[0_0_210px] md:flex-[0_0_240px] lg:flex-[0_0_260px]"
                 >
                   <ProductCardUnified
                     id={product.id}
@@ -194,7 +201,7 @@ export default function FeaturedProductsEnhanced({
             className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-sm font-semibold rounded-full hover:shadow-lg transition-all"
           >
             <Star className="h-4 w-4" />
-            Voir tous les produits
+            {t('viewAll')}
           </Link>
         </div>
       </div>

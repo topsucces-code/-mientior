@@ -311,7 +311,7 @@ async function handlePOST(request: NextRequest, { adminSession }: { params?: unk
     if (adminSession?.adminUser) {
       await logCreate(
         'product',
-        transformedProduct,
+        transformedProduct as unknown as Record<string, import('@prisma/client').Prisma.JsonValue>,
         adminSession.adminUser as unknown as import('@prisma/client').AdminUser,
         request
       )

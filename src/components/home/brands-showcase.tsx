@@ -4,6 +4,7 @@ import * as React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Award, ChevronRight, Verified } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
@@ -36,12 +37,16 @@ interface BrandsShowcaseProps {
 
 export default function BrandsShowcase({
   brands = defaultBrands,
-  title = 'Nos Marques Partenaires',
-  subtitle = 'Découvrez les meilleures marques disponibles sur notre plateforme',
+  title,
+  subtitle,
 }: BrandsShowcaseProps) {
+  const t = useTranslations('home.brands')
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
-  
+
+  const displayTitle = title || t('title')
+  const displaySubtitle = subtitle || t('subtitle')
+
   // Duplicate brands for infinite scroll effect
   const duplicatedBrands = [...brands, ...brands]
 
@@ -68,11 +73,11 @@ export default function BrandsShowcase({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
-                  {title}
+                  {displayTitle}
                 </h2>
                 <Verified className="h-5 w-5 sm:h-6 sm:w-6 text-amber-500" />
               </div>
-              <p className="text-sm sm:text-base text-gray-500 mt-0.5">{subtitle}</p>
+              <p className="text-sm sm:text-base text-gray-500 mt-0.5">{displaySubtitle}</p>
             </div>
           </div>
 
@@ -81,7 +86,7 @@ export default function BrandsShowcase({
             href="/brands"
             className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors"
           >
-            Voir toutes les marques
+            {t('viewAll')}
             <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
@@ -133,12 +138,12 @@ export default function BrandsShowcase({
               <div className="px-4 pb-3 sm:px-5 sm:pb-4 border-t border-gray-50">
                 <div className="flex items-center justify-between">
                   <span className="text-xs sm:text-sm text-gray-500">
-                    {brand.productCount} produits
+                    {brand.productCount} {t('productsLabel')}
                   </span>
                   {brand.isVerified && (
                     <span className="flex items-center gap-0.5 text-[10px] sm:text-xs text-amber-600 font-medium">
                       <Verified className="h-3 w-3" />
-                      Officiel
+                      {t('official')}
                     </span>
                   )}
                 </div>

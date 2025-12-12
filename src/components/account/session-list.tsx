@@ -1,12 +1,14 @@
 'use client'
 
 import * as React from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 import { Monitor, Smartphone, Tablet, MapPin, Clock, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { formatDistanceToNow } from 'date-fns'
+import { enUS, fr, ar } from 'date-fns/locale'
 
 export interface SessionInfo {
   id: string
@@ -34,8 +36,13 @@ export function SessionList({
   onLogoutAll,
   isLoading = false,
 }: SessionListProps) {
+  const t = useTranslations('account.security.sessions')
+  const locale = useLocale()
   const [loadingSessionId, setLoadingSessionId] = React.useState<string | null>(null)
   const [loadingAll, setLoadingAll] = React.useState(false)
+
+  // Get date-fns locale
+  const dateLocale = locale === 'fr' ? fr : locale === 'ar' ? ar : enUS
 
   const handleLogoutSession = async (sessionId: string) => {
     setLoadingSessionId(sessionId)
@@ -72,9 +79,9 @@ export function SessionList({
       {/* Header with logout all button */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-anthracite-700">Active Sessions</h2>
+          <h2 className="text-2xl font-bold text-anthracite-700">{t('title')}</h2>
           <p className="text-sm text-nuanced-500">
-            Manage your active sessions across different devices
+            {t('subtitle')}
           </p>
         </div>
         {otherSessions.length > 0 && (
@@ -83,7 +90,7 @@ export function SessionList({
             onClick={handleLogoutAll}
             disabled={loadingAll || isLoading}
           >
-            {loadingAll ? 'Logging out...' : 'Log out all other devices'}
+            {loadingAll ? t('loggingOut') : t('logoutAll')}
           </Button>
         )}
       </div>
@@ -105,10 +112,10 @@ export function SessionList({
                       {session.device}
                       <Badge variant="default" className="bg-orange-600">
                         <CheckCircle2 className="mr-1 h-3 w-3" />
-                        Current Session
+                        {t('current')}
                       </Badge>
                     </CardTitle>
-                    <CardDescription>This is your current active session</CardDescription>
+                    <CardDescription>{t('currentDescription')}</CardDescription>
                   </div>
                 </div>
               </div>
@@ -122,7 +129,7 @@ export function SessionList({
                 <div className="flex items-center gap-2 text-nuanced-600">
                   <Clock className="h-4 w-4" />
                   <span>
-                    Last active {formatDistanceToNow(new Date(session.lastActivity), { addSuffix: true })}
+                    {t('lastActive')} {formatDistanceToNow(new Date(session.lastActivity), { addSuffix: true, locale: dateLocale })}
                   </span>
                 </div>
               </div>
@@ -137,7 +144,7 @@ export function SessionList({
           <Separator />
           <div>
             <h3 className="mb-4 text-lg font-semibold text-anthracite-700">
-              Other Sessions ({otherSessions.length})
+              {t('otherSessions', { count: otherSessions.length })}
             </h3>
             <div className="space-y-4">
               {otherSessions.map((session) => (
@@ -161,7 +168,7 @@ export function SessionList({
                         onClick={() => handleLogoutSession(session.id)}
                         disabled={loadingSessionId === session.id || isLoading}
                       >
-                        {loadingSessionId === session.id ? 'Logging out...' : 'Log out'}
+                        {loadingSessionId === session.id ? t('loggingOut') : t('logout')}
                       </Button>
                     </div>
                   </CardHeader>
@@ -169,7 +176,7 @@ export function SessionList({
                     <div className="flex items-center gap-2 text-sm text-nuanced-600">
                       <Clock className="h-4 w-4" />
                       <span>
-                        Last active {formatDistanceToNow(new Date(session.lastActivity), { addSuffix: true })}
+                        {t('lastActive')} {formatDistanceToNow(new Date(session.lastActivity), { addSuffix: true, locale: dateLocale })}
                       </span>
                     </div>
                   </CardContent>
@@ -185,9 +192,9 @@ export function SessionList({
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-8 text-center">
             <Monitor className="mb-3 h-12 w-12 text-nuanced-400" />
-            <p className="text-sm font-medium text-anthracite-700">No other active sessions</p>
+            <p className="text-sm font-medium text-anthracite-700">{t('noOtherSessions')}</p>
             <p className="mt-1 text-sm text-nuanced-500">
-              You're only logged in on this device
+              {t('onlyThisDevice')}
             </p>
           </CardContent>
         </Card>
@@ -199,7 +206,7 @@ export function SessionList({
           <CardContent className="flex items-center justify-center py-12">
             <div className="text-center">
               <div className="mb-3 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-orange-600 border-r-transparent"></div>
-              <p className="text-sm text-nuanced-500">Loading sessions...</p>
+              <p className="text-sm text-nuanced-500">{t('loading')}</p>
             </div>
           </CardContent>
         </Card>

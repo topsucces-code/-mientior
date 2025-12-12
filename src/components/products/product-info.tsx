@@ -23,7 +23,9 @@ import { TrustBadges } from '@/components/products/trust-badges'
 import { PaymentMethods } from '@/components/products/payment-methods'
 import { SocialShare } from '@/components/products/social-share'
 import { ProductMeta } from '@/components/products/product-meta'
+import { DeliveryOptionsModal } from '@/components/products/delivery-options-modal'
 import { COLOR_HEX_MAP } from '@/lib/constants'
+import { formatPrice } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 import { createCartItem } from '@/lib/cart-utils'
 import type { Product, ProductVariant } from '@/types'
@@ -48,6 +50,7 @@ export function ProductInfo({
   const [internalQuantity, setInternalQuantity] = useState(1)
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false)
+  const [isDeliveryModalOpen, setIsDeliveryModalOpen] = useState(false)
 
   // Use external quantity if provided, otherwise use internal
   const quantity = externalQuantity ?? internalQuantity
@@ -56,7 +59,9 @@ export function ProductInfo({
   const { addItem } = useCartStore()
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
   const { toast } = useToast()
-  const t = useTranslations('wishlist')
+  const t = useTranslations('products.pdp')
+  const tNav = useTranslations('nav')
+  const tWishlist = useTranslations('wishlist')
 
   // Derive variant from color/size selection and call onVariantChange
   useEffect(() => {
@@ -108,8 +113,8 @@ export function ProductInfo({
 
     if (requiresSize && !selectedSize) {
       toast({
-        title: 'Sélectionnez une taille',
-        description: 'Veuillez choisir une taille avant d\'ajouter au panier',
+        title: t('selectSize'),
+        description: t('selectSizeDesc'),
         variant: 'destructive',
       })
       return
@@ -117,8 +122,8 @@ export function ProductInfo({
 
     if (requiresColor && !selectedColor) {
       toast({
-        title: 'Sélectionnez une couleur',
-        description: 'Veuillez choisir une couleur avant d\'ajouter au panier',
+        title: t('selectColor'),
+        description: t('selectColorDesc'),
         variant: 'destructive',
       })
       return
@@ -136,8 +141,8 @@ export function ProductInfo({
       addItem(cartItem)
 
       toast({
-        title: '✓ Ajouté au panier',
-        description: `${product.name} a été ajouté à votre panier`,
+        title: t('addedSuccess'),
+        description: t('addedSuccessDesc', { name: product.name }),
       })
     } finally {
       setIsAddingToCart(false)
@@ -150,8 +155,8 @@ export function ProductInfo({
     if (inWishlist) {
       removeFromWishlist(product.id)
       toast({
-        title: t('removedFromWishlist'),
-        description: t('removedFromWishlistDesc', { name: product.name }),
+        title: tWishlist('removedFromWishlist'),
+        description: tWishlist('removedFromWishlistDesc', { name: product.name }),
       })
     } else {
       addToWishlist({
@@ -163,8 +168,8 @@ export function ProductInfo({
         addedAt: new Date().toISOString(),
       })
       toast({
-        title: t('addedToWishlist'),
-        description: t('addedToWishlistDesc', { name: product.name }),
+        title: tWishlist('addedToWishlist'),
+        description: tWishlist('addedToWishlistDesc', { name: product.name }),
       })
     }
   }
@@ -179,7 +184,7 @@ export function ProductInfo({
     <div className="space-y-6">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-nuanced-600">
-        <Link href="/" className="hover:text-orange-500">Accueil</Link>
+        <Link href="/" className="hover:text-orange-500">{tNav('home')}</Link>
         <span>/</span>
         <Link href={`/products?category=${product.category.slug}`} className="hover:text-orange-500">
           {product.category.name}
@@ -202,7 +207,7 @@ export function ProductInfo({
       <div className="flex items-center gap-3">
         <StarRating rating={product.rating} size="lg" />
         <span className="text-sm text-nuanced-600">
-          {product.rating} ({product.reviewCount} avis)
+          {t('reviews', { rating: product.rating, count: product.reviewCount })}
         </span>
       </div>
 
@@ -211,11 +216,11 @@ export function ProductInfo({
         <div className="flex items-baseline gap-3">
           {product.compareAtPrice && (
             <span className="text-lg text-nuanced-500 line-through">
-              {product.compareAtPrice.toFixed(2)}€
+              {formatPrice(product.compareAtPrice)}
             </span>
           )}
           <span className="text-4xl font-bold text-orange-500">
-            {finalPrice.toFixed(2)}€
+            {formatPrice(finalPrice)}
           </span>
           {discount > 0 && (
             <Badge variant="destructive" className="text-base">
@@ -224,7 +229,8 @@ export function ProductInfo({
           )}
         </div>
         <p className="text-sm text-nuanced-600">
-          Ou <strong>3x {(finalPrice / 3).toFixed(2)}€</strong> sans frais
+            {/* Note: using hardcoded 3 for installment logic until we have a real config */}
+          {t.rich('installment', { price: (finalPrice / 3).toFixed(2), strong: (chunks) => <strong>{chunks}</strong> })}
         </p>
       </div>
 
@@ -267,7 +273,7 @@ export function ProductInfo({
           onChange={setQuantity}
         />
         <span className="text-sm text-nuanced-600">
-          Prix total: <strong className="text-anthracite-900">{(finalPrice * quantity).toFixed(2)}€</strong>
+          {t.rich('totalPrice', { total: (finalPrice * quantity).toFixed(2), strong: (chunks) => <strong className="text-anthracite-900">{chunks}</strong> })}
         </span>
       </div>
 
@@ -287,15 +293,15 @@ export function ProductInfo({
                 onClick={handleAddToCart}
                 disabled={isAddingToCart || !isVariantSelectionComplete || currentStock === 0}
                 className="w-full h-14 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-                aria-label={currentStock === 0 ? 'RUPTURE DE STOCK' : isAddingToCart ? 'Ajout en cours...' : 'AJOUTER AU PANIER'}
+                aria-label={currentStock === 0 ? t('outOfStock') : isAddingToCart ? t('adding') : t('addToCart')}
               >
                 <ShoppingCart className="w-6 h-6" />
-                <p>{currentStock === 0 ? 'RUPTURE DE STOCK' : isAddingToCart ? 'Ajout en cours...' : 'AJOUTER AU PANIER'}</p>
+                <p>{currentStock === 0 ? t('outOfStock') : isAddingToCart ? t('adding') : t('addToCart')}</p>
               </RippleButton>
             </span>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{currentStock === 0 ? 'RUPTURE DE STOCK' : isAddingToCart ? 'Ajout en cours...' : 'AJOUTER AU PANIER'}</p>
+            <p>{currentStock === 0 ? t('outOfStock') : isAddingToCart ? t('adding') : t('addToCart')}</p>
           </TooltipContent>
         </Tooltip>
 
@@ -306,7 +312,7 @@ export function ProductInfo({
               ? 'border-red-500 bg-red-50 hover:bg-red-100' 
               : 'border-platinum-300 hover:border-orange-500'
           }`}
-          aria-label={isInWishlist(product.id) ? t('removedFromWishlist') : t('addedToWishlist')}
+          aria-label={isInWishlist(product.id) ? tWishlist('removedFromWishlist') : tWishlist('addedToWishlist')}
         >
           <Heart className={`w-6 h-6 transition-all ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : 'text-anthracite-500 hover:text-orange-500'}`} />
         </button>
@@ -315,10 +321,10 @@ export function ProductInfo({
       {/* Trust Badges */}
       <TrustBadges
         features={[
-          { icon: <Truck className="w-5 h-5" />, text: 'Livraison gratuite dès 25€', highlight: true },
-          { icon: <RotateCcw className="w-5 h-5" />, text: 'Retour gratuit sous 30 jours' },
-          { icon: <Shield className="w-5 h-5" />, text: 'Garantie 2 ans constructeur' },
-          { icon: <CreditCard className="w-5 h-5" />, text: 'Paiement 100% sécurisé' },
+          { icon: <Truck className="w-5 h-5" />, text: t('trustBadges.freeShipping'), highlight: true },
+          { icon: <RotateCcw className="w-5 h-5" />, text: t('trustBadges.freeReturns') },
+          { icon: <Shield className="w-5 h-5" />, text: t('trustBadges.warranty') },
+          { icon: <CreditCard className="w-5 h-5" />, text: t('trustBadges.securePayment') },
         ]}
         estimatedDelivery={{
           min: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
@@ -326,6 +332,7 @@ export function ProductInfo({
         }}
         shippingOrigin="France"
         internationalShipping={true}
+        onDeliveryClick={() => setIsDeliveryModalOpen(true)}
       />
 
       {/* Payment Methods */}
@@ -359,6 +366,12 @@ export function ProductInfo({
         isOpen={isSizeGuideOpen}
         onClose={() => setIsSizeGuideOpen(false)}
         sizeGuide={null}
+      />
+
+      {/* Delivery Options Modal */}
+      <DeliveryOptionsModal 
+        isOpen={isDeliveryModalOpen}
+        onClose={() => setIsDeliveryModalOpen(false)}
       />
     </div>
   )

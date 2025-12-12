@@ -9,6 +9,7 @@ import { EnhancedCartPreview } from './enhanced-cart-preview'
 import { UserAccountDropdown } from './user-account-dropdown'
 import { Bell, Search, X } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import type { MegaMenuColumn } from '@/types'
 
 const MOCK_CATEGORIES: MegaMenuColumn[] = [
@@ -108,6 +109,7 @@ const MOCK_CATEGORIES: MegaMenuColumn[] = [
 export function MainHeader() {
     const { isCompact, setMobileMenuOpen, setMobileSearchOpen, isMobileSearchOpen } = useHeader()
     const [isHamburgerActive, setIsHamburgerActive] = useState(false)
+    const t = useTranslations('header')
 
     const handleMenuToggle = () => {
         setIsHamburgerActive(!isHamburgerActive)
@@ -178,7 +180,7 @@ export function MainHeader() {
                                 transition-all duration-200
                                 text-gray-800 hover:text-turquoise-600
                             "
-                            aria-label="Rechercher"
+                            aria-label={t('search')}
                         >
                             {isMobileSearchOpen ? (
                                 <X className="w-5 h-5" />

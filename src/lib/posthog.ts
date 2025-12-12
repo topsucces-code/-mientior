@@ -13,13 +13,13 @@ export function initPostHog() {
 }
 
 export const analytics = {
-  capture: (eventName: string, properties?: Record<string, any>) => {
+  capture: (eventName: string, properties?: Record<string, unknown>) => {
     if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
       posthog.capture(eventName, properties)
     }
   },
   
-  identify: (userId: string, traits?: Record<string, any>) => {
+  identify: (userId: string, traits?: Record<string, unknown>) => {
     if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
       posthog.identify(userId, traits)
     }

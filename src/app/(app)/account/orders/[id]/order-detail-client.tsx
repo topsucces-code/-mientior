@@ -3,6 +3,7 @@
 import * as React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useTranslations, useLocale } from 'next-intl'
 import {
   ArrowLeft,
   Package,
@@ -56,33 +57,35 @@ interface OrderDetailClientProps {
   order: Order
 }
 
-const STATUS_STEPS = [
-  { key: 'PENDING', label: 'En attente', icon: Clock },
-  { key: 'PROCESSING', label: 'En préparation', icon: Package },
-  { key: 'SHIPPED', label: 'Expédiée', icon: Truck },
-  { key: 'DELIVERED', label: 'Livrée', icon: CheckCircle },
-]
-
-const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
-  PENDING: { label: 'En attente', color: 'text-amber-700', bgColor: 'bg-amber-100' },
-  PROCESSING: { label: 'En préparation', color: 'text-blue-700', bgColor: 'bg-blue-100' },
-  SHIPPED: { label: 'Expédiée', color: 'text-purple-700', bgColor: 'bg-purple-100' },
-  DELIVERED: { label: 'Livrée', color: 'text-green-700', bgColor: 'bg-green-100' },
-  CANCELLED: { label: 'Annulée', color: 'text-red-700', bgColor: 'bg-red-100' },
-}
-
 export function OrderDetailClient({ order }: OrderDetailClientProps) {
   const [copied, setCopied] = React.useState(false)
+  const t = useTranslations('account.orderDetail')
+  const locale = useLocale()
+
+  const STATUS_STEPS = [
+    { key: 'PENDING', label: t('statusSteps.pending'), icon: Clock },
+    { key: 'PROCESSING', label: t('statusSteps.processing'), icon: Package },
+    { key: 'SHIPPED', label: t('statusSteps.shipped'), icon: Truck },
+    { key: 'DELIVERED', label: t('statusSteps.delivered'), icon: CheckCircle },
+  ]
+
+  const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
+    PENDING: { label: t('statusSteps.pending'), color: 'text-amber-700', bgColor: 'bg-amber-100' },
+    PROCESSING: { label: t('statusSteps.processing'), color: 'text-blue-700', bgColor: 'bg-blue-100' },
+    SHIPPED: { label: t('statusSteps.shipped'), color: 'text-purple-700', bgColor: 'bg-purple-100' },
+    DELIVERED: { label: t('statusSteps.delivered'), color: 'text-green-700', bgColor: 'bg-green-100' },
+    CANCELLED: { label: t('statusSteps.cancelled'), color: 'text-red-700', bgColor: 'bg-red-100' },
+  }
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR', {
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: 'EUR',
     }).format(price)
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
+    return new Date(dateString).toLocaleDateString(locale, {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -98,7 +101,7 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
   }
 
   const currentStatusIndex = STATUS_STEPS.findIndex((step) => step.key === order.status)
-  const statusConfig = STATUS_CONFIG[order.status] || { label: 'Inconnu', color: 'text-gray-700', bgColor: 'bg-gray-100' }
+  const statusConfig = STATUS_CONFIG[order.status] || { label: t('statuses.unknown'), color: 'text-gray-700', bgColor: 'bg-gray-100' }
 
   const formatAddress = (address: Record<string, string>) => {
     const parts = [
@@ -120,19 +123,19 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
           className="inline-flex items-center text-sm text-nuanced-600 hover:text-anthracite-900 mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Retour aux commandes
+          {t('backToOrders')}
         </Link>
 
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-2xl font-bold text-anthracite-900">
-                Commande {order.orderNumber}
+                {t('order')} {order.orderNumber}
               </h1>
               <button
                 onClick={copyOrderNumber}
                 className="p-1.5 rounded-md hover:bg-platinum-100 transition-colors"
-                title="Copier le numéro"
+                title={t('copyNumber')}
               >
                 {copied ? (
                   <Check className="w-4 h-4 text-green-600" />
@@ -142,7 +145,7 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
               </button>
             </div>
             <p className="text-nuanced-600">
-              Passée le {formatDate(order.createdAt)}
+              {t('placedOn')} {formatDate(order.createdAt)}
             </p>
           </div>
           <Badge className={cn('px-4 py-2 text-sm', statusConfig.bgColor, statusConfig.color)}>
@@ -154,7 +157,7 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
       {/* Status Timeline (only for non-cancelled orders) */}
       {order.status !== 'CANCELLED' && (
         <div className="bg-white rounded-xl border border-platinum-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-anthracite-900 mb-6">Suivi de commande</h2>
+          <h2 className="text-lg font-semibold text-anthracite-900 mb-6">{t('tracking.title')}</h2>
           <div className="relative">
             {/* Progress Line */}
             <div className="absolute top-5 left-5 right-5 h-0.5 bg-platinum-200">
@@ -204,16 +207,16 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
             <div className="mt-6 pt-6 border-t border-platinum-100">
               <p className="text-sm text-nuanced-600">
                 <Truck className="w-4 h-4 inline mr-2" />
-                Livraison estimée :{' '}
+                {t('tracking.estimatedDelivery')} :{' '}
                 <span className="font-medium text-anthracite-900">
-                  {new Date(order.estimatedDeliveryMin).toLocaleDateString('fr-FR', {
+                  {new Date(order.estimatedDeliveryMin).toLocaleDateString(locale, {
                     day: 'numeric',
                     month: 'long',
                   })}
                   {order.estimatedDeliveryMax && (
                     <>
                       {' - '}
-                      {new Date(order.estimatedDeliveryMax).toLocaleDateString('fr-FR', {
+                      {new Date(order.estimatedDeliveryMax).toLocaleDateString(locale, {
                         day: 'numeric',
                         month: 'long',
                       })}
@@ -239,7 +242,7 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
           <div className="bg-white rounded-xl border border-platinum-200 overflow-hidden">
             <div className="p-4 border-b border-platinum-100">
               <h2 className="font-semibold text-anthracite-900">
-                Articles ({order.items.length})
+                {t('items.title')} ({order.items.length})
               </h2>
             </div>
             <div className="divide-y divide-platinum-100">
@@ -265,10 +268,10 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
                       {item.productName}
                     </Link>
                     <p className="text-sm text-nuanced-600 mt-1">
-                      Quantité : {item.quantity}
+                      {t('items.quantity')} : {item.quantity}
                     </p>
                     <p className="text-sm text-nuanced-600">
-                      Prix unitaire : {formatPrice(item.price)}
+                      {t('items.unitPrice')} : {formatPrice(item.price)}
                     </p>
                   </div>
                   <div className="text-right">
@@ -286,30 +289,30 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
         <div className="space-y-6">
           {/* Summary */}
           <div className="bg-white rounded-xl border border-platinum-200 p-4">
-            <h2 className="font-semibold text-anthracite-900 mb-4">Récapitulatif</h2>
+            <h2 className="font-semibold text-anthracite-900 mb-4">{t('summary.title')}</h2>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-nuanced-600">Sous-total</span>
+                <span className="text-nuanced-600">{t('summary.subtotal')}</span>
                 <span className="text-anthracite-700">{formatPrice(order.subtotal)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-nuanced-600">Livraison</span>
+                <span className="text-nuanced-600">{t('summary.shipping')}</span>
                 <span className="text-anthracite-700">
-                  {order.shippingCost === 0 ? 'Gratuite' : formatPrice(order.shippingCost)}
+                  {order.shippingCost === 0 ? t('summary.free') : formatPrice(order.shippingCost)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-nuanced-600">TVA</span>
+                <span className="text-nuanced-600">{t('summary.tax')}</span>
                 <span className="text-anthracite-700">{formatPrice(order.tax)}</span>
               </div>
               {order.discount > 0 && (
                 <div className="flex justify-between text-green-600">
-                  <span>Réduction</span>
+                  <span>{t('summary.discount')}</span>
                   <span>-{formatPrice(order.discount)}</span>
                 </div>
               )}
               <div className="pt-3 border-t border-platinum-200 flex justify-between">
-                <span className="font-semibold text-anthracite-900">Total</span>
+                <span className="font-semibold text-anthracite-900">{t('summary.total')}</span>
                 <span className="font-bold text-lg text-anthracite-900">
                   {formatPrice(order.total)}
                 </span>
@@ -321,7 +324,7 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
           <div className="bg-white rounded-xl border border-platinum-200 p-4">
             <div className="flex items-center gap-2 mb-3">
               <MapPin className="w-4 h-4 text-nuanced-500" />
-              <h2 className="font-semibold text-anthracite-900">Adresse de livraison</h2>
+              <h2 className="font-semibold text-anthracite-900">{t('shippingAddress')}</h2>
             </div>
             <div className="text-sm text-nuanced-600 space-y-1">
               {formatAddress(order.shippingAddress).map((line, i) => (
@@ -334,11 +337,11 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
           <div className="bg-white rounded-xl border border-platinum-200 p-4">
             <div className="flex items-center gap-2 mb-3">
               <CreditCard className="w-4 h-4 text-nuanced-500" />
-              <h2 className="font-semibold text-anthracite-900">Paiement</h2>
+              <h2 className="font-semibold text-anthracite-900">{t('payment')}</h2>
             </div>
             <div className="text-sm">
               <p className="text-nuanced-600">
-                Statut :{' '}
+                {t('paymentStatus.label', { defaultValue: 'Status' })} :{' '}
                 <span
                   className={cn(
                     'font-medium',
@@ -350,17 +353,17 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
                   )}
                 >
                   {order.paymentStatus === 'PAID'
-                    ? 'Payé'
+                    ? t('paymentStatus.paid')
                     : order.paymentStatus === 'FAILED'
-                    ? 'Échoué'
+                    ? t('paymentStatus.failed')
                     : order.paymentStatus === 'REFUNDED'
-                    ? 'Remboursé'
-                    : 'En attente'}
+                    ? t('paymentStatus.refunded')
+                    : t('paymentStatus.pending')}
                 </span>
               </p>
               {order.paymentGateway && (
                 <p className="text-nuanced-600 mt-1">
-                  Via : {order.paymentGateway}
+                  {t('paymentGateway', { defaultValue: 'Via' })} : {order.paymentGateway}
                 </p>
               )}
             </div>
@@ -371,7 +374,7 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
             <div className="bg-white rounded-xl border border-platinum-200 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <FileText className="w-4 h-4 text-nuanced-500" />
-                <h2 className="font-semibold text-anthracite-900">Notes</h2>
+                <h2 className="font-semibold text-anthracite-900">{t('notes')}</h2>
               </div>
               <p className="text-sm text-nuanced-600">{order.notes}</p>
             </div>
@@ -381,7 +384,7 @@ export function OrderDetailClient({ order }: OrderDetailClientProps) {
           <div className="space-y-3">
             <Link href="/contact" className="block">
               <Button variant="outline" className="w-full">
-                Besoin d'aide ?
+                {t('actions.needHelp')}
               </Button>
             </Link>
           </div>

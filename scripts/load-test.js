@@ -16,7 +16,7 @@ export const options = {
 
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000';
 
-export default function () {
+export default function loadTest() {
   // 1. Visit Homepage
   const homeRes = http.get(`${BASE_URL}/`);
   check(homeRes, {
@@ -41,7 +41,8 @@ export default function () {
   sleep(1);
 
   // 4. API Health Check
-  const apiRes = http.get(`${BASE_URL}/api/health`); // Assuming a health endpoint exists or similar
-  // If no health endpoint, check a public API
-  // const apiRes = http.get(`${BASE_URL}/api/products`); 
+  const apiRes = http.get(`${BASE_URL}/api/health`);
+  check(apiRes, {
+    'API health endpoint accessible': (r) => r.status === 200 || r.status === 404,
+  });
 }

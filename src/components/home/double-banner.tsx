@@ -4,6 +4,7 @@ import * as React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, Shirt, Watch, Sparkles, TrendingUp, ChevronRight } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
@@ -65,11 +66,12 @@ interface DoubleBannerProps {
 }
 
 export default function DoubleBanner({ banners = defaultBanners }: DoubleBannerProps) {
+  const t = useTranslations('home.banners')
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
 
   return (
-    <section 
+    <section
       ref={sectionRef}
       className="py-8 sm:py-10 md:py-14 bg-gradient-to-br from-slate-50 via-white to-gray-50"
     >
@@ -91,11 +93,11 @@ export default function DoubleBanner({ banners = defaultBanners }: DoubleBannerP
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
-                  Collections Tendance
+                  {t('title')}
                 </h2>
                 <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-amber-500" />
               </div>
-              <p className="text-sm sm:text-base text-gray-500 mt-0.5">Les styles les plus populaires du moment</p>
+              <p className="text-sm sm:text-base text-gray-500 mt-0.5">{t('subtitle')}</p>
             </div>
           </div>
 
@@ -104,7 +106,7 @@ export default function DoubleBanner({ banners = defaultBanners }: DoubleBannerP
             href="/categories"
             className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
           >
-            Voir toutes les collections
+            {t('viewAll')}
             <ChevronRight className="h-4 w-4" />
           </Link>
         </div>

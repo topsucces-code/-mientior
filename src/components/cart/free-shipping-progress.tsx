@@ -2,6 +2,7 @@
 
 import { Truck, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useCurrency } from '@/hooks/use-currency'
 
 interface FreeShippingProgressProps {
   currentTotal: number
@@ -10,14 +11,10 @@ interface FreeShippingProgressProps {
 }
 
 export function FreeShippingProgress({ currentTotal, threshold, className }: FreeShippingProgressProps) {
+  const { formatPrice } = useCurrency()
   const percentage = Math.min((currentTotal / threshold) * 100, 100)
   const remaining = Math.max(threshold - currentTotal, 0)
   const unlocked = currentTotal >= threshold
-
-  // Format cents to dollars
-  const formatPrice = (cents: number) => {
-    return `$${(cents / 100).toFixed(2)}`
-  }
 
   return (
     <div

@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { Shield, Truck, Award, Users, CreditCard, RotateCcw } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
 
@@ -11,38 +12,7 @@ interface TrustIndicator {
   text: string
 }
 
-const defaultIndicators: TrustIndicator[] = [
-  {
-    id: '1',
-    icon: <Users className="h-4 w-4" />,
-    text: '🔥 2,847 commandes aujourd\'hui',
-  },
-  {
-    id: '2',
-    icon: <Award className="h-4 w-4" />,
-    text: '⭐ 4.9/5 (120k avis)',
-  },
-  {
-    id: '3',
-    icon: <Truck className="h-4 w-4" />,
-    text: '🚚 Livraison 48h',
-  },
-  {
-    id: '4',
-    icon: <Shield className="h-4 w-4" />,
-    text: '✓ +2M clients',
-  },
-  {
-    id: '5',
-    icon: <CreditCard className="h-4 w-4" />,
-    text: '💳 Paiement sécurisé',
-  },
-  {
-    id: '6',
-    icon: <RotateCcw className="h-4 w-4" />,
-    text: '↩️ Retours 30j',
-  },
-]
+const defaultIndicators: TrustIndicator[] = []
 
 interface SocialProofBarProps extends React.HTMLAttributes<HTMLDivElement> {
   indicators?: TrustIndicator[]
@@ -51,14 +21,51 @@ interface SocialProofBarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export default function SocialProofBar({
-  indicators = defaultIndicators,
+  indicators: customIndicators,
   speed = 'normal',
   className,
   ...props
 }: SocialProofBarProps) {
+  const t = useTranslations('home.socialProof')
   const prefersReducedMotion = useReducedMotion()
   const scrollerRef = React.useRef<HTMLDivElement>(null)
   const [isPaused, setIsPaused] = React.useState(false)
+
+  // Create translated indicators
+  const translatedIndicators: TrustIndicator[] = [
+    {
+      id: '1',
+      icon: <Users className="h-4 w-4" />,
+      text: t('ordersToday', { count: 2847 }),
+    },
+    {
+      id: '2',
+      icon: <Award className="h-4 w-4" />,
+      text: t('ratingText', { rating: '4.9/5', count: '120k' }),
+    },
+    {
+      id: '3',
+      icon: <Truck className="h-4 w-4" />,
+      text: t('delivery'),
+    },
+    {
+      id: '4',
+      icon: <Shield className="h-4 w-4" />,
+      text: t('customersCount', { count: '2M' }),
+    },
+    {
+      id: '5',
+      icon: <CreditCard className="h-4 w-4" />,
+      text: t('securePayment'),
+    },
+    {
+      id: '6',
+      icon: <RotateCcw className="h-4 w-4" />,
+      text: t('returns'),
+    },
+  ]
+
+  const indicators = customIndicators || translatedIndicators
 
   // Duplicate indicators for seamless loop
   const duplicatedIndicators = [...indicators, ...indicators]
@@ -92,7 +99,7 @@ export default function SocialProofBar({
       )}
       style={{ top: 'var(--header-height, 0px)' }}
       role="region"
-      aria-label="Trust indicators"
+      aria-label={t('ariaLabel')}
       aria-live="polite"
       {...props}
     >
@@ -116,7 +123,7 @@ export default function SocialProofBar({
         onBlur={handleResume}
         tabIndex={0}
         role="marquee"
-        aria-label={`Trust indicators${isPaused ? ' (paused)' : ''}`}
+        aria-label={isPaused ? t('ariaLabelPaused') : t('ariaLabel')}
       >
         {duplicatedIndicators.map((indicator, index) => (
           <div

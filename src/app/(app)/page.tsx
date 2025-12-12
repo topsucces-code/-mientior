@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react'
 import dynamic from 'next/dynamic'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/prisma-simple'
 
 import TrustBadges from '@/components/home/trust-badges'
 import SocialProofBar from '@/components/home/social-proof-bar'
@@ -49,17 +49,30 @@ const NewsletterEnhanced = dynamic(() => import('@/components/home/newsletter-en
 // Add ISR revalidation
 export const revalidate = 300 // Revalidate every 5 minutes
 
+// Empty product type for fallback
+type ProductResult = {
+  id: string
+  name: string
+  slug: string
+  price: number
+  compareAtPrice: number | null
+  stock: number
+  rating: number
+  reviewCount: number
+  badge?: string | null
+  images: { url: string; alt: string }[]
+}[]
+
 export default async function HomePage() {
-  // Fetch real data from database
-  const [
-    featuredProducts,
-    trendingProducts,
-    flashDealsProducts,
-    _categories, // Not used in enhanced version - categories are hardcoded
-    _curatedProducts, // Not used - replaced by FeaturedProductsEnhanced
-  ] = await Promise.all([
-    // Featured products for main grid
-    prisma.product.findMany({
+  // Fetch real data from database with error handling
+  let featuredProducts: ProductResult = []
+  let trendingProducts: ProductResult = []
+  let flashDealsProducts: ProductResult = []
+
+  try {
+    const results = await Promise.all([
+      // Featured products for main grid
+      prisma.product.findMany({
       where: {
         status: 'ACTIVE',
         featured: true,
@@ -90,118 +103,79 @@ export default async function HomePage() {
       },
     }),
 
-    // Trending products
-    prisma.product.findMany({
-      where: {
-        status: 'ACTIVE',
-      },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        price: true,
-        compareAtPrice: true,
-        stock: true,
-        rating: true,
-        reviewCount: true,
-        badge: true,
-        images: {
-          select: {
-            url: true,
-            alt: true,
-          },
-          orderBy: {
-            order: 'asc',
-          },
-          take: 1,
+      // Trending products
+      prisma.product.findMany({
+        where: {
+          status: 'ACTIVE',
         },
-      },
-      take: 8,
-      orderBy: {
-        rating: 'desc',
-      },
-    }),
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          price: true,
+          compareAtPrice: true,
+          stock: true,
+          rating: true,
+          reviewCount: true,
+          badge: true,
+          images: {
+            select: {
+              url: true,
+              alt: true,
+            },
+            orderBy: {
+              order: 'asc',
+            },
+            take: 1,
+          },
+        },
+        take: 8,
+        orderBy: {
+          rating: 'desc',
+        },
+      }),
 
-    // Flash deals (products on sale)
-    prisma.product.findMany({
-      where: {
-        status: 'ACTIVE',
-        onSale: true,
-        compareAtPrice: {
-          not: null,
-        },
-      },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        price: true,
-        compareAtPrice: true,
-        stock: true,
-        images: {
-          select: {
-            url: true,
-            alt: true,
+      // Flash deals (products on sale)
+      prisma.product.findMany({
+        where: {
+          status: 'ACTIVE',
+          onSale: true,
+          compareAtPrice: {
+            not: null,
           },
-          orderBy: {
-            order: 'asc',
-          },
-          take: 1,
         },
-      },
-      take: 6,
-      orderBy: {
-        updatedAt: 'desc',
-      },
-    }),
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          price: true,
+          compareAtPrice: true,
+          stock: true,
+          images: {
+            select: {
+              url: true,
+              alt: true,
+            },
+            orderBy: {
+              order: 'asc',
+            },
+            take: 1,
+          },
+        },
+        take: 6,
+        orderBy: {
+          updatedAt: 'desc',
+        },
+      }),
+    ])
 
-    // Categories for navigation
-    prisma.category.findMany({
-      where: {
-        isActive: true,
-        parentId: null, // Only root categories
-      },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        image: true,
-      },
-      take: 8,
-      orderBy: {
-        order: 'asc',
-      },
-    }),
-
-    // Curated collection
-    prisma.product.findMany({
-      where: {
-        status: 'ACTIVE',
-        featured: true,
-      },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        price: true,
-        compareAtPrice: true,
-        images: {
-          select: {
-            url: true,
-            alt: true,
-          },
-          orderBy: {
-            order: 'asc',
-          },
-          take: 1,
-        },
-      },
-      take: 4,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    }),
-  ])
+    featuredProducts = results[0] as ProductResult
+    trendingProducts = results[1] as ProductResult
+    flashDealsProducts = results[2] as ProductResult
+  } catch (error) {
+    console.error('Database connection error:', error)
+    // Continue with empty arrays - page will show placeholders
+  }
 
   // Format products for component props with all details
   const mainProducts = featuredProducts.map((p, i) => ({
@@ -363,8 +337,6 @@ export default async function HomePage() {
                   ? { text: '-30%', variant: 'sale' as const }
                   : undefined,
           }))}
-          title="Produits Vedettes"
-          subtitle="Notre sélection des meilleurs produits"
         />
       </Suspense>
 
@@ -377,8 +349,6 @@ export default async function HomePage() {
       <Suspense fallback={<div className="h-96 animate-pulse bg-gray-100" />}>
         <BestSellers 
           products={bestSellersProducts}
-          title="Meilleures Ventes"
-          subtitle="Les produits les plus populaires de notre boutique"
         />
       </Suspense>
 
@@ -391,8 +361,6 @@ export default async function HomePage() {
       <Suspense fallback={<div className="h-96 animate-pulse bg-gray-100" />}>
         <NewArrivalsMasonry 
           products={newArrivalsProducts}
-          title="Nouveautés"
-          subtitle="Découvrez nos dernières arrivées"
         />
       </Suspense>
 

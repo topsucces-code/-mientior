@@ -16,7 +16,7 @@ export function initSentry() {
   }
 }
 
-export function captureError(error: Error, context?: Record<string, any>) {
+export function captureError(error: Error, context?: Record<string, unknown>) {
   console.error('Error captured:', error)
   
   if (process.env.NEXT_PUBLIC_SENTRY_DSN) {

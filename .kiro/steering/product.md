@@ -2,6 +2,8 @@
 
 Mientior is a premium e-commerce marketplace platform built for the French market. It's a full-stack Next.js application featuring a customer-facing storefront and a comprehensive admin panel for managing products, orders, vendors, and marketing campaigns.
 
+**Last Updated:** December 12, 2024
+
 ## Core Features
 
 - Multi-vendor marketplace with commission tracking

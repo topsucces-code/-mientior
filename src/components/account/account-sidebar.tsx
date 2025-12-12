@@ -3,6 +3,7 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   User,
   ShoppingBag,
@@ -24,56 +25,57 @@ export interface AccountSidebarProps {
   onSignOut?: () => void
 }
 
-const navigationItems = [
-  {
-    title: 'Mon compte',
-    href: '/account',
-    icon: User,
-  },
-  {
-    title: 'Mes commandes',
-    href: '/account/orders',
-    icon: ShoppingBag,
-  },
-  {
-    title: 'Ma liste de souhaits',
-    href: '/account/wishlist',
-    icon: Heart,
-  },
-  {
-    title: 'Mes adresses',
-    href: '/account/addresses',
-    icon: MapPin,
-  },
-  {
-    title: 'Moyens de paiement',
-    href: '/account/payment-methods',
-    icon: CreditCard,
-  },
-  {
-    title: 'Sécurité',
-    href: '/account/security',
-    icon: Shield,
-  },
-  {
-    title: 'Programme fidélité',
-    href: '/account/loyalty',
-    icon: Trophy,
-  },
-  {
-    title: 'Récompenses',
-    href: '/account/rewards',
-    icon: Gift,
-  },
-  {
-    title: 'Paramètres',
-    href: '/account/settings',
-    icon: Settings,
-  },
-]
-
 export function AccountSidebar({ className, onSignOut }: AccountSidebarProps) {
   const pathname = usePathname()
+  const t = useTranslations('account.sidebar')
+
+  const navigationItems = [
+    {
+      title: t('nav.myAccount'),
+      href: '/account',
+      icon: User,
+    },
+    {
+      title: t('nav.orders'),
+      href: '/account/orders',
+      icon: ShoppingBag,
+    },
+    {
+      title: t('nav.wishlist'),
+      href: '/account/wishlist',
+      icon: Heart,
+    },
+    {
+      title: t('nav.addresses'),
+      href: '/account/addresses',
+      icon: MapPin,
+    },
+    {
+      title: t('nav.paymentMethods'),
+      href: '/account/payment-methods',
+      icon: CreditCard,
+    },
+    {
+      title: t('nav.security'),
+      href: '/account/security',
+      icon: Shield,
+    },
+    {
+      title: t('nav.loyalty'),
+      href: '/account/loyalty',
+      icon: Trophy,
+    },
+    {
+      title: t('nav.rewards'),
+      href: '/account/rewards',
+      icon: Gift,
+    },
+    {
+      title: t('nav.settings'),
+      href: '/account/settings',
+      icon: Settings,
+    },
+  ]
 
   return (
     <aside
@@ -83,8 +85,8 @@ export function AccountSidebar({ className, onSignOut }: AccountSidebarProps) {
       )}
     >
       <div>
-        <h2 className="text-lg font-semibold text-anthracite-700">Mon Compte</h2>
-        <p className="text-sm text-nuanced-500">Gérez vos paramètres</p>
+        <h2 className="text-lg font-semibold text-anthracite-700">{t('title')}</h2>
+        <p className="text-sm text-nuanced-500">{t('subtitle')}</p>
       </div>
 
       <Separator />
@@ -120,7 +122,7 @@ export function AccountSidebar({ className, onSignOut }: AccountSidebarProps) {
         onClick={onSignOut}
       >
         <LogOut className="h-5 w-5" />
-        Déconnexion
+        {t('signOut')}
       </Button>
     </aside>
   )

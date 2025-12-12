@@ -134,7 +134,7 @@ export default function ProductEdit({ params }: { params: Promise<{ id: string }
         />
       )}
 
-      <Form {...formProps} layout="vertical">
+      <Form {...formProps} form={form} layout="vertical">
         <Form.Item
           label="Name"
           name="name"
@@ -355,7 +355,6 @@ export default function ProductEdit({ params }: { params: Promise<{ id: string }
                   <Form.Item
                     {...restField}
                     name={[name, "type"]}
-                    initialValue="IMAGE"
                   >
                     <Select style={{ width: 120 }} disabled={hasPimMapping}>
                       <Select.Option value="IMAGE">Image</Select.Option>
@@ -371,7 +370,7 @@ export default function ProductEdit({ params }: { params: Promise<{ id: string }
                 <Form.Item>
                   <Button
                     type="dashed"
-                    onClick={() => add()}
+                    onClick={() => add({ type: "IMAGE" })}
                     block
                     icon={<PlusOutlined />}
                   >

@@ -128,7 +128,6 @@ describe.skipIf(!shouldRunIntegrationTests)('Security Tests - OWASP Top 10', () 
 
     it('should not expose server version', async () => {
       const response = await fetch(BASE_URL)
-      const server = response.headers.get('server')
       const xPoweredBy = response.headers.get('x-powered-by')
       
       // Should not reveal Next.js or Node version

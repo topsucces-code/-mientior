@@ -5,8 +5,28 @@
  */
 
 import React, { useState, useEffect } from 'react'
+import {
+  FileText,
+  ListChecks,
+  MessageSquare,
+  Truck,
+  ThumbsUp,
+  ThumbsDown,
+  HelpCircle,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  MessageSquarePlus,
+  ShieldCheck,
+  MessageCircle,
+  Globe,
+  Store,
+  Filter,
+  Check,
+  RotateCcw
+} from 'lucide-react'
 import Image from 'next/image'
-import { FileText, ListChecks, MessageSquare, ThumbsUp, ThumbsDown, HelpCircle, Truck, X, ChevronLeft, ChevronRight, Search, MessageSquarePlus, ShieldCheck, MessageCircle, RotateCcw, Globe, Check, Store } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { StarRating } from '@/components/ui/star-rating'
 import { Avatar } from '@/components/ui/avatar'
@@ -15,11 +35,21 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Progress } from '@/components/ui/progress'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useToast } from '@/hooks/use-toast'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { PDP_CONFIG } from '@/lib/constants'
 import type { Product, Review, ReviewStats, QA, ShippingInfo } from '@/types'
+import { useTranslations } from 'next-intl'
+import { cn } from '@/lib/utils'
 
 interface ProductTabsProps {
   product: Product
@@ -35,25 +65,25 @@ interface ProductTabsProps {
  */
 function formatSpecificationValue(value: string): string {
   if (!value) return value
-  
+
   // Check if value already has a unit (common units)
   const hasUnit = /\d+\s*(cm|mm|m|km|kg|g|mg|l|ml|cl|w|kw|v|a|hz|khz|mhz|ghz|gb|mb|tb|kb|inch|in|lb|oz|ft|yd|°c|°f|%|px|dpi)$/i.test(value)
   if (hasUnit) return value
-  
+
   // Check for dimension patterns (e.g., "30 x 20 x 10")
   const dimensionMatch = value.match(/^(\d+\.?\d*)\s*x\s*(\d+\.?\d*)\s*x\s*(\d+\.?\d*)$/i)
   if (dimensionMatch) {
     // Dimensions without units - return as-is
     return value
   }
-  
+
   // Check if it's a pure number that might need a unit
   const numMatch = value.match(/^(\d+\.?\d*)$/)
   if (numMatch) {
     // Return as-is, unit should be in the key or context
     return value
   }
-  
+
   return value
 }
 
@@ -62,7 +92,7 @@ function formatSpecificationValue(value: string): string {
  */
 function parseSpecifications(specs: Record<string, string> | undefined): Array<{ category: string; items: Array<{ key: string; value: string }> }> {
   if (!specs || Object.keys(specs).length === 0) return []
-  
+
   // For now, return all specs in a single "General" category
   // In the future, this could be enhanced to group by category
   return [{
@@ -74,40 +104,45 @@ function parseSpecifications(specs: Record<string, string> | undefined): Array<{
   }]
 }
 
-export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shippingInfo }: ProductTabsProps) {
+export function ProductTabs({ product, reviews: initialReviews = [], reviewStats, qa = [], shippingInfo }: ProductTabsProps) {
   const [reviewSort, setReviewSort] = useState<'recent' | 'helpful' | 'rating'>('recent')
   const [filters, setFilters] = useState<{ photos: boolean; videos: boolean; verified: boolean; rating: number | null }>({ photos: false, videos: false, verified: false, rating: null })
   const [isWriteReviewOpen, setIsWriteReviewOpen] = useState(false)
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
-  const [allReviews, setAllReviews] = useState(reviews)
+  const [allReviews, setAllReviews] = useState(initialReviews)
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const { toast } = useToast()
-  
+
   // Q&A state
   const [searchQuery, setSearchQuery] = useState('')
   const [showAskModal, setShowAskModal] = useState(false)
   const [userVotes, setUserVotes] = useState<Record<string, 'helpful' | 'notHelpful' | null>>({})
   const [expandedAnswers, setExpandedAnswers] = useState<Record<string, boolean>>({})
 
+  // Translations
+  const tTabs = useTranslations('products.pdp.tabs')
+  const tReviews = useTranslations('products.pdp.reviews')
+  const tQa = useTranslations('products.pdp.qa')
+
   // Parse specifications
   const specificationGroups = parseSpecifications(product.specifications)
 
   // Initialize reviews when they change
   useEffect(() => {
-    setAllReviews(reviews)
+    setAllReviews(initialReviews)
     setCurrentPage(1)
-    setHasMore(reviewStats ? reviews.length < reviewStats.total : false)
-  }, [reviews, reviewStats])
+    setHasMore(reviewStats ? initialReviews.length < reviewStats.total : false)
+  }, [initialReviews, reviewStats])
 
   // Reset pagination when filters or sort change
   useEffect(() => {
     setCurrentPage(1)
-    setAllReviews(reviews)
-    setHasMore(reviewStats ? reviews.length < reviewStats.total : false)
-  }, [filters, reviewSort, reviews, reviewStats])
+    setAllReviews(initialReviews)
+    setHasMore(reviewStats ? initialReviews.length < reviewStats.total : false)
+  }, [filters, reviewSort, initialReviews, reviewStats])
 
   // Load more reviews handler
   const loadMoreReviews = async () => {
@@ -140,8 +175,8 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
     } catch (error) {
       console.error('Error loading more reviews:', error)
       toast({
-        title: 'Erreur',
-        description: 'Impossible de charger plus d\'avis',
+        title: tReviews('errorTitle'),
+        description: tReviews('errorLoadingMore'),
         variant: 'destructive',
       })
     } finally {
@@ -181,49 +216,49 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
 
   return (
     <Tabs defaultValue="description" className="w-full">
-      <TabsList 
+      <TabsList
         className="w-full justify-start border-b border-platinum-300 bg-transparent rounded-none h-auto p-0"
-        aria-label="Informations produit"
+        aria-label={tTabs('ariaLabel')}
       >
         <TabsTrigger
           value="description"
           className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none px-6 py-4"
-          aria-label="Description du produit"
+          aria-label={tTabs('descriptionAriaLabel')}
         >
           <FileText className="w-4 h-4" aria-hidden="true" />
-          Description
+          {tTabs('description')}
         </TabsTrigger>
         <TabsTrigger
           value="specifications"
           className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none px-6 py-4"
-          aria-label="Caractéristiques techniques"
+          aria-label={tTabs('specsAriaLabel')}
         >
           <ListChecks className="w-4 h-4" aria-hidden="true" />
-          Caractéristiques
+          {tTabs('specs')}
         </TabsTrigger>
         <TabsTrigger
           value="reviews"
           className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none px-6 py-4"
-          aria-label={`Avis clients, ${reviews.length} avis`}
+          aria-label={tTabs('reviewsAriaLabel', { count: initialReviews.length })}
         >
           <MessageSquare className="w-4 h-4" aria-hidden="true" />
-          Avis ({reviews.length})
+          {tTabs('reviews', { count: initialReviews.length })}
         </TabsTrigger>
         <TabsTrigger
           value="qa"
           className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none px-6 py-4"
-          aria-label={`Questions et réponses, ${qa.length} questions`}
+          aria-label={tTabs('qaAriaLabel', { count: qa.length })}
         >
           <HelpCircle className="w-4 h-4" aria-hidden="true" />
-          Questions & Réponses ({qa.length})
+          {tTabs('qa', { count: qa.length })}
         </TabsTrigger>
         <TabsTrigger
           value="shipping"
           className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none px-6 py-4"
-          aria-label="Informations de livraison et retours"
+          aria-label={tTabs('shippingAriaLabel')}
         >
           <Truck className="w-4 h-4" aria-hidden="true" />
-          Livraison & Retours
+          {tTabs('shipping')}
         </TabsTrigger>
       </TabsList>
 
@@ -255,7 +290,7 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
                     </h4>
                   )
                 }
-                
+
                 // Check if paragraph is a list (lines starting with - or *)
                 const lines = paragraph.split('\n')
                 if (lines.every(line => line.trim().startsWith('-') || line.trim().startsWith('*') || line.trim() === '')) {
@@ -270,7 +305,7 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
                     </ul>
                   )
                 }
-                
+
                 // Regular paragraph with inline formatting
                 return (
                   <p key={index} className="whitespace-pre-wrap">
@@ -298,244 +333,266 @@ export function ProductTabs({ product, reviews = [], reviewStats, qa = [], shipp
         {product.specifications && Object.keys(product.specifications).length > 0 && (
           <div className="mt-8 bg-platinum-50 rounded-lg p-6 border border-platinum-200">
             <h3 className="text-lg font-bold text-anthracite-900 mb-4 flex items-center gap-2">
-              <span className="text-orange-500">✓</span>
-              Points clés
+              <ShieldCheck className="w-5 h-5 text-orange-500" />
+              {tTabs('keyPoints')}
             </h3>
-            <div className="grid gap-3">
-              {Object.entries(product.specifications).slice(0, 5).map(([key, value]) => (
-                <div key={key} className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
-                  <p className="text-nuanced-700">
-                    <strong className="text-anthracite-900">{key}:</strong> {value}
-                  </p>
-                </div>
+            <ul className="grid sm:grid-cols-2 gap-3">
+              {Object.entries(product.specifications).slice(0, 4).map(([key, value], i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-nuanced-700">
+                  <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                  <span><span className="font-medium text-anthracite-900">{key.replace(/_/g, ' ')}:</span> {String(value)}</span>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         )}
       </TabsContent>
 
       {/* Specifications Tab */}
-      <TabsContent value="specifications" className="mt-8" role="tabpanel" aria-labelledby="specifications-tab">
-        {specificationGroups.length > 0 ? (
-          <div className="space-y-8">
-            {specificationGroups.map((group, groupIndex) => (
-              <div key={groupIndex}>
-                {specificationGroups.length > 1 && (
-                  <h3 className="text-lg font-bold text-anthracite-900 mb-4">{group.category}</h3>
-                )}
-                <div className="border border-platinum-200 rounded-lg overflow-hidden">
-                  <table className="w-full">
-                    <tbody className="divide-y divide-platinum-200">
-                      {group.items.map((item, itemIndex) => (
-                        <tr key={itemIndex} className="hover:bg-platinum-50 transition-colors">
-                          <td className="w-1/3 px-6 py-4 font-medium text-anthracite-900 bg-platinum-50/50">
-                            {item.key}
-                          </td>
-                          <td className="w-2/3 px-6 py-4 text-nuanced-700">
-                            {item.value || <span className="text-nuanced-400 italic">Non spécifié</span>}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+      <TabsContent value="specifications" className="mt-8 space-y-8" role="tabpanel" aria-labelledby="specifications-tab">
+        <div className="grid md:grid-cols-2 gap-8">
+          {specificationGroups.map((group, groupIndex) => (
+            <div key={groupIndex} className="bg-white rounded-xl border border-platinum-200 overflow-hidden">
+              <div className="bg-platinum-50 px-6 py-4 border-b border-platinum-200">
+                <h3 className="font-bold text-anthracite-900 flex items-center gap-2">
+                  <ListChecks className="w-5 h-5 text-orange-500" />
+                  {tTabs('generalSpecs')}
+                </h3>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <ListChecks className="w-12 h-12 text-nuanced-400 mx-auto mb-4" />
-            <p className="text-nuanced-500 italic">Aucune caractéristique technique disponible pour ce produit.</p>
-          </div>
-        )}
+              <div className="divide-y divide-platinum-100">
+                {group.items.map((spec, index) => (
+                  <div key={index} className="grid grid-cols-2 p-4 hover:bg-platinum-50/50 transition-colors">
+                    <dt className="font-medium text-nuanced-600">{spec.key.replace(/_/g, ' ')}</dt>
+                    <dd className="text-anthracite-900 font-medium text-right">{spec.value}</dd>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+          
+          {specificationGroups.length === 0 && (
+            <div className="col-span-2 text-center py-12 bg-platinum-50 rounded-xl border border-dashed border-platinum-300">
+              <ListChecks className="w-12 h-12 text-nuanced-300 mx-auto mb-3" />
+              <p className="text-nuanced-500 font-medium">{tTabs('noSpecs')}</p>
+            </div>
+          )}
+        </div>
       </TabsContent>
 
       {/* Reviews Tab */}
       <TabsContent value="reviews" className="mt-8 space-y-8" role="tabpanel" aria-labelledby="reviews-tab">
-        {/* Review Summary */}
-        {reviewStats && (
-          <div className="bg-platinum-50 rounded-lg p-6 border border-platinum-200">
-            <div className="flex flex-col md:flex-row gap-8">
-              {/* Overall Rating */}
-              <div className="flex flex-col items-center justify-center text-center min-w-[200px]">
-                <div className="text-5xl font-bold text-anthracite-900 mb-2">
-                  {reviewStats.average.toFixed(1)}
+        {/* Reviews Summary Header */}
+        <div className="bg-platinum-50 border border-platinum-200 rounded-2xl p-6 md:p-8">
+          <div className="grid md:grid-cols-3 gap-8 items-center">
+            {/* Overall Rating */}
+            <div className="text-center md:text-left space-y-2">
+              <div className="flex items-center justify-center md:justify-start gap-4">
+                <span className="text-5xl font-bold text-anthracite-900">{reviewStats?.average.toFixed(1) || '0.0'}</span>
+                <div className="space-y-1">
+                  <StarRating rating={reviewStats?.average || 0} size="lg" />
+                  <p className="text-sm text-nuanced-600 font-medium">
+                    {tReviews('summaryBase', { count: reviewStats?.total || 0 })}
+                  </p>
                 </div>
-                <StarRating rating={reviewStats.average} size="lg" />
-                <p className="text-sm text-nuanced-600 mt-2">
-                  Basé sur {reviewStats.total} avis
-                </p>
-              </div>
-
-              {/* Rating Distribution */}
-              <div className="flex-1 space-y-2">
-                {([5, 4, 3, 2, 1] as const).map((rating) => {
-                  const count = reviewStats.distribution[rating]
-                  const percentage = reviewStats.total > 0 ? (count / reviewStats.total) * 100 : 0
-
-                  return (
-                    <button
-                      key={rating}
-                      type="button"
-                      onClick={() => setFilters(prev => ({ ...prev, rating: prev.rating === rating ? null : rating }))}
-                      className={`flex items-center gap-3 w-full hover:bg-platinum-100 rounded px-2 py-1 transition-colors ${filters.rating === rating ? 'bg-orange-50' : ''}`}
-                      data-testid={`filter-rating-${rating}`}
-                    >
-                      <span className="text-sm font-medium text-anthracite-900 w-12">
-                        {rating} étoiles
-                      </span>
-                      <div className="flex-1 h-3 bg-platinum-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-aurore-500 transition-all"
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
-                      <span className="text-sm text-nuanced-600 w-12 text-right">
-                        {count}
-                      </span>
-                    </button>
-                  )
-                })}
               </div>
             </div>
 
-            {/* Prominent Write Review CTA */}
-            <div className="mt-6">
+            {/* Rating Distribution Bars */}
+            <div className="space-y-2 w-full max-w-xs mx-auto md:mx-0">
+              {[5, 4, 3, 2, 1].map((rating) => {
+                const count = reviewStats?.distribution[rating as keyof typeof reviewStats.distribution] || 0
+                const total = reviewStats?.total || 1
+                const percentage = (count / total) * 100
+                
+                return (
+                  <div key={rating} className="flex items-center gap-3 text-sm">
+                    <span className="flex items-center gap-1 w-12 font-medium text-nuanced-700">
+                      {rating} <span className="text-yellow-400">★</span>
+                    </span>
+                    <Progress value={percentage} className="h-2 flex-1 bg-platinum-200" indicatorClassName="bg-yellow-400" />
+                    <span className="w-8 text-right text-nuanced-500 text-xs">{percentage.toFixed(0)}%</span>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Write Review Action */}
+            <div className="text-center md:text-right">
               <Dialog open={isWriteReviewOpen} onOpenChange={setIsWriteReviewOpen}>
                 <DialogTrigger asChild>
-                  <Button className="w-full bg-orange-600 hover:bg-orange-700 text-white">
-                    Écrire un avis
+                  <Button size="lg" className="bg-anthracite-900 hover:bg-anthracite-800 text-white shadow-lg shadow-anthracite-900/10 rounded-full px-8">
+                    <MessageSquarePlus className="mr-2 h-5 w-5" />
+                    {tReviews('writeReview')}
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="sm:max-w-[500px]">
                   <DialogHeader>
-                    <DialogTitle>Écrire un avis pour {product.name}</DialogTitle>
+                    <DialogTitle>{tReviews('writeReviewTitle', { productName: product.name })}</DialogTitle>
                   </DialogHeader>
-                  <WriteReviewModal product={product} onClose={() => setIsWriteReviewOpen(false)} />
+                  <div className="py-6">
+                    <div className="space-y-4">
+                      <p className="text-center text-nuanced-600">
+                        {/* Placeholder for the review form */}
+                        Formulaire d'avis à implémenter ici...
+                      </p>
+                    </div>
+                  </div>
                 </DialogContent>
               </Dialog>
             </div>
           </div>
-        )}
-
-        {/* Filter Controls */}
-        {reviews.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-nuanced-600 mr-2">Filtrer par:</span>
-            <Button
-              variant={!filters.photos && !filters.videos && !filters.verified && filters.rating === null ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilters({ photos: false, videos: false, verified: false, rating: null })}
-              className={!filters.photos && !filters.videos && !filters.verified && filters.rating === null ? 'bg-orange-600 hover:bg-orange-700' : ''}
-              data-testid="filter-all"
-            >
-              Tous
-            </Button>
-            <Button
-              variant={filters.photos ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilters(prev => ({ ...prev, photos: !prev.photos }))}
-              className={filters.photos ? 'bg-orange-600 hover:bg-orange-700' : ''}
-              data-testid="filter-photos"
-            >
-              Avec photos
-            </Button>
-            <Button
-              variant={filters.videos ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilters(prev => ({ ...prev, videos: !prev.videos }))}
-              className={filters.videos ? 'bg-orange-600 hover:bg-orange-700' : ''}
-              data-testid="filter-videos"
-            >
-              Avec vidéos
-            </Button>
-            <Button
-              variant={filters.verified ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilters(prev => ({ ...prev, verified: !prev.verified }))}
-              className={filters.verified ? 'bg-orange-600 hover:bg-orange-700' : ''}
-              data-testid="filter-verified"
-            >
-              Achat vérifié
-            </Button>
-          </div>
-        )}
-
-        {/* Sort Options */}
-        {reviews.length > 0 && (
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-anthracite-900">
-              {filteredReviews.length === reviews.length 
-                ? `Avis clients (${reviews.length})`
-                : `${filteredReviews.length} sur ${reviews.length} avis affichés`
-              }
-            </h3>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-nuanced-600">Trier par:</span>
-              <select
-                value={reviewSort}
-                onChange={(e) => setReviewSort(e.target.value as typeof reviewSort)}
-                className="px-3 py-1.5 border border-platinum-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-              >
-                <option value="recent">Plus récents</option>
-                <option value="helpful">Plus utiles</option>
-                <option value="rating">Note la plus élevée</option>
-              </select>
-            </div>
-          </div>
-        )}
-
-        {/* Reviews List */}
-        <div className="space-y-6" data-testid="reviews-list">
-          {filteredReviews.length > 0 ? (
-            filteredReviews.map((review) => (
-              <ReviewItem key={review.id} review={review} />
-            ))
-          ) : reviews.length > 0 ? (
-            <div className="text-center py-12" data-testid="no-results-message">
-              <MessageSquare className="w-12 h-12 text-nuanced-400 mx-auto mb-4" />
-              <p className="text-nuanced-600 mb-4">Aucun avis ne correspond à vos filtres.</p>
-              <Button
-                variant="outline"
-                onClick={() => setFilters({ photos: false, videos: false, verified: false, rating: null })}
-              >
-                Réinitialiser les filtres
-              </Button>
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <MessageSquare className="w-12 h-12 text-nuanced-400 mx-auto mb-4" />
-              <p className="text-nuanced-600 mb-4">Aucun avis pour ce produit.</p>
-              <Button 
-                variant="outline"
-                onClick={() => setIsWriteReviewOpen(true)}
-              >
-                Soyez le premier à donner votre avis
-              </Button>
-            </div>
-          )}
         </div>
 
-        {/* Load More Button */}
-        {hasMore && filteredReviews.length > 0 && reviewStats && allReviews.length < reviewStats.total && (
-          <div className="text-center pt-4">
-            <Button
-              variant="outline"
-              className="min-w-[200px]"
-              onClick={loadMoreReviews}
-              disabled={loadingMore}
-              data-testid="load-more-reviews"
+        {/* Filters and Sort */}
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between sticky top-[calc(8rem)] z-30 bg-white/95 backdrop-blur py-4 border-b border-platinum-100">
+          
+          {/* Filters */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium text-nuanced-500 mr-2 flex items-center gap-1">
+              <Filter className="w-4 h-4" />
+              {tReviews('filterBy')}
+            </span>
+            <Button 
+              variant={Object.values(filters).every(v => !v && v !== 0) ? "secondary" : "outline"} 
+              size="sm" 
+              onClick={() => setFilters({ photos: false, videos: false, verified: false, rating: null })}
+              className="rounded-full text-xs h-8"
             >
-              {loadingMore ? 'Chargement...' : 'Voir plus d\'avis'}
+              {tReviews('filterAll')}
             </Button>
-            {reviewStats && (
-              <p className="text-sm text-nuanced-500 mt-2">
-                {allReviews.length} sur {reviewStats.total} avis affichés
-              </p>
-            )}
+            <Button 
+              variant={filters.photos ? "secondary" : "outline"} 
+              size="sm"
+              onClick={() => setFilters(prev => ({ ...prev, photos: !prev.photos }))}
+              className={cn("rounded-full text-xs h-8", filters.photos && "border-orange-200 bg-orange-50 text-orange-700")}
+            >
+              {tReviews('filterPhotos')}
+            </Button>
+             <Button 
+              variant={filters.verified ? "secondary" : "outline"} 
+              size="sm"
+              onClick={() => setFilters(prev => ({ ...prev, verified: !prev.verified }))}
+              className={cn("rounded-full text-xs h-8", filters.verified && "border-emerald-200 bg-emerald-50 text-emerald-700")}
+            >
+              <ShieldCheck className="w-3 h-3 mr-1.5" />
+              {tReviews('filterVerified')}
+            </Button>
           </div>
-        )}
+
+          {/* Sort */}
+          <div className="flex items-center gap-2 ml-auto">
+            <span className="text-sm text-nuanced-500 whitespace-nowrap hidden sm:inline">{tReviews('sortBy')}</span>
+            <Select value={reviewSort} onValueChange={(v: any) => setReviewSort(v)}>
+              <SelectTrigger className="w-[180px] h-9 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">{tReviews('sortRecent')}</SelectItem>
+                <SelectItem value="helpful">{tReviews('sortHelpful')}</SelectItem>
+                <SelectItem value="rating">{tReviews('sortRating')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Reviews List */}
+        <div className="space-y-6">
+          {filteredReviews.length > 0 ? (
+            filteredReviews.map((review) => (
+              <div key={review.id} className="group border-b border-platinum-100 last:border-0 pb-8 last:pb-0 animate-in fade-in duration-500">
+                <div className="flex gap-4">
+                  <Avatar 
+                    src={`https://api.dicebear.com/7.x/initials/svg?seed=${review.userName}`}
+                    fallback={review.userName.substring(0, 2).toUpperCase()}
+                    className="w-10 h-10 border border-platinum-200"
+                  />
+                  
+                  <div className="flex-1 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                       <div>
+                         <div className="flex items-center gap-2 mb-1">
+                           <span className="font-bold text-anthracite-900">{review.userName}</span>
+                           {review.verified && (
+                             <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-100 gap-1 text-[10px] px-1.5 py-0 h-5">
+                               <ShieldCheck className="w-3 h-3" />
+                               {tReviews('filterVerified')}
+                             </Badge>
+                           )}
+                         </div>
+                         <div className="flex items-center gap-2 text-xs text-nuanced-500">
+                            <StarRating rating={review.rating} size="sm" />
+                            <span>•</span>
+                            <time dateTime={new Date(review.createdAt).toISOString()}>{formatDistanceToNow(new Date(review.createdAt), { addSuffix: true, locale: fr })}</time>
+                         </div>
+                       </div>
+                    </div>
+
+                    <div className="prose prose-sm max-w-none text-nuanced-700">
+                      <p>{review.comment}</p>
+                    </div>
+
+                    {/* Review Response (if any) */}
+                    {/* Placeholder logic for response */}
+                    {false && (
+                        <div className="bg-platinum-50 rounded-lg p-4 mt-3 text-sm">
+                            <div className="flex items-center gap-2 font-bold text-anthracite-900 mb-1">
+                                <Store className="w-4 h-4" />
+                                <span className="text-orange-600">Réponse de Mientior</span>
+                            </div>
+                            <p className="text-nuanced-600">Merci pour votre retour !</p>
+                        </div>
+                    )}
+                    
+                    <div className="flex items-center gap-4 pt-2">
+                       <Button variant="ghost" size="sm" className="h-8 px-2 text-nuanced-500 hover:text-anthracite-900 gap-1.5 rounded-full">
+                           <ThumbsUp className="w-4 h-4" />
+                           <span className="text-xs font-medium">{tReviews('helpful', { count: review.helpful })}</span>
+                           <span className="sr-only">Utile</span>
+                       </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-16 bg-platinum-50 rounded-2xl border border-dashed border-platinum-300">
+               <MessageSquare className="w-12 h-12 text-nuanced-300 mx-auto mb-4" />
+               <h3 className="text-lg font-bold text-anthracite-900 mb-2">{tReviews('noResults')}</h3>
+               <p className="text-nuanced-500 max-w-sm mx-auto mb-6">
+                 {filters.rating !== null || filters.photos || filters.verified 
+                    ? tReviews('noResultsFiltersDesc') 
+                    : tReviews('noReviews')}
+               </p>
+               {(filters.rating !== null || filters.photos || filters.verified) ? (
+                 <Button variant="outline" onClick={() => setFilters({ photos: false, videos: false, verified: false, rating: null })}>
+                   {tReviews('resetFilters')}
+                 </Button>
+               ) : (
+                 <Button onClick={() => setIsWriteReviewOpen(true)}>
+                   {tReviews('beFirst')}
+                 </Button>
+               )}
+            </div>
+          )}
+
+          {/* Load More Button */}
+          {hasMore && filteredReviews.length > 0 && (
+             <div className="pt-8 text-center border-t border-platinum-100">
+                <Button 
+                   variant="outline" 
+                   size="lg" 
+                   className="rounded-full px-8 min-w-[200px]"
+                   onClick={loadMoreReviews}
+                   disabled={loadingMore}
+                >
+                   {loadingMore ? tReviews('loading') : tReviews('loadMore')}
+                </Button>
+                <div className="mt-2 text-xs text-nuanced-400">
+                    {tReviews('showingCount', { count: filteredReviews.length, total: reviewStats?.total || 0 })}
+                </div>
+             </div>
+          )}
+        </div>
       </TabsContent>
 
       {/* Q&A Tab */}

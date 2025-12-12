@@ -3,6 +3,7 @@
 import { Search, Mic, Camera, X, Clock } from 'lucide-react'
 import { useHeader } from '@/contexts/header-context'
 import { useState, useRef, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import type { SearchSuggestion } from '@/types'
 import { useSearchHistory } from '@/hooks/use-search-history'
 
@@ -57,6 +58,7 @@ declare global {
 
 export function AdvancedSearchBar() {
     const { searchQuery, setSearchQuery } = useHeader()
+    const t = useTranslations('header')
     const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [showHistory, setShowHistory] = useState(false)
@@ -235,7 +237,7 @@ export function AdvancedSearchBar() {
                             setShowHistory(false)
                         }, 200)
                     }}
-                    placeholder="Rechercher des produits, marques ou catégories..."
+                    placeholder={t('search')}
                     className="w-full h-12 pl-12 pr-32 rounded-full border-2 border-gray-200 focus:border-emerald-500 focus:outline-none transition-colors"
                 />
 

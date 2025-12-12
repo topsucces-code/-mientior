@@ -4,6 +4,7 @@ import * as React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations, useLocale } from 'next-intl'
 import { Package, ChevronRight, Search, Calendar, ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -52,27 +53,30 @@ interface OrderHistoryClientProps {
   filters: OrdersQuery
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
-  PENDING: { label: 'En attente', color: 'text-amber-700', bgColor: 'bg-amber-100' },
-  PROCESSING: { label: 'En cours', color: 'text-blue-700', bgColor: 'bg-blue-100' },
-  SHIPPED: { label: 'Expédiée', color: 'text-purple-700', bgColor: 'bg-purple-100' },
-  DELIVERED: { label: 'Livrée', color: 'text-green-700', bgColor: 'bg-green-100' },
-  CANCELLED: { label: 'Annulée', color: 'text-red-700', bgColor: 'bg-red-100' },
-}
-
-const PAYMENT_STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  PENDING: { label: 'En attente', color: 'text-amber-600' },
-  PAID: { label: 'Payé', color: 'text-green-600' },
-  FAILED: { label: 'Échoué', color: 'text-red-600' },
-  REFUNDED: { label: 'Remboursé', color: 'text-purple-600' },
-}
-
 export function OrderHistoryClient({ orders, pagination, filters }: OrderHistoryClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const t = useTranslations('account.orders')
+  const locale = useLocale()
   const [searchQuery, setSearchQuery] = React.useState(filters.search || '')
   const [statusFilter, setStatusFilter] = React.useState<string>(filters.status || 'all')
   const searchTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+
+  // Status and payment status configs using translations
+  const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string }> = {
+    PENDING: { label: t('statuses.PENDING'), color: 'text-amber-700', bgColor: 'bg-amber-100' },
+    PROCESSING: { label: t('statuses.PROCESSING'), color: 'text-blue-700', bgColor: 'bg-blue-100' },
+    SHIPPED: { label: t('statuses.SHIPPED'), color: 'text-purple-700', bgColor: 'bg-purple-100' },
+    DELIVERED: { label: t('statuses.DELIVERED'), color: 'text-green-700', bgColor: 'bg-green-100' },
+    CANCELLED: { label: t('statuses.CANCELLED'), color: 'text-red-700', bgColor: 'bg-red-100' },
+  }
+
+  const PAYMENT_STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+    PENDING: { label: t('paymentStatuses.PENDING'), color: 'text-amber-600' },
+    PAID: { label: t('paymentStatuses.PAID'), color: 'text-green-600' },
+    FAILED: { label: t('paymentStatuses.FAILED'), color: 'text-red-600' },
+    REFUNDED: { label: t('paymentStatuses.REFUNDED'), color: 'text-purple-600' },
+  }
 
   const updateFilters = React.useCallback((updates: Partial<OrdersQuery>) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -118,14 +122,14 @@ export function OrderHistoryClient({ orders, pagination, filters }: OrderHistory
   }, [updateFilters])
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('fr-FR', {
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: 'EUR',
+      currency: 'EUR', // TODO: Get from user preferences
     }).format(price)
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
+    return new Date(dateString).toLocaleDateString(locale, {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -136,9 +140,9 @@ export function OrderHistoryClient({ orders, pagination, filters }: OrderHistory
     <div className="max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-anthracite-900 mb-2">Mes Commandes</h1>
+        <h1 className="text-3xl font-bold text-anthracite-900 mb-2">{t('title')}</h1>
         <p className="text-nuanced-600">
-          Consultez et suivez l'état de vos commandes
+          {t('subtitle')}
         </p>
       </div>
 
@@ -149,7 +153,7 @@ export function OrderHistoryClient({ orders, pagination, filters }: OrderHistory
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-nuanced-400" />
             <Input
               type="text"
-              placeholder="Rechercher par n° de commande ou produit..."
+              placeholder={t('filters.placeholder')}
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
               className="pl-10"
@@ -161,7 +165,7 @@ export function OrderHistoryClient({ orders, pagination, filters }: OrderHistory
               onChange={(e) => handleStatusFilter(e.target.value)}
               className="px-4 py-2 border border-platinum-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
-              <option value="all">Tous les statuts</option>
+              <option value="all">{t('filters.allStatuses')}</option>
               {Object.entries(STATUS_CONFIG).map(([key, { label }]) => (
                 <option key={key} value={key}>
                   {label}
@@ -177,16 +181,16 @@ export function OrderHistoryClient({ orders, pagination, filters }: OrderHistory
         <div className="bg-white rounded-xl border border-platinum-200 p-12 text-center">
           <Package className="w-16 h-16 mx-auto text-platinum-300 mb-4" />
           <h3 className="text-lg font-semibold text-anthracite-900 mb-2">
-            Aucune commande
+            {t('empty.title')}
           </h3>
           <p className="text-nuanced-600 mb-6">
             {pagination.total === 0
-              ? "Vous n'avez pas encore passé de commande."
-              : 'Aucune commande ne correspond à votre recherche.'}
+              ? t('empty.subtitle')
+              : t('empty.noResults')}
           </p>
           {pagination.total === 0 && (
             <Link href="/products">
-              <Button>Découvrir nos produits</Button>
+              <Button>{t('empty.discover')}</Button>
             </Link>
           )}
         </div>
@@ -206,13 +210,13 @@ export function OrderHistoryClient({ orders, pagination, filters }: OrderHistory
                   <div className="flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <div>
-                        <p className="text-sm text-nuanced-600">Commande</p>
+                        <p className="text-sm text-nuanced-600">{t('orderCard.order')}</p>
                         <p className="font-semibold text-anthracite-900">
                           {order.orderNumber}
                         </p>
                       </div>
                       <div className="hidden sm:block">
-                        <p className="text-sm text-nuanced-600">Date</p>
+                        <p className="text-sm text-nuanced-600">{t('orderCard.date')}</p>
                         <p className="font-medium text-anthracite-700">
                           {formatDate(order.createdAt)}
                         </p>
@@ -274,7 +278,7 @@ export function OrderHistoryClient({ orders, pagination, filters }: OrderHistory
                         {order.items.length > 2 && ` et ${order.items.length - 2} autre(s)`}
                       </p>
                       <p className="text-sm text-nuanced-500">
-                        {order.itemCount} article{order.itemCount > 1 ? 's' : ''}
+                        {order.itemCount} {order.itemCount > 1 ? t('orderCard.items_plural') : t('orderCard.items')}
                       </p>
                     </div>
 
@@ -285,7 +289,7 @@ export function OrderHistoryClient({ orders, pagination, filters }: OrderHistory
                       </p>
                       <Link href={`/account/orders/${order.id}`}>
                         <Button variant="ghost" size="sm" className="mt-1">
-                          Détails
+                          {t('orderCard.details')}
                           <ChevronRight className="w-4 h-4 ml-1" />
                         </Button>
                       </Link>
@@ -297,7 +301,7 @@ export function OrderHistoryClient({ orders, pagination, filters }: OrderHistory
                     <div className="mt-4 pt-4 border-t border-platinum-100 flex items-center gap-2 text-sm text-nuanced-600">
                       <Calendar className="w-4 h-4" />
                       <span>
-                        Livraison estimée : {formatDate(order.estimatedDeliveryMin)}
+                        {t('orderCard.estimatedDelivery')} : {formatDate(order.estimatedDeliveryMin)}
                         {order.estimatedDeliveryMax &&
                           ` - ${formatDate(order.estimatedDeliveryMax)}`}
                       </span>
@@ -314,9 +318,11 @@ export function OrderHistoryClient({ orders, pagination, filters }: OrderHistory
       {pagination.total > 0 && (
         <div className="mt-6 flex items-center justify-between">
           <p className="text-sm text-nuanced-600">
-            Affichage de {(pagination.page - 1) * pagination.limit + 1}-
-            {Math.min(pagination.page * pagination.limit, pagination.total)} sur{' '}
-            {pagination.total} commande{pagination.total > 1 ? 's' : ''}
+            {t('pagination.showing', {
+              from: (pagination.page - 1) * pagination.limit + 1,
+              to: Math.min(pagination.page * pagination.limit, pagination.total),
+              total: pagination.total
+            })} {pagination.total > 1 ? t('pagination.orders') : t('pagination.orders')}
           </p>
           <div className="flex gap-2">
             <Button
@@ -326,7 +332,7 @@ export function OrderHistoryClient({ orders, pagination, filters }: OrderHistory
               disabled={pagination.page === 1}
             >
               <ChevronLeft className="w-4 h-4 mr-1" />
-              Précédent
+              {t('pagination.previous')}
             </Button>
             <div className="flex gap-1">
               {Array.from(
@@ -378,7 +384,7 @@ export function OrderHistoryClient({ orders, pagination, filters }: OrderHistory
               onClick={() => handlePageChange(pagination.page + 1)}
               disabled={!pagination.hasMore}
             >
-              Suivant
+              {t('pagination.next')}
               <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           </div>

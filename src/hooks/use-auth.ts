@@ -125,6 +125,29 @@ export function useAuth() {
     []
   )
 
+  const handleFacebookSignIn = useCallback(
+    async (redirectTo?: string) => {
+      try {
+        // Better Auth handles OAuth flow automatically
+        // Construct the OAuth URL with redirect parameter
+        const callbackUrl = redirectTo || '/account'
+        const oauthUrl = `/api/auth/signin/facebook?callbackURL=${encodeURIComponent(callbackUrl)}`
+        
+        // Redirect to Facebook OAuth
+        window.location.href = oauthUrl
+        
+        return { success: true }
+      } catch (error) {
+        console.error('Facebook sign in error:', error)
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Erreur de connexion Facebook',
+        }
+      }
+    },
+    []
+  )
+
   return {
     session,
     user: session?.user,
@@ -135,5 +158,6 @@ export function useAuth() {
     signUp: handleSignUp,
     signOut: handleSignOut,
     signInWithGoogle: handleGoogleSignIn,
+    signInWithFacebook: handleFacebookSignIn,
   }
 }

@@ -3,11 +3,12 @@
 import * as React from 'react'
 import Link from 'next/link'
 import useEmblaCarousel from 'embla-carousel-react'
-import { Trophy, ChevronLeft, ChevronRight, Crown, Flame, ArrowRight } from 'lucide-react'
+import { Trophy, ChevronLeft, ChevronRight, Crown, Flame } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ProductCardUnified } from '@/components/ui/product-card-unified'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
+import { useTranslations } from 'next-intl'
 
 interface Product {
   id: string
@@ -51,13 +52,17 @@ const filterCategories = [
 
 export default function BestSellers({
   products,
-  title = 'Meilleures Ventes',
-  subtitle = 'Les produits les plus populaires de notre boutique',
+  title,
+  subtitle,
 }: BestSellersProps) {
+  const t = useTranslations('home.bestSellers')
   const [activeFilter, setActiveFilter] = React.useState('all')
   const [emblaRef, emblaApi] = useEmblaCarousel({ align: 'start', loop: true, dragFree: true })
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
+
+  const displayTitle = title || t('title')
+  const displaySubtitle = subtitle || t('subtitle')
 
   const scrollPrev = React.useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
   const scrollNext = React.useCallback(() => emblaApi?.scrollNext(), [emblaApi])
@@ -90,11 +95,11 @@ export default function BestSellers({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
-                  {title}
+                  {displayTitle}
                 </h2>
                 <Crown className="h-5 w-5 sm:h-6 sm:w-6 text-amber-500" />
               </div>
-              <p className="text-sm sm:text-base text-gray-500 mt-0.5">{subtitle}</p>
+              <p className="text-sm sm:text-base text-gray-500 mt-0.5">{displaySubtitle}</p>
             </div>
           </div>
 
@@ -105,7 +110,7 @@ export default function BestSellers({
               className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors"
             >
               <Flame className="h-4 w-4" />
-              Voir tout
+              {t('viewAll')}
             </Link>
             <div className="flex items-center gap-2">
               <button
@@ -150,11 +155,11 @@ export default function BestSellers({
         {/* Products Carousel */}
         <div className="relative -mx-3 sm:mx-0 px-3 sm:px-0">
           <div className="embla overflow-hidden" ref={emblaRef}>
-            <div className="embla__container flex gap-3 sm:gap-4">
+            <div className="embla__container flex gap-2">
               {products.map((product, index) => (
                 <div 
                   key={product.id} 
-                  className="embla__slide flex-[0_0_170px] sm:flex-[0_0_200px] md:flex-[0_0_220px] lg:flex-[0_0_240px] relative"
+                  className="embla__slide flex-[0_0_180px] sm:flex-[0_0_210px] md:flex-[0_0_240px] lg:flex-[0_0_260px] relative"
                 >
                   {/* Rank Badge for top 3 */}
                   {index < 3 && (

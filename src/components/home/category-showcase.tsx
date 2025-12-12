@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, Sparkles, Crown, Leaf, Zap, Gift, Star, ChevronLeft, ChevronRight } from 'lucide-react'
 import useEmblaCarousel from 'embla-carousel-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
@@ -88,11 +89,12 @@ const defaultCategories: CategoryShowcaseData[] = [
 
 export default function CategoryShowcase({
   categories = defaultCategories,
-  title = 'Collections Phares',
-  subtitle = 'Explorez nos sélections thématiques',
+  title,
+  subtitle,
   className,
   ...props
 }: CategoryShowcaseProps) {
+  const t = useTranslations('home.categoryShowcase')
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: 'start',
@@ -100,6 +102,9 @@ export default function CategoryShowcase({
   })
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
+
+  const displayTitle = title || t('title')
+  const displaySubtitle = subtitle || t('subtitle')
 
   const scrollPrev = React.useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev()
@@ -133,33 +138,33 @@ export default function CategoryShowcase({
             </div>
             <div>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
-                {title}
+                {displayTitle}
               </h2>
-              <p className="text-sm sm:text-base text-gray-500">{subtitle}</p>
+              <p className="text-sm sm:text-base text-gray-500">{displaySubtitle}</p>
             </div>
           </div>
-          
+
           {/* Navigation & View All */}
           <div className="flex items-center gap-3">
             <Link
               href="/categories"
               className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-turquoise-600 hover:text-turquoise-700 hover:bg-turquoise-50 rounded-lg transition-colors"
             >
-              Voir tout
+              {t('viewAll')}
               <ArrowRight className="h-4 w-4" />
             </Link>
             <div className="flex items-center gap-2">
               <button
                 onClick={scrollPrev}
                 className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-turquoise-500 hover:text-white hover:border-turquoise-500 transition-all shadow-sm"
-                aria-label="Précédent"
+                aria-label={t('navigation.previous')}
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
                 onClick={scrollNext}
                 className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-turquoise-500 hover:text-white hover:border-turquoise-500 transition-all shadow-sm"
-                aria-label="Suivant"
+                aria-label={t('navigation.next')}
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
@@ -178,6 +183,8 @@ export default function CategoryShowcase({
                 >
                   <CategoryShowcaseCard
                     category={category}
+                    productsLabel={t('productsLabel')}
+                    exploreLabel={t('explore')}
                     className={cn(
                       !prefersReducedMotion && isVisible && 'animate-fade-in-up'
                     )}
@@ -198,7 +205,7 @@ export default function CategoryShowcase({
             className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-turquoise-500 to-blue-500 text-white text-sm font-semibold rounded-full hover:shadow-lg transition-all"
           >
             <Crown className="h-4 w-4" />
-            Voir toutes les collections
+            {t('viewAllCollections')}
           </Link>
         </div>
       </div>
@@ -208,14 +215,16 @@ export default function CategoryShowcase({
 
 interface CategoryShowcaseCardProps {
   category: CategoryShowcaseData
+  productsLabel: string
+  exploreLabel: string
   className?: string
   style?: React.CSSProperties
 }
 
-function CategoryShowcaseCard({ category, className, style }: CategoryShowcaseCardProps) {
+function CategoryShowcaseCard({ category, productsLabel, exploreLabel, className, style }: CategoryShowcaseCardProps) {
   const [isImageLoaded, setIsImageLoaded] = React.useState(false)
   const [isHovered, setIsHovered] = React.useState(false)
-  
+
   const IconComponent = category.icon ? iconMap[category.icon] : Sparkles
 
   return (
@@ -294,7 +303,7 @@ function CategoryShowcaseCard({ category, className, style }: CategoryShowcaseCa
         <div className="flex items-center gap-1.5">
           {category.productCount && (
             <span className="text-xs sm:text-sm text-gray-500">
-              <span className="font-semibold text-gray-700">{category.productCount}</span> produits
+              <span className="font-semibold text-gray-700">{category.productCount}</span> {productsLabel}
             </span>
           )}
         </div>
@@ -302,7 +311,7 @@ function CategoryShowcaseCard({ category, className, style }: CategoryShowcaseCa
           'inline-flex items-center gap-1 text-xs sm:text-sm font-medium transition-all duration-300',
           'text-turquoise-600 group-hover:text-turquoise-700'
         )}>
-          Explorer
+          {exploreLabel}
           <ArrowRight className={cn(
             'h-3.5 w-3.5 transition-transform duration-300',
             isHovered && 'translate-x-1'

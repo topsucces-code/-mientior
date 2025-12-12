@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server'
 import { getSession } from './src/lib/auth-server'
 import { rateLimitApiMiddleware } from './src/middleware/rate-limit-api'
 import { securityMiddleware } from './src/middleware/security'
+import { roleProtectionMiddleware } from './src/middleware/role-protection'
 import { prisma } from './src/lib/prisma'
 
 export async function middleware(request: NextRequest) {
@@ -79,7 +80,7 @@ export async function middleware(request: NextRequest) {
     // Check email verification for authenticated users
     if (!isVerificationPage && session.user) {
       try {
-        const betterAuthUser = await prisma.better_auth_users.findUnique({
+        const betterAuthUser = await prisma.betterAuthUser.findUnique({
           where: { id: session.user.id },
           select: { emailVerified: true, email: true },
         })
@@ -106,7 +107,7 @@ export async function middleware(request: NextRequest) {
     // Check email verification for authenticated users
     if (!isVerificationPage && session.user) {
       try {
-        const betterAuthUser = await prisma.better_auth_users.findUnique({
+        const betterAuthUser = await prisma.betterAuthUser.findUnique({
           where: { id: session.user.id },
           select: { emailVerified: true, email: true },
         })
@@ -119,6 +120,14 @@ export async function middleware(request: NextRequest) {
       } catch (error) {
         console.error('Error checking email verification:', error)
       }
+    }
+  }
+
+  // Apply role-based protection for vendor routes
+  if (pathname.startsWith('/vendor')) {
+    const roleResponse = await roleProtectionMiddleware(request)
+    if (roleResponse) {
+      return roleResponse
     }
   }
 

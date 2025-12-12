@@ -3,11 +3,13 @@
 import * as React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Heart, ShoppingCart, Star, Truck, Check, Eye, Flame } from 'lucide-react'
+import { Heart, ShoppingCart, Star, Check, Eye, Flame } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { useCartStore } from '@/stores/cart.store'
 import { useWishlistStore } from '@/stores/wishlist.store'
 import { toast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/use-currency'
 
 export interface ProductCardUnifiedProps {
   id: string
@@ -62,7 +64,7 @@ export function ProductCardUnified({
   isVerifiedSeller = false,
   isOfficialStore = false,
   stock = 10,
-  freeShipping = false,
+  freeShipping: _freeShipping = false,
   deliveryDays,
   className,
   onQuickView,
@@ -73,6 +75,10 @@ export function ProductCardUnified({
   const [imageLoaded, setImageLoaded] = React.useState(false)
   const [isAddingToCart, setIsAddingToCart] = React.useState(false)
   const [isMounted, setIsMounted] = React.useState(false)
+
+  const t = useTranslations('products.card')
+  const tw = useTranslations('wishlist')
+  const { formatPrice } = useCurrency()
 
   const addToCart = useCartStore((state) => state.addItem)
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
@@ -104,18 +110,11 @@ export function ProductCardUnified({
     }
   }, [isHovered, allImages.length])
 
-  const formatPrice = (priceInCents: number) => {
-    return new Intl.NumberFormat('fr-FR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(priceInCents / 100)
-  }
-
   const formatSalesCount = (count: number) => {
     if (count >= 1000) {
-      return `${(count / 1000).toFixed(1).replace('.0', '')}k+ ventes`
+      return `${(count / 1000).toFixed(1).replace('.0', '')}k+ ${t('sales')}`
     }
-    return `${count} ventes`
+    return `${count} ${t('sales')}`
   }
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -136,7 +135,7 @@ export function ProductCardUnified({
     })
 
     toast({
-      title: 'Ajouté au panier',
+      title: t('addedToCart'),
       description: name,
     })
 
@@ -150,7 +149,7 @@ export function ProductCardUnified({
     if (inWishlist) {
       removeFromWishlist(id)
       toast({
-        title: 'Retiré des favoris',
+        title: tw('removedFromWishlist'),
         description: name,
       })
     } else {
@@ -163,7 +162,7 @@ export function ProductCardUnified({
         addedAt: new Date().toISOString(),
       })
       toast({
-        title: 'Ajouté aux favoris',
+        title: tw('addedToWishlist'),
         description: name,
       })
     }
@@ -178,9 +177,8 @@ export function ProductCardUnified({
   return (
     <div
       className={cn(
-        'group relative flex flex-col bg-white rounded-lg overflow-hidden',
-        'border border-gray-200 hover:border-gray-300',
-        'transition-all duration-300 hover:shadow-lg',
+        'group relative flex flex-col bg-white rounded-xl overflow-hidden',
+        'transition-all duration-300 hover:shadow-xl',
         isOutOfStock && 'opacity-70',
         className
       )}
@@ -190,64 +188,48 @@ export function ProductCardUnified({
       {/* Image Container */}
       <Link 
         href={`/products/${slug}`} 
-        className="relative block w-full overflow-hidden bg-gray-100"
+        className="relative block w-full overflow-hidden bg-gray-50 rounded-t-xl"
         style={{ paddingBottom: '100%' }}
       >
-        {/* Badges Top Left */}
-        <div className="absolute left-2 top-2 z-10 flex flex-col gap-1">
-          {badge && (
-            <span className={cn(
-              'px-1.5 py-0.5 text-[10px] font-bold uppercase rounded',
-              badgeStyles[badge.variant] || badgeStyles.local
-            )}>
-              {badge.text}
-            </span>
-          )}
-          {hasDiscount && discountPercentage >= 10 && (
-            <span className="px-1.5 py-0.5 text-[10px] font-bold bg-red-600 text-white rounded">
-              -{discountPercentage}%
-            </span>
+        {/* Badge Top Left - Style Temu */}
+        {badge && (
+          <span className={cn(
+            'absolute left-0 top-2 z-10 px-2 py-0.5 text-[10px] font-bold rounded-r-md shadow-sm',
+            badgeStyles[badge.variant] || badgeStyles.local
+          )}>
+            {badge.text}
+          </span>
+        )}
+
+        {/* Wishlist & Quick View - Top Right */}
+        <div className="absolute right-2 top-2 z-10 flex flex-col gap-1.5">
+          <button
+            onClick={handleToggleWishlist}
+            className={cn(
+              'w-7 h-7 flex items-center justify-center rounded-full',
+              'bg-white shadow-md border border-gray-100',
+              'transition-all duration-200 hover:scale-110',
+              inWishlist && 'bg-red-50 border-red-200'
+            )}
+            aria-label={inWishlist ? t('removeFromWishlist') : t('addToWishlist')}
+          >
+            <Heart
+              className={cn(
+                'w-3.5 h-3.5',
+                inWishlist ? 'fill-red-500 text-red-500' : 'text-gray-400'
+              )}
+            />
+          </button>
+          {onQuickView && (
+            <button
+              onClick={handleQuickView}
+              className="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow-md border border-gray-100 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
+              aria-label={t('quickView')}
+            >
+              <Eye className="w-3.5 h-3.5 text-gray-400" />
+            </button>
           )}
         </div>
-
-        {/* Wishlist Button */}
-        <button
-          onClick={handleToggleWishlist}
-          className={cn(
-            'absolute right-2 top-2 z-10',
-            'w-8 h-8 flex items-center justify-center rounded-full',
-            'bg-white/90 backdrop-blur-sm shadow-sm',
-            'transition-all duration-200',
-            'hover:scale-110 hover:bg-white',
-            inWishlist && 'bg-red-50'
-          )}
-          aria-label={inWishlist ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-        >
-          <Heart
-            className={cn(
-              'w-4 h-4 transition-colors',
-              inWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600'
-            )}
-          />
-        </button>
-
-        {/* Quick View Button (on hover) */}
-        {onQuickView && (
-          <button
-            onClick={handleQuickView}
-            className={cn(
-              'absolute right-2 top-12 z-10',
-              'w-8 h-8 flex items-center justify-center rounded-full',
-              'bg-white/90 backdrop-blur-sm shadow-sm',
-              'transition-all duration-200',
-              'opacity-0 group-hover:opacity-100',
-              'hover:scale-110 hover:bg-white'
-            )}
-            aria-label="Aperçu rapide"
-          >
-            <Eye className="w-4 h-4 text-gray-600" />
-          </button>
-        )}
 
         {/* Product Image */}
         <Image
@@ -255,8 +237,8 @@ export function ProductCardUnified({
           alt={name}
           fill
           className={cn(
-            'object-cover transition-all duration-500',
-            isHovered && 'scale-105',
+            'object-cover transition-transform duration-500',
+            isHovered && 'scale-110',
             imageLoaded ? 'opacity-100' : 'opacity-0'
           )}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
@@ -266,88 +248,100 @@ export function ProductCardUnified({
 
         {/* Loading Skeleton */}
         {!imageLoaded && (
-          <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+          <div className="absolute inset-0 bg-gray-100 animate-pulse" />
         )}
 
         {/* Out of Stock Overlay */}
         {isOutOfStock && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-            <span className="px-3 py-1.5 bg-gray-900 text-white text-sm font-medium rounded">
-              Épuisé
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+            <span className="px-3 py-1.5 bg-gray-900/90 text-white text-xs font-semibold rounded-full">
+              {t('outOfStock')}
             </span>
           </div>
         )}
 
-        {/* Image Dots Indicator */}
+        {/* Image Dots */}
         {allImages.length > 1 && (
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
             {allImages.slice(0, 5).map((_, idx) => (
               <span
                 key={idx}
                 className={cn(
-                  'w-1.5 h-1.5 rounded-full transition-colors',
-                  idx === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                  'w-1 h-1 rounded-full transition-colors',
+                  idx === currentImageIndex ? 'bg-orange-500' : 'bg-gray-300'
                 )}
               />
             ))}
           </div>
         )}
+
+        {/* Add to Cart Button - Bottom Right on Image */}
+        <button
+          onClick={handleAddToCart}
+          disabled={isOutOfStock || isAddingToCart}
+          className={cn(
+            'absolute right-2 bottom-2 z-10',
+            'w-8 h-8 flex items-center justify-center rounded-full shadow-lg',
+            'transition-all duration-200',
+            isAddingToCart
+              ? 'bg-green-500 text-white'
+              : 'bg-white border border-gray-200 text-gray-600 hover:bg-orange-500 hover:text-white hover:border-orange-500',
+            'hover:scale-110 active:scale-95',
+            'disabled:opacity-50 disabled:cursor-not-allowed'
+          )}
+          aria-label={isAddingToCart ? t('added') : t('addToCart')}
+        >
+          {isAddingToCart ? (
+            <Check className="w-4 h-4" />
+          ) : (
+            <ShoppingCart className="w-4 h-4" />
+          )}
+        </button>
       </Link>
 
-      {/* Product Info */}
-      <div className="flex flex-col gap-1.5 p-2.5">
-        {/* Product Name */}
+      {/* Product Info - Temu Style */}
+      <div className="flex flex-col gap-1 p-2.5 pt-2">
+        {/* Product Name with Badge inline */}
         <Link href={`/products/${slug}`}>
-          <h3 className="text-[13px] leading-tight font-medium text-gray-800 line-clamp-2 hover:text-turquoise-600 transition-colors">
+          <h3 className="text-[12px] leading-[1.3] text-gray-700 line-clamp-2 hover:text-orange-600 transition-colors min-h-[32px]">
+            {badge && (
+              <span className={cn(
+                'inline-block mr-1 px-1 py-0.5 text-[9px] font-bold rounded align-middle',
+                badgeStyles[badge.variant] || badgeStyles.local
+              )}>
+                {badge.text}
+              </span>
+            )}
             {name}
           </h3>
         </Link>
 
-        {/* Price Row */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-baseline gap-1.5 flex-wrap">
-            <span className="text-lg font-bold text-orange-600">
-              {formatPrice(price)} F
-            </span>
-            {hasDiscount && (
-              <span className="text-xs text-gray-400 line-through">
-                {formatPrice(compareAtPrice)} F
+        {/* Price Row - Temu Style */}
+        <div className="flex items-baseline gap-1.5 flex-wrap">
+          <span className="text-[18px] font-black text-orange-600 leading-none">
+            {formatPrice(price)}
+          </span>
+          {hasDiscount && (
+            <>
+              <span className="text-[11px] text-gray-400 line-through">
+                {formatPrice(compareAtPrice)}
               </span>
-            )}
-          </div>
-
-          {/* Add to Cart Button */}
-          <button
-            onClick={handleAddToCart}
-            disabled={isOutOfStock || isAddingToCart}
-            className={cn(
-              'flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full',
-              'transition-all duration-200',
-              isAddingToCart 
-                ? 'bg-green-500 text-white' 
-                : 'bg-orange-500 hover:bg-orange-600 text-white',
-              'hover:scale-110 active:scale-95',
-              'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100'
-            )}
-            aria-label={isAddingToCart ? 'Ajouté' : 'Ajouter au panier'}
-          >
-            {isAddingToCart ? (
-              <Check className="w-4 h-4" />
-            ) : (
-              <ShoppingCart className="w-4 h-4" />
-            )}
-          </button>
+              <span className="text-[10px] font-semibold text-green-600">
+                -{discountPercentage}%
+              </span>
+            </>
+          )}
         </div>
 
-        {/* Sales Count */}
+        {/* Sales Count - Temu Style */}
         {salesCount > 0 && (
-          <div className="flex items-center gap-1 text-[11px] text-gray-500">
-            <Flame className="w-3 h-3 text-orange-500" />
-            <span>{formatSalesCount(salesCount)}</span>
-          </div>
+          <span className="text-[11px] text-gray-500">
+            <Flame className="inline w-3 h-3 text-orange-400 mr-0.5" />
+            {formatSalesCount(salesCount)}
+          </span>
         )}
 
-        {/* Rating */}
+        {/* Rating - Temu Style */}
         {rating > 0 && (
           <div className="flex items-center gap-1">
             <div className="flex items-center">
@@ -355,64 +349,55 @@ export function ProductCardUnified({
                 <Star
                   key={i}
                   className={cn(
-                    'w-3 h-3',
+                    'w-2.5 h-2.5',
                     i < Math.floor(rating)
                       ? 'fill-amber-400 text-amber-400'
-                      : i < rating
-                      ? 'fill-amber-400/50 text-amber-400'
-                      : 'text-gray-300'
+                      : 'text-gray-200 fill-gray-200'
                   )}
                 />
               ))}
             </div>
             {reviewCount > 0 && (
-              <span className="text-[11px] text-gray-500">
+              <span className="text-[10px] text-gray-400">
                 {reviewCount > 1000 ? `${(reviewCount / 1000).toFixed(1)}k` : reviewCount}
               </span>
             )}
           </div>
         )}
 
-        {/* Seller Badges */}
-        <div className="flex flex-wrap gap-1">
+        {/* Seller Badges Row - Temu Style */}
+        <div className="flex flex-wrap items-center gap-1 mt-0.5">
           {isVerifiedSeller && (
-            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-turquoise-50 text-turquoise-700 text-[10px] font-medium rounded">
-              <Check className="w-2.5 h-2.5" />
-              Vendeur vedette
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-orange-50 text-orange-600 text-[9px] font-semibold rounded border border-orange-200">
+              <Check className="w-2 h-2" />
+              {t('verifiedSeller')}
             </span>
           )}
           {isOfficialStore && (
-            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-medium rounded">
-              Magasin officiel
-            </span>
-          )}
-          {brand && (
-            <span className="text-[10px] text-gray-500">
-              Marque : <span className="text-turquoise-600 font-medium">{brand}</span>
+            <span className="inline-flex items-center px-1.5 py-0.5 bg-blue-50 text-blue-600 text-[9px] font-semibold rounded border border-blue-200">
+              {t('officialStore')}
             </span>
           )}
         </div>
 
-        {/* Delivery Info */}
-        {(freeShipping || deliveryDays) && (
-          <div className="flex items-center gap-1 pt-1 border-t border-gray-100">
-            <Truck className="w-3 h-3 text-green-600" />
-            <span className="text-[10px] text-gray-600">
-              {freeShipping && <span className="text-green-600 font-medium">Livraison gratuite</span>}
-              {freeShipping && deliveryDays && ' • '}
-              {deliveryDays && (
-                <span>
-                  Arrive en <span className="text-turquoise-600 font-semibold">{deliveryDays} JOURS OUVRÉS OU PLUS</span>
-                </span>
-              )}
-            </span>
+        {/* Brand - Temu Style */}
+        {brand && (
+          <span className="text-[10px] text-gray-500">
+            {t('brand')} <span className="text-blue-600 hover:underline cursor-pointer">{brand}</span>
+          </span>
+        )}
+
+        {/* Delivery Info - Temu Style */}
+        {deliveryDays && (
+          <div className="text-[10px] text-gray-600 mt-0.5">
+            {t('delivery')} <span className="text-orange-600 font-bold">{deliveryDays} {t('workingDays')}</span>
           </div>
         )}
 
         {/* Low Stock Warning */}
         {!isOutOfStock && stock > 0 && stock <= 5 && (
-          <span className="text-[10px] text-red-600 font-medium">
-            Plus que {stock} en stock !
+          <span className="text-[10px] text-red-500 font-medium">
+            ⚡ {t('lowStock', { count: stock })}
           </span>
         )}
       </div>

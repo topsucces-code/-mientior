@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { Truck, RotateCcw, CreditCard, Headphones } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
@@ -51,13 +52,48 @@ interface TrustBadgesProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 export default function TrustBadges({
-  badges = defaultBadges,
+  badges: customBadges,
   variant = 'default',
   className,
   ...props
 }: TrustBadgesProps) {
+  const t = useTranslations('home.trustBadges')
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
+
+  // Use translated badges
+  const translatedBadges: TrustBadge[] = [
+    {
+      id: '1',
+      icon: <Truck className="h-8 w-8 md:h-10 md:w-10" />,
+      title: t('freeShipping'),
+      description: t('freeShippingDesc'),
+      gradient: 'from-blue-500 to-blue-600',
+    },
+    {
+      id: '2',
+      icon: <RotateCcw className="h-8 w-8 md:h-10 md:w-10" />,
+      title: t('returns'),
+      description: t('returnsDesc'),
+      gradient: 'from-green-500 to-emerald-600',
+    },
+    {
+      id: '3',
+      icon: <CreditCard className="h-8 w-8 md:h-10 md:w-10" />,
+      title: t('securePayment'),
+      description: t('securePaymentDesc'),
+      gradient: 'from-purple-500 to-purple-600',
+    },
+    {
+      id: '4',
+      icon: <Headphones className="h-8 w-8 md:h-10 md:w-10" />,
+      title: t('support'),
+      description: t('supportDesc'),
+      gradient: 'from-orange-500 to-orange-600',
+    },
+  ]
+
+  const badges = customBadges || translatedBadges
 
   if (!badges || badges.length === 0) {
     return null

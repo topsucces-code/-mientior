@@ -35,6 +35,7 @@ export function ComparePageClient() {
   const [products, setProducts] = useState<CompareProduct[]>([])
   const [loading, setLoading] = useState(true)
   const t = useTranslations('wishlist')
+  const tc = useTranslations('products.compare')
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -68,8 +69,8 @@ export function ComparePageClient() {
   const handleAddToCart = (product: CompareProduct) => {
     if (product.stock <= 0) {
       toast({
-        title: 'Out of stock',
-        description: 'This product is currently unavailable',
+        title: tc('outOfStockTitle'),
+        description: tc('outOfStockDesc'),
         variant: 'destructive',
       })
       return
@@ -89,8 +90,8 @@ export function ComparePageClient() {
     })
 
     toast({
-      title: 'Added to cart',
-      description: `${product.name} has been added to your cart`,
+      title: tc('addedToCart'),
+      description: tc('addedToCartDesc', { name: product.name }),
     })
   }
 
@@ -152,12 +153,12 @@ export function ComparePageClient() {
         <div className="mb-6 rounded-full bg-platinum-100 p-6">
           <Package className="h-12 w-12 text-platinum-400" />
         </div>
-        <h1 className="mb-2 text-2xl font-bold text-anthracite-700">No products to compare</h1>
+        <h1 className="mb-2 text-2xl font-bold text-anthracite-700">{tc('noProducts')}</h1>
         <p className="mb-6 text-nuanced-600">
-          Add products to compare by clicking the compare icon on product cards
+          {tc('addProductsDesc')}
         </p>
         <Button onClick={() => router.push('/products')}>
-          Browse Products
+          {tc('browseProducts')}
         </Button>
       </div>
     )
@@ -173,22 +174,22 @@ export function ComparePageClient() {
             className="mb-2 flex items-center text-sm text-nuanced-600 hover:text-anthracite-700"
           >
             <ArrowLeft className="mr-1 h-4 w-4" />
-            Back
+            {tc('back')}
           </button>
           <h1 className="text-2xl font-bold text-anthracite-700">
-            Compare Products
+            {tc('title')}
             <span className="ml-2 text-lg font-normal text-nuanced-600">
-              ({products.length} products)
+              {tc('productsCount', { count: products.length })}
             </span>
           </h1>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={clearAll}>
-            Clear All
+            {tc('clearAll')}
           </Button>
           <Button variant="outline" onClick={() => router.push('/products')}>
             <Plus className="mr-2 h-4 w-4" />
-            Add More
+            {tc('addMore')}
           </Button>
         </div>
       </div>
@@ -200,7 +201,7 @@ export function ComparePageClient() {
           <thead>
             <tr>
               <th className="w-48 p-4 text-left align-top">
-                <span className="text-sm font-medium text-nuanced-600">Product</span>
+                <span className="text-sm font-medium text-nuanced-600">{tc('product')}</span>
               </th>
               {products.map((product) => (
                 <th key={product.id} className="relative w-64 p-4 align-top">
@@ -252,7 +253,7 @@ export function ComparePageClient() {
                         disabled={product.stock <= 0}
                       >
                         <ShoppingCart className="mr-1 h-4 w-4" />
-                        {product.stock > 0 ? 'Add' : 'Out'}
+                        {product.stock > 0 ? tc('add') : tc('out')}
                       </Button>
                       <Button
                         size="sm"
@@ -271,7 +272,7 @@ export function ComparePageClient() {
                   <div className="flex h-80 items-center justify-center rounded-lg border-2 border-dashed border-platinum-300 bg-platinum-50">
                     <Button variant="outline" onClick={() => router.push('/products')}>
                       <Plus className="mr-2 h-4 w-4" />
-                      Add Product
+                      {tc('addProduct')}
                     </Button>
                   </div>
                 </th>
@@ -282,7 +283,7 @@ export function ComparePageClient() {
           <tbody>
             {/* Rating Row */}
             <tr className="border-t border-platinum-200">
-              <td className="p-4 text-sm font-medium text-nuanced-600">Rating</td>
+              <td className="p-4 text-sm font-medium text-nuanced-600">{tc('rating')}</td>
               {products.map((product) => (
                 <td key={product.id} className="p-4 text-center">
                   {product.rating ? (
@@ -292,7 +293,7 @@ export function ComparePageClient() {
                       <span className="text-sm text-nuanced-500">({product.reviewCount})</span>
                     </div>
                   ) : (
-                    <span className="text-nuanced-400">No reviews</span>
+                    <span className="text-nuanced-400">{tc('noReviews')}</span>
                   )}
                 </td>
               ))}
@@ -303,18 +304,18 @@ export function ComparePageClient() {
 
             {/* Stock Row */}
             <tr className="border-t border-platinum-200 bg-platinum-50">
-              <td className="p-4 text-sm font-medium text-nuanced-600">Availability</td>
+              <td className="p-4 text-sm font-medium text-nuanced-600">{tc('availability')}</td>
               {products.map((product) => (
                 <td key={product.id} className="p-4 text-center">
                   {product.stock > 0 ? (
                     <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
                       <Check className="mr-1 h-3 w-3" />
-                      In Stock ({product.stock})
+                      {tc('inStock', { count: product.stock })}
                     </span>
                   ) : (
                     <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-700">
                       <Minus className="mr-1 h-3 w-3" />
-                      Out of Stock
+                      {tc('outOfStock')}
                     </span>
                   )}
                 </td>
@@ -326,7 +327,7 @@ export function ComparePageClient() {
 
             {/* Category Row */}
             <tr className="border-t border-platinum-200">
-              <td className="p-4 text-sm font-medium text-nuanced-600">Category</td>
+              <td className="p-4 text-sm font-medium text-nuanced-600">{tc('category')}</td>
               {products.map((product) => (
                 <td key={product.id} className="p-4 text-center text-sm">
                   {product.category?.name || '-'}
@@ -342,7 +343,7 @@ export function ComparePageClient() {
               <>
                 <tr className="border-t-2 border-platinum-300">
                   <td colSpan={5} className="bg-platinum-100 p-4 text-sm font-semibold text-anthracite-700">
-                    Specifications
+                    {tc('specifications')}
                   </td>
                 </tr>
                 {allSpecKeys.map((key, idx) => (

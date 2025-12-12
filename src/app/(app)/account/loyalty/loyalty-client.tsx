@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations, useLocale } from 'next-intl'
 import { Award, Gift, Star, TrendingUp, ArrowLeft, ShoppingBag, Clock, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -36,16 +37,18 @@ interface LoyaltyPageClientProps {
 
 export function LoyaltyPageClient({ data }: LoyaltyPageClientProps) {
   const router = useRouter()
+  const t = useTranslations('account.loyalty')
+  const locale = useLocale()
 
   if (!data) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <Award className="mb-4 h-16 w-16 text-platinum-400" />
-        <h1 className="mb-2 text-2xl font-bold text-anthracite-700">Loyalty Program</h1>
-        <p className="mb-6 text-nuanced-600">Start earning points with your first purchase!</p>
+        <h1 className="mb-2 text-2xl font-bold text-anthracite-700">{t('empty.title')}</h1>
+        <p className="mb-6 text-nuanced-600">{t('empty.subtitle')}</p>
         <Button onClick={() => router.push('/products')}>
           <ShoppingBag className="mr-2 h-4 w-4" />
-          Shop Now
+          {t('empty.shopNow')}
         </Button>
       </div>
     )
@@ -83,18 +86,18 @@ export function LoyaltyPageClient({ data }: LoyaltyPageClientProps) {
           className="mb-4 flex items-center text-sm text-nuanced-600 hover:text-anthracite-700"
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
-          Back to Account
+          {t('backToAccount')}
         </button>
-        <h1 className="text-2xl font-bold text-anthracite-700">Loyalty Program</h1>
-        <p className="text-nuanced-600">Earn points and unlock exclusive rewards</p>
+        <h1 className="text-2xl font-bold text-anthracite-700">{t('title')}</h1>
+        <p className="text-nuanced-600">{t('subtitle')}</p>
       </div>
 
       {/* Points Card */}
       <div className={`mb-8 rounded-2xl bg-gradient-to-br ${getTierColor(data.level)} p-6 text-white shadow-lg`}>
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm opacity-80">Your Points</p>
-            <p className="text-4xl font-bold">{data.points.toLocaleString()}</p>
+            <p className="text-sm opacity-80">{t('points.your')}</p>
+            <p className="text-4xl font-bold">{data.points.toLocaleString(locale)}</p>
           </div>
           <div className="rounded-full bg-white/20 p-3">
             <Award className="h-8 w-8" />
@@ -107,14 +110,14 @@ export function LoyaltyPageClient({ data }: LoyaltyPageClientProps) {
             {data.nextTier && <span className="opacity-80">{data.nextTier.name}</span>}
           </div>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/30">
-            <div 
+            <div
               className="h-full rounded-full bg-white transition-all duration-500"
               style={{ width: `${Math.min(progressPercent, 100)}%` }}
             />
           </div>
           {data.nextTier && (
             <p className="mt-2 text-sm opacity-80">
-              {data.pointsToNextTier.toLocaleString()} points to {data.nextTier.name}
+              {t('points.to', { points: data.pointsToNextTier.toLocaleString(locale), tier: data.nextTier.name })}
             </p>
           )}
         </div>
@@ -124,7 +127,7 @@ export function LoyaltyPageClient({ data }: LoyaltyPageClientProps) {
       <div className="mb-8 rounded-lg border border-platinum-200 bg-white p-6">
         <h2 className="mb-4 flex items-center text-lg font-semibold text-anthracite-700">
           <Gift className="mr-2 h-5 w-5 text-orange-500" />
-          Your {data.currentTier.name} Benefits
+          {t('benefits.your', { tier: data.currentTier.name })}
         </h2>
         <ul className="space-y-3">
           {data.currentTier.benefits.map((benefit, idx) => (
@@ -138,20 +141,20 @@ export function LoyaltyPageClient({ data }: LoyaltyPageClientProps) {
 
       {/* All Tiers */}
       <div className="mb-8 rounded-lg border border-platinum-200 bg-white p-6">
-        <h2 className="mb-4 text-lg font-semibold text-anthracite-700">All Tiers</h2>
+        <h2 className="mb-4 text-lg font-semibold text-anthracite-700">{t('allTiers.title')}</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {data.tiers.map((tier) => {
             const isCurrentTier = tier.name === data.currentTier.name
             const isUnlocked = data.points >= tier.minPoints
-            
+
             return (
-              <div 
+              <div
                 key={tier.name}
                 className={`rounded-lg border p-4 ${
-                  isCurrentTier 
-                    ? 'border-orange-300 bg-orange-50' 
-                    : isUnlocked 
-                      ? 'border-green-200 bg-green-50' 
+                  isCurrentTier
+                    ? 'border-orange-300 bg-orange-50'
+                    : isUnlocked
+                      ? 'border-green-200 bg-green-50'
                       : 'border-platinum-200 bg-platinum-50'
                 }`}
               >
@@ -161,12 +164,12 @@ export function LoyaltyPageClient({ data }: LoyaltyPageClientProps) {
                   </span>
                   {isCurrentTier && (
                     <span className="rounded-full bg-orange-500 px-2 py-0.5 text-xs text-white">
-                      Current
+                      {t('allTiers.current')}
                     </span>
                   )}
                 </div>
                 <p className="text-sm text-nuanced-600">
-                  {tier.minPoints.toLocaleString()} points
+                  {t('allTiers.points', { points: tier.minPoints.toLocaleString(locale) })}
                 </p>
                 <ul className="mt-2 space-y-1">
                   {tier.benefits.slice(0, 2).map((benefit, idx) => (
@@ -176,7 +179,7 @@ export function LoyaltyPageClient({ data }: LoyaltyPageClientProps) {
                   ))}
                   {tier.benefits.length > 2 && (
                     <li className="text-xs text-nuanced-400">
-                      +{tier.benefits.length - 2} more
+                      {t('allTiers.more', { count: tier.benefits.length - 2 })}
                     </li>
                   )}
                 </ul>
@@ -188,18 +191,17 @@ export function LoyaltyPageClient({ data }: LoyaltyPageClientProps) {
 
       {/* Transaction History */}
       <div className="rounded-lg border border-platinum-200 bg-white p-6">
-        <h2 className="mb-4 text-lg font-semibold text-anthracite-700">Points History</h2>
-        
+        <h2 className="mb-4 text-lg font-semibold text-anthracite-700">{t('history.title')}</h2>
+
         {data.transactions.length === 0 ? (
           <div className="py-8 text-center text-nuanced-600">
             <Clock className="mx-auto mb-2 h-8 w-8 text-platinum-400" />
-            <p>No transactions yet</p>
-            <p className="text-sm">Start shopping to earn points!</p>
+            <p>{t('history.empty')}</p>
           </div>
         ) : (
           <div className="space-y-3">
             {data.transactions.map((tx) => (
-              <div 
+              <div
                 key={tx.id}
                 className="flex items-center justify-between rounded-lg border border-platinum-100 p-3"
               >
@@ -208,7 +210,7 @@ export function LoyaltyPageClient({ data }: LoyaltyPageClientProps) {
                   <div>
                     <p className="font-medium text-anthracite-700">{tx.description}</p>
                     <p className="text-sm text-nuanced-500">
-                      {new Date(tx.createdAt).toLocaleDateString('en-US', {
+                      {new Date(tx.createdAt).toLocaleDateString(locale, {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric',
@@ -217,7 +219,7 @@ export function LoyaltyPageClient({ data }: LoyaltyPageClientProps) {
                   </div>
                 </div>
                 <span className={`font-semibold ${tx.type === 'EARN' ? 'text-green-600' : 'text-red-600'}`}>
-                  {tx.type === 'EARN' ? '+' : '-'}{tx.points}
+                  {tx.type === 'EARN' ? '+' : '-'}{tx.points.toLocaleString(locale)}
                 </span>
               </div>
             ))}
@@ -227,28 +229,28 @@ export function LoyaltyPageClient({ data }: LoyaltyPageClientProps) {
 
       {/* How to Earn */}
       <div className="mt-8 rounded-lg border border-platinum-200 bg-white p-6">
-        <h2 className="mb-4 text-lg font-semibold text-anthracite-700">How to Earn Points</h2>
+        <h2 className="mb-4 text-lg font-semibold text-anthracite-700">{t('howToEarn.title')}</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="text-center">
             <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-orange-100">
               <ShoppingBag className="h-6 w-6 text-orange-600" />
             </div>
-            <h3 className="font-medium text-anthracite-700">Shop</h3>
-            <p className="text-sm text-nuanced-600">Earn 1 point per €1 spent</p>
+            <h3 className="font-medium text-anthracite-700">{t('howToEarn.shop.title')}</h3>
+            <p className="text-sm text-nuanced-600">{t('howToEarn.shop.description')}</p>
           </div>
           <div className="text-center">
             <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
               <Star className="h-6 w-6 text-blue-600" />
             </div>
-            <h3 className="font-medium text-anthracite-700">Review</h3>
-            <p className="text-sm text-nuanced-600">50 points per review</p>
+            <h3 className="font-medium text-anthracite-700">{t('howToEarn.review.title')}</h3>
+            <p className="text-sm text-nuanced-600">{t('howToEarn.review.description')}</p>
           </div>
           <div className="text-center">
             <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-purple-100">
               <Gift className="h-6 w-6 text-purple-600" />
             </div>
-            <h3 className="font-medium text-anthracite-700">Refer</h3>
-            <p className="text-sm text-nuanced-600">200 points per referral</p>
+            <h3 className="font-medium text-anthracite-700">{t('howToEarn.refer.title')}</h3>
+            <p className="text-sm text-nuanced-600">{t('howToEarn.refer.description')}</p>
           </div>
         </div>
       </div>

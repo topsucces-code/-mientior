@@ -8,6 +8,7 @@ import { ProductCardUnified } from '@/components/ui/product-card-unified'
 import { cn } from '@/lib/utils'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
+import { useTranslations } from 'next-intl'
 
 interface Product {
   id: string
@@ -39,9 +40,10 @@ interface NewArrivalsMasonryProps {
 
 export default function NewArrivalsMasonry({
   products,
-  title = 'Nouveautés',
-  subtitle = 'Découvrez nos dernières arrivées',
+  title,
+  subtitle,
 }: NewArrivalsMasonryProps) {
+  const t = useTranslations('home.newArrivals')
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: 'start',
@@ -49,6 +51,9 @@ export default function NewArrivalsMasonry({
   })
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
+
+  const displayTitle = title || t('title')
+  const displaySubtitle = subtitle || t('subtitle')
 
   const scrollPrev = React.useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev()
@@ -90,11 +95,11 @@ export default function NewArrivalsMasonry({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
-                  {title}
+                  {displayTitle}
                 </h2>
                 <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-500" />
               </div>
-              <p className="text-sm sm:text-base text-gray-500 mt-0.5">{subtitle}</p>
+              <p className="text-sm sm:text-base text-gray-500 mt-0.5">{displaySubtitle}</p>
             </div>
           </div>
 
@@ -105,7 +110,7 @@ export default function NewArrivalsMasonry({
               className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
             >
               <Sparkles className="h-4 w-4" />
-              Voir tout
+              {t('viewAll')}
             </Link>
             <div className="flex items-center gap-2">
               <button
@@ -129,11 +134,11 @@ export default function NewArrivalsMasonry({
         {/* Carousel */}
         <div className="relative -mx-3 sm:mx-0 px-3 sm:px-0">
           <div className="embla overflow-hidden" ref={emblaRef}>
-            <div className="embla__container flex gap-3 sm:gap-4">
+            <div className="embla__container flex gap-2">
               {products.map((product, index) => (
                 <div
                   key={product.id}
-                  className="embla__slide flex-[0_0_170px] sm:flex-[0_0_200px] md:flex-[0_0_220px] lg:flex-[0_0_240px]"
+                  className="embla__slide flex-[0_0_180px] sm:flex-[0_0_210px] md:flex-[0_0_240px] lg:flex-[0_0_260px]"
                 >
                   <ProductCardUnified
                     id={product.id}

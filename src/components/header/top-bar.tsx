@@ -5,6 +5,7 @@ import { useHeader } from '@/contexts/header-context'
 import { GeolocationSelector } from './geolocation-selector'
 import { LanguageCurrencySelector } from './language-currency-selector'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { 
     Smartphone, 
     Headphones, 
@@ -15,6 +16,7 @@ import {
 
 export function TopBar() {
     const { isScrolled } = useHeader()
+    const t = useTranslations('header')
 
     if (isScrolled) {
         return null
@@ -39,9 +41,9 @@ export function TopBar() {
                         {/* Message Promotionnel Rotatif */}
                         <div className="hidden lg:flex items-center gap-2 text-[12px] xl:text-[13px] font-medium tracking-[0.02em]">
                             <Package className="w-4 h-4 text-success flex-shrink-0" />
-                            <span className="text-gray-500">Livraison</span>
-                            <span className="text-turquoise-600 font-semibold">GRATUITE</span>
-                            <span className="text-gray-500 hidden xl:inline">dès 15 000 F</span>
+                            <span className="text-gray-500">{t('freeShippingShort')}</span>
+                            <span className="text-turquoise-600 font-semibold">{t('freeShippingLabel')}</span>
+                            <span className="text-gray-500 hidden xl:inline">{t('freeShippingAmount')}</span>
                         </div>
                     </div>
 
@@ -53,17 +55,17 @@ export function TopBar() {
                     {/* Section Droite (40%) - Liens Utilitaires */}
                     <div className="flex items-center justify-end gap-0.5 lg:gap-1 flex-1 lg:flex-none lg:w-[40%]">
                         {/* App Download */}
-                        <UtilityLink href="/app" icon={<Smartphone className="w-4 h-4" />} label="App" />
+                        <UtilityLink href="/app" icon={<Smartphone className="w-4 h-4" />} label={t('app')} />
                         
                         <span className="text-gray-300 mx-1 lg:mx-2 hidden lg:inline">│</span>
                         
                         {/* Support */}
-                        <UtilityLink href="/support" icon={<Headphones className="w-4 h-4" />} label="Support" className="hidden lg:flex" />
+                        <UtilityLink href="/support" icon={<Headphones className="w-4 h-4" />} label={t('support')} className="hidden lg:flex" />
                         
                         <span className="text-gray-300 mx-1 lg:mx-2 hidden lg:inline">│</span>
                         
                         {/* Aide */}
-                        <UtilityLink href="/aide" icon={<HelpCircle className="w-4 h-4" />} label="Aide" />
+                        <UtilityLink href="/aide" icon={<HelpCircle className="w-4 h-4" />} label={t('help')} />
                         
                         <span className="text-gray-300 mx-1 lg:mx-2 hidden xl:inline">│</span>
                         
@@ -71,7 +73,7 @@ export function TopBar() {
                         <UtilityLink 
                             href="/points-retrait" 
                             icon={<MapPinIcon className="w-4 h-4" />} 
-                            label="Points de retrait" 
+                            label={t('pickupPoints')} 
                             className="hidden xl:flex"
                         />
                         

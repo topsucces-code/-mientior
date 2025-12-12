@@ -192,6 +192,12 @@ enum Role {
   VIEWER
 }
 
+// User roles for customers (different from admin Role)
+enum UserRole {
+  CLIENT // Regular customer
+  VENDOR // Seller/merchant
+}
+
 enum Permission {
   PRODUCTS_READ
   PRODUCTS_WRITE
@@ -518,6 +524,8 @@ model User {
   firstName      String?
   lastName       String?
   phone          String? // Phone number for Mobile Money
+  // User role (Client or Vendor)
+  role           UserRole        @default(CLIENT)
   // Localization preferences for African markets
   countryCode    String          @default("SN") @map("country_code") // SN, CI, CM, NG, etc.
   currency       String          @default("XOF") // XOF, XAF, NGN, KES, ZAR, MAD, GHS
@@ -551,6 +559,7 @@ model User {
   twoFactorEnabled     Boolean @default(false) @map("two_factor_enabled")
   twoFactorSecret      String? @map("two_factor_secret")
   twoFactorBackupCodes Json?   @map("two_factor_backup_codes") // Array of hashed backup codes
+  vendor               Vendor?
 
   @@index([email])
   @@index([loyaltyLevel])
@@ -678,27 +687,33 @@ model Notification {
 
 model Vendor {
   id             String         @id @default(cuid())
-  businessName   String
+  userId         String         @unique @map("user_id")
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessName   String         @map("business_name")
+  businessType   String?        @map("business_type")
   slug           String         @unique
   email          String         @unique
   phone          String?
   logo           String?
   description    String?        @db.Text
+  city           String?
+  country        String         @default("SN")
   status         VendorStatus   @default(PENDING)
-  commissionRate Float          @default(10.0)
+  commissionRate Float          @default(10.0) @map("commission_rate")
   documents      Json?
-  bankDetails    Json?
+  bankDetails    Json?          @map("bank_details")
   rating         Float          @default(0)
-  totalSales     Float          @default(0)
-  totalProducts  Int            @default(0)
+  totalSales     Float          @default(0) @map("total_sales")
+  totalProducts  Int            @default(0) @map("total_products")
   products       Product[]
   orders         Order[]
   payouts        VendorPayout[]
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
 
   @@index([status])
   @@index([email])
+  @@index([userId])
   @@index([createdAt])
   @@map("vendors")
 }
@@ -875,6 +890,25 @@ model Verification {
 
   @@unique([identifier, value])
   @@map("verifications")
+}
+
+// Password Reset Tokens
+// Used for secure password reset flow with expiry and usage tracking
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  usedAt    DateTime?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
 }
 
 model PimSyncLog {

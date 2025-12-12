@@ -4,12 +4,14 @@ import { User, LogOut, Package, Heart, Settings, CreditCard, MapPin, MessageCirc
 import { useHeader } from '@/contexts/header-context'
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { useAuth } from '@/hooks/use-auth'
 
 export function UserAccountDropdown() {
     const { activeDropdown, setActiveDropdown } = useHeader()
     const { session, isLoading, signOut } = useAuth()
     const dropdownRef = useRef<HTMLDivElement>(null)
+    const t = useTranslations('header')
 
     const isOpen = activeDropdown === 'account'
 
@@ -38,7 +40,7 @@ export function UserAccountDropdown() {
 
     if (isLoading) {
         return (
-            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors" aria-label="Compte">
+            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors" aria-label={t('account')}>
                 <User className="w-6 h-6 animate-pulse" />
             </button>
         )
@@ -51,7 +53,7 @@ export function UserAccountDropdown() {
                 className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-full hover:bg-emerald-700 transition-colors font-medium"
             >
                 <User className="w-5 h-5" />
-                <span className="hidden lg:inline">Connexion</span>
+                <span className="hidden lg:inline">{t('login')}</span>
             </Link>
         )
     }
@@ -61,7 +63,7 @@ export function UserAccountDropdown() {
             <button
                 onClick={() => setActiveDropdown(isOpen ? null : 'account')}
                 className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-full transition-colors"
-                aria-label="Mon compte"
+                aria-label={t('account')}
                 aria-expanded={isOpen}
             >
                 <User className="w-6 h-6" />
@@ -75,7 +77,7 @@ export function UserAccountDropdown() {
                                 {session.user.name?.[0]?.toUpperCase() || session.user.email?.[0]?.toUpperCase() || 'U'}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="font-semibold truncate">{session.user.name || 'Utilisateur'}</p>
+                                <p className="font-semibold truncate">{session.user.name || t('user')}</p>
                                 <p className="text-sm text-gray-600 truncate">{session.user.email}</p>
                             </div>
                         </div>
@@ -87,7 +89,7 @@ export function UserAccountDropdown() {
                             className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                         >
                             <Package className="w-5 h-5 text-gray-600" />
-                            <span className="font-medium">Mes commandes</span>
+                            <span className="font-medium">{t('myOrders')}</span>
                         </Link>
 
                         <Link
@@ -95,7 +97,7 @@ export function UserAccountDropdown() {
                             className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                         >
                             <Heart className="w-5 h-5 text-gray-600" />
-                            <span className="font-medium">Ma liste de souhaits</span>
+                            <span className="font-medium">{t('myWishlist')}</span>
                         </Link>
 
                         <Link
@@ -103,7 +105,7 @@ export function UserAccountDropdown() {
                             className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                         >
                             <MapPin className="w-5 h-5 text-gray-600" />
-                            <span className="font-medium">Mes adresses</span>
+                            <span className="font-medium">{t('myAddresses')}</span>
                         </Link>
 
                         <Link
@@ -111,7 +113,7 @@ export function UserAccountDropdown() {
                             className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                         >
                             <CreditCard className="w-5 h-5 text-gray-600" />
-                            <span className="font-medium">Moyens de paiement</span>
+                            <span className="font-medium">{t('paymentMethods')}</span>
                         </Link>
 
                         <Link
@@ -119,7 +121,7 @@ export function UserAccountDropdown() {
                             className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                         >
                             <Settings className="w-5 h-5 text-gray-600" />
-                            <span className="font-medium">Paramètres</span>
+                            <span className="font-medium">{t('settings')}</span>
                         </Link>
 
                         <Link
@@ -127,7 +129,7 @@ export function UserAccountDropdown() {
                             className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                         >
                             <Shield className="w-5 h-5 text-gray-600" />
-                            <span className="font-medium">Sécurité & 2FA</span>
+                            <span className="font-medium">{t('security')}</span>
                         </Link>
                     </div>
 
@@ -137,7 +139,7 @@ export function UserAccountDropdown() {
                             className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                         >
                             <MessageCircle className="w-5 h-5 text-gray-600" />
-                            <span className="font-medium">Support & Aide</span>
+                            <span className="font-medium">{t('supportHelp')}</span>
                         </Link>
                     </div>
 
@@ -147,7 +149,7 @@ export function UserAccountDropdown() {
                             className="flex items-center gap-3 w-full px-4 py-3 hover:bg-red-50 text-red-600 rounded-md transition-colors font-medium"
                         >
                             <LogOut className="w-5 h-5" />
-                            <span>Déconnexion</span>
+                            <span>{t('logout')}</span>
                         </button>
                     </div>
                 </div>

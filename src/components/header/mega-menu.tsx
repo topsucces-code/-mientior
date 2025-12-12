@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useHeader } from '@/contexts/header-context'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import type { MegaMenuColumn } from '@/types'
 
 interface MegaMenuProps {
@@ -14,6 +15,7 @@ interface MegaMenuProps {
 export function MegaMenu({ categories }: MegaMenuProps) {
     const { activeDropdown, setActiveDropdown } = useHeader()
     const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
+    const t = useTranslations('header')
     const dropdownRef = useRef<HTMLDivElement>(null)
     const triggerRef = useRef<HTMLButtonElement>(null)
 
@@ -119,7 +121,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                     hover:from-turquoise-500 hover:to-turquoise-600
                     hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(8,145,178,0.3)]
                 `}
-                aria-label="Catégories - Ouvrir le menu"
+                aria-label={`${t('categories')} - ${t('menu')}`}
                 aria-expanded={isOpen}
                 aria-haspopup="menu"
                 aria-controls="megamenu-dropdown"
@@ -130,7 +132,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                     <span className={`block w-[18px] h-0.5 bg-white transition-all duration-300 ${isOpen ? 'opacity-0' : ''}`} />
                     <span className={`block w-[18px] h-0.5 bg-white transition-all duration-300 ${isOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
                 </div>
-                <span>Catégories</span>
+                <span>{t('categories')}</span>
             </button>
 
             {isOpen && (
@@ -138,7 +140,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                     ref={menuRef}
                     id="megamenu-dropdown"
                     role="menu"
-                    aria-label="Menu des catégories"
+                    aria-label={t('allCategories')}
                     onMouseEnter={handleMouseEnterDropdown}
                     onMouseLeave={handleMouseLeaveDropdown}
                     className="
@@ -156,11 +158,11 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                         {/* Column 1: Categories List (20%) */}
                         <nav
                             className="w-64 bg-gray-50 border-r border-gray-100 overflow-y-auto"
-                            aria-label="Liste des catégories principales"
+                            aria-label={t('allCategories')}
                         >
                             <div className="p-4">
                                 <h3 className="text-[11px] font-bold uppercase tracking-[0.1em] text-gray-500 mb-4">
-                                    Toutes les catégories
+                                    {t('allCategories')}
                                 </h3>
                                 <ul className="space-y-1" role="menubar" aria-orientation="vertical">
                                     {categories.map((category, index) => {
@@ -253,7 +255,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                                                     hover:gap-2.5 transition-all duration-200
                                                 "
                                             >
-                                                Voir tout
+                                                {t('viewAll')}
                                                 <ChevronRight className="w-4 h-4" />
                                             </Link>
                                         </div>
@@ -296,8 +298,8 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                                             />
                                             <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-end p-6">
                                                 <div className="text-white">
-                                                    <p className="font-bold text-lg mb-1">Découvrir {activeCategoryData.title}</p>
-                                                    <p className="text-sm opacity-90">Voir tous les produits →</p>
+                                                    <p className="font-bold text-lg mb-1">{t('viewAll')} {activeCategoryData.title}</p>
+                                                    <p className="text-sm opacity-90">{t('viewAll')} →</p>
                                                 </div>
                                             </div>
                                             {/* CTA Button */}
@@ -309,7 +311,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                                                 hover:bg-orange-600 hover:scale-105
                                                 transition-all duration-250
                                             ">
-                                                Explorer
+                                                {t('viewAll')}
                                             </button>
                                         </Link>
                                     )}

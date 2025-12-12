@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import useEmblaCarousel from 'embla-carousel-react'
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 
 interface HeroSlide {
@@ -27,66 +28,67 @@ interface HeroSlide {
   features?: { icon: string; text: string }[]
 }
 
-const defaultSlides: HeroSlide[] = [
+// Default slides with static images and hrefs - text will be localized
+const getDefaultSlides = (t: (key: string) => string): HeroSlide[] => [
   {
     id: '1',
-    title: 'Mode Automne 2025',
-    subtitle: 'NOUVELLE COLLECTION',
-    description: 'Découvrez les dernières tendances avec notre collection exclusive',
+    title: t('slides.1.title'),
+    subtitle: t('slides.1.subtitle'),
+    description: t('slides.1.description'),
     image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80',
     productImage: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80',
-    discount: '-50%',
-    price: '12 500 F',
-    cta: { text: 'Acheter maintenant', href: '/products' },
-    secondaryCta: { text: 'En savoir plus', href: '/about' },
+    discount: t('slides.1.discount'),
+    price: t('slides.1.price'),
+    cta: { text: t('slides.1.cta.text'), href: '/products' },
+    secondaryCta: { text: t('slides.1.secondaryCta.text'), href: '/about' },
     features: [
-      { icon: '🚚', text: 'Livraison gratuite' },
-      { icon: '↩️', text: 'Retour 30 jours' },
+      { icon: '🚚', text: t('slides.1.features.freeShipping') },
+      { icon: '↩️', text: t('slides.1.features.returns') },
     ],
   },
   {
     id: '2',
-    title: 'Électronique Premium',
-    subtitle: 'TECH & GADGETS',
-    description: 'Les meilleurs appareils aux meilleurs prix',
+    title: t('slides.2.title'),
+    subtitle: t('slides.2.subtitle'),
+    description: t('slides.2.description'),
     image: 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=1920&q=80',
     productImage: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80',
-    discount: '-30%',
-    price: '45 000 F',
-    cta: { text: 'Voir les offres', href: '/categories/electronique' },
+    discount: t('slides.2.discount'),
+    price: t('slides.2.price'),
+    cta: { text: t('slides.2.cta.text'), href: '/categories/electronique' },
     features: [
-      { icon: '🔒', text: 'Paiement sécurisé' },
-      { icon: '⚡', text: 'Livraison express' },
+      { icon: '🔒', text: t('slides.2.features.securePayment') },
+      { icon: '⚡', text: t('slides.2.features.expressDelivery') },
     ],
   },
   {
     id: '3',
-    title: 'Offres Exclusives',
-    subtitle: 'VENTES FLASH',
-    description: 'Profitez de nos promotions exceptionnelles',
+    title: t('slides.3.title'),
+    subtitle: t('slides.3.subtitle'),
+    description: t('slides.3.description'),
     image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1920&q=80',
     productImage: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80',
-    discount: '-70%',
-    price: '8 990 F',
-    cta: { text: 'Voir les offres', href: '/products?filter=sale' },
+    discount: t('slides.3.discount'),
+    price: t('slides.3.price'),
+    cta: { text: t('slides.3.cta.text'), href: '/products?filter=sale' },
     features: [
-      { icon: '🎁', text: 'Cadeaux exclusifs' },
-      { icon: '💳', text: 'Paiement en 4x' },
+      { icon: '🎁', text: t('slides.3.features.exclusiveGifts') },
+      { icon: '💳', text: t('slides.3.features.installments') },
     ],
   },
   {
     id: '4',
-    title: 'Beauté & Bien-être',
-    subtitle: 'SOINS PREMIUM',
-    description: 'Prenez soin de vous avec nos produits de qualité',
+    title: t('slides.4.title'),
+    subtitle: t('slides.4.subtitle'),
+    description: t('slides.4.description'),
     image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1920&q=80',
     productImage: 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=600&q=80',
-    discount: '-40%',
-    price: '15 000 F',
-    cta: { text: 'Découvrir', href: '/categories/beaute' },
+    discount: t('slides.4.discount'),
+    price: t('slides.4.price'),
+    cta: { text: t('slides.4.cta.text'), href: '/categories/beaute' },
     features: [
-      { icon: '✨', text: '100% Authentique' },
-      { icon: '🌿', text: 'Produits naturels' },
+      { icon: '✨', text: t('slides.4.features.authentic') },
+      { icon: '🌿', text: t('slides.4.features.natural') },
     ],
   },
 ]
@@ -96,10 +98,12 @@ interface HeroSectionProps {
   autoplayDelay?: number
 }
 
-export default function HeroSectionEnhanced({ 
-  slides = defaultSlides, 
-  autoplayDelay = 5000 
+export default function HeroSectionEnhanced({
+  slides,
+  autoplayDelay = 5000
 }: HeroSectionProps) {
+  const t = useTranslations('home.hero')
+  const localizedSlides = slides || getDefaultSlides(t)
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true })
   const [selectedIndex, setSelectedIndex] = React.useState(0)
   const [progress, setProgress] = React.useState(0)
@@ -141,14 +145,14 @@ export default function HeroSectionEnhanced({
 
   return (
     <section 
-      className="relative w-full h-[400px] sm:h-[450px] md:h-[500px] lg:h-[550px] xl:h-[600px] overflow-hidden bg-gradient-to-br from-turquoise-600 to-turquoise-500"
+      className="relative w-full h-[280px] sm:h-[300px] md:h-[340px] lg:h-[380px] xl:h-[420px] overflow-hidden bg-gradient-to-br from-turquoise-600 to-turquoise-500"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* Carousel */}
       <div className="embla h-full" ref={emblaRef}>
         <div className="embla__container flex h-full">
-          {slides.map((slide, index) => {
+          {localizedSlides.map((slide, index) => {
             const isActive = index === selectedIndex
 
             return (
@@ -313,14 +317,14 @@ export default function HeroSectionEnhanced({
         <button
           onClick={scrollPrev}
           className="pointer-events-auto w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 flex items-center justify-center rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white hover:text-turquoise-600 hover:scale-110 transition-all duration-300"
-          aria-label="Slide précédent"
+          aria-label={t('navigation.previous')}
         >
           <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
         </button>
         <button
           onClick={scrollNext}
           className="pointer-events-auto w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 flex items-center justify-center rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white hover:text-turquoise-600 hover:scale-110 transition-all duration-300"
-          aria-label="Slide suivant"
+          aria-label={t('navigation.next')}
         >
           <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
         </button>
@@ -328,7 +332,7 @@ export default function HeroSectionEnhanced({
 
       {/* Dots Navigation */}
       <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3 z-20">
-        {slides.map((_, index) => (
+        {localizedSlides.map((_, index) => (
           <button
             key={index}
             onClick={() => scrollTo(index)}
@@ -338,7 +342,7 @@ export default function HeroSectionEnhanced({
                 ? "w-6 sm:w-8 md:w-10 bg-white border-orange-500/60 shadow-[0_4px_12px_rgba(255,255,255,0.4)]" 
                 : "w-2 sm:w-3 bg-white/40 border-transparent hover:bg-white/60 hover:scale-125"
             )}
-            aria-label={`Aller au slide ${index + 1}`}
+            aria-label={t('navigation.goToSlide', { number: index + 1 })}
           />
         ))}
       </div>

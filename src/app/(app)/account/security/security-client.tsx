@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import QRCode from 'qrcode'
 import { SessionList, type SessionInfo } from '@/components/account/session-list'
 import { useToast } from '@/hooks/use-toast'
@@ -14,6 +15,7 @@ import { Label } from '@/components/ui/label'
 
 export function SecurityPageClient() {
   const router = useRouter()
+  const t = useTranslations('account.security')
   const [sessions, setSessions] = React.useState<SessionInfo[]>([])
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
@@ -49,8 +51,8 @@ export function SecurityPageClient() {
         .catch((err) => {
           console.error('Error generating QR code:', err)
           toast({
-            title: 'Erreur',
-            description: 'Impossible de générer le QR code',
+            title: t('messages.error'),
+            description: t('twoFactor.qrError'),
             variant: 'destructive',
           })
         })
@@ -87,16 +89,16 @@ export function SecurityPageClient() {
       }
 
       toast({
-        title: 'Session logged out',
-        description: 'The session has been successfully terminated.',
+        title: t('sessions.loggedOut'),
+        description: t('sessions.loggedOutDescription'),
       })
 
       // Refresh sessions list
       await fetchSessions()
     } catch (err) {
       toast({
-        title: 'Error',
-        description: err instanceof Error ? err.message : 'Failed to log out session',
+        title: t('messages.error'),
+        description: err instanceof Error ? err.message : t('sessions.logoutError'),
         variant: 'destructive',
       })
     }
@@ -116,16 +118,16 @@ export function SecurityPageClient() {
       const data = await response.json()
 
       toast({
-        title: 'All sessions logged out',
-        description: `${data.sessionsInvalidated} session(s) have been terminated.`,
+        title: t('sessions.allLoggedOut'),
+        description: t('sessions.allLoggedOutDescription', { count: data.sessionsInvalidated }),
       })
 
       // Refresh sessions list
       await fetchSessions()
     } catch (err) {
       toast({
-        title: 'Error',
-        description: err instanceof Error ? err.message : 'Failed to log out all sessions',
+        title: t('messages.error'),
+        description: err instanceof Error ? err.message : t('sessions.logoutAllError'),
         variant: 'destructive',
       })
     }
@@ -136,8 +138,8 @@ export function SecurityPageClient() {
 
     if (newPassword !== confirmPassword) {
       toast({
-        title: 'Erreur',
-        description: 'Les mots de passe ne correspondent pas',
+        title: t('messages.error'),
+        description: t('password.mismatch'),
         variant: 'destructive',
       })
       return
@@ -161,8 +163,8 @@ export function SecurityPageClient() {
       }
 
       toast({
-        title: 'Mot de passe changé',
-        description: 'Votre mot de passe a été modifié avec succès',
+        title: t('password.changed'),
+        description: t('password.changedDescription'),
       })
 
       // Reset form
@@ -171,8 +173,8 @@ export function SecurityPageClient() {
       setConfirmPassword('')
     } catch (error) {
       toast({
-        title: 'Erreur',
-        description: error instanceof Error ? error.message : 'Impossible de changer le mot de passe',
+        title: t('messages.error'),
+        description: error instanceof Error ? error.message : t('password.changeError'),
         variant: 'destructive',
       })
     } finally {
@@ -181,14 +183,14 @@ export function SecurityPageClient() {
   }
 
   const handleDeleteAccount = async () => {
-    const password = prompt('Entrez votre mot de passe pour confirmer la suppression')
+    const password = prompt(t('deleteAccount.confirmPassword'))
     if (!password) return
 
-    const confirmation = prompt('Tapez DELETE en majuscules pour confirmer')
+    const confirmation = prompt(t('deleteAccount.confirmText'))
     if (confirmation !== 'DELETE') {
       toast({
-        title: 'Annulé',
-        description: 'Suppression du compte annulée',
+        title: t('deleteAccount.cancelled'),
+        description: t('deleteAccount.cancelledDescription'),
       })
       return
     }
@@ -208,8 +210,8 @@ export function SecurityPageClient() {
       }
 
       toast({
-        title: 'Compte supprimé',
-        description: 'Votre compte a été supprimé avec succès',
+        title: t('deleteAccount.deleted'),
+        description: t('deleteAccount.deletedDescription'),
       })
 
       // Redirect to homepage after 2 seconds
@@ -218,8 +220,8 @@ export function SecurityPageClient() {
       }, 2000)
     } catch (error) {
       toast({
-        title: 'Erreur',
-        description: error instanceof Error ? error.message : 'Impossible de supprimer le compte',
+        title: t('messages.error'),
+        description: error instanceof Error ? error.message : t('deleteAccount.deleteError'),
         variant: 'destructive',
       })
     } finally {
@@ -237,9 +239,9 @@ export function SecurityPageClient() {
               <Shield className="h-6 w-6" />
             </div>
             <div>
-              <CardTitle>Security Settings</CardTitle>
+              <CardTitle>{t('overview.title')}</CardTitle>
               <CardDescription>
-                Manage your account security and monitor active sessions
+                {t('overview.description')}
               </CardDescription>
             </div>
           </div>
@@ -248,8 +250,7 @@ export function SecurityPageClient() {
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              If you see any suspicious activity or unrecognized devices, log them out immediately
-              and consider changing your password.
+              {t('overview.alert')}
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -271,9 +272,9 @@ export function SecurityPageClient() {
               <Smartphone className="h-6 w-6" />
             </div>
             <div>
-              <CardTitle>Authentification à deux facteurs (2FA)</CardTitle>
+              <CardTitle>{t('twoFactor.title')}</CardTitle>
               <CardDescription>
-                Ajoutez une couche de sécurité supplémentaire à votre compte
+                {t('twoFactor.description')}
               </CardDescription>
             </div>
           </div>
@@ -284,14 +285,14 @@ export function SecurityPageClient() {
               <div className="flex items-center gap-3">
                 <CheckCircle className="h-5 w-5 text-emerald-600" />
                 <div>
-                  <p className="font-medium text-emerald-800">2FA activé</p>
-                  <p className="text-sm text-emerald-600">Votre compte est protégé</p>
+                  <p className="font-medium text-emerald-800">{t('twoFactor.enabled')}</p>
+                  <p className="text-sm text-emerald-600">{t('twoFactor.protected')}</p>
                 </div>
               </div>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={async () => {
-                  const code = prompt('Entrez votre code 2FA pour désactiver')
+                  const code = prompt(t('twoFactor.disablePrompt'))
                   if (code) {
                     setTwoFALoading(true)
                     try {
@@ -302,9 +303,9 @@ export function SecurityPageClient() {
                       })
                       if (res.ok) {
                         setTwoFAEnabled(false)
-                        toast({ title: '2FA désactivé', description: 'L\'authentification à deux facteurs a été désactivée.' })
+                        toast({ title: t('twoFactor.disabled'), description: t('twoFactor.disabledDescription') })
                       } else {
-                        toast({ title: 'Erreur', description: 'Code invalide', variant: 'destructive' })
+                        toast({ title: t('messages.error'), description: t('twoFactor.invalidCode'), variant: 'destructive' })
                       }
                     } finally {
                       setTwoFALoading(false)
@@ -314,37 +315,37 @@ export function SecurityPageClient() {
                 disabled={twoFALoading}
               >
                 {twoFALoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4 mr-2" />}
-                Désactiver
+                {t('twoFactor.disable')}
               </Button>
             </div>
           ) : setupData ? (
             <div className="space-y-4">
               <div className="p-4 bg-gray-50 rounded-lg">
-                <p className="font-medium mb-2">1. Scannez ce QR code avec votre application d'authentification</p>
+                <p className="font-medium mb-2">{t('twoFactor.step1')}</p>
                 <div className="flex justify-center p-4 bg-white rounded border">
                   {qrCodeUrl ? (
                     <div className="text-center">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={qrCodeUrl}
-                        alt="QR Code 2FA"
+                        alt={t('twoFactor.qrAlt')}
                         className="w-64 h-64 mx-auto"
                       />
                       <p className="text-xs text-gray-500 mt-2">
-                        Scannez avec Google Authenticator, Authy ou une application similaire
+                        {t('twoFactor.scanInstructions')}
                       </p>
                     </div>
                   ) : (
                     <div className="text-center">
                       <Loader2 className="h-16 w-16 mx-auto text-gray-400 mb-2 animate-spin" />
-                      <p className="text-xs text-gray-500">Génération du QR code...</p>
+                      <p className="text-xs text-gray-500">{t('twoFactor.generatingQR')}</p>
                     </div>
                   )}
                 </div>
                 <div className="mt-4 p-3 bg-white rounded border">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <p className="text-xs text-gray-500 mb-1">Clé secrète (si vous ne pouvez pas scanner)</p>
+                      <p className="text-xs text-gray-500 mb-1">{t('twoFactor.secretKey')}</p>
                       <code className="text-sm font-mono text-gray-700 break-all">{setupData.secret}</code>
                     </div>
                     <Button
@@ -352,7 +353,7 @@ export function SecurityPageClient() {
                       size="sm"
                       onClick={() => {
                         navigator.clipboard.writeText(setupData.secret)
-                        toast({ title: 'Copié !', description: 'La clé secrète a été copiée dans le presse-papier' })
+                        toast({ title: t('twoFactor.copied'), description: t('twoFactor.copiedDescription') })
                       }}
                     >
                       <Copy className="h-4 w-4" />
@@ -360,18 +361,18 @@ export function SecurityPageClient() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="p-4 bg-gray-50 rounded-lg">
-                <p className="font-medium mb-2">2. Entrez le code de vérification</p>
+                <p className="font-medium mb-2">{t('twoFactor.step2')}</p>
                 <div className="flex gap-2">
-                  <Input 
-                    placeholder="000000" 
+                  <Input
+                    placeholder="000000"
                     value={verifyCode}
                     onChange={(e) => setVerifyCode(e.target.value)}
                     maxLength={6}
                     className="w-32"
                   />
-                  <Button 
+                  <Button
                     onClick={async () => {
                       setTwoFALoading(true)
                       try {
@@ -383,9 +384,9 @@ export function SecurityPageClient() {
                         if (res.ok) {
                           setTwoFAEnabled(true)
                           setShowBackupCodes(true)
-                          toast({ title: '2FA activé', description: 'L\'authentification à deux facteurs est maintenant active.' })
+                          toast({ title: t('twoFactor.enabled'), description: t('twoFactor.enabledDescription') })
                         } else {
-                          toast({ title: 'Erreur', description: 'Code invalide', variant: 'destructive' })
+                          toast({ title: t('messages.error'), description: t('twoFactor.invalidCode'), variant: 'destructive' })
                         }
                       } finally {
                         setTwoFALoading(false)
@@ -393,7 +394,7 @@ export function SecurityPageClient() {
                     }}
                     disabled={twoFALoading || verifyCode.length !== 6}
                   >
-                    {twoFALoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Vérifier'}
+                    {twoFALoading ? <Loader2 className="h-4 w-4 animate-spin" /> : t('twoFactor.verify')}
                   </Button>
                 </div>
               </div>
@@ -402,7 +403,7 @@ export function SecurityPageClient() {
                 <Alert>
                   <Key className="h-4 w-4" />
                   <AlertDescription>
-                    <p className="font-medium mb-2">Codes de secours (à conserver en lieu sûr)</p>
+                    <p className="font-medium mb-2">{t('twoFactor.backupCodes')}</p>
                     <div className="grid grid-cols-2 gap-2 font-mono text-sm">
                       {setupData.backupCodes.map((code, i) => (
                         <span key={i} className="bg-gray-100 p-1 rounded">{code}</span>
@@ -415,9 +416,9 @@ export function SecurityPageClient() {
           ) : (
             <div className="flex items-center justify-between">
               <p className="text-gray-600">
-                Protégez votre compte avec une application d'authentification comme Google Authenticator ou Authy.
+                {t('twoFactor.notEnabled')}
               </p>
-              <Button 
+              <Button
                 onClick={async () => {
                   setTwoFALoading(true)
                   try {
@@ -426,7 +427,7 @@ export function SecurityPageClient() {
                       const data = await res.json()
                       setSetupData(data)
                     } else {
-                      toast({ title: 'Erreur', description: 'Impossible de configurer 2FA', variant: 'destructive' })
+                      toast({ title: t('messages.error'), description: t('twoFactor.setupError'), variant: 'destructive' })
                     }
                   } finally {
                     setTwoFALoading(false)
@@ -435,7 +436,7 @@ export function SecurityPageClient() {
                 disabled={twoFALoading}
               >
                 {twoFALoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Smartphone className="h-4 w-4 mr-2" />}
-                Activer 2FA
+                {t('twoFactor.enable')}
               </Button>
             </div>
           )}
@@ -450,9 +451,9 @@ export function SecurityPageClient() {
               <Lock className="h-6 w-6" />
             </div>
             <div>
-              <CardTitle>Changer le mot de passe</CardTitle>
+              <CardTitle>{t('password.title')}</CardTitle>
               <CardDescription>
-                Mettez à jour votre mot de passe régulièrement pour plus de sécurité
+                {t('password.description')}
               </CardDescription>
             </div>
           </div>
@@ -460,39 +461,39 @@ export function SecurityPageClient() {
         <CardContent>
           <form onSubmit={handlePasswordChange} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="currentPassword">Mot de passe actuel</Label>
+              <Label htmlFor="currentPassword">{t('password.current')}</Label>
               <Input
                 id="currentPassword"
                 type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Entrez votre mot de passe actuel"
+                placeholder={t('password.currentPlaceholder')}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="newPassword">Nouveau mot de passe</Label>
+              <Label htmlFor="newPassword">{t('password.new')}</Label>
               <Input
                 id="newPassword"
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Entrez votre nouveau mot de passe"
+                placeholder={t('password.newPlaceholder')}
                 required
                 minLength={8}
               />
               <p className="text-sm text-nuanced-500">
-                Au moins 8 caractères avec majuscules, minuscules, chiffres et caractères spéciaux
+                {t('password.requirements')}
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmer le nouveau mot de passe</Label>
+              <Label htmlFor="confirmPassword">{t('password.confirm')}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirmez votre nouveau mot de passe"
+                placeholder={t('password.confirmPlaceholder')}
                 required
               />
             </div>
@@ -500,12 +501,12 @@ export function SecurityPageClient() {
               {passwordLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Changement en cours...
+                  {t('password.changing')}
                 </>
               ) : (
                 <>
                   <Lock className="h-4 w-4 mr-2" />
-                  Changer le mot de passe
+                  {t('password.changeButton')}
                 </>
               )}
             </Button>
@@ -521,9 +522,9 @@ export function SecurityPageClient() {
               <Trash2 className="h-6 w-6" />
             </div>
             <div>
-              <CardTitle className="text-red-600">Supprimer le compte</CardTitle>
+              <CardTitle className="text-red-600">{t('deleteAccount.title')}</CardTitle>
               <CardDescription>
-                Supprimez définitivement votre compte et toutes vos données
+                {t('deleteAccount.description')}
               </CardDescription>
             </div>
           </div>
@@ -532,8 +533,7 @@ export function SecurityPageClient() {
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              Cette action est irréversible. Toutes vos commandes, avis et données personnelles seront supprimés.
-              Les informations de commande nécessaires à la comptabilité seront anonymisées.
+              {t('deleteAccount.warning')}
             </AlertDescription>
           </Alert>
           <Button
@@ -544,12 +544,12 @@ export function SecurityPageClient() {
             {deleteLoading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Suppression en cours...
+                {t('deleteAccount.deleting')}
               </>
             ) : (
               <>
                 <Trash2 className="h-4 w-4 mr-2" />
-                Supprimer mon compte
+                {t('deleteAccount.button')}
               </>
             )}
           </Button>

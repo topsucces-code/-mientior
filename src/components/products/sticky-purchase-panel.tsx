@@ -38,6 +38,7 @@ export function StickyPurchasePanel({
   const [isVisible, setIsVisible] = useState(false)
   const [internalQuantity, setInternalQuantity] = useState(1)
   const [isAddingToCart, setIsAddingToCart] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
   const { addItem: addToCart } = useCartStore()
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
   const { toast } = useToast()
@@ -46,6 +47,11 @@ export function StickyPurchasePanel({
   // Use external quantity if provided, otherwise use internal
   const quantity = externalQuantity ?? internalQuantity
   const setQuantity = onQuantityChange ?? setInternalQuantity
+
+  // Track mounted state to avoid hydration mismatch
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Show/hide panel based on scroll position
   useEffect(() => {
@@ -98,8 +104,10 @@ export function StickyPurchasePanel({
   }
 
   const handleToggleWishlist = () => {
+    if (!isMounted) return
+
     const inWishlist = isInWishlist(product.id)
-    
+
     if (inWishlist) {
       removeFromWishlist(product.id)
       toast({
@@ -273,14 +281,14 @@ export function StickyPurchasePanel({
                 onClick={handleToggleWishlist}
                 className={cn(
                   'hidden md:flex items-center justify-center w-12 h-12 rounded-lg border-2 transition-all',
-                  isInWishlist(product.id)
+                  isMounted && isInWishlist(product.id)
                     ? 'border-red-500 bg-red-50 text-red-500 hover:bg-red-100'
                     : 'border-platinum-300 hover:border-orange-500'
                 )}
-                aria-label={isInWishlist(product.id) ? t('removedFromWishlist') : t('addedToWishlist')}
+                aria-label={isMounted && isInWishlist(product.id) ? t('removedFromWishlist') : t('addedToWishlist')}
               >
                 <Heart
-                  className={cn('w-5 h-5 transition-all', isInWishlist(product.id) && 'fill-current')}
+                  className={cn('w-5 h-5 transition-all', isMounted && isInWishlist(product.id) && 'fill-current')}
                 />
               </button>
 

@@ -4,6 +4,7 @@ import * as React from 'react'
 import Image from 'next/image'
 import { Star, Quote, ChevronLeft, ChevronRight } from 'lucide-react'
 import useEmblaCarousel from 'embla-carousel-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 
 interface Testimonial {
@@ -87,12 +88,16 @@ interface TestimonialsEnhancedProps {
 
 export default function TestimonialsEnhanced({
   testimonials = defaultTestimonials,
-  title = 'Ce que disent nos clients',
-  subtitle = 'Des milliers de clients satisfaits nous font confiance',
+  title,
+  subtitle,
 }: TestimonialsEnhancedProps) {
+  const t = useTranslations('home.testimonials')
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'center' })
   const [selectedIndex, setSelectedIndex] = React.useState(0)
   const [isPaused, setIsPaused] = React.useState(false)
+
+  const displayTitle = title || t('title')
+  const displaySubtitle = subtitle || t('subtitle')
 
   const scrollPrev = React.useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
   const scrollNext = React.useCallback(() => emblaApi?.scrollNext(), [emblaApi])
@@ -131,23 +136,23 @@ export default function TestimonialsEnhanced({
         {/* Header */}
         <div className="text-center mb-8 sm:mb-10 md:mb-12">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-2 sm:mb-3">
-            {title}
+            {displayTitle}
           </h2>
-          <p className="text-turquoise-100 text-sm sm:text-base md:text-lg max-w-md mx-auto">{subtitle}</p>
-          
+          <p className="text-turquoise-100 text-sm sm:text-base md:text-lg max-w-md mx-auto">{displaySubtitle}</p>
+
           {/* Stats */}
           <div className="flex justify-center gap-6 sm:gap-8 md:gap-12 lg:gap-16 mt-6 sm:mt-8">
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white">50k+</div>
-              <div className="text-xs sm:text-sm text-turquoise-100">Clients satisfaits</div>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white">{t('stats.customers')}</div>
+              <div className="text-xs sm:text-sm text-turquoise-100">{t('stats.customersLabel')}</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white">4.9</div>
-              <div className="text-xs sm:text-sm text-turquoise-100">Note moyenne</div>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white">{t('stats.rating')}</div>
+              <div className="text-xs sm:text-sm text-turquoise-100">{t('stats.ratingLabel')}</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white">98%</div>
-              <div className="text-xs sm:text-sm text-turquoise-100">Recommandent</div>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-black text-white">{t('stats.recommend')}</div>
+              <div className="text-xs sm:text-sm text-turquoise-100">{t('stats.recommendLabel')}</div>
             </div>
           </div>
         </div>
@@ -205,7 +210,7 @@ export default function TestimonialsEnhanced({
                           />
                         </div>
                         <span className="text-xs sm:text-sm text-gray-600 font-medium line-clamp-1">
-                          A acheté: {testimonial.product.name}
+                          {t('purchased')} {testimonial.product.name}
                         </span>
                       </div>
                     )}
@@ -226,7 +231,7 @@ export default function TestimonialsEnhanced({
                           <span className="font-bold text-gray-800 text-sm sm:text-base">{testimonial.name}</span>
                           {testimonial.verified && (
                             <span className="px-1.5 py-0.5 sm:px-2 bg-emerald-100 text-emerald-600 text-[10px] sm:text-xs font-semibold rounded-full whitespace-nowrap">
-                              ✓ Vérifié
+                              {t('verified')}
                             </span>
                           )}
                         </div>

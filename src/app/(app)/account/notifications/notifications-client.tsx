@@ -2,19 +2,20 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { 
-  Bell, 
-  Check, 
-  CheckCheck, 
-  Trash2, 
-  Package, 
-  CreditCard, 
-  Truck, 
-  Tag, 
-  TrendingDown, 
-  Box, 
-  Star, 
-  MessageCircle, 
+import { useTranslations, useLocale } from 'next-intl';
+import {
+  Bell,
+  Check,
+  CheckCheck,
+  Trash2,
+  Package,
+  CreditCard,
+  Truck,
+  Tag,
+  TrendingDown,
+  Box,
+  Star,
+  MessageCircle,
   AlertCircle,
   Loader2,
   ArrowLeft
@@ -49,46 +50,12 @@ const typeColors: Record<NotificationType, string> = {
   SYSTEM_ALERT: 'bg-orange-100 text-orange-600',
 };
 
-// Type labels
-const typeLabels: Record<NotificationType, string> = {
-  ORDER_UPDATE: 'Commandes',
-  PAYMENT_UPDATE: 'Paiements',
-  DELIVERY_UPDATE: 'Livraisons',
-  PROMO_OFFER: 'Promotions',
-  PRICE_DROP: 'Baisses de prix',
-  BACK_IN_STOCK: 'Retours en stock',
-  REVIEW_REQUEST: 'Avis',
-  SUPPORT_UPDATE: 'Support',
-  SYSTEM_ALERT: 'Système',
-};
-
-// Format date
-function formatDate(date: Date | string): string {
-  const d = new Date(date);
-  const now = new Date();
-  const diffInDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (diffInDays === 0) {
-    return `Aujourd'hui à ${d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
-  } else if (diffInDays === 1) {
-    return `Hier à ${d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
-  } else if (diffInDays < 7) {
-    return d.toLocaleDateString('fr-FR', { weekday: 'long', hour: '2-digit', minute: '2-digit' });
-  }
-  
-  return d.toLocaleDateString('fr-FR', { 
-    day: 'numeric', 
-    month: 'long', 
-    year: 'numeric',
-    hour: '2-digit', 
-    minute: '2-digit' 
-  });
-}
-
 type FilterType = 'all' | 'unread' | NotificationType;
 
 export default function NotificationsPageClient() {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const t = useTranslations('account.notifications');
+  const locale = useLocale();
   
   const {
     notifications,
@@ -101,6 +68,44 @@ export default function NotificationsPageClient() {
     hasMore,
     loadMore,
   } = useNotifications({ pollInterval: 30000, limit: 20 });
+
+  // Type labels
+  const typeLabels: Record<NotificationType, string> = {
+    ORDER_UPDATE: t('typeLabels.ORDER_UPDATE'),
+    PAYMENT_UPDATE: t('typeLabels.PAYMENT_UPDATE'),
+    DELIVERY_UPDATE: t('typeLabels.DELIVERY_UPDATE'),
+    PROMO_OFFER: t('typeLabels.PROMO_OFFER'),
+    PRICE_DROP: t('typeLabels.PRICE_DROP'),
+    BACK_IN_STOCK: t('typeLabels.BACK_IN_STOCK'),
+    REVIEW_REQUEST: t('typeLabels.REVIEW_REQUEST'),
+    SUPPORT_UPDATE: t('typeLabels.SUPPORT_UPDATE'),
+    SYSTEM_ALERT: t('typeLabels.SYSTEM_ALERT'),
+  };
+
+  // Format date
+  const formatDate = (date: Date | string): string => {
+    const d = new Date(date);
+    const now = new Date();
+    const diffInDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+
+    const time = d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+
+    if (diffInDays === 0) {
+      return t('dateGroups.today', { time });
+    } else if (diffInDays === 1) {
+      return t('dateGroups.yesterday', { time });
+    } else if (diffInDays < 7) {
+      return d.toLocaleDateString(locale, { weekday: 'long', hour: '2-digit', minute: '2-digit' });
+    }
+
+    return d.toLocaleDateString(locale, {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   // Filter notifications
   const filteredNotifications = notifications.filter(notification => {
@@ -118,11 +123,11 @@ export default function NotificationsPageClient() {
 
     let groupKey: string;
     if (date.toDateString() === today.toDateString()) {
-      groupKey = "Aujourd'hui";
+      groupKey = t('dateGroups.todayLabel');
     } else if (date.toDateString() === yesterday.toDateString()) {
-      groupKey = 'Hier';
+      groupKey = t('dateGroups.yesterdayLabel');
     } else {
-      groupKey = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+      groupKey = date.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
     }
 
     if (!groups[groupKey]) {
@@ -141,15 +146,15 @@ export default function NotificationsPageClient() {
           className="inline-flex items-center text-sm text-emerald-600 hover:text-emerald-700 mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Retour au compte
+          {t('backToAccount')}
         </Link>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
             <p className="text-gray-600 mt-1">
-              {unreadCount > 0 
-                ? `${unreadCount} notification${unreadCount > 1 ? 's' : ''} non lue${unreadCount > 1 ? 's' : ''}`
-                : 'Toutes vos notifications sont lues'
+              {unreadCount > 0
+                ? t('unreadCount', { count: unreadCount })
+                : t('allRead')
               }
             </p>
           </div>
@@ -159,7 +164,7 @@ export default function NotificationsPageClient() {
               className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-emerald-600 text-sm font-medium rounded-md text-emerald-600 bg-white hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
             >
               <CheckCheck className="h-4 w-4 mr-2" />
-              Tout marquer comme lu
+              {t('markAllRead')}
             </button>
           )}
         </div>
@@ -177,7 +182,7 @@ export default function NotificationsPageClient() {
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             )}
           >
-            Toutes ({total})
+            {t('filters.all', { count: total })}
           </button>
           <button
             onClick={() => setActiveFilter('unread')}
@@ -188,7 +193,7 @@ export default function NotificationsPageClient() {
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             )}
           >
-            Non lues ({unreadCount})
+            {t('filters.unread', { count: unreadCount })}
           </button>
           {Object.entries(typeLabels).map(([type, label]) => (
             <button
@@ -216,13 +221,13 @@ export default function NotificationsPageClient() {
         ) : filteredNotifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-gray-500">
             <Bell className="h-16 w-16 text-gray-300 mb-4" />
-            <p className="text-lg font-medium">Aucune notification</p>
+            <p className="text-lg font-medium">{t('empty.title')}</p>
             <p className="text-sm mt-1">
-              {activeFilter === 'all' 
-                ? 'Vous n\'avez pas encore reçu de notifications'
+              {activeFilter === 'all'
+                ? t('empty.noNotifications')
                 : activeFilter === 'unread'
-                ? 'Toutes vos notifications sont lues'
-                : `Aucune notification de type "${typeLabels[activeFilter as NotificationType]}"`
+                ? t('empty.allRead')
+                : t('empty.noType', { type: typeLabels[activeFilter as NotificationType] })
               }
             </p>
           </div>
@@ -286,7 +291,7 @@ export default function NotificationsPageClient() {
                                 onClick={() => !notification.read && markAsRead(notification.id)}
                                 className="inline-flex items-center mt-3 text-sm text-emerald-600 hover:text-emerald-700"
                               >
-                                Voir les détails
+                                {t('actions.viewDetails')}
                                 <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
@@ -300,7 +305,7 @@ export default function NotificationsPageClient() {
                               <button
                                 onClick={() => markAsRead(notification.id)}
                                 className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-full transition-colors"
-                                title="Marquer comme lu"
+                                title={t('actions.markRead')}
                               >
                                 <Check className="h-4 w-4" />
                               </button>
@@ -308,7 +313,7 @@ export default function NotificationsPageClient() {
                             <button
                               onClick={() => deleteNotification(notification.id)}
                               className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                              title="Supprimer"
+                              title={t('actions.delete')}
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -328,7 +333,7 @@ export default function NotificationsPageClient() {
                   onClick={loadMore}
                   className="w-full py-2 text-sm text-emerald-600 hover:text-emerald-700 font-medium"
                 >
-                  Charger plus de notifications
+                  {t('loadMore')}
                 </button>
               </div>
             )}

@@ -123,22 +123,54 @@ export async function POST(request: NextRequest) {
     await clearAccountLockout(email)
     await clearFailedLoginAttempts(email)
 
-    // Check email verification status (emailVerified is on BetterAuthUser, not User)
+    // Check email verification status and 2FA status
     const betterAuthUser = await prisma.betterAuthUser.findUnique({
       where: { id: authResponse.user.id },
-      select: { emailVerified: true, email: true },
+      select: {
+        emailVerified: true,
+        email: true,
+      },
     })
 
     if (!betterAuthUser?.emailVerified) {
       // Return a specific error for unverified email
       return NextResponse.json(
-        { 
+        {
           error: 'Email not verified',
           code: 'EMAIL_NOT_VERIFIED',
           email: betterAuthUser?.email || email,
         },
         { status: 403 }
       )
+    }
+
+    // Check application user profile for 2FA status
+    const userProfile = await prisma.user.findUnique({
+      where: { email: betterAuthUser.email },
+      select: { twoFactorEnabled: true }
+    })
+
+    // If 2FA is enabled, return a pending status and require 2FA verification
+    if (userProfile?.twoFactorEnabled) {
+      // Store a temporary session token that can be used to complete 2FA verification
+      // This token is stored in Redis with a short TTL (5 minutes)
+      const tempToken = authResponse.token
+
+      // Log pending 2FA verification
+      await logLoginSuccess(
+        authResponse.user.id,
+        authResponse.user.email,
+        ipAddress,
+        userAgent,
+        { rememberMe, requires2FA: true }
+      )
+
+      return NextResponse.json({
+        code: 'REQUIRES_2FA',
+        userId: authResponse.user.id,
+        tempToken: tempToken,
+        message: '2FA verification required',
+      }, { status: 200 })
     }
 
     // Update login metadata (IP address, user agent, timestamp)

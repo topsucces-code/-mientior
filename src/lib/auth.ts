@@ -39,6 +39,11 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
       enabled: !!process.env.GOOGLE_CLIENT_ID,
     },
+    facebook: {
+      clientId: process.env.FACEBOOK_CLIENT_ID || '',
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || '',
+      enabled: !!process.env.FACEBOOK_CLIENT_ID,
+    },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days (604800 seconds) - default

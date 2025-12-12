@@ -109,7 +109,7 @@ const handlePOST = async (req: NextRequest, { adminSession }: { adminSession?: A
     finalSlug = `${slug}-${slugSuffix}`;
   }
 
-  // Create vendor
+  // Create vendor (admin-created vendors may not have user association initially)
   const vendor = await prisma.vendor.create({
     data: {
       businessName: body.businessName,
@@ -122,7 +122,8 @@ const handlePOST = async (req: NextRequest, { adminSession }: { adminSession?: A
       commissionRate: body.commissionRate || 10.0,
       documents: body.documents,
       bankDetails: body.bankDetails,
-    },
+      userId: body.userId, // Optional: link to existing user account
+    } as Prisma.VendorUncheckedCreateInput,
     include: {
       _count: {
         select: {

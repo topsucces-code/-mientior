@@ -3,11 +3,13 @@
 import * as React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Heart, ShoppingCart, Eye, Star, Truck, Check } from 'lucide-react'
+import { Heart, ShoppingCart, Star, Check, Eye, Flame, Truck } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
-import { Badge } from './badge'
-import { Button } from './button'
-import { Tooltip, TooltipTrigger, TooltipContent } from './tooltip'
+import { useCartStore } from '@/stores/cart.store'
+import { useWishlistStore } from '@/stores/wishlist.store'
+import { toast } from '@/hooks/use-toast'
+import { useCurrency } from '@/hooks/use-currency'
 
 export interface ProductCardProps extends React.HTMLAttributes<HTMLDivElement> {
   id: string
@@ -15,26 +17,26 @@ export interface ProductCardProps extends React.HTMLAttributes<HTMLDivElement> {
   slug: string
   price: number
   compareAtPrice?: number
-  originalPrice?: number // Legacy prop - use compareAtPrice instead
+  originalPrice?: number // Legacy prop
   image?: string
   images?: string[]
   rating?: number
   reviewCount?: number
-  salesCount?: number // Extracted to prevent DOM warning
+  salesCount?: number
   badge?: {
     text: string
-    variant: 'flash' | 'urgent' | 'bestseller' | 'trending' | 'new'
+    variant: 'local' | 'new' | 'hot' | 'sale' | 'featured' | 'limited' | 'bestseller' | 'trending' | 'flash' | 'urgent'
   } | string
-  onSale?: boolean
-  inStock?: boolean
-  stock?: number // Extracted to prevent DOM warning
+  onSale?: boolean // Legacy prop
+  inStock?: boolean // Legacy prop
+  stock?: number
   freeShipping?: boolean
-  deliveryDays?: number // Extracted to prevent DOM warning
+  deliveryDays?: number
   compact?: boolean
-  brand?: string // Extracted to prevent DOM warning
-  vendor?: string // Extracted to prevent DOM warning
-  isVerifiedSeller?: boolean // Extracted to prevent DOM warning
-  isOfficialStore?: boolean // Extracted to prevent DOM warning
+  brand?: string
+  vendor?: string
+  isVerifiedSeller?: boolean
+  isOfficialStore?: boolean
   onAddToCart?: (id: string) => void
   onQuickView?: (id: string) => void
   onWishlistToggle?: (id: string) => void
@@ -43,33 +45,46 @@ export interface ProductCardProps extends React.HTMLAttributes<HTMLDivElement> {
   priority?: boolean
 }
 
+const badgeStyles: Record<string, string> = {
+  local: 'bg-orange-500 text-white',
+  new: 'bg-turquoise-500 text-white',
+  hot: 'bg-red-500 text-white',
+  sale: 'bg-red-600 text-white',
+  featured: 'bg-amber-500 text-white',
+  limited: 'bg-purple-500 text-white',
+  bestseller: 'bg-gradient-to-r from-orange-500 to-red-500 text-white',
+  trending: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white',
+  flash: 'bg-red-600 text-white',
+  urgent: 'bg-red-600 text-white',
+}
+
 export function ProductCard({
   id,
   name,
   slug,
   price,
   compareAtPrice,
-  originalPrice: _originalPrice, // Destructure to prevent DOM warning (unused)
+  originalPrice,
   image,
   images = [],
   rating = 0,
   reviewCount = 0,
-  salesCount: _salesCount, // Destructure to prevent DOM warning (unused)
+  salesCount = 0,
   badge,
   onSale: _onSale,
   inStock = true,
-  stock: _stock, // Destructure to prevent DOM warning (unused)
+  stock,
   freeShipping = false,
-  deliveryDays: _deliveryDays, // Destructure to prevent DOM warning (unused)
-  compact: _compact, // Destructure to prevent DOM warning (unused)
-  brand: _brand, // Destructure to prevent DOM warning (unused)
-  vendor: _vendor, // Destructure to prevent DOM warning (unused)
-  isVerifiedSeller: _isVerifiedSeller, // Destructure to prevent DOM warning (unused)
-  isOfficialStore: _isOfficialStore, // Destructure to prevent DOM warning (unused)
+  deliveryDays,
+  compact: _compact,
+  brand,
+  vendor,
+  isVerifiedSeller = false,
+  isOfficialStore = false,
   onAddToCart,
   onQuickView,
   onWishlistToggle,
-  isInWishlist = false,
+  isInWishlist: initialIsInWishlist = false,
   className,
   style,
   priority = false,
@@ -77,32 +92,52 @@ export function ProductCard({
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = React.useState(false)
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0)
-  const [isImageLoaded, setIsImageLoaded] = React.useState(false)
-  const [isAddedToCart, setIsAddedToCart] = React.useState(false)
+  const [imageLoaded, setImageLoaded] = React.useState(false)
+  const [isAddingToCart, setIsAddingToCart] = React.useState(false)
   const [isMounted, setIsMounted] = React.useState(false)
 
-  // Prevent hydration mismatch - wishlist state comes from localStorage
+  // Use effective stock if provided, otherwise fallback to inStock param
+  const effectiveStock = stock !== undefined ? stock : (inStock ? 10 : 0)
+  const isOutOfStock = effectiveStock === 0
+
+  const t = useTranslations('products.card')
+  const tw = useTranslations('wishlist')
+  const { formatPrice } = useCurrency()
+
+  const addToCart = useCartStore((state) => state.addItem)
+  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
+
   React.useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  // Only show wishlist state after client hydration to prevent mismatch
-  const showAsWishlisted = isMounted && isInWishlist
+  // Use store state if mounted, otherwise fallback to props (SSR/Hydration mismatch prevention)
+  const inWishlist = isMounted ? isInWishlist(id) : initialIsInWishlist
+
+  // Determine pricing to display
+  const displayPrice = price
+  const displayCompareAtPrice = compareAtPrice || originalPrice
+  
+  const hasDiscount = displayCompareAtPrice && displayCompareAtPrice > displayPrice
+  const discountPercentage = hasDiscount
+    ? Math.round(((displayCompareAtPrice - displayPrice) / displayCompareAtPrice) * 100)
+    : 0
 
   const allImages = [image, ...images].filter(Boolean) as string[]
-  const displayImage = allImages[currentImageIndex] || '/placeholder-product.jpg'
-  const hasDiscount = compareAtPrice && compareAtPrice > price
-  const discountPercentage = hasDiscount
-    ? Math.round(((compareAtPrice - price) / compareAtPrice) * 100)
-    : 0
+  // Fallback if no images provided
+  if (allImages.length === 0) {
+    allImages.push('/placeholder-product.jpg')
+  }
+  
+  const displayImage = allImages[currentImageIndex] || allImages[0] || '/placeholder-product.jpg'
 
   // Convert string badge to object format
   const getBadgeObject = (
-    badge: string | { text: string; variant: 'flash' | 'urgent' | 'bestseller' | 'trending' | 'new' } | undefined
-  ): { text: string; variant: 'flash' | 'urgent' | 'bestseller' | 'trending' | 'new' } | undefined => {
-    if (!badge) return undefined
-    if (typeof badge === 'string') return { text: badge, variant: 'new' }
-    return badge
+    badgeInput: ProductCardProps['badge']
+  ): { text: string; variant: string } | undefined => {
+    if (!badgeInput) return undefined
+    if (typeof badgeInput === 'string') return { text: badgeInput, variant: 'new' }
+    return badgeInput
   }
   const badgeObject = getBadgeObject(badge)
 
@@ -115,20 +150,76 @@ export function ProductCard({
       return () => clearInterval(interval)
     } else {
       setCurrentImageIndex(0)
-      return undefined
+      return undefined // Explicit return to satisfy linter
     }
   }, [isHovered, allImages.length])
+
+  const formatSalesCount = (count: number) => {
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(1).replace('.0', '')}k+ ${t('sales')}`
+    }
+    return `${count} ${t('sales')}`
+  }
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (isAddedToCart) return // Prevent double-click
-    
+    if (isOutOfStock || isAddingToCart) return
+
     onAddToCart?.(id)
+
+    setIsAddingToCart(true)
     
-    // Show visual feedback
-    setIsAddedToCart(true)
-    setTimeout(() => setIsAddedToCart(false), 2000)
+    // Add to internal store as backup/direct action if parent handler just syncs
+    // But we rely on parent usually. If onAddToCart is just a notify, we do logic here:
+    if (!onAddToCart) {
+       addToCart({
+        id,
+        productId: id,
+        productName: name,
+        productSlug: slug,
+        productImage: image || '/placeholder-product.jpg',
+        price: displayPrice,
+        quantity: 1,
+        stock: effectiveStock,
+      })
+      toast({
+        title: t('addedToCart'),
+        description: name,
+      })
+    }
+
+    setTimeout(() => setIsAddingToCart(false), 1500)
+  }
+
+  const handleToggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    onWishlistToggle?.(id)
+
+    // Fallback logic if no handler provided
+    if (!onWishlistToggle) {
+        if (inWishlist) {
+            removeFromWishlist(id)
+            toast({
+                title: tw('removedFromWishlist'),
+                description: name,
+            })
+        } else {
+            addToWishlist({
+                productId: id,
+                slug,
+                name,
+                price: displayPrice,
+                image: image || '/placeholder-product.jpg',
+                addedAt: new Date().toISOString(),
+            })
+            toast({
+                title: tw('addedToWishlist'),
+                description: name,
+            })
+        }
+    }
   }
 
   const handleQuickView = (e: React.MouseEvent) => {
@@ -137,18 +228,12 @@ export function ProductCard({
     onQuickView?.(id)
   }
 
-  const handleWishlistToggle = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    onWishlistToggle?.(id)
-  }
-
   return (
     <div
       className={cn(
-        'group relative flex flex-col overflow-hidden rounded-lg border border-platinum-300 bg-white transition-all duration-300',
-        'hover:shadow-elevation-3 hover:-translate-y-1',
-        !inStock && 'opacity-60',
+        'group relative flex flex-col bg-white rounded-xl overflow-hidden',
+        'transition-all duration-300 hover:shadow-xl',
+        isOutOfStock && 'opacity-70',
         className
       )}
       style={style}
@@ -157,40 +242,50 @@ export function ProductCard({
       {...props}
     >
       {/* Image Container */}
-      <Link href={`/products/${slug}`} className="relative block w-full overflow-hidden bg-platinum-100" style={{ paddingBottom: '100%' }}>
-        {/* Badges */}
-        <div className="absolute left-1.5 top-1.5 z-10 flex flex-col gap-1">
-          {badgeObject && (
-            <Badge variant={badgeObject.variant} size="sm">
-              {badgeObject.text}
-            </Badge>
-          )}
-          {hasDiscount && (
-            <Badge variant="urgent" size="sm">
-              -{discountPercentage}%
-            </Badge>
-          )}
-          {!inStock && (
-            <Badge variant="error" size="sm">
-              Épuisé
-            </Badge>
+      <Link 
+        href={`/products/${slug}`} 
+        className="relative block w-full overflow-hidden bg-gray-50 rounded-t-xl"
+        style={{ paddingBottom: '100%' }}
+      >
+        {/* Badge Top Left - Style Temu */}
+        {badgeObject && (
+          <span className={cn(
+            'absolute left-0 top-2 z-10 px-2 py-0.5 text-[10px] font-bold rounded-r-md shadow-sm',
+            badgeStyles[badgeObject.variant] || badgeStyles.local
+          )}>
+            {badgeObject.text}
+          </span>
+        )}
+
+        {/* Wishlist & Quick View - Top Right */}
+        <div className="absolute right-2 top-2 z-10 flex flex-col gap-1.5">
+          <button
+            onClick={handleToggleWishlist}
+            className={cn(
+              'w-7 h-7 flex items-center justify-center rounded-full',
+              'bg-white shadow-md border border-gray-100',
+              'transition-all duration-200 hover:scale-110',
+              inWishlist && 'bg-red-50 border-red-200'
+            )}
+            aria-label={inWishlist ? tw('removedFromWishlist') : tw('addToWishlist')}
+          >
+            <Heart
+              className={cn(
+                'w-3.5 h-3.5',
+                inWishlist ? 'fill-red-500 text-red-500' : 'text-gray-400'
+              )}
+            />
+          </button>
+          {onQuickView && (
+            <button
+              onClick={handleQuickView}
+              className="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow-md border border-gray-100 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
+              aria-label={t('quickView')}
+            >
+              <Eye className="w-3.5 h-3.5 text-gray-400" />
+            </button>
           )}
         </div>
-
-        {/* Wishlist Button */}
-        <button
-          onClick={handleWishlistToggle}
-          className={cn(
-            'absolute right-1.5 top-1.5 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition-all duration-300',
-            'hover:bg-white hover:scale-110 hover:shadow-elevation-2',
-            showAsWishlisted && 'bg-orange-500 text-white hover:bg-orange-600'
-          )}
-          aria-label={showAsWishlisted ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-        >
-          <Heart
-            className={cn('h-4 w-4 transition-all', showAsWishlisted && 'fill-current')}
-          />
-        </button>
 
         {/* Product Image */}
         <Image
@@ -198,117 +293,186 @@ export function ProductCard({
           alt={name}
           fill
           className={cn(
-            'object-cover transition-all duration-500',
-            isHovered && 'scale-105',
-            !isImageLoaded && 'blur-sm',
-            isImageLoaded && 'blur-0'
+            'object-cover transition-transform duration-500',
+            isHovered && 'scale-110',
+            imageLoaded ? 'opacity-100' : 'opacity-0'
           )}
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-          onLoad={() => setIsImageLoaded(true)}
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+          onLoad={() => setImageLoaded(true)}
           priority={priority}
-          loading={priority ? 'eager' : 'lazy'}
         />
 
-        {/* Quick View Overlay */}
-        <div
-          className={cn(
-            'absolute inset-0 flex items-center justify-center gap-2 bg-black/40 backdrop-blur-sm transition-all duration-300',
-            isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          )}
-        >
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleQuickView}
-            className="w-10 h-10 p-0 rounded-full"
-            aria-label="Aperçu rapide"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-        </div>
-      </Link>
+        {/* Loading Skeleton */}
+        {!imageLoaded && (
+          <div className="absolute inset-0 bg-gray-100 animate-pulse" />
+        )}
 
-      {/* Product Info */}
-      <div className="flex flex-1 flex-col gap-1.5 p-2">
-        {/* Rating */}
-        {rating > 0 && (
-          <div className="flex items-center gap-1.5 text-xs">
-            <div className="flex items-center gap-0.5">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                  key={i}
-                  className={cn(
-                    'h-3 w-3',
-                    i < Math.floor(rating)
-                      ? 'fill-aurore-500 text-aurore-500'
-                      : 'text-platinum-400'
-                  )}
-                />
-              ))}
-            </div>
-            <span className="text-nuanced-500">
-              ({rating.toFixed(1)}) • {reviewCount > 1000 ? `${(reviewCount / 1000).toFixed(1)}k` : reviewCount}
+        {/* Out of Stock Overlay */}
+        {isOutOfStock && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+            <span className="px-3 py-1.5 bg-gray-900/90 text-white text-xs font-semibold rounded-full">
+              {t('outOfStock')}
             </span>
           </div>
         )}
 
-        {/* Product Name */}
+        {/* Image Dots */}
+        {allImages.length > 1 && (
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+            {allImages.slice(0, 5).map((_, idx) => (
+              <span
+                key={idx}
+                className={cn(
+                  'w-1 h-1 rounded-full transition-colors',
+                  idx === currentImageIndex ? 'bg-orange-500' : 'bg-gray-300'
+                )}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Add to Cart Button - Bottom Right on Image */}
+        <button
+          onClick={handleAddToCart}
+          disabled={isOutOfStock || isAddingToCart}
+          className={cn(
+            'absolute right-2 bottom-2 z-10',
+            'w-8 h-8 flex items-center justify-center rounded-full shadow-lg',
+            'transition-all duration-200',
+            isAddingToCart
+              ? 'bg-green-500 text-white'
+              : 'bg-white border border-gray-200 text-gray-600 hover:bg-orange-500 hover:text-white hover:border-orange-500',
+            'hover:scale-110 active:scale-95',
+            'disabled:opacity-50 disabled:cursor-not-allowed'
+          )}
+          aria-label={isAddingToCart ? t('added') : t('addToCart')}
+        >
+          {isAddingToCart ? (
+            <Check className="w-4 h-4" />
+          ) : (
+            <ShoppingCart className="w-4 h-4" />
+          )}
+        </button>
+      </Link>
+
+      {/* Product Info - Temu Style */}
+      <div className="flex flex-col gap-1 p-2.5 pt-2">
+        {/* Product Name with Badge inline */}
         <Link href={`/products/${slug}`}>
-          <h3 className="line-clamp-2 text-xs font-medium text-anthracite-500 transition-colors hover:text-orange-500">
+          <h3 className="text-[12px] leading-[1.3] text-gray-700 line-clamp-2 hover:text-orange-600 transition-colors min-h-[32px]">
+            {badgeObject && (
+              <span className={cn(
+                'inline-block mr-1 px-1 py-0.5 text-[9px] font-bold rounded align-middle',
+                badgeStyles[badgeObject.variant] || badgeStyles.local
+              )}>
+                {badgeObject.text}
+              </span>
+            )}
             {name}
           </h3>
         </Link>
 
-        {/* Free Shipping Badge */}
-        {freeShipping && (
-          <div className="flex items-center gap-1.5 text-xs text-success">
-            <Truck className="h-3.5 w-3.5" />
-            <span className="font-medium">Livraison gratuite</span>
+        {/* Price Row - Temu Style */}
+        <div className="flex items-baseline gap-1.5 flex-wrap">
+          <span className="text-[18px] font-black text-orange-600 leading-none">
+            {formatPrice(displayPrice)}
+          </span>
+          {hasDiscount && (
+            <>
+              <span className="text-[11px] text-gray-400 line-through">
+                {formatPrice(displayCompareAtPrice!)}
+              </span>
+              <span className="text-[10px] font-semibold text-green-600">
+                -{discountPercentage}%
+              </span>
+            </>
+          )}
+        </div>
+
+        {/* Sales Count - Temu Style */}
+        {salesCount > 0 && (
+          <span className="text-[11px] text-gray-500">
+            <Flame className="inline w-3 h-3 text-orange-400 mr-0.5" />
+            {formatSalesCount(salesCount)}
+          </span>
+        )}
+
+        {/* Rating - Temu Style */}
+        {rating > 0 && (
+          <div className="flex items-center gap-1">
+            <div className="flex items-center">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star
+                  key={i}
+                  className={cn(
+                    'w-2.5 h-2.5',
+                    i < Math.floor(rating)
+                      ? 'fill-amber-400 text-amber-400'
+                      : 'text-gray-200 fill-gray-200'
+                  )}
+                />
+              ))}
+            </div>
+            {reviewCount > 0 && (
+              <span className="text-[10px] text-gray-400">
+                {reviewCount > 1000 ? `${(reviewCount / 1000).toFixed(1)}k` : reviewCount}
+              </span>
+            )}
           </div>
         )}
 
-        {/* Price and Add to Cart Button */}
-        <div className="flex items-center justify-between gap-2">
-          {/* Price */}
-          <div className="flex items-baseline gap-2">
-            {hasDiscount && (
-              <span className="text-xs text-nuanced-500 line-through" style={{ fontFeatureSettings: '"tnum"' }}>
-                {(compareAtPrice / 100).toFixed(2)}€
-              </span>
-            )}
-            <span className="font-display text-lg font-extrabold text-orange-500" style={{ fontFeatureSettings: '"tnum"' }}>
-              {(price / 100).toFixed(2)}€
+        {/* Seller Badges Row - Temu Style */}
+        <div className="flex flex-wrap items-center gap-1 mt-0.5">
+          {isVerifiedSeller && (
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-orange-50 text-orange-600 text-[9px] font-semibold rounded border border-orange-200">
+              <Check className="w-2 h-2" />
+              {t('verifiedSeller')}
             </span>
-          </div>
-
-          {/* Add to Cart Button */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="inline-flex">
-                <Button
-                  onClick={handleAddToCart}
-                  disabled={!inStock || isAddedToCart}
-                  className={cn(
-                    'w-8 h-8 p-0 rounded-full flex items-center justify-center transition-all duration-300',
-                    isHovered && !isAddedToCart && 'shadow-elevation-2 scale-110',
-                    isAddedToCart && 'bg-green-500 hover:bg-green-500 scale-110 shadow-elevation-2'
-                  )}
-                  variant={inStock ? 'default' : 'outline'}
-                  aria-label={isAddedToCart ? 'Ajouté au panier' : (inStock ? 'Ajouter au panier' : 'Rupture de stock')}
-                >
-                  {isAddedToCart ? (
-                    <Check className="h-4 w-4 text-white animate-in zoom-in duration-200" />
-                  ) : (
-                    <ShoppingCart className="h-4 w-4" />
-                  )}
-                </Button>
-              </span>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{isAddedToCart ? 'Ajouté !' : (inStock ? 'Ajouter au panier' : 'Rupture de stock')}</p>
-            </TooltipContent>
-          </Tooltip>
+          )}
+          {isOfficialStore && (
+            <span className="inline-flex items-center px-1.5 py-0.5 bg-blue-50 text-blue-600 text-[9px] font-semibold rounded border border-blue-200">
+              {t('officialStore')}
+            </span>
+          )}
         </div>
+
+        {/* Brand - Temu Style */}
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          {brand && (
+            <span className="text-[10px] text-gray-500">
+              {t('brand')} <span className="text-blue-600 hover:underline cursor-pointer">{brand}</span>
+            </span>
+          )}
+          
+          {vendor && (
+             <span className="text-[10px] text-gray-400">
+              • {vendor}
+             </span>
+          )}
+        </div>
+
+        {/* Delivery & Shipping Info */}
+        <div className="flex flex-col gap-0.5 mt-0.5">
+          {deliveryDays && (
+            <div className="text-[10px] text-gray-600">
+              {t('delivery')} <span className="text-orange-600 font-bold">{deliveryDays} {t('workingDays')}</span>
+            </div>
+          )}
+          
+          {freeShipping && (
+            <div className="flex items-center gap-1 text-[10px] text-green-600 font-medium">
+              <Truck className="w-3 h-3" />
+              <span>{t('freeShipping') || 'Livraison gratuite'}</span>
+            </div>
+          )}
+        </div>
+
+         {/* Low Stock Warning */}
+         {!isOutOfStock && effectiveStock > 0 && effectiveStock <= 5 && (
+          <span className="text-[10px] text-red-500 font-medium">
+            ⚡ {t('lowStock', { count: effectiveStock })}
+          </span>
+        )}
       </div>
     </div>
   )

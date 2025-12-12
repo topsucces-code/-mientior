@@ -3,6 +3,7 @@
 import * as React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Minus, Plus, X, Heart, Truck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -23,6 +24,7 @@ interface CartItemProps {
 }
 
 export function CartItem({ item, className, showActions = true }: CartItemProps) {
+  const t = useTranslations('cart.item')
   const { removeItem: optimisticRemove, saveForLater: optimisticSave } = useOptimisticCart()
   const { trackRemoveFromCart } = useCartAnalytics()
   const { toast } = useToast()

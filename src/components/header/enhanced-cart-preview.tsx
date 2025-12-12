@@ -3,17 +3,23 @@
 import { ShoppingCart, X, ArrowRight, Minus, Plus, Truck, Shield, RotateCcw } from 'lucide-react'
 import { useCartStore } from '@/stores/cart.store'
 import { useHeader } from '@/contexts/header-context'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useCurrency } from '@/hooks/use-currency'
 
 const FREE_SHIPPING_THRESHOLD = 15000 // 15,000 FCFA
 
 export function EnhancedCartPreview() {
     const { items, removeItem, getTotalPrice, getTotalItems, updateQuantity } = useCartStore()
     const { activeDropdown, setActiveDropdown } = useHeader()
-    const dropdownRef = useRef<HTMLDivElement>(null)
+    const containerRef = useRef<HTMLDivElement>(null)
+    const buttonRef = useRef<HTMLButtonElement>(null)
+    const panelRef = useRef<HTMLDivElement>(null)
     const [mounted, setMounted] = useState(false)
+    const { formatPrice } = useCurrency()
+    const t = useTranslations('cart')
 
     const isOpen = activeDropdown === 'cart'
 
@@ -22,18 +28,36 @@ export function EnhancedCartPreview() {
         setMounted(true)
     }, [])
 
+    // Close dropdown when clicking outside - but NOT when clicking inside the dropdown
     useEffect(() => {
+        if (!isOpen) return
+
         const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setActiveDropdown(null)
+            const target = event.target as HTMLElement
+            
+            // If the target is no longer in the document (removed by React), don't close
+            // This happens when clicking remove button which removes the item from DOM
+            if (!document.body.contains(target)) {
+                return
             }
+            
+            // If click is inside the container (which includes the panel), don't close
+            if (containerRef.current?.contains(target)) {
+                return
+            }
+            
+            setActiveDropdown(null)
         }
 
-        if (isOpen) {
-            document.addEventListener('mousedown', handleClickOutside)
-        }
+        // Use click event instead of mousedown
+        const timeoutId = setTimeout(() => {
+            document.addEventListener('click', handleClickOutside)
+        }, 50)
 
-        return () => document.removeEventListener('mousedown', handleClickOutside)
+        return () => {
+            clearTimeout(timeoutId)
+            document.removeEventListener('click', handleClickOutside)
+        }
     }, [isOpen, setActiveDropdown])
 
     const totalItems = mounted ? getTotalItems() : 0
@@ -47,39 +71,47 @@ export function EnhancedCartPreview() {
     // Use a timeout to allow mouse to move to dropdown
     const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    const handleMouseEnter = () => {
+    const cancelClose = useCallback(() => {
         if (closeTimeoutRef.current) {
             clearTimeout(closeTimeoutRef.current)
             closeTimeoutRef.current = null
         }
-        setActiveDropdown('cart')
-    }
+    }, [])
 
-    const handleMouseLeave = () => {
+    const scheduleClose = useCallback(() => {
+        cancelClose()
         closeTimeoutRef.current = setTimeout(() => {
             setActiveDropdown(null)
-        }, 150)
+        }, 400)
+    }, [setActiveDropdown, cancelClose])
+
+    const handleButtonClick = () => {
+        cancelClose()
+        setActiveDropdown(isOpen ? null : 'cart')
+    }
+
+    const handleDropdownMouseEnter = () => {
+        cancelClose()
+    }
+
+    const handleDropdownMouseLeave = () => {
+        scheduleClose()
     }
 
     // Cleanup timeout on unmount
     useEffect(() => {
-        return () => {
-            if (closeTimeoutRef.current) {
-                clearTimeout(closeTimeoutRef.current)
-            }
-        }
-    }, [])
+        return () => cancelClose()
+    }, [cancelClose])
 
     return (
         <div 
             className="relative" 
-            ref={dropdownRef}
+            ref={containerRef}
         >
             {/* Cart Icon Button */}
             <button
-                onClick={() => setActiveDropdown(isOpen ? null : 'cart')}
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
+                ref={buttonRef}
+                onClick={handleButtonClick}
                 className="
                     relative flex flex-col items-center justify-center
                     w-12 h-12 rounded-full cursor-pointer
@@ -87,7 +119,7 @@ export function EnhancedCartPreview() {
                     hover:bg-turquoise-600/[0.08] hover:-translate-y-0.5 hover:scale-[1.08]
                     text-gray-800 hover:text-turquoise-600
                 "
-                aria-label="Panier"
+                aria-label={t('title')}
                 aria-expanded={isOpen}
             >
                 <ShoppingCart className="w-6 h-6" />
@@ -116,15 +148,17 @@ export function EnhancedCartPreview() {
                         text-orange-500 bg-white px-2 py-0.5
                         rounded-full shadow-sm
                     ">
-                        {(totalPrice / 100).toLocaleString()} F
+                        {formatPrice(totalPrice)}
                     </span>
                 )}
             </button>
 
             {isOpen && (
                 <div 
-                    onMouseEnter={handleMouseEnter}
-                    onMouseLeave={() => setActiveDropdown(null)}
+                    ref={panelRef}
+                    onMouseEnter={handleDropdownMouseEnter}
+                    onMouseLeave={handleDropdownMouseLeave}
+                    onClick={(e) => e.stopPropagation()}
                     className="
                     absolute right-0 top-[calc(100%+12px)] 
                     w-[420px] max-h-[500px] overflow-y-auto
@@ -143,16 +177,16 @@ export function EnhancedCartPreview() {
                     {/* Header */}
                     <div className="flex justify-between items-center p-5 border-b border-gray-200">
                         <div>
-                            <h3 className="text-base font-bold text-gray-800">Mon Panier</h3>
+                            <h3 className="text-base font-bold text-gray-800">{t('title')}</h3>
                             <p className="text-sm text-gray-500 mt-0.5">
-                                {totalItems} article{totalItems > 1 ? 's' : ''}
+                                {totalItems} {t('items')}
                             </p>
                         </div>
                         <Link 
                             href="/cart" 
                             className="text-[13px] text-turquoise-600 hover:text-turquoise-500 hover:underline transition-colors"
                         >
-                            Tout effacer
+                            {t('remove')}
                         </Link>
                     </div>
                     
@@ -167,8 +201,8 @@ export function EnhancedCartPreview() {
                             </div>
                             <p className="text-[13px] text-center text-turquoise-600 font-semibold">
                                 {remainingForFreeShipping > 0 
-                                    ? `Plus que ${(remainingForFreeShipping / 100).toLocaleString()} F pour la livraison gratuite!`
-                                    : '🎉 Livraison gratuite débloquée!'
+                                    ? `${t('freeShippingProgress', { amount: formatPrice(remainingForFreeShipping) })}`
+                                    : `🎉 ${t('freeShippingLabel')}!`
                                 }
                             </p>
                         </div>
@@ -212,7 +246,11 @@ export function EnhancedCartPreview() {
                                         {/* Quantity Controls */}
                                         <div className="flex items-center gap-3 mt-2">
                                             <button 
-                                                onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                                                onMouseDown={(e) => e.stopPropagation()}
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    updateQuantity(item.id, Math.max(1, item.quantity - 1))
+                                                }}
                                                 className="w-6 h-6 border border-gray-200 rounded flex items-center justify-center hover:border-turquoise-600 hover:text-turquoise-600 transition-colors"
                                             >
                                                 <Minus className="w-3 h-3" />
@@ -221,7 +259,11 @@ export function EnhancedCartPreview() {
                                                 {item.quantity}
                                             </span>
                                             <button 
-                                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                onMouseDown={(e) => e.stopPropagation()}
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    updateQuantity(item.id, item.quantity + 1)
+                                                }}
                                                 className="w-6 h-6 border border-gray-200 rounded flex items-center justify-center hover:border-turquoise-600 hover:text-turquoise-600 transition-colors"
                                             >
                                                 <Plus className="w-3 h-3" />
@@ -232,12 +274,16 @@ export function EnhancedCartPreview() {
                                     {/* Price & Remove */}
                                     <div className="flex flex-col items-end gap-2">
                                         <span className="text-base font-bold text-orange-500">
-                                            {((item.price / 100) * item.quantity).toLocaleString()} F
+                                            {formatPrice(item.price * item.quantity)}
                                         </span>
                                         <button
-                                            onClick={() => removeItem(item.id)}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                removeItem(item.id)
+                                            }}
                                             className="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-error-light hover:border-error hover:text-error transition-all"
-                                            aria-label="Retirer"
+                                            aria-label={t('remove')}
                                         >
                                             <X className="w-4 h-4" />
                                         </button>
@@ -247,8 +293,8 @@ export function EnhancedCartPreview() {
                         ) : (
                             <div className="py-12 text-center">
                                 <ShoppingCart className="w-16 h-16 mx-auto mb-4 text-gray-200" />
-                                <p className="font-semibold text-gray-800">Votre panier est vide</p>
-                                <p className="text-sm text-gray-500 mt-1">Ajoutez des produits pour commencer</p>
+                                <p className="font-semibold text-gray-800">{t('emptyMessage')}</p>
+                                <p className="text-sm text-gray-500 mt-1">{t('emptyText')}</p>
                             </div>
                         )}
                     </div>
@@ -259,19 +305,19 @@ export function EnhancedCartPreview() {
                             {/* Summary */}
                             <div className="space-y-2 mb-4">
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-gray-500">Sous-total</span>
-                                    <span className="text-gray-800">{(totalPrice / 100).toLocaleString()} F</span>
+                                    <span className="text-gray-500">{t('subtotal')}</span>
+                                    <span className="text-gray-800">{formatPrice(totalPrice)}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
-                                    <span className="text-gray-500">Livraison</span>
+                                    <span className="text-gray-500">{t('shipping')}</span>
                                     <span className="text-success font-medium">
-                                        {remainingForFreeShipping > 0 ? 'À calculer' : 'Gratuite'}
+                                        {remainingForFreeShipping > 0 ? t('shippingCalculated') : t('freeShippingLabel')}
                                     </span>
                                 </div>
                                 <div className="flex justify-between pt-3 border-t border-gray-200">
-                                    <span className="text-lg font-bold text-gray-800">Total</span>
+                                    <span className="text-lg font-bold text-gray-800">{t('total')}</span>
                                     <span className="text-lg font-bold text-orange-500">
-                                        {(totalPrice / 100).toLocaleString()} F
+                                        {formatPrice(totalPrice)}
                                     </span>
                                 </div>
                             </div>
@@ -282,13 +328,13 @@ export function EnhancedCartPreview() {
                                     href="/cart"
                                     className="py-3 px-5 border-2 border-turquoise-600 text-turquoise-600 text-center rounded-lg font-semibold hover:bg-turquoise-50 transition-colors"
                                 >
-                                    Voir le panier
+                                    {t('viewCart')}
                                 </Link>
                                 <Link
                                     href="/checkout"
                                     className="py-3 px-5 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-center rounded-lg font-semibold shadow-[0_4px_12px_rgba(249,115,22,0.3)] hover:from-orange-600 hover:to-orange-700 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
                                 >
-                                    Commander
+                                    {t('checkout')}
                                     <ArrowRight className="w-4 h-4" />
                                 </Link>
                             </div>
@@ -297,15 +343,15 @@ export function EnhancedCartPreview() {
                             <div className="flex justify-around mt-4 pt-4 border-t border-gray-200">
                                 <div className="flex flex-col items-center gap-1 text-[11px] text-gray-500">
                                     <Truck className="w-5 h-5 text-success" />
-                                    <span>Livraison rapide</span>
+                                    <span>{t('fastDelivery')}</span>
                                 </div>
                                 <div className="flex flex-col items-center gap-1 text-[11px] text-gray-500">
                                     <Shield className="w-5 h-5 text-success" />
-                                    <span>Paiement sécurisé</span>
+                                    <span>{t('securePayment')}</span>
                                 </div>
                                 <div className="flex flex-col items-center gap-1 text-[11px] text-gray-500">
                                     <RotateCcw className="w-5 h-5 text-success" />
-                                    <span>Retours gratuits</span>
+                                    <span>{t('freeReturns')}</span>
                                 </div>
                             </div>
                         </div>

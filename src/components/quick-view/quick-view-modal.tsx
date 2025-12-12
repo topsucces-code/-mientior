@@ -16,7 +16,7 @@ import { useWishlistStore } from '@/stores/wishlist.store'
 import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import { useTranslations } from 'next-intl'
-import { formatPrice } from '@/lib/currency-utils'
+import { useCurrency } from '@/hooks/use-currency'
 import type { CartItem } from '@/types'
 
 interface QuickViewModalProps {
@@ -79,6 +79,7 @@ export function QuickViewModal({ productId, isOpen, onClose, onAddToCart }: Quic
   const [quantity, setQuantity] = React.useState(1)
   const [isAddingToCart, setIsAddingToCart] = React.useState(false)
   const t = useTranslations('wishlist')
+  const { formatPrice } = useCurrency()
 
   const addToCart = useCartStore((state) => state.addItem)
   const { items: wishlistItems, addItem: addToWishlist, removeItem: removeFromWishlist } = useWishlistStore()

@@ -109,7 +109,7 @@ export async function GET(
         onSale: true,
         description: true,
         images: {
-          where: { order: 0 },
+          orderBy: { order: 'asc' },
           take: 1,
           select: {
             url: true,

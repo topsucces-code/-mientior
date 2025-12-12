@@ -267,12 +267,17 @@ export function ProductsGrid({
                 price={product.price}
                 compareAtPrice={product.compareAtPrice}
                 image={product.images[0]?.url || '/placeholder-product.jpg'}
+                images={product.images.map(img => img.url)}
                 rating={product.rating}
                 reviewCount={product.reviewCount}
                 onSale={product.onSale}
                 badge={product.badge}
                 inStock={product.stock > 0}
+                stock={product.stock}
                 onAddToCart={() => handleAddToCart(product)}
+                vendor={product.vendor?.name}
+                // deliveryDays={product.shippingInfo?.options?.[0]?.estimatedDays} // Use if available
+                freeShipping={product.price > 5000} // Mock rule: free shipping over 50€
               />
             </div>
           )
