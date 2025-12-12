@@ -3,12 +3,13 @@ import { prisma } from '@/lib/prisma'
 import { verifyTOTP } from '@/lib/two-factor-service'
 import { updateLoginMetadata } from '@/lib/login-metadata'
 import { detectAndAlertNewDevice } from '@/lib/new-device-detection'
-import { logAuditEvent } from '@/lib/auth-audit-logger'
+import { logAuthEvent } from '@/lib/auth-audit-logger'
 import {
   checkAccountLockout,
   trackFailedLoginAttempt,
   clearFailedLoginAttempts,
 } from '@/lib/auth-rate-limit'
+import bcrypt from 'bcrypt'
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,9 +31,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get user from database with 2FA secret and backup codes
-    const user = await prisma.betterAuthUser.findUnique({
+    // Get better auth user first
+    const authUser = await prisma.betterAuthUser.findUnique({
       where: { id: userId },
+      select: { id: true, email: true },
+    })
+
+    if (!authUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    // Get user profile with 2FA settings using email
+    const user = await prisma.user.findUnique({
+      where: { email: authUser.email },
       select: {
         id: true,
         email: true,
@@ -42,11 +53,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    }
-
-    if (!user.twoFactorEnabled || !user.twoFactorSecret) {
+    if (!user || !user.twoFactorEnabled || !user.twoFactorSecret) {
       return NextResponse.json(
         { error: '2FA is not enabled for this account' },
         { status: 400 }
@@ -95,7 +102,7 @@ export async function POST(request: NextRequest) {
     let usedBackupCode: string | null = null
 
     if (!isValidTOTP && user.twoFactorBackupCodes) {
-      const bcrypt = require('bcrypt')
+
       const backupCodes = JSON.parse(user.twoFactorBackupCodes as string)
 
       for (const hashedCode of backupCodes) {
@@ -113,13 +120,14 @@ export async function POST(request: NextRequest) {
       const shouldLock = await trackFailedLoginAttempt(user.email)
 
       // Log failed 2FA verification
-      await logAuditEvent({
+      await logAuthEvent({
         userId: user.id,
         email: user.email,
         action: '2FA_VERIFICATION_FAILED',
         ipAddress,
         userAgent,
-        details: { shouldLock },
+        success: false,
+        metadata: { shouldLock },
       })
 
       if (shouldLock) {
@@ -148,7 +156,7 @@ export async function POST(request: NextRequest) {
         (code: string) => code !== usedBackupCode
       )
 
-      await prisma.betterAuthUser.update({
+      await prisma.user.update({
         where: { id: user.id },
         data: {
           twoFactorBackupCodes: JSON.stringify(updatedBackupCodes),
@@ -156,13 +164,14 @@ export async function POST(request: NextRequest) {
       })
 
       // Log backup code usage
-      await logAuditEvent({
+      await logAuthEvent({
         userId: user.id,
         email: user.email,
         action: '2FA_BACKUP_CODE_USED',
         ipAddress,
         userAgent,
-        details: { remainingCodes: updatedBackupCodes.length },
+        success: true,
+        metadata: { remainingCodes: updatedBackupCodes.length },
       })
     }
 
@@ -189,13 +198,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Log successful 2FA verification
-    await logAuditEvent({
+    await logAuthEvent({
       userId: user.id,
       email: user.email,
       action: '2FA_VERIFICATION_SUCCESS',
       ipAddress,
       userAgent,
-      details: {
+      success: true,
+      metadata: {
         method: isValidBackupCode ? 'backup_code' : 'totp',
         rememberMe,
       },
@@ -205,8 +215,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       user: {
-        id: user.id,
-        email: user.email,
+        id: authUser.id,
+        email: authUser.email,
       },
       token: tempToken,
     })
