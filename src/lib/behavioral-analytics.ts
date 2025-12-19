@@ -41,7 +41,7 @@ export async function calculateBehavioralAnalytics(
   customerId: string
 ): Promise<BehavioralAnalytics> {
   // Get all orders with items and product categories
-  const orders = await prisma.order.findMany({
+  const orders = await prisma.orders.findMany({
     where: {
       userId: customerId,
       status: { not: 'CANCELLED' },
@@ -63,7 +63,7 @@ export async function calculateBehavioralAnalytics(
   })
 
   // Get sessions for the customer
-  const sessions = await prisma.session.findMany({
+  const sessions = await prisma.sessions.findMany({
     where: {
       userId: customerId,
     },

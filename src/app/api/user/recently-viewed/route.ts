@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     if (session?.user?.id) {
       // Fetch current user
-      const user = await prisma.user.findUnique({
+      const user = await prisma.users.findUnique({
         where: { id: session.user.id },
         select: { recentlyViewed: true }
       })
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       // Add to beginning of list
       const updated = [productId, ...filtered].slice(0, 20) // Keep max 20 items
 
-      await prisma.user.update({
+      await prisma.users.update({
         where: { id: session.user.id },
         data: { recentlyViewed: updated }
       })

@@ -44,31 +44,31 @@ async function handleGET(
       }),
 
       // Total orders count
-      prisma.order.count(),
+      prisma.orders.count(),
 
       // Pending orders count
-      prisma.order.count({
+      prisma.orders.count({
         where: { status: 'PENDING' },
       }),
 
       // Total revenue (sum of paid orders)
-      prisma.order.aggregate({
+      prisma.orders.aggregate({
         _sum: { total: true },
         where: { paymentStatus: PaymentStatus.PAID },
       }),
 
       // Total users count
-      prisma.user.count(),
+      prisma.users.count(),
 
       // New users this month
-      prisma.user.count({
+      prisma.users.count({
         where: {
           createdAt: { gte: firstDayOfMonth },
         },
       }),
 
       // Recent 5 orders with user and items
-      prisma.order.findMany({
+      prisma.orders.findMany({
         take: 5,
         orderBy: { createdAt: 'desc' },
         include: {

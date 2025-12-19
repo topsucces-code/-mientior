@@ -17,20 +17,20 @@ export function PromotionBadge({
   const getVariantStyles = (type: PromotionType) => {
     switch (type) {
       case 'automatic':
-        return 'bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200'
+        return 'bg-turquoise-100 text-turquoise-700 hover:bg-turquoise-200 border-turquoise-200'
       case 'manual':
-        return 'bg-green-100 text-green-700 hover:bg-green-200 border-green-200'
+        return 'bg-turquoise-100 text-turquoise-700 hover:bg-turquoise-200 border-turquoise-200'
       case 'sale':
         return 'bg-orange-100 text-orange-700 hover:bg-orange-200 border-orange-200'
       case 'new':
-        return 'bg-purple-100 text-purple-700 hover:bg-purple-200 border-purple-200'
+        return 'bg-orange-100 text-orange-700 hover:bg-orange-200 border-orange-200'
       default:
         return 'bg-platinum-100 text-anthracite-700 hover:bg-platinum-200 border-platinum-200'
     }
   }
 
   const sizeStyles = {
-    sm: 'px-1.5 py-0.5 text-[10px] h-5',
+    sm: 'px-2 py-1 text-xs',
     md: 'px-2.5 py-0.5 text-xs h-6',
     lg: 'px-3 py-1 text-sm h-7'
   }
@@ -48,7 +48,7 @@ export function PromotionBadge({
       {React.isValidElement(Icon) ? (
         Icon
       ) : (
-        // @ts-ignore - Icon can be a component
+        // @ts-expect-error - Icon can be a component
         <Icon className={cn('w-3 h-3', size === 'lg' && 'w-4 h-4')} />
       )}
       <span>{label}</span>

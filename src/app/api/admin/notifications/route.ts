@@ -37,7 +37,7 @@ async function handleGET(
 
     // Fetch notifications (unread first, then by date)
     const [notifications, totalCount] = await Promise.all([
-      prisma.notification.findMany({
+      prisma.notifications.findMany({
         skip,
         take,
         where,
@@ -52,7 +52,7 @@ async function handleGET(
           createdAt: true,
         },
       }),
-      prisma.notification.count({ where }),
+      prisma.notifications.count({ where }),
     ]);
 
     return NextResponse.json(notifications, {
@@ -91,7 +91,7 @@ async function handlePUT(
     }
 
     // Update notifications - only those belonging to the current admin user
-    const result = await prisma.notification.updateMany({
+    const result = await prisma.notifications.updateMany({
       where: {
         id: { in: notificationIds },
         adminUserId: adminSession.adminUser.id,

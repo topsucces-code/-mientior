@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user exists in both User and BetterAuthUser tables
     const [user, authUser] = await Promise.all([
-      prisma.user.findUnique({
+      prisma.users.findUnique({
         where: { email },
       }),
       prisma.betterAuthUser.findUnique({

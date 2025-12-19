@@ -73,7 +73,7 @@ export function ChallengeCard({
       {/* Featured Ribbon */}
       {featured && (
         <div className="absolute right-0 top-0 z-10">
-          <div className="flex items-center gap-1 bg-gradient-to-r from-aurore-500 to-aurore-600 px-4 py-1 text-xs font-bold uppercase text-white shadow-lg">
+          <div className="flex items-center gap-1 bg-aurore-600 px-4 py-1 text-xs font-bold uppercase text-white shadow-lg">
             <Flame className="h-3 w-3" />
             Vedette
           </div>
@@ -128,15 +128,12 @@ export function ChallengeCard({
               className={cn(
                 'h-full rounded-full transition-all duration-500',
                 isCompleted
-                  ? 'bg-gradient-to-r from-success to-success-dark'
-                  : 'bg-gradient-to-r from-orange-500 to-orange-600'
+                  ? 'bg-success'
+                  : 'bg-orange-600'
               )}
               style={{ width: `${progressPercentage}%` }}
             />
-            {/* Shimmer effect */}
-            {isInProgress && !isCompleted && (
-              <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/30 to-transparent bg-[length:200%_100%]" />
-            )}
+            {/* Shimmer effect removed for solid colors */}
           </div>
         </div>
 
@@ -219,7 +216,7 @@ export function ChallengeCard({
 
       {/* Completion Celebration Overlay */}
       {isCompleted && (
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-success/10 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-success/10" />
       )}
     </div>
   )

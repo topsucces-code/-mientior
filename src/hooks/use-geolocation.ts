@@ -38,9 +38,9 @@ export function useGeolocation(): UseGeolocationReturn {
                 country: result.country || GEOLOCATION_CONFIG.defaultCountry,
                 city: result.city || null,
                 region: result.region || null,
-                countryCode: result.country_code || 'FR',
-                currency: result.currency || 'EUR',
-                timezone: result.timezone || 'Europe/Paris'
+                countryCode: result.country_code || 'SN',
+                currency: result.currency || 'XOF',
+                timezone: result.timezone || 'Africa/Dakar'
             }
 
             setData(geolocationData)
@@ -60,9 +60,9 @@ export function useGeolocation(): UseGeolocationReturn {
                 country: GEOLOCATION_CONFIG.defaultCountry,
                 city: null,
                 region: null,
-                countryCode: 'FR',
-                currency: 'EUR',
-                timezone: 'Europe/Paris'
+                countryCode: 'SN',
+                currency: 'XOF',
+                timezone: 'Africa/Dakar'
             })
         } finally {
             setLoading(false)

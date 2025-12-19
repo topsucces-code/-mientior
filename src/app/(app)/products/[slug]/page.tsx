@@ -8,6 +8,7 @@ import { prisma } from '@/lib/prisma'
 import { PDPClient } from './pdp-client'
 import { ProductSchema } from '@/components/products/product-schema'
 import type { ProductImage, Review } from '@/types'
+import { getTranslations } from 'next-intl/server'
 
 interface ProductPageProps {
   params: Promise<{
@@ -73,15 +74,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
         orderBy: { order: 'asc' },
       },
       variants: true,
-      tags: {
+      productTags: {
         include: {
-          tag: true,
+          tags: true,
         },
       },
       vendor: {
         select: {
           id: true,
-          businessName: true,
+          business_name: true,
           slug: true,
         },
       },
@@ -111,7 +112,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     .catch(() => [])
 
   // Fetch Q&A data (using global FAQs as placeholder until product-specific Q&A is implemented)
-  const faqs = await prisma.fAQ.findMany({
+  const faqs = await prisma.faqs.findMany({
     where: { isActive: true },
     orderBy: { order: 'asc' },
     take: 5,
@@ -128,24 +129,25 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }))
 
   // Prepare shipping info
+  const tShipping = await getTranslations('products.pdp.shipping')
   const shippingInfo = {
     options: [
       {
-        name: 'Standard',
+        name: tShipping('standardName'),
         price: 0,
         estimatedDays: 5,
-        description: 'Gratuit dès 25€',
+        description: tShipping('standardDesc', { amount: 25 }),
       },
       {
-        name: 'Express',
+        name: tShipping('expressName'),
         price: 9.99,
         estimatedDays: 2,
-        description: 'Livraison rapide',
+        description: tShipping('expressDesc'),
       },
     ],
     freeShippingThreshold: 25,
     internationalShipping: true,
-    returnPolicy: 'Retours gratuits sous 30 jours',
+    returnPolicy: tShipping('returnPolicy'),
   }
 
   // Fetch reviews and review stats
@@ -173,7 +175,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       color: v.color || undefined,
       sku: v.sku,
       stock: v.stock,
-      priceModifier: v.priceModifier || undefined,
+      priceModifier: v.price_modifier || undefined,
       // TODO: Add image field to ProductVariant schema if needed
     })),
     category: {
@@ -186,10 +188,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
         slug: product.category.parent.slug,
       } : undefined,
     },
-    tags: product.tags.map((pt) => ({
-      id: pt.tag.id,
-      name: pt.tag.name,
-      slug: pt.tag.slug,
+    tags: product.productTags.map((pt: { tags: { id: string; name: string; slug: string } }) => ({
+      id: pt.tags.id,
+      name: pt.tags.name,
+      slug: pt.tags.slug,
     })),
     rating: product.rating,
     reviewCount: product.reviewCount,
@@ -200,7 +202,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     description: product.description || undefined,
     vendor: product.vendor ? {
       id: product.vendor.id,
-      businessName: product.vendor.businessName,
+      businessName: product.vendor.business_name,
       slug: product.vendor.slug,
     } : undefined,
   }

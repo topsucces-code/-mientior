@@ -152,10 +152,6 @@ const defaultPlatformSettings: PlatformSettings = {
     
     // Southern Africa
     { code: 'ZA', name: 'South Africa', nameLocal: 'South Africa', currency: 'ZAR', language: 'en', enabled: true, shippingZone: 'southern-africa', freeShippingThreshold: 5000, baseShippingCost: 700 },
-    
-    // Europe
-    { code: 'FR', name: 'France', nameLocal: 'France', currency: 'EUR', language: 'fr', enabled: true, shippingZone: 'europe', freeShippingThreshold: 5000, baseShippingCost: 500 },
-    { code: 'BE', name: 'Belgium', nameLocal: 'Belgique', currency: 'EUR', language: 'fr', enabled: true, shippingZone: 'europe', freeShippingThreshold: 5000, baseShippingCost: 500 },
   ],
   
   shippingZones: [
@@ -165,7 +161,6 @@ const defaultPlatformSettings: PlatformSettings = {
     { id: 'east-africa', name: 'East Africa', countries: ['KE', 'TZ', 'UG', 'RW'], baseRate: 500, freeThreshold: 4000, estimatedDays: { min: 5, max: 10 } },
     { id: 'north-africa', name: 'North Africa', countries: ['MA', 'DZ', 'TN', 'EG'], baseRate: 500, freeThreshold: 4000, estimatedDays: { min: 4, max: 8 } },
     { id: 'southern-africa', name: 'Southern Africa', countries: ['ZA'], baseRate: 700, freeThreshold: 5000, estimatedDays: { min: 5, max: 10 } },
-    { id: 'europe', name: 'Europe', countries: ['FR', 'BE'], baseRate: 500, freeThreshold: 5000, estimatedDays: { min: 3, max: 7 } },
   ],
   
   paymentMethods: [
@@ -215,7 +210,7 @@ const defaultPlatformSettings: PlatformSettings = {
 
 export async function GET() {
   try {
-    const setting = await prisma.setting.findUnique({
+    const setting = await prisma.settings.findUnique({
       where: { key: 'platform' },
     });
 
@@ -265,7 +260,7 @@ export async function PUT(request: NextRequest) {
       body.languages[0].isDefault = true;
     }
 
-    await prisma.setting.upsert({
+    await prisma.settings.upsert({
       where: { key: 'platform' },
       update: {
         value: JSON.stringify(body),

@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import {
   Heart, Truck, Shield, Check, Star, ChevronRight,
   Gift, Zap, BadgeCheck, Copy, Facebook, Twitter, MessageCircle,
@@ -17,7 +18,8 @@ import {
 import { StickyPurchasePanel } from '@/components/products/sticky-purchase-panel'
 import { FrequentlyBoughtTogether } from '@/components/products/frequently-bought-together'
 import { ProductTabs } from '@/components/products/product-tabs'
-import { DeliveryOptions, type DeliveryOption } from '@/components/delivery/delivery-options'
+import type { DeliveryOption } from '@/components/delivery/delivery-options'
+import { DeliveryOptionsModal } from '@/components/products/delivery-options-modal'
 import { useCartStore } from '@/stores/cart.store'
 import { useWishlistStore } from '@/stores/wishlist.store'
 import { useToast } from '@/hooks/use-toast'
@@ -48,6 +50,8 @@ export function PDPClient({
   qa,
   shippingInfo,
 }: PDPClientProps) {
+  const t = useTranslations('products.pdp.client')
+
   // Centralized state for variant selection and quantity
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null)
   const [quantity, setQuantity] = useState(1)
@@ -104,14 +108,13 @@ export function PDPClient({
   }
 
   const shippingCost = getShippingCost(selectedDeliveryOption)
-  const totalWithShipping = subtotal + shippingCost
 
   // Handle delivery option selection
   const handleDeliveryOptionSelect = (option: DeliveryOption) => {
     setSelectedDeliveryOption(option)
     setShowDeliveryModal(false)
     toast({
-      title: 'Option de livraison mise à jour',
+      title: t('deliveryOptionUpdatedTitle'),
       description: `${option.name} - ${option.duration}`
     })
   }
@@ -121,7 +124,7 @@ export function PDPClient({
 
   const handleAddToCart = () => {
     if (currentStock <= 0) {
-      toast({ title: 'Produit indisponible', variant: 'destructive' })
+      toast({ title: t('productUnavailableTitle'), variant: 'destructive' })
       return
     }
     setIsAddingToCart(true)
@@ -142,14 +145,14 @@ export function PDPClient({
       stock: currentStock,
     })
 
-    toast({ title: 'Ajouté au panier', description: product.name })
+    toast({ title: t('addedToCartTitle'), description: product.name })
     setTimeout(() => setIsAddingToCart(false), 500)
   }
 
   const handleToggleWishlist = () => {
     if (isWishlisted) {
       removeFromWishlist(product.id)
-      toast({ title: 'Retiré des favoris' })
+      toast({ title: t('removedFromWishlistTitle') })
     } else {
       addToWishlist({
         productId: product.id,
@@ -159,7 +162,7 @@ export function PDPClient({
         image: product.images[0]?.url || '/images/placeholder.svg',
         addedAt: new Date().toISOString(),
       })
-      toast({ title: 'Ajouté aux favoris' })
+      toast({ title: t('addedToWishlistTitle') })
     }
   }
 
@@ -241,7 +244,7 @@ export function PDPClient({
 
   const handleShare = async (platform: string) => {
     const url = typeof window !== 'undefined' ? window.location.href : ''
-    const text = `Découvrez ${product.name} sur Mientior!`
+    const text = t('shareText', { productName: product.name })
 
     switch (platform) {
       case 'facebook':
@@ -255,7 +258,7 @@ export function PDPClient({
         break
       case 'copy':
         await navigator.clipboard.writeText(url)
-        toast({ title: 'Lien copié!' })
+        toast({ title: t('linkCopiedTitle') })
         break
     }
     setShowShareMenu(false)
@@ -448,17 +451,17 @@ export function PDPClient({
                 {/* Badges on image */}
                 <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
                   {discount > 0 && (
-                    <span className="px-2.5 py-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-full shadow-lg animate-pulse">
+                    <span className="px-2.5 py-1 bg-red-600 text-white text-xs font-bold rounded-full shadow-lg animate-pulse">
                       -{discount}%
                     </span>
                   )}
                   {product.featured && (
-                    <span className="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold rounded-full flex items-center gap-1 shadow-lg">
+                    <span className="px-2.5 py-1 bg-orange-600 text-white text-xs font-bold rounded-full flex items-center gap-1 shadow-lg">
                       <Zap className="w-3 h-3" /> Top vente
                     </span>
                   )}
                   {currentStock <= 5 && currentStock > 0 && (
-                    <span className="px-2.5 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold rounded-full flex items-center gap-1 shadow-lg">
+                    <span className="px-2.5 py-1 bg-orange-600 text-white text-xs font-bold rounded-full flex items-center gap-1 shadow-lg">
                       <Timer className="w-3 h-3" /> Stock limité
                     </span>
                   )}
@@ -564,7 +567,7 @@ export function PDPClient({
               </div>
 
               {/* Reviews summary under image */}
-              <div className="mt-4 p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl border border-orange-100">
+              <div className="mt-4 p-4 bg-orange-50 rounded-xl border border-orange-100">
                 <div className="flex items-center justify-between flex-wrap gap-3">
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1.5">
@@ -588,12 +591,12 @@ export function PDPClient({
                     <div className="h-8 w-px bg-orange-200" />
                     <div className="text-sm">
                       <span className="font-semibold text-gray-900">{product.reviewCount.toLocaleString()}</span>
-                      <span className="text-gray-500"> avis vérifiés</span>
+                      <span className="text-gray-500"> {t('verifiedReviewsLabel')}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Eye className="w-4 h-4 text-orange-500" />
-                    <span className="text-gray-600"><strong>{viewedCount}</strong> personnes regardent ce produit</span>
+                    <span className="text-gray-600">{t('peopleViewing', { count: viewedCount })}</span>
                   </div>
                 </div>
 
@@ -617,10 +620,10 @@ export function PDPClient({
               {/* Trust badges under gallery */}
               <div className="mt-4 grid grid-cols-4 gap-2">
                 {[
-                  { icon: Truck, label: 'Livraison gratuite', color: 'text-green-600' },
-                  { icon: RotateCcw, label: 'Retour 30 jours', color: 'text-blue-600' },
-                  { icon: Shield, label: 'Paiement sécurisé', color: 'text-purple-600' },
-                  { icon: Award, label: 'Qualité garantie', color: 'text-orange-600' },
+                  { icon: Truck, label: t('trustBadgeFreeShipping'), color: 'text-green-600' },
+                  { icon: RotateCcw, label: t('trustBadgeReturn30'), color: 'text-blue-600' },
+                  { icon: Shield, label: t('trustBadgeSecurePayment'), color: 'text-purple-600' },
+                  { icon: Award, label: t('trustBadgeQuality'), color: 'text-orange-600' },
                 ].map(({ icon: Icon, label, color }) => (
                   <div key={label} className="flex flex-col items-center gap-1 p-2 bg-gray-50 rounded-lg text-center">
                     <Icon className={cn('w-5 h-5', color)} />
@@ -638,10 +641,10 @@ export function PDPClient({
 
             {/* Flash Deal Banner */}
             {discount > 0 && (
-              <div className="bg-gradient-to-r from-red-500 via-orange-500 to-red-500 text-white p-3 rounded-xl flex items-center justify-between animate-gradient-x">
+              <div className="bg-orange-600 text-white p-3 rounded-xl flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5 animate-pulse" />
-                  <span className="font-bold">VENTE FLASH</span>
+                  <span className="font-bold">{t('flashSale')}</span>
                 </div>
                 <div className="flex items-center gap-1 font-mono">
                   <Clock className="w-4 h-4" />
@@ -660,8 +663,8 @@ export function PDPClient({
                 <Truck className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-green-700">Livraison GRATUITE</p>
-                <p className="text-xs text-green-600">Arrive en <strong>3-5 jours ouvrables</strong></p>
+                <p className="text-sm font-medium text-green-700">{t('deliveryFreeTitle')}</p>
+                <p className="text-xs text-green-600">{t('deliveryEta', { days: '3-5' })}</p>
               </div>
             </div>
 
@@ -672,7 +675,7 @@ export function PDPClient({
 
             {/* Sales & Vendor */}
             <div className="flex items-center gap-3 text-sm text-gray-500">
-              <span>{(product.reviewCount * 15).toLocaleString()}+ ventes</span>
+              <span>{t('salesCount', { count: (product.reviewCount * 15).toLocaleString() })}</span>
               <span>|</span>
               {product.vendor && (
                 <Link
@@ -680,7 +683,7 @@ export function PDPClient({
                   className="flex items-center gap-1 text-orange-500 hover:underline"
                 >
                   <BadgeCheck className="w-4 h-4" />
-                  Vendeur vedette
+                  {t('featuredVendor')}
                 </Link>
               )}
               <span className="flex items-center gap-1">
@@ -712,7 +715,7 @@ export function PDPClient({
                   className="text-xs text-orange-500 font-medium mt-1 hover:underline"
                   onClick={() => document.getElementById('product-details-tab')?.scrollIntoView({ behavior: 'smooth' })}
                 >
-                  Voir plus →
+                  {t('seeMore')}
                 </button>
               </div>
             )}
@@ -721,7 +724,7 @@ export function PDPClient({
             {product.featured && (
               <div className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded">
                 <Zap className="w-3 h-3" />
-                #10 Mieux noté dans {product.category?.name}
+                {t('topRankedInCategory', { category: product.category?.name || '' })}
               </div>
             )}
 
@@ -734,10 +737,10 @@ export function PDPClient({
                 {product.compareAtPrice && product.compareAtPrice > finalPrice && (
                   <>
                     <span className="text-base text-gray-400 line-through">
-                      Payez {formatPrice(product.compareAtPrice)}
+                      {t('payOriginalPrice', { price: formatPrice(product.compareAtPrice) })}
                     </span>
                     <span className="text-sm text-orange-500 font-medium">
-                      aujourd'hui
+                      {t('today')}
                     </span>
                   </>
                 )}
@@ -748,11 +751,11 @@ export function PDPClient({
             <div className="flex flex-wrap gap-3">
               <div className="flex items-center gap-1.5 text-sm">
                 <Check className="w-4 h-4 text-green-500" />
-                <span className="text-green-600 font-medium">LIVRAISON GRATUITE</span>
+                <span className="text-green-600 font-medium">{t('freeShippingUpper')}</span>
               </div>
               <div className="flex items-center gap-1.5 text-sm">
                 <Check className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-600">5,00€ CRÉDIT POUR RETARD</span>
+                <span className="text-gray-600">{t('delayCreditUpper', { amount: '5,00€' })}</span>
               </div>
             </div>
 
@@ -760,7 +763,7 @@ export function PDPClient({
             {colorVariantsWithImages.length > 0 && (
               <div className="space-y-3">
                 <label className="text-sm font-medium text-gray-900">
-                  Couleur
+                  {t('colorLabel')}
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {colorVariantsWithImages.map(({ color, image, variant }) => {
@@ -804,9 +807,9 @@ export function PDPClient({
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-medium text-gray-900">
-                    Taille: <span className="text-orange-500">{selectedVariant?.size}</span>
+                    {t('sizeLabel')}: <span className="text-orange-500">{selectedVariant?.size}</span>
                   </label>
-                  <button className="text-xs text-orange-500 hover:underline">Guide des tailles</button>
+                  <button className="text-xs text-orange-500 hover:underline">{t('sizeGuide')}</button>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {sizes.map((size) => {
@@ -837,7 +840,7 @@ export function PDPClient({
 
             {/* Quantity Selector - Enhanced */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-900">Quantité</label>
+              <label className="text-sm font-medium text-gray-900">{t('quantityLabel')}</label>
               <div className="flex items-center gap-4">
                 <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
                   <button
@@ -866,13 +869,13 @@ export function PDPClient({
                 {currentStock <= 10 && currentStock > 0 && (
                   <div className="flex items-center gap-1.5 text-sm text-orange-600 bg-orange-50 px-3 py-1.5 rounded-full">
                     <Timer className="w-4 h-4" />
-                    <span>Plus que <strong>{currentStock}</strong> en stock!</span>
+                    <span>{t('onlyLeftInStock', { count: currentStock })}</span>
                   </div>
                 )}
               </div>
               {quantity > 1 && (
                 <p className="text-sm text-gray-500">
-                  Total: <span className="font-semibold text-gray-900">{formatPrice(finalPrice * quantity)}</span>
+                  {t('totalLabel')}: <span className="font-semibold text-gray-900">{formatPrice(finalPrice * quantity)}</span>
                 </p>
               )}
             </div>
@@ -885,7 +888,7 @@ export function PDPClient({
                 className={cn(
                   'w-full h-14 rounded-xl font-bold text-lg text-white transition-all flex items-center justify-center gap-3 shadow-lg',
                   currentStock > 0
-                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 active:scale-[0.98] shadow-orange-200'
+                    ? 'bg-orange-600 hover:bg-orange-700 active:scale-[0.98] shadow-orange-200'
                     : 'bg-gray-300 cursor-not-allowed'
                 )}
               >
@@ -894,7 +897,7 @@ export function PDPClient({
                 ) : (
                   <>
                     <ShoppingBag className="w-6 h-6" />
-                    AJOUTER AU PANIER
+                    {t('addToCartCta')}
                   </>
                 )}
               </button>
@@ -913,24 +916,24 @@ export function PDPClient({
                 )}
               >
                 <Zap className="w-5 h-5" />
-                ACHETER MAINTENANT
+                {t('buyNowCta')}
               </button>
             </div>
 
             {/* Shipping Info Box - Enhanced with Dynamic Selection */}
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 space-y-4 border border-green-100 relative">
+            <div className="bg-green-50 rounded-[3px] p-4 space-y-4 border border-green-100 relative">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-[3px] bg-green-100 flex items-center justify-center">
                     <Package className="w-4 h-4 text-green-600" />
                   </div>
-                  <span className="text-sm font-semibold text-green-700">Options de livraison</span>
+                  <span className="text-sm font-semibold text-green-700">{t('deliveryOptionsTitle')}</span>
                 </div>
                 <button
-                  onClick={() => setShowDeliveryModal(!showDeliveryModal)}
+                  onClick={() => setShowDeliveryModal(true)}
                   className="text-orange-500 hover:text-orange-600 font-medium text-sm flex items-center gap-1"
                 >
-                  {selectedDeliveryOption ? 'Modifier' : 'Choisir'}
+                  {selectedDeliveryOption ? t('edit') : t('choose')}
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
@@ -938,7 +941,7 @@ export function PDPClient({
               {selectedDeliveryOption ? (
                 <>
                   {/* Selected delivery option display */}
-                  <div className="p-3 bg-white rounded-lg border-2 border-green-200">
+                  <div className="p-3 bg-white rounded-[3px] border-2 border-green-200">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 flex-1">
                         {(() => {
@@ -949,8 +952,8 @@ export function PDPClient({
                           <div className="flex items-center gap-2 mb-1">
                             <p className="text-sm font-bold text-gray-900">{selectedDeliveryOption.name}</p>
                             {shippingCost === 0 && (
-                              <span className="px-2 py-0.5 bg-green-500 text-white text-[10px] font-bold rounded-full">
-                                GRATUIT
+                              <span className="px-2 py-0.5 bg-green-500 text-white text-[10px] font-bold rounded-[3px]">
+                                {t('freeUpper')}
                               </span>
                             )}
                           </div>
@@ -962,7 +965,7 @@ export function PDPClient({
                       </div>
                       <div className="text-right flex-shrink-0">
                         {shippingCost === 0 ? (
-                          <span className="text-green-600 font-bold">Gratuit</span>
+                          <span className="text-green-600 font-bold">{t('free')}</span>
                         ) : (
                           <span className="font-bold text-gray-900">{formatPrice(shippingCost)}</span>
                         )}
@@ -972,13 +975,13 @@ export function PDPClient({
 
                   {/* Free shipping progress */}
                   {selectedDeliveryOption.freeThreshold && subtotal < selectedDeliveryOption.freeThreshold && (
-                    <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
+                    <div className="p-3 bg-orange-50 rounded-[3px] border border-orange-100">
                       <p className="text-xs text-orange-700 mb-2">
-                        Plus que <strong>{formatPrice(selectedDeliveryOption.freeThreshold - subtotal)}</strong> pour la livraison gratuite!
+                        {t('freeShippingProgress', { remaining: formatPrice(selectedDeliveryOption.freeThreshold - subtotal) })}
                       </p>
-                      <div className="w-full h-2 bg-orange-100 rounded-full overflow-hidden">
+                      <div className="w-full h-2 bg-orange-100 rounded-[3px] overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-orange-500 to-orange-600 transition-all duration-500"
+                          className="h-full bg-orange-500 transition-all duration-500"
                           style={{ width: `${Math.min((subtotal / selectedDeliveryOption.freeThreshold) * 100, 100)}%` }}
                         />
                       </div>
@@ -987,57 +990,44 @@ export function PDPClient({
                 </>
               ) : (
                 <div className="flex flex-wrap gap-2">
-                  <span className="px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-medium flex items-center gap-1">
-                    <Check className="w-3 h-3" /> 5€ crédit retard
+                  <span className="px-3 py-1.5 bg-green-100 text-green-700 rounded-[3px] text-xs font-medium flex items-center gap-1">
+                    <Check className="w-3 h-3" /> {t('codAvailablePill')}
                   </span>
-                  <span className="px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-medium flex items-center gap-1">
-                    <Check className="w-3 h-3" /> Suivi en temps réel
+                  <span className="px-3 py-1.5 bg-green-100 text-green-700 rounded-[3px] text-xs font-medium flex items-center gap-1">
+                    <Check className="w-3 h-3" /> {t('smsTrackingPill')}
                   </span>
-                  <span className="px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-medium flex items-center gap-1">
-                    <Check className="w-3 h-3" /> Retour gratuit
+                  <span className="px-3 py-1.5 bg-green-100 text-green-700 rounded-[3px] text-xs font-medium flex items-center gap-1">
+                    <Check className="w-3 h-3" /> {t('freeReturnsPill')}
                   </span>
-                </div>
-              )}
-
-              {/* Delivery modal */}
-              {showDeliveryModal && (
-                <div className="absolute left-0 right-0 z-20 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 mt-2">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-semibold text-gray-900">Choisissez votre livraison</h4>
-                    <button
-                      onClick={() => setShowDeliveryModal(false)}
-                      className="w-6 h-6 rounded-full hover:bg-gray-100 flex items-center justify-center"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <DeliveryOptions
-                    selectedOption={selectedDeliveryOption?.id}
-                    onSelect={handleDeliveryOptionSelect}
-                    cartTotal={subtotal}
-                    showFullCards={false}
-                  />
                 </div>
               )}
             </div>
 
+            <DeliveryOptionsModal
+              isOpen={showDeliveryModal}
+              onClose={() => setShowDeliveryModal(false)}
+              selectedOption={selectedDeliveryOption?.id}
+              cartTotal={subtotal}
+              onSelect={handleDeliveryOptionSelect}
+            />
+
             {/* Guarantees Grid */}
             <div className="grid grid-cols-2 gap-3">
               {[
-                { icon: Shield, title: 'Paiement sécurisé', desc: 'SSL 256-bit', color: 'purple' },
-                { icon: RotateCcw, title: 'Retour gratuit', desc: '30 jours', color: 'blue' },
-                { icon: ThumbsUp, title: 'Satisfaction', desc: '100% garantie', color: 'green' },
-                { icon: Gift, title: 'Emballage soigné', desc: 'Cadeau possible', color: 'orange' },
+                { icon: Shield, title: t('guaranteeSecurePaymentTitle'), desc: t('guaranteeSecurePaymentDesc'), color: 'purple' },
+                { icon: RotateCcw, title: t('guaranteeFreeReturnsTitle'), desc: t('guaranteeFreeReturnsDesc'), color: 'blue' },
+                { icon: ThumbsUp, title: t('guaranteeSatisfactionTitle'), desc: t('guaranteeSatisfactionDesc'), color: 'green' },
+                { icon: Gift, title: t('guaranteePackagingTitle'), desc: t('guaranteePackagingDesc'), color: 'orange' },
               ].map(({ icon: Icon, title, desc, color }) => (
                 <div key={title} className={cn(
-                  'p-3 rounded-lg border flex items-center gap-3',
+                  'p-3 rounded-[3px] border flex items-center gap-3',
                   color === 'purple' && 'bg-purple-50 border-purple-100',
                   color === 'blue' && 'bg-blue-50 border-blue-100',
                   color === 'green' && 'bg-green-50 border-green-100',
                   color === 'orange' && 'bg-orange-50 border-orange-100',
                 )}>
                   <div className={cn(
-                    'w-10 h-10 rounded-full flex items-center justify-center',
+                    'w-10 h-10 rounded-[3px] flex items-center justify-center',
                     color === 'purple' && 'bg-purple-100',
                     color === 'blue' && 'bg-blue-100',
                     color === 'green' && 'bg-green-100',
@@ -1064,7 +1054,7 @@ export function PDPClient({
               <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-lg">
+                    <div className="w-12 h-12 rounded-full bg-orange-600 flex items-center justify-center text-white font-bold text-lg">
                       {product.vendor.businessName?.charAt(0) || 'V'}
                     </div>
                     <div>
@@ -1078,7 +1068,7 @@ export function PDPClient({
                           4.8
                         </span>
                         <span>•</span>
-                        <span>98% avis positifs</span>
+                        <span>{t('positiveReviews')}</span>
                       </div>
                     </div>
                   </div>
@@ -1086,7 +1076,7 @@ export function PDPClient({
                     href={`/vendors/${product.vendor.slug}`}
                     className="px-4 py-2 text-sm font-medium text-orange-600 border border-orange-200 rounded-lg hover:bg-orange-50 transition-colors"
                   >
-                    Voir boutique
+                    {t('viewStore')}
                   </Link>
                 </div>
               </div>

@@ -119,7 +119,7 @@ export async function validateExpressPaymentRequest(
 
   // 7. If orderId provided, validate it exists and belongs to user
   if (orderId) {
-    const order = await prisma.order.findUnique({
+    const order = await prisma.orders.findUnique({
       where: { id: orderId },
       select: { id: true, total: true, paymentStatus: true },
     })
@@ -315,7 +315,7 @@ export async function createProvisionalExpressOrder(options: {
   const paymentGateway = gateway === 'PAYPAL' ? 'PAYPAL' : 'PAYSTACK' // Express methods use Paystack for card processing
 
   // Create provisional order
-  const order = await prisma.order.create({
+  const order = await prisma.orders.create({
     data: {
       orderNumber,
       userId: userId || undefined,

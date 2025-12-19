@@ -50,7 +50,7 @@ export function SavingsSummary({
 
   return (
     <Card className={cn(
-      "overflow-hidden border-green-100 bg-gradient-to-br from-green-50/50 to-emerald-50/30 animate-in zoom-in-95 duration-300",
+      "overflow-hidden border-green-100 bg-green-50 animate-in zoom-in-95 duration-300",
       className
     )}>
       <div className="p-4 space-y-3">
@@ -83,8 +83,8 @@ export function SavingsSummary({
           </div>
           <Progress 
             value={progressValue} 
-            className="h-2.5 bg-green-100" 
-            indicatorClassName="bg-gradient-to-r from-green-400 to-green-600"
+            className="h-2.5 bg-orange-100" 
+            indicatorClassName="bg-orange-600"
           />
         </div>
       </div>

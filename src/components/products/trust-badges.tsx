@@ -79,12 +79,12 @@ export function TrustBadges({
           >
             <Truck className={cn("w-4 h-4 text-success", onDeliveryClick && "group-hover:text-orange-500")} />
             <span>
-              <strong>Livraison estimée:</strong>{' '}
+              <strong>Livraison:</strong>{' '}
               {formatDeliveryDate(estimatedDelivery.min)} -{' '}
               {formatDeliveryDate(estimatedDelivery.max)}
             </span>
             {onDeliveryClick && (
-                <span className="text-orange-500 text-xs font-bold ml-auto border border-orange-200 bg-orange-50 px-2 py-0.5 rounded">
+                <span className="text-orange-500 text-xs font-semibold ml-auto border border-orange-200 bg-orange-50 px-2 py-1 rounded">
                     Options ›
                 </span>
             )}
@@ -92,7 +92,7 @@ export function TrustBadges({
           <div className="flex items-center gap-2 text-sm text-nuanced-700 px-2">
             <Package className="w-4 h-4 text-success" />
             <span>
-              <strong>Expédié depuis:</strong> {shippingOrigin}
+              <strong>Depuis:</strong> {shippingOrigin}
             </span>
           </div>
           {internationalShipping && (

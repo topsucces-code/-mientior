@@ -28,12 +28,12 @@ export function EnhancedStockIndicator({
         {isLowStock ? (
           <AlertCircle className="h-4 w-4 text-orange-600" />
         ) : (
-          <Check className="h-4 w-4 text-green-600" />
+          <Check className="h-4 w-4 text-turquoise-600" />
         )}
         <span
           className={cn(
             'text-[13px] font-semibold',
-            isLowStock ? 'text-orange-600' : 'text-green-600'
+            isLowStock ? 'text-orange-600' : 'text-turquoise-600'
           )}
         >
           {isLowStock
@@ -46,8 +46,8 @@ export function EnhancedStockIndicator({
           className={cn(
             'h-full transition-all duration-300 rounded-full',
             isLowStock
-              ? 'bg-gradient-to-r from-orange-600 to-orange-700'
-              : 'bg-gradient-to-r from-green-500 to-green-600'
+              ? 'bg-orange-600'
+              : 'bg-turquoise-600'
           )}
           style={{ width: `${percentage}%` }}
         />

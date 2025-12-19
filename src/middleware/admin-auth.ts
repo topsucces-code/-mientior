@@ -16,12 +16,12 @@ export type { AdminSession };
 
 export type ApiHandler = (
   request: NextRequest,
-  context: { params: Record<string, string> }
+  context: { params: Record<string, string> | Promise<Record<string, string>> }
 ) => Promise<NextResponse>;
 
 export type AuthenticatedApiHandler = (
   request: NextRequest,
-  context: { params: Record<string, string>; adminSession: AdminSession }
+  context: { params: Record<string, string> | Promise<Record<string, string>>; adminSession: AdminSession }
 ) => Promise<NextResponse>;
 
 interface WithAdminAuthOptions {
@@ -35,7 +35,7 @@ export function withAdminAuth(
   handler: AuthenticatedApiHandler,
   options: WithAdminAuthOptions = { logAction: true }
 ): ApiHandler {
-  return async (request: NextRequest, context: { params: Record<string, string> }) => {
+  return async (request: NextRequest, context: { params: Record<string, string> | Promise<Record<string, string>> }) => {
     try {
       const adminSession = await requireAdminAuthFromLib();
 
@@ -86,7 +86,7 @@ export function withPermission(
   handler: AuthenticatedApiHandler,
   options: WithAdminAuthOptions = { logAction: true }
 ): ApiHandler {
-  return async (request: NextRequest, context: { params: Record<string, string> }) => {
+  return async (request: NextRequest, context: { params: Record<string, string> | Promise<Record<string, string>> }) => {
     try {
       const adminSession = await requirePermission(permission);
 
@@ -148,7 +148,7 @@ export function withRole(
   handler: AuthenticatedApiHandler,
   options: WithAdminAuthOptions = { logAction: true }
 ): ApiHandler {
-  return async (request: NextRequest, context: { params: Record<string, string> }) => {
+  return async (request: NextRequest, context: { params: Record<string, string> | Promise<Record<string, string>> }) => {
     try {
       const adminSession = await requireRole(minRole);
 

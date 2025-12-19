@@ -363,7 +363,7 @@ export function ShippingForm({
                   <FormItem>
                     <FormLabel>Adresse email *</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="jean@exemple.fr" {...field} />
+                      <Input type="email" placeholder="amadou@exemple.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -468,7 +468,7 @@ export function ShippingForm({
                       <FormItem>
                         <FormLabel>Prénom *</FormLabel>
                         <FormControl>
-                          <Input placeholder="Jean" {...field} />
+                          <Input placeholder="Amadou" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -481,7 +481,7 @@ export function ShippingForm({
                       <FormItem>
                         <FormLabel>Nom *</FormLabel>
                         <FormControl>
-                          <Input placeholder="Dupont" {...field} />
+                          <Input placeholder="Diallo" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -497,7 +497,7 @@ export function ShippingForm({
                     <FormItem>
                       <FormLabel>Adresse *</FormLabel>
                       <FormControl>
-                        <Input placeholder="123 Rue de la Paix" {...field} />
+                        <Input placeholder="Cocody Riviera 2, Rue des Jardins" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -612,8 +612,8 @@ export function ShippingForm({
                       <FormItem>
                         <FormLabel>Code postal {hasPresetCities ? '(optionnel)' : '*'}</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder={hasPresetCities ? 'BP 1234' : '75001'} 
+                          <Input
+                            placeholder="BP 1234"
                             {...field}
                             value={field.value || ''}
                           />
@@ -632,7 +632,7 @@ export function ShippingForm({
                     <FormItem>
                       <FormLabel>Téléphone *</FormLabel>
                       <FormControl>
-                        <Input type="tel" placeholder="06 12 34 56 78" {...field} />
+                        <Input type="tel" placeholder="+225 07 07 12 34 56" {...field} />
                       </FormControl>
                       <FormDescription className="text-xs">
                         Nécessaire pour la livraison

@@ -37,7 +37,7 @@ export default function CategoryCreate() {
   return (
     <div style={{ padding: "24px", maxWidth: "800px" }}>
       <h1>Create Category</h1>
-      <Form {...formProps} layout="vertical">
+      <Form {...formProps} form={form} layout="vertical">
         <Form.Item
           label="Name"
           name="name"

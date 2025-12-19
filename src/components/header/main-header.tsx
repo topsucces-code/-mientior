@@ -7,7 +7,8 @@ import { AdvancedSearchBar } from './advanced-search-bar'
 import { WishlistDropdown } from './wishlist-dropdown'
 import { EnhancedCartPreview } from './enhanced-cart-preview'
 import { UserAccountDropdown } from './user-account-dropdown'
-import { Bell, Search, X } from 'lucide-react'
+import { NotificationDropdown } from './notification-dropdown'
+import { Search, X } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { MegaMenuColumn } from '@/types'
@@ -19,7 +20,7 @@ const MOCK_CATEGORIES: MegaMenuColumn[] = [
         icon: '💻',
         link: '/categories/electronique',
         description: 'Tous vos appareils électroniques',
-        image: '/images/categories/electronics.jpg',
+        image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=1200&q=80',
         subcategories: [
             {
                 id: 'computers',
@@ -209,9 +210,9 @@ export function MainHeader() {
                     {/* Action Icons */}
                     <div className="flex items-center gap-1 flex-shrink-0">
                         {/* Notifications */}
-                        <ActionIconWrapper badge={2} badgeType="info" className="hidden sm:flex">
-                            <Bell className="w-5 h-5" />
-                        </ActionIconWrapper>
+                        <div className="hidden sm:flex">
+                            <NotificationDropdown />
+                        </div>
                         
                         {/* Wishlist */}
                         <WishlistDropdown />
@@ -246,9 +247,7 @@ export function MainHeader() {
                     {/* Action Icons */}
                     <div className="flex items-center gap-1 xl:gap-2 flex-shrink-0">
                         {/* Notifications */}
-                        <ActionIconWrapper badge={2} badgeType="info">
-                            <Bell className="w-5 h-5" />
-                        </ActionIconWrapper>
+                        <NotificationDropdown />
                         
                         {/* Wishlist */}
                         <WishlistDropdown />
@@ -302,7 +301,7 @@ function ActionIconWrapper({ children, badge, badgeType = 'default', onClick, cl
                     absolute -top-0.5 -right-0.5
                     min-w-[20px] h-5 px-1.5
                     ${badgeColors[badgeType]} text-white
-                    text-[11px] font-bold rounded-full
+                    text-xs font-bold rounded-full
                     border-2 border-white
                     flex items-center justify-center
                     shadow-[0_2px_8px_rgba(239,68,68,0.3)]

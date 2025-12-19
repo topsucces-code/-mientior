@@ -21,7 +21,7 @@ const handleGET = async (req: NextRequest, { adminSession: _adminSession }: { ad
   const searchParams = req.nextUrl.searchParams;
   const _start = parseInt(searchParams.get('_start') || '0');
   const _end = parseInt(searchParams.get('_end') || '10');
-  const _sort = searchParams.get('_sort') || 'createdAt';
+  const _sort = searchParams.get('_sort') || 'created_at';
   const _order = searchParams.get('_order') || 'desc';
   const status = searchParams.get('status');
   const search = searchParams.get('q');
@@ -30,22 +30,22 @@ const handleGET = async (req: NextRequest, { adminSession: _adminSession }: { ad
 
   const result = await getCachedData(cacheKey, async () => {
     // Build where clause
-    const where: Prisma.VendorWhereInput = {};
+    const where: Prisma.vendorsWhereInput = {};
     if (status) {
       where.status = status as Prisma.EnumVendorStatusFilter;
     }
     if (search) {
       where.OR = [
-        { businessName: { contains: search, mode: 'insensitive' } },
+        { business_name: { contains: search, mode: 'insensitive' } },
         { email: { contains: search, mode: 'insensitive' } },
       ];
     }
 
     // Get total count
-    const total = await prisma.vendor.count({ where });
+    const total = await prisma.vendors.count({ where });
 
     // Get vendors with relations
-    const vendors = await prisma.vendor.findMany({
+    const vendors = await prisma.vendors.findMany({
       where,
       skip: _start,
       take: _end - _start,
@@ -84,7 +84,7 @@ const handlePOST = async (req: NextRequest, { adminSession }: { adminSession?: A
   }
 
   // Check if email already exists
-  const existing = await prisma.vendor.findUnique({
+  const existing = await prisma.vendors.findUnique({
     where: { email: body.email },
   });
 
@@ -104,26 +104,28 @@ const handlePOST = async (req: NextRequest, { adminSession }: { adminSession?: A
   // Ensure slug uniqueness
   let slugSuffix = 0;
   let finalSlug = slug;
-  while (await prisma.vendor.findUnique({ where: { slug: finalSlug } })) {
+  while (await prisma.vendors.findUnique({ where: { slug: finalSlug } })) {
     slugSuffix++;
     finalSlug = `${slug}-${slugSuffix}`;
   }
 
   // Create vendor (admin-created vendors may not have user association initially)
-  const vendor = await prisma.vendor.create({
+  const vendor = await prisma.vendors.create({
     data: {
-      businessName: body.businessName,
+      id: crypto.randomUUID(),
+      business_name: body.businessName,
       slug: finalSlug,
       email: body.email,
       phone: body.phone,
       logo: body.logo,
       description: body.description,
       status: body.status || 'PENDING',
-      commissionRate: body.commissionRate || 10.0,
+      commission_rate: body.commissionRate || 10.0,
       documents: body.documents,
-      bankDetails: body.bankDetails,
-      userId: body.userId, // Optional: link to existing user account
-    } as Prisma.VendorUncheckedCreateInput,
+      bank_details: body.bankDetails,
+      user_id: body.userId, // Optional: link to existing user account
+      updated_at: new Date(),
+    } as Prisma.vendorsUncheckedCreateInput,
     include: {
       _count: {
         select: {
@@ -141,7 +143,7 @@ const handlePOST = async (req: NextRequest, { adminSession }: { adminSession?: A
       resource: 'vendors',
       resourceId: vendor.id,
       adminUserId: adminUser.id,
-      metadata: { businessName: vendor.businessName },
+      metadata: { businessName: vendor.business_name },
     });
   }
 

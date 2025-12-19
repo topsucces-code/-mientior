@@ -167,7 +167,7 @@ async function processBatch(job: Job<BatchJobData>): Promise<void> {
   }
 
   // Fetch recipients
-  const recipients = await prisma.user.findMany({
+  const recipients = await prisma.users.findMany({
     where: {
       id: { in: recipientIds },
     },

@@ -56,7 +56,7 @@ export default async function CategoriesPage() {
                     <span className="text-lg font-medium">Pas d'image</span>
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-60 transition-opacity group-hover:opacity-70" />
+                <div className="absolute inset-0 bg-black/50 opacity-60 transition-opacity group-hover:opacity-70" />
               </div>
               
               <div className="absolute bottom-0 left-0 right-0 p-6 text-white">

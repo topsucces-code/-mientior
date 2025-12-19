@@ -152,7 +152,7 @@ export function WishlistDropdown() {
 
                                         <div className="flex-1 min-w-0">
                                             <Link href={`/products/${item.slug || item.productId}`}>
-                                                <h4 className="font-medium hover:text-emerald-600 truncate">
+                                                <h4 className="font-medium hover:text-turquoise-600 truncate">
                                                     {item.name || 'Produit'}
                                                 </h4>
                                             </Link>
@@ -180,7 +180,7 @@ export function WishlistDropdown() {
                                                             description: `${item.name} a été ajouté à votre panier.`,
                                                         })
                                                     }}
-                                                    className="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded-md hover:bg-emerald-700 transition-colors flex items-center gap-1"
+                                                    className="text-xs bg-turquoise-600 text-white px-3 py-1.5 rounded-md hover:bg-turquoise-700 transition-colors flex items-center gap-1"
                                                 >
                                                     <ShoppingCart className="w-3.5 h-3.5" />
                                                     {tCart('addToCart')}

@@ -138,7 +138,7 @@ export async function validatePromoCode(
 
   if (firstOrderOnly) {
     // Check if user has previous orders
-    const previousOrders = await prisma.order.count({
+    const previousOrders = await prisma.orders.count({
       where: {
         userId,
         status: { notIn: ["CANCELLED"] },

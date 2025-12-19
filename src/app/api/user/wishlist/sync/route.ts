@@ -14,7 +14,7 @@ export async function GET() {
     const userId = session.user.id
 
     // Fetch user's wishlist from database
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: userId },
       select: { wishlist: true }
     })
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 
     // If merge is true, merge with server wishlist
     if (merge) {
-      const user = await prisma.user.findUnique({
+      const user = await prisma.users.findUnique({
         where: { id: userId },
         select: { wishlist: true }
       })
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user's wishlist
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: userId },
       data: { wishlist: finalWishlist }
     })

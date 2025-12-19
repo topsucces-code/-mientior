@@ -56,7 +56,7 @@ export function EmptyState({ onReset, hasActiveFilters }: EmptyStateProps) {
         {hasActiveFilters && (
           <Button
             onClick={onReset}
-            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium px-6 py-3"
+            className="bg-orange-600 hover:bg-orange-700 text-white font-medium px-6 py-3"
           >
             RÉINITIALISER LES FILTRES
           </Button>

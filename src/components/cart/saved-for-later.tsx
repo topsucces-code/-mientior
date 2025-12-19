@@ -108,7 +108,7 @@ export function SavedForLater({ items, onMoveToCart, onRemove, className }: Save
 
                 {/* Stock Badge */}
                 {item.inStock ? (
-                  <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                  <Badge variant="outline" className="text-xs bg-turquoise-50 text-turquoise-700 border-turquoise-200">
                     En stock
                   </Badge>
                 ) : (

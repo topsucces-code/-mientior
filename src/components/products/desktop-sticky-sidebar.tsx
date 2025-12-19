@@ -333,8 +333,8 @@ export function DesktopStickySidebar({
         {/* Trust Badges */}
         <div className="space-y-3 pt-6 border-t border-platinum-200">
           <div className="flex items-center gap-3">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-              <Check className="w-4 h-4 text-green-600" />
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-turquoise-100 flex items-center justify-center">
+              <Check className="w-4 h-4 text-turquoise-600" />
             </div>
             <div>
               <p className="text-sm font-medium text-anthracite-900">En stock</p>
@@ -342,8 +342,8 @@ export function DesktopStickySidebar({
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-              <Truck className="w-4 h-4 text-blue-600" />
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-turquoise-100 flex items-center justify-center">
+              <Truck className="w-4 h-4 text-turquoise-600" />
             </div>
             <div>
               <p className="text-sm font-medium text-anthracite-900">Livraison gratuite</p>

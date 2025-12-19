@@ -16,8 +16,8 @@ interface StockIndicatorProps {
 }
 
 export function StockIndicator({
-  productId,
-  variantId,
+  productId: _productId,
+  variantId: _variantId,
   stock,
   className,
 }: StockIndicatorProps) {
@@ -49,13 +49,13 @@ export function StockIndicator({
         {isLowStock ? (
           <AlertCircle className="h-5 w-5 text-orange-600 flex-shrink-0" />
         ) : (
-          <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+          <CheckCircle className="h-5 w-5 text-turquoise-600 flex-shrink-0" />
         )}
         <div className="flex-1">
           <p
             className={cn(
               'text-sm font-semibold',
-              isLowStock ? 'text-orange-900' : 'text-green-900'
+              isLowStock ? 'text-orange-900' : 'text-turquoise-900'
             )}
           >
             {isLowStock
@@ -74,8 +74,8 @@ export function StockIndicator({
           className={cn(
             'h-full transition-all duration-300 rounded-full',
             isLowStock
-              ? 'bg-gradient-to-r from-orange-500 to-orange-600'
-              : 'bg-gradient-to-r from-green-500 to-green-600'
+              ? 'bg-orange-600'
+              : 'bg-turquoise-600'
           )}
           style={{ width: `${percentage}%` }}
           role="progressbar"

@@ -38,12 +38,12 @@ const typeIcons: Record<NotificationType, React.ElementType> = {
 
 // Color mapping for notification types
 const typeColors: Record<NotificationType, string> = {
-  ORDER_UPDATE: 'bg-emerald-100 text-emerald-600',
-  PAYMENT_UPDATE: 'bg-blue-100 text-blue-600',
+  ORDER_UPDATE: 'bg-turquoise-100 text-turquoise-600',
+  PAYMENT_UPDATE: 'bg-turquoise-100 text-turquoise-600',
   DELIVERY_UPDATE: 'bg-amber-100 text-amber-600',
-  PROMO_OFFER: 'bg-purple-100 text-purple-600',
+  PROMO_OFFER: 'bg-orange-100 text-orange-600',
   PRICE_DROP: 'bg-red-100 text-red-600',
-  BACK_IN_STOCK: 'bg-green-100 text-green-600',
+  BACK_IN_STOCK: 'bg-turquoise-100 text-turquoise-600',
   REVIEW_REQUEST: 'bg-yellow-100 text-yellow-600',
   SUPPORT_UPDATE: 'bg-cyan-100 text-cyan-600',
   SYSTEM_ALERT: 'bg-orange-100 text-orange-600',
@@ -102,7 +102,7 @@ export default function NotificationsDropdown() {
       {/* Bell button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-600 hover:text-emerald-600 hover:bg-gray-100 rounded-full transition-colors"
+        className="relative p-2 text-gray-600 hover:text-turquoise-600 hover:bg-gray-100 rounded-full transition-colors"
         aria-label="Notifications"
       >
         <Bell className="h-5 w-5" />
@@ -123,7 +123,7 @@ export default function NotificationsDropdown() {
               {unreadCount > 0 && (
                 <button
                   onClick={() => markAllAsRead()}
-                  className="text-xs text-emerald-600 hover:text-emerald-700 flex items-center"
+                  className="text-xs text-turquoise-600 hover:text-turquoise-700 flex items-center"
                   title="Tout marquer comme lu"
                 >
                   <CheckCheck className="h-4 w-4 mr-1" />
@@ -143,7 +143,7 @@ export default function NotificationsDropdown() {
           <div className="max-h-[400px] overflow-y-auto">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-emerald-500" />
+                <Loader2 className="h-6 w-6 animate-spin text-turquoise-500" />
               </div>
             ) : notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-gray-500">
@@ -161,7 +161,7 @@ export default function NotificationsDropdown() {
                       key={notification.id}
                       className={cn(
                         'relative group',
-                        !notification.read && 'bg-emerald-50/50'
+                        !notification.read && 'bg-turquoise-50/50'
                       )}
                     >
                       <Link
@@ -185,7 +185,7 @@ export default function NotificationsDropdown() {
                                 {notification.title}
                               </p>
                               {!notification.read && (
-                                <span className="flex-shrink-0 w-2 h-2 bg-emerald-500 rounded-full ml-2 mt-1.5" />
+                                <span className="flex-shrink-0 w-2 h-2 bg-turquoise-500 rounded-full ml-2 mt-1.5" />
                               )}
                             </div>
                             <p className="text-sm text-gray-500 line-clamp-2 mt-0.5">
@@ -207,7 +207,7 @@ export default function NotificationsDropdown() {
                               e.stopPropagation();
                               markAsRead(notification.id);
                             }}
-                            className="p-1 text-gray-400 hover:text-emerald-600 rounded"
+                            className="p-1 text-gray-400 hover:text-turquoise-600 rounded"
                             title="Marquer comme lu"
                           >
                             <Check className="h-4 w-4" />
@@ -233,7 +233,7 @@ export default function NotificationsDropdown() {
                 {hasMore && (
                   <button
                     onClick={loadMore}
-                    className="w-full py-3 text-sm text-emerald-600 hover:text-emerald-700 hover:bg-gray-50 transition-colors"
+                    className="w-full py-3 text-sm text-turquoise-600 hover:text-turquoise-700 hover:bg-gray-50 transition-colors"
                   >
                     Voir plus
                   </button>
@@ -247,7 +247,7 @@ export default function NotificationsDropdown() {
             <Link
               href="/account/notifications"
               onClick={() => setIsOpen(false)}
-              className="block text-center text-sm text-emerald-600 hover:text-emerald-700"
+              className="block text-center text-sm text-turquoise-600 hover:text-turquoise-700"
             >
               Voir toutes les notifications
             </Link>

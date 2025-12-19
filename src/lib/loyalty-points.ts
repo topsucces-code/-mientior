@@ -63,7 +63,7 @@ export async function getUserLoyaltyInfo(userId: string): Promise<{
   nextLevel?: string;
   pointsToNextLevel?: number;
 }> {
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: userId },
     select: {
       loyaltyPoints: true,
@@ -122,7 +122,7 @@ export async function redeemLoyaltyPoints(
   orderSubtotal: number
 ): Promise<LoyaltyPointsResult> {
   // Get user's current points
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: userId },
     select: {
       loyaltyPoints: true,
@@ -168,7 +168,7 @@ export async function redeemLoyaltyPoints(
   discountAmount = Math.round(discountAmount * 100) / 100;
 
   // Deduct points from user
-  await prisma.user.update({
+  await prisma.users.update({
     where: { id: userId },
     data: {
       loyaltyPoints: { decrement: pointsToRedeem },
@@ -192,7 +192,7 @@ export async function awardOrderPoints(
   isFirstOrder: boolean = false
 ): Promise<PointsEarnedResult> {
   // Get user's current info
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: userId },
     select: {
       loyaltyPoints: true,
@@ -233,7 +233,7 @@ export async function awardOrderPoints(
   const newLevel = calculateLoyaltyLevel(estimatedTotalPointsEarned);
 
   // Update user
-  await prisma.user.update({
+  await prisma.users.update({
     where: { id: userId },
     data: {
       loyaltyPoints: { increment: totalPointsToAdd },
@@ -263,7 +263,7 @@ export async function awardBonusPoints(
     return { success: false, pointsAwarded: 0 };
   }
 
-  await prisma.user.update({
+  await prisma.users.update({
     where: { id: userId },
     data: {
       loyaltyPoints: { increment: points },
@@ -327,7 +327,7 @@ export async function getPointsHistory(
 }>> {
   // This would typically query a points_transactions table
   // For now, we'll return mock data based on orders
-  const orders = await prisma.order.findMany({
+  const orders = await prisma.orders.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
     take: limit,

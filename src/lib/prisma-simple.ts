@@ -1,37 +1,15 @@
-/**
- * Prisma Client Singleton (Simple version)
- * Provides database access for the entire application
- */
-
 import { PrismaClient } from '@prisma/client'
 
-declare global {
-  // eslint-disable-next-line vars-on-top, no-var
-  var prismaSimple: PrismaClient | undefined
+const prismaClientSingleton = () => {
+  return new PrismaClient()
 }
 
-export const prisma = global.prismaSimple || new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error']
-})
+declare global {
+  var prismaSimple: undefined | ReturnType<typeof prismaClientSingleton>
+}
 
-if (process.env.NODE_ENV !== 'production') global.prismaSimple = prisma
+const prisma = globalThis.prismaSimple ?? prismaClientSingleton()
 
-// Re-export Prisma types for convenience
-export type {
-  Product,
-  Category,
-  Order,
-  OrderItem,
-  User,
-  Review,
-  Tag,
-  ProductImage,
-  ProductVariant,
-  FAQ,
-  Media,
-  ProductStatus,
-  OrderStatus,
-  PaymentStatus,
-  LoyaltyLevel,
-  ReviewStatus
-} from '@prisma/client'
+export { prisma }
+
+if (process.env.NODE_ENV !== 'production') globalThis.prismaSimple = prisma

@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils'
 export interface FAQ {
   id: string
   question: string
-  answer: string | { root: { children: Array<any> } } // Rich text support
+  answer: string | { root: { children: Array<{ type?: string; children?: Array<{ text?: string }> }> } } // Rich text support
   category: 'Livraison' | 'Paiement' | 'Retours' | 'Compte' | 'Produits' | 'Autre'
   order?: number
   views?: number
@@ -38,15 +38,20 @@ export interface FAQSectionProps {
 }
 
 const categoryConfig = {
-  Livraison: { label: 'Delivery', icon: '📦', color: 'bg-blue-50 text-blue-700' },
-  Paiement: { label: 'Payment', icon: '💳', color: 'bg-green-50 text-green-700' },
-  Retours: { label: 'Returns', icon: '↩️', color: 'bg-purple-50 text-purple-700' },
+  Livraison: { label: 'Delivery', icon: '📦', color: 'bg-turquoise-50 text-turquoise-700' },
+  Paiement: { label: 'Payment', icon: '💳', color: 'bg-turquoise-50 text-turquoise-700' },
+  Retours: { label: 'Returns', icon: '↩️', color: 'bg-turquoise-50 text-turquoise-700' },
   Compte: { label: 'Account', icon: '👤', color: 'bg-orange-50 text-orange-700' },
   Produits: { label: 'Products', icon: '📦', color: 'bg-pink-50 text-pink-700' },
   Autre: { label: 'Other', icon: '❓', color: 'bg-gray-50 text-gray-700' },
 }
 
-function renderRichText(content: string | { root: { children: Array<any> } }): string {
+interface RichTextChild {
+  type?: string;
+  children?: Array<{ text?: string }>;
+}
+
+function renderRichText(content: string | { root: { children: Array<RichTextChild> } }): string {
   if (typeof content === 'string') return content
 
   // Simple rich text to HTML conversion
@@ -54,9 +59,9 @@ function renderRichText(content: string | { root: { children: Array<any> } }): s
   try {
     const children = content.root.children
     return children
-      .map((child: any) => {
+      .map((child: RichTextChild) => {
         if (child.type === 'paragraph') {
-          const text = child.children?.map((c: any) => c.text).join('') || ''
+          const text = child.children?.map((c) => c.text).join('') || ''
           return `<p class="mb-3">${text}</p>`
         }
         return ''
@@ -166,7 +171,7 @@ export function FAQSection({
               <TabsTrigger key={key} value={key} className="gap-2">
                 <span>{config.icon}</span>
                 {config.label}
-                {categories[key] > 0 && (
+                {(categories[key] ?? 0) > 0 && (
                   <Badge variant="secondary">{categories[key]}</Badge>
                 )}
               </TabsTrigger>
@@ -291,7 +296,7 @@ export function FAQSection({
                             onClick={() => handleVote(faq.id, 'helpful')}
                             disabled={!!hasVoted}
                             className={cn(
-                              hasVoted === 'helpful' && 'bg-green-50 text-green-700'
+                              hasVoted === 'helpful' && 'bg-turquoise-50 text-turquoise-700'
                             )}
                           >
                             <ThumbsUp className="mr-1 h-4 w-4" />
@@ -331,7 +336,7 @@ export function FAQSection({
       </Tabs>
 
       {/* Contact Support */}
-      <Card className="bg-gradient-to-r from-orange-50 to-aurore-50">
+      <Card className="bg-orange-50">
         <CardHeader>
           <CardTitle>Still need help?</CardTitle>
           <CardDescription>

@@ -72,7 +72,7 @@ export function EnhancedSizeSelector({
                 )}
               </button>
               {isLowStock && !isUnavailable && (
-                <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap shadow-sm">
+                <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full whitespace-nowrap shadow-sm">
                   Bientôt épuisé
                 </span>
               )}

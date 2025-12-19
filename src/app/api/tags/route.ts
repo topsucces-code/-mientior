@@ -32,7 +32,7 @@ async function handleGET(request: NextRequest, { adminSession: _adminSession }: 
     const _order = searchParams.get('_order') || 'asc'
 
     // Build where clause for filtering
-    const where: Prisma.TagWhereInput = {}
+    const where: Prisma.tagsWhereInput = {}
 
     // Filter by name (search)
     const name_like = searchParams.get('name_like')
@@ -44,13 +44,13 @@ async function handleGET(request: NextRequest, { adminSession: _adminSession }: 
     }
 
     // Build orderBy clause
-    const orderBy: Prisma.TagOrderByWithRelationInput = {
+    const orderBy: Prisma.tagsOrderByWithRelationInput = {
       [_sort]: _order as 'asc' | 'desc'
     }
 
     // Fetch tags with product count
     const [tags, totalCount] = await Promise.all([
-      prisma.tag.findMany({
+      prisma.tags.findMany({
         skip,
         take,
         where,
@@ -58,20 +58,20 @@ async function handleGET(request: NextRequest, { adminSession: _adminSession }: 
         include: {
           _count: {
             select: {
-              products: true
+              product_tags: true
             }
           }
         }
       }),
-      prisma.tag.count({ where })
+      prisma.tags.count({ where })
     ])
 
     // Transform to include product count
-    const transformedTags = tags.map(tag => ({
+    const transformedTags = tags.map((tag: { id: string; name: string; slug: string; createdAt: Date; _count: { product_tags: number } }) => ({
       id: tag.id,
       name: tag.name,
       slug: tag.slug,
-      productCount: tag._count.products,
+      productCount: tag._count.product_tags,
       createdAt: tag.createdAt
     }))
 

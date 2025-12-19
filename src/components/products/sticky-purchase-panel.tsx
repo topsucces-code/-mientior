@@ -43,6 +43,7 @@ export function StickyPurchasePanel({
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
   const { toast } = useToast()
   const t = useTranslations('wishlist')
+  const tPdp = useTranslations('products.pdp.client')
 
   // Use external quantity if provided, otherwise use internal
   const quantity = externalQuantity ?? internalQuantity
@@ -95,8 +96,8 @@ export function StickyPurchasePanel({
       })
 
       toast({
-        title: 'Ajouté au panier',
-        description: `${product.name} a été ajouté à votre panier`,
+        title: tPdp('addedToCartTitle'),
+        description: tPdp('addedToCartDesc', { productName: product.name }),
       })
     } finally {
       setIsAddingToCart(false)
@@ -209,7 +210,7 @@ export function StickyPurchasePanel({
                     }}
                     className="px-3 py-2 border-2 border-platinum-300 rounded-lg text-sm focus:outline-none focus:border-orange-500"
                   >
-                    <option value="">Taille</option>
+                    <option value="">{tPdp('sizeLabel')}</option>
                     {[...new Set(product.variants.map((v) => v.size))].filter(Boolean).map((size) => (
                       <option key={size} value={size}>
                         {size}
@@ -221,7 +222,10 @@ export function StickyPurchasePanel({
                 {/* Color Selector */}
                 {product.variants.some((v) => v.color) && (
                   <div className="flex items-center gap-1">
-                    {[...new Set(product.variants.map((v) => v.color))].filter(Boolean).slice(0, 5).map((color) => (
+                    {[...new Set(product.variants.map((v) => v.color))]
+                      .filter((color): color is string => typeof color === 'string' && color.length > 0)
+                      .slice(0, 5)
+                      .map((color) => (
                       <button
                         key={color}
                         onClick={() => {
@@ -238,7 +242,7 @@ export function StickyPurchasePanel({
                         )}
                         style={{ backgroundColor: color }}
                         title={color}
-                        aria-label={`Select color ${color}`}
+                        aria-label={tPdp('selectColorAria', { color })}
                       />
                     ))}
                   </div>
@@ -251,7 +255,7 @@ export function StickyPurchasePanel({
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                 className="px-3 py-2 hover:bg-platinum-100 transition-colors text-lg"
-                aria-label="Decrease quantity"
+                aria-label={tPdp('decreaseQuantityAria')}
               >
                 −
               </button>
@@ -308,7 +312,7 @@ export function StickyPurchasePanel({
                     <RippleButton
                       onClick={handleAddToCart}
                       disabled={isAddingToCart || product.stock === 0}
-                      className="h-12 px-6 md:px-8 gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold whitespace-nowrap flex items-center justify-center"
+                      className="h-12 px-6 md:px-8 gap-2 bg-orange-600 hover:bg-orange-700 text-white font-bold whitespace-nowrap flex items-center justify-center"
                       aria-label={product.stock === 0 ? 'Rupture de stock' : isAddingToCart ? 'Ajout en cours...' : 'Ajouter au panier'}
                     >
                       <ShoppingCart className="w-5 h-5" />

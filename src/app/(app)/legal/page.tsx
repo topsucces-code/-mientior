@@ -202,12 +202,12 @@ export default function LegalPage() {
             <h2 className="text-2xl font-bold text-anthracite-700">Company Information</h2>
 
             <div className="mt-6 space-y-4 text-nuanced-600">
-              <p><strong>Company Name:</strong> Mientior SAS</p>
-              <p><strong>Registration Number:</strong> RCS Paris 123 456 789</p>
-              <p><strong>VAT Number:</strong> FR12345678901</p>
-              <p><strong>Registered Address:</strong> 123 Commerce Street, 75001 Paris, France</p>
+              <p><strong>Company Name:</strong> Mientior SARL</p>
+              <p><strong>Registration Number:</strong> CI-ABJ-2024-B-12345</p>
+              <p><strong>Tax ID:</strong> 1234567890123</p>
+              <p><strong>Registered Address:</strong> Plateau, Rue du Commerce, Abidjan, Côte d'Ivoire</p>
               <p><strong>Email:</strong> legal@mientior.com</p>
-              <p><strong>Phone:</strong> +33 1 23 45 67 89</p>
+              <p><strong>Phone:</strong> +225 27 20 00 00 00</p>
             </div>
           </section>
 

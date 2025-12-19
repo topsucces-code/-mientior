@@ -50,7 +50,7 @@ export async function calculateAutomaticSegments(
   const metrics = await getCustomerMetrics(customerId)
   
   // Get customer loyalty level
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: customerId },
     select: { loyaltyLevel: true },
   })

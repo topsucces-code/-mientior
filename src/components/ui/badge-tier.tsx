@@ -52,7 +52,7 @@ function BadgeTier({ tier, variant, timer, className, ...props }: BadgeTierProps
         )
       case 2:
         // Performance - Blue + icon
-        return cn('bg-blue-500 text-white', 'shadow-elevation-1')
+        return cn('bg-turquoise-500 text-white', 'shadow-elevation-1')
       case 3:
         // Novelty - Aurore gradient
         return cn(
@@ -69,7 +69,7 @@ function BadgeTier({ tier, variant, timer, className, ...props }: BadgeTierProps
       className={cn(
         'absolute top-8 left-8 z-10',
         'rounded-sm px-8 py-4',
-        'text-[11px] font-semibold uppercase tracking-wider',
+        'text-xs font-semibold uppercase tracking-wider',
         'flex items-center gap-1',
         getTierStyles(),
         className
@@ -79,11 +79,11 @@ function BadgeTier({ tier, variant, timer, className, ...props }: BadgeTierProps
       <Icon className="h-3 w-3" />
       <span>{tierLabels[variant]}</span>
       {timer && tier === 1 && (
-        <span className="ml-1 font-mono text-[10px]">{timer}</span>
+        <span className="ml-1 font-mono text-xs">{timer}</span>
       )}
     </Badge>
   )
 }
 
 export { BadgeTier }
-export type { BadgeTierProps, Tier1Variant, Tier2Variant, Tier3Variant, BadgeTier }
+export type { BadgeTierProps, Tier1Variant, Tier2Variant, Tier3Variant }

@@ -45,8 +45,8 @@ export function WarrantyRegistrationForm() {
   if (success) {
     return (
       <div className="text-center py-8 animate-slide-down">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="w-10 h-10 text-green-600" />
+        <div className="w-20 h-20 bg-turquoise-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <CheckCircle className="w-10 h-10 text-turquoise-600" />
         </div>
         <h3 className="text-2xl font-bold text-gray-900 mb-3">
           Produit Enregistré avec Succès !
@@ -55,7 +55,7 @@ export function WarrantyRegistrationForm() {
           Votre garantie est maintenant active. Vous recevrez un email de confirmation avec tous les
           détails.
         </p>
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-left">
+        <div className="bg-turquoise-50 border border-turquoise-200 rounded-lg p-4 text-left">
           <h4 className="font-semibold text-gray-900 mb-2">Informations de garantie</h4>
           <div className="space-y-1 text-sm text-gray-600">
             <p>
@@ -88,7 +88,7 @@ export function WarrantyRegistrationForm() {
               lastName: '',
             })
           }}
-          className="mt-6 text-blue-600 hover:text-blue-700 font-medium"
+          className="mt-6 text-turquoise-600 hover:text-turquoise-700 font-medium"
         >
           Enregistrer un autre produit
         </button>
@@ -113,7 +113,7 @@ export function WarrantyRegistrationForm() {
               value={formData.orderId}
               onChange={handleChange}
               placeholder="Ex: ORD-123456"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-turquoise-500 focus:border-transparent"
               required
             />
           </div>
@@ -128,7 +128,7 @@ export function WarrantyRegistrationForm() {
               value={formData.purchaseDate}
               onChange={handleChange}
               max={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-turquoise-500 focus:border-transparent"
               required
             />
           </div>
@@ -150,7 +150,7 @@ export function WarrantyRegistrationForm() {
               value={formData.productName}
               onChange={handleChange}
               placeholder="Ex: iPhone 15 Pro"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-turquoise-500 focus:border-transparent"
               required
             />
           </div>
@@ -165,7 +165,7 @@ export function WarrantyRegistrationForm() {
               value={formData.serialNumber}
               onChange={handleChange}
               placeholder="Ex: SN123456789"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-turquoise-500 focus:border-transparent"
             />
           </div>
         </div>
@@ -187,7 +187,7 @@ export function WarrantyRegistrationForm() {
                 value={formData.firstName}
                 onChange={handleChange}
                 placeholder="Votre prénom"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-turquoise-500 focus:border-transparent"
                 required
               />
             </div>
@@ -202,7 +202,7 @@ export function WarrantyRegistrationForm() {
                 value={formData.lastName}
                 onChange={handleChange}
                 placeholder="Votre nom"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-turquoise-500 focus:border-transparent"
                 required
               />
             </div>
@@ -218,7 +218,7 @@ export function WarrantyRegistrationForm() {
               value={formData.email}
               onChange={handleChange}
               placeholder="votre.email@example.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-turquoise-500 focus:border-transparent"
               required
             />
           </div>
@@ -231,7 +231,7 @@ export function WarrantyRegistrationForm() {
         </div>
       )}
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-gray-600">
+      <div className="bg-turquoise-50 border border-turquoise-200 rounded-lg p-4 text-sm text-gray-600">
         <p>
           <strong>Note:</strong> L'enregistrement de votre produit facilite le traitement de vos
           réclamations et vous permet de bénéficier d'avantages exclusifs.
@@ -241,7 +241,7 @@ export function WarrantyRegistrationForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full bg-turquoise-600 hover:bg-turquoise-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         {loading ? (
           <>

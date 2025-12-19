@@ -96,7 +96,7 @@ function parseSpecifications(specs: Record<string, string> | undefined): Array<{
   // For now, return all specs in a single "General" category
   // In the future, this could be enhanced to group by category
   return [{
-    category: 'Caractéristiques générales',
+    category: 'general',
     items: Object.entries(specs).map(([key, value]) => ({
       key,
       value: formatSpecificationValue(value)
@@ -125,10 +125,14 @@ export function ProductTabs({ product, reviews: initialReviews = [], reviewStats
   // Translations
   const tTabs = useTranslations('products.pdp.tabs')
   const tReviews = useTranslations('products.pdp.reviews')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const tQa = useTranslations('products.pdp.qa')
 
   // Parse specifications
-  const specificationGroups = parseSpecifications(product.specifications)
+  const specificationGroups = parseSpecifications(product.specifications).map(group => ({
+    ...group,
+    category: group.category === 'general' ? tTabs('generalSpecs') : group.category
+  }))
 
   // Initialize reviews when they change
   useEffect(() => {
@@ -325,7 +329,7 @@ export function ProductTabs({ product, reviews: initialReviews = [], reviewStats
               })}
             </div>
           ) : (
-            <p className="text-nuanced-500 italic">Aucune description disponible pour ce produit.</p>
+            <p className="text-nuanced-500 italic">{tTabs('noDescription')}</p>
           )}
         </div>
 
@@ -472,7 +476,7 @@ export function ProductTabs({ product, reviews: initialReviews = [], reviewStats
               variant={filters.verified ? "secondary" : "outline"} 
               size="sm"
               onClick={() => setFilters(prev => ({ ...prev, verified: !prev.verified }))}
-              className={cn("rounded-full text-xs h-8", filters.verified && "border-emerald-200 bg-emerald-50 text-emerald-700")}
+              className={cn("rounded-full text-xs h-8", filters.verified && "border-turquoise-200 bg-turquoise-50 text-turquoise-700")}
             >
               <ShieldCheck className="w-3 h-3 mr-1.5" />
               {tReviews('filterVerified')}
@@ -482,7 +486,7 @@ export function ProductTabs({ product, reviews: initialReviews = [], reviewStats
           {/* Sort */}
           <div className="flex items-center gap-2 ml-auto">
             <span className="text-sm text-nuanced-500 whitespace-nowrap hidden sm:inline">{tReviews('sortBy')}</span>
-            <Select value={reviewSort} onValueChange={(v: any) => setReviewSort(v)}>
+            <Select value={reviewSort} onValueChange={(v: 'recent' | 'helpful' | 'rating') => setReviewSort(v)}>
               <SelectTrigger className="w-[180px] h-9 text-sm">
                 <SelectValue />
               </SelectTrigger>
@@ -513,7 +517,7 @@ export function ProductTabs({ product, reviews: initialReviews = [], reviewStats
                          <div className="flex items-center gap-2 mb-1">
                            <span className="font-bold text-anthracite-900">{review.userName}</span>
                            {review.verified && (
-                             <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-100 gap-1 text-[10px] px-1.5 py-0 h-5">
+                             <Badge variant="secondary" className="bg-turquoise-50 text-turquoise-700 hover:bg-turquoise-100 border-turquoise-100 gap-1 text-xs px-2 py-1">
                                <ShieldCheck className="w-3 h-3" />
                                {tReviews('filterVerified')}
                              </Badge>
@@ -710,9 +714,9 @@ export function ProductTabs({ product, reviews: initialReviews = [], reviewStats
                 ))}
               </div>
               {shippingInfo.freeShippingThreshold && (
-                <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <p className="text-sm text-green-800 font-medium">
+                <div className="mt-4 bg-turquoise-50 border border-turquoise-200 rounded-lg p-4 flex items-center gap-3">
+                  <Check className="w-5 h-5 text-turquoise-600 flex-shrink-0" />
+                  <p className="text-sm text-turquoise-800 font-medium">
                     Livraison gratuite pour les commandes de plus de {shippingInfo.freeShippingThreshold} €
                   </p>
                 </div>
@@ -733,15 +737,15 @@ export function ProductTabs({ product, reviews: initialReviews = [], reviewStats
               <div className="bg-platinum-50 rounded-xl p-6 space-y-4">
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <Check className="w-5 h-5 text-turquoise-600 flex-shrink-0 mt-0.5" />
                     <p className="text-nuanced-700">Retours gratuits sous 30 jours</p>
                   </div>
                   <div className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <Check className="w-5 h-5 text-turquoise-600 flex-shrink-0 mt-0.5" />
                     <p className="text-nuanced-700">Remboursement intégral garanti</p>
                   </div>
                   <div className="flex items-start gap-3">
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <Check className="w-5 h-5 text-turquoise-600 flex-shrink-0 mt-0.5" />
                     <p className="text-nuanced-700">Étiquette de retour prépayée</p>
                   </div>
                 </div>
@@ -775,7 +779,7 @@ export function ProductTabs({ product, reviews: initialReviews = [], reviewStats
                       Livraison internationale
                     </h3>
                   </div>
-                  <div className="bg-blue-50 rounded-xl p-6 space-y-4">
+                  <div className="bg-turquoise-50 rounded-xl p-6 space-y-4">
                     <p className="text-nuanced-700">
                       Nous expédions dans de nombreux pays à travers le monde. Les frais et délais de livraison varient selon la destination.
                     </p>
@@ -804,6 +808,7 @@ interface WriteReviewModalProps {
   onClose: () => void
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function WriteReviewModal({ product, onClose }: WriteReviewModalProps) {
   const [rating, setRating] = useState(5)
   const [title, setTitle] = useState('')
@@ -813,6 +818,7 @@ function WriteReviewModal({ product, onClose }: WriteReviewModalProps) {
   const [imagePreviews, setImagePreviews] = useState<string[]>([])
   const [videoPreviews, setVideoPreviews] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
 
@@ -1066,7 +1072,9 @@ function WriteReviewModal({ product, onClose }: WriteReviewModalProps) {
 
 /**
  * Review Item Component
+ * @deprecated This component is currently unused but kept for future use
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function ReviewItem({ review }: { review: Review }) {
   const [helpful, setHelpful] = useState(review.helpful)
   const [notHelpful, setNotHelpful] = useState(review.notHelpful)
@@ -1340,7 +1348,7 @@ function ReviewItem({ review }: { review: Review }) {
               variant="outline"
               size="sm"
               onClick={() => handleVote('helpful')}
-              className={userVote === 'helpful' ? 'bg-green-50 border-green-500' : ''}
+              className={userVote === 'helpful' ? 'bg-turquoise-50 border-turquoise-500' : ''}
             >
               <ThumbsUp className="w-4 h-4 mr-1" />
               Oui ({helpful})
@@ -1450,11 +1458,11 @@ function QuestionCard({ question, userVote, onVote, expanded, onToggleExpand }: 
           </div>
 
           {/* Official Answer */}
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
+          <div className="bg-turquoise-50 border border-turquoise-200 rounded-lg p-4 mb-3">
             {displayAnswer.isOfficial && (
               <div className="flex items-center gap-2 mb-2">
-                <ShieldCheck className="w-4 h-4 text-green-600" />
-                <Badge className="bg-green-600 text-white text-xs">
+                <ShieldCheck className="w-4 h-4 text-turquoise-600" />
+                <Badge className="bg-turquoise-600 text-white text-xs">
                   Réponse vérifiée (Vendeur officiel)
                 </Badge>
               </div>
@@ -1496,7 +1504,7 @@ function QuestionCard({ question, userVote, onVote, expanded, onToggleExpand }: 
                 variant="ghost"
                 size="sm"
                 onClick={() => onVote('helpful')}
-                className={userVote === 'helpful' ? 'text-green-600 bg-green-50' : 'text-nuanced-500'}
+                className={userVote === 'helpful' ? 'text-turquoise-600 bg-turquoise-50' : 'text-nuanced-500'}
                 aria-pressed={userVote === 'helpful'}
               >
                 <ThumbsUp className="w-4 h-4 mr-1" />
@@ -1594,8 +1602,8 @@ function AskQuestionModal({ open, onClose, product }: AskQuestionModalProps) {
           </div>
 
           {/* Info Message */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <p className="text-sm text-blue-800">
+          <div className="bg-turquoise-50 border border-turquoise-200 rounded-lg p-3">
+            <p className="text-sm text-turquoise-800">
               💡 Votre question sera visible publiquement après validation par notre équipe.
               Vous recevrez une notification par email lorsqu'une réponse sera publiée.
             </p>

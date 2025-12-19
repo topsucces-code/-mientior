@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user's cart in database
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: userId },
       data: { cart: payload }
     })

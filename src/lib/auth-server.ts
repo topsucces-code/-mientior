@@ -113,7 +113,7 @@ export async function getAdminSession(): Promise<AdminSession | null> {
   }
   
   // Load AdminUser record with role and permissions
-  const adminUser = await prisma.adminUser.findUnique({
+  const adminUser = await prisma.admin_users.findUnique({
     where: { authUserId: session.user.id }
   })
   
@@ -204,7 +204,7 @@ async function renewSessionIfNeeded(
 ): Promise<void> {
   try {
     // Get the session from database to check expiry
-    const dbSession = await prisma.session.findUnique({
+    const dbSession = await prisma.sessions.findUnique({
       where: { token: sessionToken }
     })
     
@@ -224,7 +224,7 @@ async function renewSessionIfNeeded(
       const newExpiresAt = new Date(now.getTime() + sevenDaysInMs)
       
       // Update database
-      await prisma.session.update({
+      await prisma.sessions.update({
         where: { token: sessionToken },
         data: { 
           expiresAt: newExpiresAt,

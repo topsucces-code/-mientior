@@ -80,7 +80,7 @@ export async function roleProtectionMiddleware(
 
   // Get user with role from database
   try {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { email: session.user.email },
       select: { role: true },
     })

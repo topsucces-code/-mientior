@@ -259,7 +259,7 @@ async function resolveBrandNames(brandIds: string[]): Promise<Record<string, str
       cacheKey,
       async () => {
         // Fetch from database
-        const vendors = await prisma.vendor.findMany({
+        const vendors = await prisma.vendors.findMany({
           where: { id: { in: brandIds } },
           select: { id: true, businessName: true },
         })

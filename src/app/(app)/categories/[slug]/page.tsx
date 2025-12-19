@@ -7,6 +7,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { prisma } from '@/lib/prisma'
+import { getTranslations } from 'next-intl/server'
 import { CategoryPageClient } from './category-client'
 import type { Product, AvailableFilters, BreadcrumbItem } from '@/types'
 
@@ -20,19 +21,20 @@ interface CategoryPageProps {
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params
+  const t = await getTranslations('products.category')
   const category = await prisma.category.findUnique({
     where: { slug },
   })
 
   if (!category) {
     return {
-      title: 'Catégorie non trouvée',
+      title: t('notFound'),
     }
   }
 
   return {
     title: `${category.name} | Mientior`,
-    description: category.description || `Découvrez notre sélection de produits ${category.name}`,
+    description: category.description || t('defaultDescription', { name: category.name }),
   }
 }
 
@@ -69,9 +71,9 @@ async function getCategoryData(slug: string) {
             orderBy: { order: 'asc' },
           },
           variants: true,
-          tags: {
+          productTags: {
             include: {
-              tag: true,
+              tags: true,
             },
           },
         },
@@ -80,9 +82,9 @@ async function getCategoryData(slug: string) {
         where: { isActive: true },
         orderBy: { order: 'asc' },
       }),
-      prisma.vendor.findMany({
+      prisma.vendors.findMany({
         where: { status: 'ACTIVE' },
-        orderBy: { businessName: 'asc' },
+        orderBy: { business_name: 'asc' },
       }),
     ])
 
@@ -104,7 +106,7 @@ async function getCategoryData(slug: string) {
         color: v.color || undefined,
         sku: v.sku,
         stock: v.stock,
-        priceModifier: v.priceModifier || undefined,
+        priceModifier: v.price_modifier || undefined,
       })),
       category: {
         id: product.category.id,
@@ -112,14 +114,14 @@ async function getCategoryData(slug: string) {
         slug: product.category.slug,
         isActive: product.category.isActive,
       },
-      tags: product.tags.map((pt) => ({
-        id: pt.tag.id,
-        name: pt.tag.name,
-        slug: pt.tag.slug,
+      tags: product.productTags.map((pt) => ({
+        id: pt.tags.id,
+        name: pt.tags.name,
+        slug: pt.tags.slug,
       })),
       vendor: product.vendor ? {
         id: product.vendor.id,
-        name: product.vendor.businessName, // For filter display
+        name: product.vendor.business_name, // For filter display
       } : undefined,
       rating: product.rating,
       reviewCount: product.reviewCount,
@@ -183,7 +185,7 @@ async function getCategoryData(slug: string) {
         .filter((vendor) => (brandCount[vendor.id] || 0) > 0)
         .map((vendor) => ({
           id: vendor.id,
-          name: vendor.businessName,
+          name: vendor.business_name,
           count: brandCount[vendor.id] || 0,
         }))
         .sort((a, b) => b.count - a.count),
@@ -208,9 +210,12 @@ async function getCategoryData(slug: string) {
         }),
     }
 
+    // Get translations
+    const t = await getTranslations('products.category')
+
     // Build breadcrumbs
     const breadcrumbs: BreadcrumbItem[] = [
-      { label: 'Accueil', href: '/' },
+      { label: t('breadcrumbs.home'), href: '/' },
     ]
     
     if (category.parent) {
@@ -225,31 +230,28 @@ async function getCategoryData(slug: string) {
     // Build category hero data
     const categoryHeroData = {
       title: category.name,
-      description: category.description || `Découvrez notre sélection de produits ${category.name}`,
+      description: category.description || t('defaultDescription', { name: category.name }),
       image: category.image || undefined,
       productCount: transformedProducts.length,
       quickFilters: [
-        { id: 'new', label: 'Nouveautés', value: 'newest' },
-        { id: 'sale', label: 'En promotion', value: 'onSale' },
-        { id: 'bestseller', label: 'Bestsellers', value: 'bestseller' }
+        { id: 'new', label: t('quickFilters.new'), value: 'newest' },
+        { id: 'sale', label: t('quickFilters.sale'), value: 'onSale' },
+        { id: 'bestseller', label: t('quickFilters.bestseller'), value: 'bestseller' }
       ]
     }
 
     // SEO content data
     const seoContent = {
-      title: `À propos de ${category.name}`,
+      title: t('seo.aboutTitle', { name: category.name }),
       content: `
-        <h2>Découvrez Notre Collection ${category.name}</h2>
-        <p>${category.description || `Explorez notre sélection complète de produits ${category.name} soigneusement choisis pour leur qualité exceptionnelle.`}
-        Nous travaillons avec les meilleurs vendeurs pour vous offrir une expérience d'achat incomparable.</p>
+        <h2>${t('seo.discoverCollection', { name: category.name })}</h2>
+        <p>${category.description || t('seo.defaultContent', { name: category.name })}</p>
 
-        <h3>Qualité Garantie</h3>
-        <p>Tous nos produits sont vérifiés et approuvés par notre équipe avant d'être mis en vente.
-        Nous garantissons la satisfaction de nos clients avec une politique de retour flexible.</p>
+        <h3>${t('seo.qualityTitle')}</h3>
+        <p>${t('seo.qualityContent')}</p>
 
-        <h3>Livraison Rapide</h3>
-        <p>Profitez de notre service de livraison rapide partout en France.
-        La livraison est gratuite pour toute commande supérieure à 50€.</p>
+        <h3>${t('seo.deliveryTitle')}</h3>
+        <p>${t('seo.deliveryContent')}</p>
       `
     }
 

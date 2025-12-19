@@ -20,7 +20,7 @@ async function handleGET(
     thirtyDaysAgo.setDate(today.getDate() - 30);
 
     // Fetch orders for the last 30 days (paid orders only for revenue)
-    const recentOrders = await prisma.order.findMany({
+    const recentOrders = await prisma.orders.findMany({
       where: {
         createdAt: { gte: thirtyDaysAgo },
         paymentStatus: PaymentStatus.PAID,
@@ -51,7 +51,7 @@ async function handleGET(
       .sort((a, b) => a.date.localeCompare(b.date));
 
     // Fetch orders by status count
-    const ordersByStatus = await prisma.order.groupBy({
+    const ordersByStatus = await prisma.orders.groupBy({
       by: ['status'],
       _count: {
         id: true,

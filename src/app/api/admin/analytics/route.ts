@@ -81,7 +81,7 @@ async function handleGET(
       conversionData,
     ] = await Promise.all([
       // Total revenue (paid orders)
-      prisma.order.aggregate({
+      prisma.orders.aggregate({
         _sum: { total: true },
         where: {
           createdAt: { gte: start, lte: end },
@@ -90,14 +90,14 @@ async function handleGET(
       }),
       
       // Total orders
-      prisma.order.count({
+      prisma.orders.count({
         where: {
           createdAt: { gte: start, lte: end },
         },
       }),
       
       // New customers
-      prisma.user.count({
+      prisma.users.count({
         where: {
           createdAt: { gte: start, lte: end },
         },
@@ -107,19 +107,19 @@ async function handleGET(
       compareWith ? (async () => {
         const { start: compStart, end: compEnd } = getComparisonRange(period, compareWith);
         const [revenue, orders, customers] = await Promise.all([
-          prisma.order.aggregate({
+          prisma.orders.aggregate({
             _sum: { total: true },
             where: {
               createdAt: { gte: compStart, lte: compEnd },
               paymentStatus: PaymentStatus.PAID,
             },
           }),
-          prisma.order.count({
+          prisma.orders.count({
             where: {
               createdAt: { gte: compStart, lte: compEnd },
             },
           }),
-          prisma.user.count({
+          prisma.users.count({
             where: {
               createdAt: { gte: compStart, lte: compEnd },
             },
@@ -133,7 +133,7 @@ async function handleGET(
       })() : Promise.resolve(null),
       
       // Revenue by day
-      prisma.order.findMany({
+      prisma.orders.findMany({
         where: {
           createdAt: { gte: start, lte: end },
           paymentStatus: PaymentStatus.PAID,
@@ -145,7 +145,7 @@ async function handleGET(
       }),
       
       // Orders by status
-      prisma.order.groupBy({
+      prisma.orders.groupBy({
         by: ['status'],
         _count: { id: true },
         where: {
@@ -203,7 +203,7 @@ async function handleGET(
             createdAt: { gte: start, lte: end },
           },
         }),
-        prisma.order.count({
+        prisma.orders.count({
           where: {
             createdAt: { gte: start, lte: end },
             status: { in: ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED'] },

@@ -5,14 +5,14 @@ import { DeliveryOptions } from '@/components/delivery/delivery-options'
 
 export const metadata: Metadata = {
   title: 'Livraison | Mientior',
-  description: 'Informations sur la livraison, options de livraison et suivi de commande. Livraison gratuite dès 50€.',
+  description: 'Informations sur la livraison, options de livraison et suivi de commande. Livraison gratuite dès 25 000 FCFA.',
 }
 
 export default function DeliveryPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-16">
+      <section className="bg-turquoise-700 text-white py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-white/10 rounded-full mb-6 backdrop-blur-sm">
@@ -22,7 +22,7 @@ export default function DeliveryPage() {
               Livraison Rapide et Sécurisée
             </h1>
             <p className="text-xl text-blue-100 mb-8">
-              Livraison gratuite dès 50€ • Suivi en temps réel • Retours faciles
+              Livraison gratuite dès 25 000 FCFA • Suivi en temps réel • Retours faciles
             </p>
           </div>
         </div>
@@ -67,26 +67,26 @@ export default function DeliveryPage() {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">Zones de Livraison</h2>
-              <p className="text-lg text-gray-600">Nous livrons partout en France et à l'international</p>
+              <p className="text-lg text-gray-600">Nous livrons dans toute l'Afrique</p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
-              {/* France Métropolitaine */}
+              {/* Afrique de l'Ouest (UEMOA) */}
               <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 mx-auto">
                   <MapPin className="w-8 h-8 text-blue-600" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">
-                  France Métropolitaine
+                  Afrique de l'Ouest (UEMOA)
                 </h3>
                 <ul className="space-y-2 text-gray-600">
                   <li className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-blue-600 rounded-full" />
-                    Livraison 3-5 jours
+                    Livraison 3-7 jours
                   </li>
                   <li className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-blue-600 rounded-full" />
-                    Gratuite dès 50€
+                    Gratuite dès 25 000 FCFA
                   </li>
                   <li className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-blue-600 rounded-full" />
@@ -95,46 +95,46 @@ export default function DeliveryPage() {
                 </ul>
               </div>
 
-              {/* DOM-TOM */}
+              {/* Afrique Centrale */}
               <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6 mx-auto">
                   <Package className="w-8 h-8 text-green-600" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">DOM-TOM</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">Afrique Centrale</h3>
                 <ul className="space-y-2 text-gray-600">
                   <li className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-green-600 rounded-full" />
-                    Livraison 7-10 jours
+                    Livraison 5-10 jours
                   </li>
                   <li className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-green-600 rounded-full" />
-                    Tarifs spéciaux
+                    Tarifs préférentiels
                   </li>
                   <li className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-green-600 rounded-full" />
-                    Suivi disponible
+                    Suivi en temps réel
                   </li>
                 </ul>
               </div>
 
-              {/* International */}
+              {/* Afrique du Nord & Est */}
               <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow">
                 <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-6 mx-auto">
                   <Truck className="w-8 h-8 text-purple-600" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">International</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3 text-center">Afrique du Nord & Est</h3>
                 <ul className="space-y-2 text-gray-600">
                   <li className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-purple-600 rounded-full" />
-                    Europe: 5-7 jours
+                    Maghreb: 5-7 jours
                   </li>
                   <li className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-purple-600 rounded-full" />
-                    Monde: 10-15 jours
+                    Afrique de l'Est: 7-12 jours
                   </li>
                   <li className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-purple-600 rounded-full" />
-                    Douanes incluses
+                    Frais de douane inclus
                   </li>
                 </ul>
               </div>
@@ -149,7 +149,7 @@ export default function DeliveryPage() {
           <div className="max-w-4xl mx-auto">
             <div className="grid md:grid-cols-2 gap-8">
               {/* Delivery Process */}
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-8">
+              <div className="bg-turquoise-50 rounded-xl p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <Clock className="w-8 h-8 text-blue-600" />
                   <h3 className="text-2xl font-bold text-gray-900">Processus de Livraison</h3>
@@ -192,7 +192,7 @@ export default function DeliveryPage() {
               </div>
 
               {/* Guarantees */}
-              <div className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl p-8">
+              <div className="bg-turquoise-50 rounded-xl p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <Shield className="w-8 h-8 text-green-600" />
                   <h3 className="text-2xl font-bold text-gray-900">Nos Garanties</h3>

@@ -120,8 +120,8 @@ export function ContactPageClient() {
                 <Phone className="mt-1 h-5 w-5 text-orange-500" />
                 <div>
                   <p className="font-medium text-anthracite-700">Phone</p>
-                  <a href="tel:+33123456789" className="text-nuanced-600 hover:text-orange-600">
-                    +33 1 23 45 67 89
+                  <a href="tel:+22527200000" className="text-nuanced-600 hover:text-orange-600">
+                    +225 27 20 00 00 00
                   </a>
                 </div>
               </div>
@@ -131,8 +131,8 @@ export function ContactPageClient() {
                 <div>
                   <p className="font-medium text-anthracite-700">Address</p>
                   <p className="text-nuanced-600">
-                    123 Commerce Street<br />
-                    75001 Paris, France
+                    Plateau, Rue du Commerce<br />
+                    Abidjan, Côte d'Ivoire
                   </p>
                 </div>
               </div>
@@ -169,7 +169,7 @@ export function ContactPageClient() {
                     onChange={handleInputChange}
                     required
                     className="w-full rounded-lg border border-platinum-300 px-4 py-2 focus:border-orange-500 focus:outline-none"
-                    placeholder="John Doe"
+                    placeholder="Amadou Diallo"
                   />
                 </div>
 
@@ -184,7 +184,7 @@ export function ContactPageClient() {
                     onChange={handleInputChange}
                     required
                     className="w-full rounded-lg border border-platinum-300 px-4 py-2 focus:border-orange-500 focus:outline-none"
-                    placeholder="john@example.com"
+                    placeholder="amadou@exemple.com"
                   />
                 </div>
               </div>

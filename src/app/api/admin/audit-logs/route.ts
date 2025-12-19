@@ -73,7 +73,7 @@ async function handleGET(
 
     // Fetch audit logs with relations
     const [auditLogs, totalCount] = await Promise.all([
-      prisma.auditLog.findMany({
+      prisma.audit_logs.findMany({
         skip,
         take,
         where,
@@ -90,7 +90,7 @@ async function handleGET(
           },
         },
       }),
-      prisma.auditLog.count({ where }),
+      prisma.audit_logs.count({ where }),
     ]);
 
     return NextResponse.json(auditLogs, {

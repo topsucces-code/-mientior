@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     // Find the user and auth user by email
     const [user, authUser] = await Promise.all([
-      prisma.user.findUnique({
+      prisma.users.findUnique({
         where: { email },
       }),
       prisma.betterAuthUser.findUnique({

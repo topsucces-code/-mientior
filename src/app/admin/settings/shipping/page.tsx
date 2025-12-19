@@ -73,33 +73,33 @@ const defaultSettings: ShippingSettings = {
   enableShipping: true,
   defaultShippingMethod: '',
   freeShippingEnabled: false,
-  freeShippingThreshold: 100,
+  freeShippingThreshold: 25000,
   calculateTaxOnShipping: false,
   shippingOrigin: {
-    country: 'FR',
-    city: 'Paris',
-    postalCode: '75001',
-    address: '123 Rue du Commerce',
+    country: 'CI',
+    city: 'Abidjan',
+    postalCode: '01 BP 1234',
+    address: 'Plateau, Rue du Commerce',
   },
   zones: [
     {
       id: 'zone-1',
-      name: 'France Métropolitaine',
-      countries: ['FR'],
+      name: 'Afrique de l\'Ouest (UEMOA)',
+      countries: ['CI', 'SN', 'ML', 'BF', 'TG', 'BJ', 'NE', 'GN'],
       regions: [],
       enabled: true,
     },
     {
       id: 'zone-2',
-      name: 'Europe',
-      countries: ['DE', 'ES', 'IT', 'BE', 'NL', 'PT'],
+      name: 'Afrique Centrale',
+      countries: ['CM', 'GA', 'CG', 'CD', 'CF', 'TD'],
       regions: [],
       enabled: true,
     },
     {
       id: 'zone-3',
-      name: 'Afrique de l\'Ouest',
-      countries: ['SN', 'CI', 'ML', 'BF', 'TG', 'BJ'],
+      name: 'Afrique du Nord & Est',
+      countries: ['MA', 'TN', 'DZ', 'EG', 'KE', 'TZ', 'UG', 'ET'],
       regions: [],
       enabled: true,
     },
@@ -111,7 +111,7 @@ const defaultSettings: ShippingSettings = {
       description: 'Livraison standard',
       zoneId: 'zone-1',
       type: 'flat',
-      cost: 5.99,
+      cost: 5990,
       estimatedDays: { min: 3, max: 5 },
       enabled: true,
     },
@@ -121,7 +121,7 @@ const defaultSettings: ShippingSettings = {
       description: 'Livraison express',
       zoneId: 'zone-1',
       type: 'flat',
-      cost: 12.99,
+      cost: 12990,
       estimatedDays: { min: 1, max: 2 },
       enabled: true,
     },
@@ -129,6 +129,30 @@ const defaultSettings: ShippingSettings = {
 };
 
 const countryOptions = [
+  { value: 'CI', label: 'Côte d\'Ivoire' },
+  { value: 'SN', label: 'Sénégal' },
+  { value: 'ML', label: 'Mali' },
+  { value: 'BF', label: 'Burkina Faso' },
+  { value: 'TG', label: 'Togo' },
+  { value: 'BJ', label: 'Bénin' },
+  { value: 'NE', label: 'Niger' },
+  { value: 'GN', label: 'Guinée' },
+  { value: 'CM', label: 'Cameroun' },
+  { value: 'GA', label: 'Gabon' },
+  { value: 'CG', label: 'Congo' },
+  { value: 'CD', label: 'RD Congo' },
+  { value: 'CF', label: 'Centrafrique' },
+  { value: 'TD', label: 'Tchad' },
+  { value: 'NG', label: 'Nigeria' },
+  { value: 'GH', label: 'Ghana' },
+  { value: 'MA', label: 'Maroc' },
+  { value: 'TN', label: 'Tunisie' },
+  { value: 'DZ', label: 'Algérie' },
+  { value: 'EG', label: 'Égypte' },
+  { value: 'KE', label: 'Kenya' },
+  { value: 'TZ', label: 'Tanzanie' },
+  { value: 'UG', label: 'Ouganda' },
+  { value: 'ET', label: 'Éthiopie' },
   { value: 'FR', label: 'France' },
   { value: 'DE', label: 'Allemagne' },
   { value: 'ES', label: 'Espagne' },
@@ -139,14 +163,6 @@ const countryOptions = [
   { value: 'GB', label: 'Royaume-Uni' },
   { value: 'US', label: 'États-Unis' },
   { value: 'CA', label: 'Canada' },
-  { value: 'SN', label: 'Sénégal' },
-  { value: 'CI', label: 'Côte d\'Ivoire' },
-  { value: 'ML', label: 'Mali' },
-  { value: 'BF', label: 'Burkina Faso' },
-  { value: 'TG', label: 'Togo' },
-  { value: 'BJ', label: 'Bénin' },
-  { value: 'NG', label: 'Nigeria' },
-  { value: 'GH', label: 'Ghana' },
 ];
 
 export default function ShippingSettingsPage() {
@@ -380,8 +396,8 @@ export default function ShippingSettingsPage() {
       title: t('admin:settings.shipping.cost'),
       dataIndex: 'cost',
       key: 'cost',
-      render: (cost: number, record: ShippingMethod) => 
-        record.type === 'free' ? t('admin:settings.shipping.free') : `€${cost.toFixed(2)}`,
+      render: (cost: number, record: ShippingMethod) =>
+        record.type === 'free' ? t('admin:settings.shipping.free') : `${(cost/100).toLocaleString()} FCFA`,
     },
     {
       title: t('admin:settings.shipping.estimatedDays'),
@@ -474,7 +490,7 @@ export default function ShippingSettingsPage() {
                 name="freeShippingThreshold"
                 label={t('admin:settings.shipping.freeShippingThreshold')}
               >
-                <InputNumber min={0} style={{ width: '100%' }} prefix="€" />
+                <InputNumber min={0} style={{ width: '100%' }} prefix="FCFA " />
               </Form.Item>
             </Col>
           </Row>
@@ -668,7 +684,7 @@ export default function ShippingSettingsPage() {
                 name="cost"
                 label={t('admin:settings.shipping.cost')}
               >
-                <InputNumber min={0} style={{ width: '100%' }} prefix="€" />
+                <InputNumber min={0} style={{ width: '100%' }} prefix="FCFA " />
               </Form.Item>
             </Col>
           </Row>

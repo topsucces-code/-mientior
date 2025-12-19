@@ -25,7 +25,7 @@ const defaultLevels: LoyaltyLevel[] = [
     name: 'Bronze',
     minPoints: 0,
     maxPoints: 999,
-    color: 'from-amber-700 to-amber-900',
+    color: 'bg-amber-800',
     icon: <Star className="h-6 w-6" />,
     perks: ['5% de réduction', 'Livraison standard gratuite'],
   },
@@ -33,7 +33,7 @@ const defaultLevels: LoyaltyLevel[] = [
     name: 'Argent',
     minPoints: 1000,
     maxPoints: 4999,
-    color: 'from-gray-400 to-gray-600',
+    color: 'bg-gray-600',
     icon: <Trophy className="h-6 w-6" />,
     perks: ['10% de réduction', 'Livraison express gratuite', 'Accès anticipé aux ventes'],
   },
@@ -41,7 +41,7 @@ const defaultLevels: LoyaltyLevel[] = [
     name: 'Or',
     minPoints: 5000,
     maxPoints: 14999,
-    color: 'from-aurore-500 to-aurore-700',
+    color: 'bg-aurore-600',
     icon: <Crown className="h-6 w-6" />,
     perks: ['15% de réduction', 'Livraison prioritaire', 'Cadeaux exclusifs', 'Support VIP'],
   },
@@ -49,7 +49,7 @@ const defaultLevels: LoyaltyLevel[] = [
     name: 'Platine',
     minPoints: 15000,
     maxPoints: Infinity,
-    color: 'from-blue-400 to-purple-600',
+    color: 'bg-purple-700',
     icon: <Gem className="h-6 w-6" />,
     perks: [
       '20% de réduction',
@@ -89,7 +89,7 @@ export function LoyaltyProgress({
         <div className="flex items-center gap-4">
           <div
             className={cn(
-              'flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br text-white shadow-elevation-2',
+              'flex h-16 w-16 items-center justify-center rounded-full text-white shadow-elevation-2',
               currentLevel.color
             )}
           >
@@ -125,13 +125,13 @@ export function LoyaltyProgress({
           <div className="relative h-4 overflow-hidden rounded-full bg-platinum-200">
             <div
               className={cn(
-                'h-full rounded-full bg-gradient-to-r transition-all duration-500',
+                'h-full rounded-full transition-all duration-500',
                 currentLevel.color
               )}
               style={{ width: `${progressToNextLevel}%` }}
             />
             {/* Shimmer effect */}
-            <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/30 to-transparent bg-[length:200%_100%]" />
+            {/* Shimmer removed for solid colors */}
           </div>
 
           {/* Milestones */}
@@ -146,7 +146,7 @@ export function LoyaltyProgress({
                     className={cn(
                       'flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all',
                       isPassed
-                        ? `border-transparent bg-gradient-to-br ${level.color} text-white shadow-elevation-1`
+                        ? `border-transparent ${level.color} text-white shadow-elevation-1`
                         : 'border-platinum-400 bg-white text-platinum-400',
                       isCurrent && 'ring-4 ring-orange-500/30 scale-110'
                     )}
@@ -173,7 +173,7 @@ export function LoyaltyProgress({
 
       {/* Max Level Achievement */}
       {isMaxLevel && (
-        <div className="mb-6 rounded-lg bg-gradient-to-r from-aurore-500 to-aurore-600 p-4 text-center">
+        <div className="mb-6 rounded-lg bg-aurore-600 p-4 text-center">
           <div className="mb-2 flex items-center justify-center gap-2">
             <Zap className="h-5 w-5 text-white" />
             <p className="font-bold text-white">Niveau Maximum Atteint !</p>

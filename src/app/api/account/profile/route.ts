@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
       return apiError('Unauthorized', ErrorCodes.UNAUTHORIZED, 401)
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: session.user.id },
       select: {
         id: true,
@@ -61,7 +61,7 @@ export async function PATCH(request: NextRequest) {
     const { firstName, lastName, phone, locale, countryCode, currency } =
       validation.data
 
-    const updatedUser = await prisma.user.update({
+    const updatedUser = await prisma.users.update({
       where: { id: session.user.id },
       data: {
         ...(firstName !== undefined && { firstName }),

@@ -53,15 +53,7 @@ function ProgressBar({
           )}
           style={{ width: `${normalizedValue}%` }}
         >
-          {animated && (
-            <div
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-              style={{
-                backgroundSize: '200% 100%',
-                animation: 'shimmer 1.5s linear infinite',
-              }}
-            />
-          )}
+          {/* Shimmer removed for solid colors */}
         </div>
       </div>
       {showLabel && (

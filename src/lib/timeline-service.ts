@@ -54,7 +54,7 @@ export class TimelineService {
     } = filters
 
     // Verify customer exists
-    const customer = await prisma.user.findUnique({
+    const customer = await prisma.users.findUnique({
       where: { id: customerId },
       select: { id: true, createdAt: true, email: true }
     })
@@ -116,7 +116,7 @@ export class TimelineService {
     customerId: string,
     dateFilter: { gte?: Date; lte?: Date }
   ): Promise<TimelineEvent[]> {
-    const orders = await prisma.order.findMany({
+    const orders = await prisma.orders.findMany({
       where: {
         userId: customerId,
         ...(Object.keys(dateFilter).length > 0 && { createdAt: dateFilter })

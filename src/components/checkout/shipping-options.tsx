@@ -40,6 +40,7 @@ export function ShippingOptions({
   onBack,
   isLoading = false,
   className,
+  currency = 'XOF',
 }: ShippingOptionsProps) {
   const [selected, setSelected] = React.useState<string>(selectedOption || '')
 
@@ -153,7 +154,7 @@ export function ShippingOptions({
                             <span className="text-success">Gratuit</span>
                           ) : (
                             <span className="text-anthracite-700">
-                              {(option.price / 100).toFixed(2)} €
+                              {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: currency }).format(option.price / 100)}
                             </span>
                           )}
                         </p>

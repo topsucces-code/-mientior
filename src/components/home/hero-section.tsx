@@ -267,7 +267,7 @@ export default function HeroSection({ slides = defaultSlides, autoplayDelay = 60
                 {/* Background Image with Fade + Scale Animation */}
                 <div className="relative h-[50vh] md:h-[60vh] lg:h-[65vh] overflow-hidden bg-anthracite-700">
                   {/* Fallback Gradient (only visible if image fails to load) */}
-                  <div className="absolute inset-0 -z-10 bg-gradient-to-br from-emerald-600 via-emerald-700 to-taupe-600" />
+                  <div className="absolute inset-0 -z-10 bg-turquoise-700" />
                   
                   {/* Background Layer with scale animation on transition */}
                   <div
@@ -310,7 +310,7 @@ export default function HeroSection({ slides = defaultSlides, autoplayDelay = 60
                   >
                     {/* Dynamic Gradient Overlay - adapts based on image luminance */}
                     <div
-                      className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent transition-opacity duration-500"
+                      className="absolute inset-0 bg-black/70 transition-opacity duration-500"
                       style={{
                         opacity: overlayOpacity,
                       }}
@@ -355,7 +355,7 @@ export default function HeroSection({ slides = defaultSlides, autoplayDelay = 60
                           'mb-4 font-display font-extrabold leading-[1.1] tracking-tight',
                           'text-[clamp(48px,8vw,96px)]',
                           isDark ? 'text-transparent' : 'text-anthracite-700',
-                          'bg-gradient-to-r from-white via-platinum-100 to-taupe-200 bg-clip-text',
+                          'text-white',
                           isActive && !prefersReducedMotion && 'animate-fade-in-up'
                         )}
                         style={{

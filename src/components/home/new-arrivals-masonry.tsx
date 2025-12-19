@@ -70,9 +70,15 @@ export default function NewArrivalsMasonry({
   return (
     <section
       ref={sectionRef}
-      className={cn('py-8 sm:py-10 md:py-14 bg-gradient-to-br from-emerald-50 via-white to-teal-50')}
+      className={cn('relative py-24 md:py-32 overflow-hidden')}
     >
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6">
+      {/* Background avec motifs */}
+      <div className="absolute inset-0 bg-turquoise-50/30">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(16,185,129,0.06),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(5,150,105,0.05),transparent_50%)]" />
+      </div>
+
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 relative">
         {/* Header - Style Temu */}
         <div
           className={cn(
@@ -80,13 +86,13 @@ export default function NewArrivalsMasonry({
             isVisible && !prefersReducedMotion && 'animate-fade-in-up'
           )}
         >
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-4 sm:gap-6">
             {/* Icon with Animation */}
             <div className="relative">
-              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg">
-                <Star className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+              <div className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-md bg-gray-900 shadow-lg">
+                <Star className="h-7 w-7 sm:h-8 sm:w-8 text-white" />
               </div>
-              <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-yellow-400 text-[10px] font-bold text-yellow-900 animate-pulse">
+              <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white animate-pulse">
                 NEW
               </div>
             </div>
@@ -94,35 +100,35 @@ export default function NewArrivalsMasonry({
             {/* Title & Subtitle */}
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 tracking-tight">
                   {displayTitle}
                 </h2>
-                <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-500" />
+                <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-gray-500" />
               </div>
-              <p className="text-sm sm:text-base text-gray-500 mt-0.5">{displaySubtitle}</p>
+              <p className="text-sm sm:text-base text-gray-500 mt-1 leading-relaxed">{displaySubtitle}</p>
             </div>
           </div>
 
           {/* Navigation & View All */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <Link
               href="/products?filter=new"
-              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+              className="hidden sm:inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
             >
               <Sparkles className="h-4 w-4" />
               {t('viewAll')}
             </Link>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
               <button
                 onClick={scrollPrev}
-                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all shadow-sm"
+                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all shadow-sm"
                 aria-label="Précédent"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
                 onClick={scrollNext}
-                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all shadow-sm"
+                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all shadow-sm"
                 aria-label="Suivant"
               >
                 <ChevronRight className="h-5 w-5" />
@@ -132,13 +138,13 @@ export default function NewArrivalsMasonry({
         </div>
 
         {/* Carousel */}
-        <div className="relative -mx-3 sm:mx-0 px-3 sm:px-0">
+        <div className="relative -mx-3 sm:mx-0 px-3 sm:px-0 mt-12">
           <div className="embla overflow-hidden" ref={emblaRef}>
-            <div className="embla__container flex gap-2">
+            <div className="embla__container flex gap-4">
               {products.map((product, index) => (
                 <div
                   key={product.id}
-                  className="embla__slide flex-[0_0_180px] sm:flex-[0_0_210px] md:flex-[0_0_240px] lg:flex-[0_0_260px]"
+                  className="embla__slide flex-[0_0_220px] sm:flex-[0_0_250px] md:flex-[0_0_280px] lg:flex-[0_0_300px]"
                 >
                   <ProductCardUnified
                     id={product.id}
@@ -168,10 +174,10 @@ export default function NewArrivalsMasonry({
         </div>
 
         {/* Mobile View All */}
-        <div className="mt-6 text-center sm:hidden">
+        <div className="mt-5 text-center sm:hidden">
           <Link
             href="/products?filter=new"
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-semibold rounded-full hover:shadow-lg transition-all"
+            className="inline-flex items-center gap-2 px-5 py-2 bg-black text-white text-sm font-semibold rounded-full hover:shadow-lg transition-all"
           >
             <Sparkles className="h-4 w-4" />
             Voir toutes les nouveautés

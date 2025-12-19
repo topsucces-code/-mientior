@@ -30,7 +30,7 @@ export async function GET(
     }
 
     // Verify customer exists
-    const customer = await prisma.user.findUnique({
+    const customer = await prisma.users.findUnique({
       where: { id: customerId },
       select: { id: true }
     })
@@ -43,7 +43,7 @@ export async function GET(
     }
 
     // Get orders with items
-    const orders = await prisma.order.findMany({
+    const orders = await prisma.orders.findMany({
       where: { userId: customerId },
       include: {
         items: {

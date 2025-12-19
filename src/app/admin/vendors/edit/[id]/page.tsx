@@ -322,7 +322,7 @@ export default function VendorEdit({ params }: PageProps) {
         />
       )}
 
-      <Form {...formProps} layout="vertical" onFinish={handleSubmit}>
+      <Form {...formProps} form={form} layout="vertical" onFinish={handleSubmit}>
         <Row gutter={24}>
           {/* Main Content */}
           <Col xs={24} lg={18}>

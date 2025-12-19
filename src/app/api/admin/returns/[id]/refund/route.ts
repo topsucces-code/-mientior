@@ -72,7 +72,7 @@ async function handlePOST(
     // If refund method is store credit, add to user's loyalty points
     if (refundMethod === 'STORE_CREDIT') {
       const pointsToAdd = Math.floor(refundAmount * 10); // 10 points per euro
-      await prisma.user.update({
+      await prisma.users.update({
         where: { id: returnRequest.userId },
         data: {
           loyaltyPoints: { increment: pointsToAdd },

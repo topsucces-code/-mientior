@@ -153,7 +153,7 @@ export default function TestimonialsCarousel({
   return (
     <section
       ref={sectionRef}
-      className={cn('py-10 md:py-14 bg-gradient-to-br from-blue-50 via-white to-orange-50', className)}
+      className={cn('py-20 md:py-24 bg-turquoise-50', className)}
       aria-label="Témoignages clients"
       {...props}
     >
@@ -248,7 +248,7 @@ function TestimonialCard({ testimonial, className, style, ...props }: Testimonia
       {...props}
     >
       {/* Quote Icon */}
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-orange-100 to-blue-100">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-turquoise-100">
         <Quote className="h-6 w-6 text-orange-500" />
       </div>
 
@@ -305,7 +305,7 @@ function TestimonialCard({ testimonial, className, style, ...props }: Testimonia
               onLoad={() => setIsAvatarLoaded(true)}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-orange-200 to-blue-200 text-lg font-bold text-anthracite-700">
+            <div className="flex h-full w-full items-center justify-center bg-turquoise-200 text-lg font-bold text-anthracite-700">
               {testimonial.name.charAt(0)}
             </div>
           )}

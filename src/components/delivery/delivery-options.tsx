@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { Truck, Zap, Clock, MapPin, Check, Package, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
+import { useCurrency } from '@/hooks/use-currency'
 
 export interface DeliveryOption {
   id: string
@@ -10,85 +12,88 @@ export interface DeliveryOption {
   description: string
   icon: React.ComponentType<{ className?: string }>
   duration: string
-  price: number
-  freeThreshold: number | null
+  price: number // Prix en centimes EUR
+  freeThreshold: number | null // Seuil en centimes EUR
   features: string[]
   color: 'blue' | 'orange' | 'purple' | 'green'
 }
 
-const deliveryOptions: DeliveryOption[] = [
-  {
-    id: 'standard',
-    name: 'Livraison Standard',
-    description: 'Livraison à domicile ou en point relais',
-    icon: Truck,
-    duration: '3-5 jours ouvrés',
-    price: 4.9,
-    freeThreshold: 50,
-    features: [
-      'Suivi de colis',
-      'Livraison en point relais disponible',
-      'Assurance incluse',
-    ],
-    color: 'blue',
-  },
-  {
-    id: 'express',
-    name: 'Livraison Express',
-    description: 'Livraison rapide garantie',
-    icon: Zap,
-    duration: '1-2 jours ouvrés',
-    price: 9.9,
-    freeThreshold: null,
-    features: [
-      'Livraison prioritaire',
-      'Suivi en temps réel',
-      'Garantie de livraison',
-    ],
-    color: 'orange',
-  },
-  {
-    id: 'same-day',
-    name: 'Livraison Jour Même',
-    description: 'Disponible dans certaines villes',
-    icon: Clock,
-    duration: "Aujourd'hui",
-    price: 14.9,
-    freeThreshold: null,
-    features: [
-      'Commande avant 14h',
-      'Paris, Lyon, Marseille',
-      'Créneau horaire au choix',
-    ],
-    color: 'purple',
-  },
-  {
-    id: 'pickup',
-    name: 'Click & Collect',
-    description: 'Retrait en magasin gratuit',
-    icon: MapPin,
-    duration: '2-3 heures',
-    price: 0,
-    freeThreshold: null,
-    features: [
-      'Retrait gratuit',
-      'Disponible sous 2-3h',
-      'Plus de 50 magasins',
-    ],
-    color: 'green',
-  },
-]
+function getDeliveryOptions(t: ReturnType<typeof useTranslations>): DeliveryOption[] {
+  // Prix en centimes EUR (seront convertis à l'affichage)
+  return [
+    {
+      id: 'standard',
+      name: t('options.standard.name'),
+      description: t('options.standard.description'),
+      icon: Truck,
+      duration: t('options.standard.duration'),
+      price: 250, // 2.50€ = ~1500 FCFA
+      freeThreshold: 4000, // 40€ = ~25 000 FCFA
+      features: [
+        t('options.standard.features.tracking'),
+        t('options.standard.features.relay'),
+        t('options.standard.features.insurance'),
+      ],
+      color: 'blue',
+    },
+    {
+      id: 'express',
+      name: t('options.express.name'),
+      description: t('options.express.description'),
+      icon: Zap,
+      duration: t('options.express.duration'),
+      price: 600, // 6€ = ~3500 FCFA
+      freeThreshold: null,
+      features: [
+        t('options.express.features.priority'),
+        t('options.express.features.realtimeTracking'),
+        t('options.express.features.guarantee'),
+      ],
+      color: 'orange',
+    },
+    {
+      id: 'same-day',
+      name: t('options.sameDay.name'),
+      description: t('options.sameDay.description'),
+      icon: Clock,
+      duration: t('options.sameDay.duration'),
+      price: 850, // 8.50€ = ~5000 FCFA
+      freeThreshold: null,
+      features: [
+        t('options.sameDay.features.cutoff'),
+        t('options.sameDay.features.cities'),
+        t('options.sameDay.features.slot'),
+      ],
+      color: 'purple',
+    },
+    {
+      id: 'pickup',
+      name: t('options.pickup.name'),
+      description: t('options.pickup.description'),
+      icon: MapPin,
+      duration: t('options.pickup.duration'),
+      price: 0,
+      freeThreshold: null,
+      features: [
+        t('options.pickup.features.freePickup'),
+        t('options.pickup.features.ready'),
+        t('options.pickup.features.stores'),
+      ],
+      color: 'green',
+    },
+  ]
+}
 
 const colorClasses = {
   blue: {
-    bg: 'bg-blue-50',
-    bgSelected: 'bg-blue-100',
-    border: 'border-blue-200',
-    borderSelected: 'border-blue-500 ring-2 ring-blue-200',
-    icon: 'bg-blue-100 text-blue-600',
-    iconSelected: 'bg-blue-600 text-white',
-    badge: 'bg-blue-600',
-    text: 'text-blue-600',
+    bg: 'bg-turquoise-50',
+    bgSelected: 'bg-turquoise-100',
+    border: 'border-turquoise-200',
+    borderSelected: 'border-turquoise-500 ring-2 ring-turquoise-200',
+    icon: 'bg-turquoise-100 text-turquoise-600',
+    iconSelected: 'bg-turquoise-600 text-white',
+    badge: 'bg-turquoise-600',
+    text: 'text-turquoise-600',
   },
   orange: {
     bg: 'bg-orange-50',
@@ -101,24 +106,24 @@ const colorClasses = {
     text: 'text-orange-600',
   },
   purple: {
-    bg: 'bg-purple-50',
-    bgSelected: 'bg-purple-100',
-    border: 'border-purple-200',
-    borderSelected: 'border-purple-500 ring-2 ring-purple-200',
-    icon: 'bg-purple-100 text-purple-600',
-    iconSelected: 'bg-purple-600 text-white',
-    badge: 'bg-purple-600',
-    text: 'text-purple-600',
+    bg: 'bg-turquoise-50',
+    bgSelected: 'bg-turquoise-100',
+    border: 'border-turquoise-200',
+    borderSelected: 'border-turquoise-500 ring-2 ring-turquoise-200',
+    icon: 'bg-turquoise-100 text-turquoise-600',
+    iconSelected: 'bg-turquoise-600 text-white',
+    badge: 'bg-turquoise-600',
+    text: 'text-turquoise-600',
   },
   green: {
-    bg: 'bg-green-50',
-    bgSelected: 'bg-green-100',
-    border: 'border-green-200',
-    borderSelected: 'border-green-500 ring-2 ring-green-200',
-    icon: 'bg-green-100 text-green-600',
-    iconSelected: 'bg-green-600 text-white',
-    badge: 'bg-green-600',
-    text: 'text-green-600',
+    bg: 'bg-turquoise-50',
+    bgSelected: 'bg-turquoise-100',
+    border: 'border-turquoise-200',
+    borderSelected: 'border-turquoise-500 ring-2 ring-turquoise-200',
+    icon: 'bg-turquoise-100 text-turquoise-600',
+    iconSelected: 'bg-turquoise-600 text-white',
+    badge: 'bg-turquoise-600',
+    text: 'text-turquoise-600',
   },
 }
 
@@ -127,14 +132,24 @@ interface DeliveryOptionsProps {
   onSelect?: (option: DeliveryOption) => void
   cartTotal?: number
   showFullCards?: boolean
+  visibleOptionIds?: string[]
+  showHeader?: boolean
 }
 
 export function DeliveryOptions({ 
   selectedOption = 'standard', 
   onSelect,
   cartTotal = 0,
-  showFullCards = true
+  showFullCards = true,
+  visibleOptionIds,
+  showHeader = true
 }: DeliveryOptionsProps) {
+  const t = useTranslations('products.pdp.deliveryOptions')
+  const { formatPrice } = useCurrency()
+  const deliveryOptions = getDeliveryOptions(t)
+  const visibleOptions = visibleOptionIds?.length
+    ? deliveryOptions.filter((o) => visibleOptionIds.includes(o.id))
+    : deliveryOptions
   const [selected, setSelected] = useState(selectedOption)
 
   const handleSelect = (option: DeliveryOption) => {
@@ -142,6 +157,7 @@ export function DeliveryOptions({
     onSelect?.(option)
   }
 
+  // cartTotal est en centimes EUR, option.price aussi
   const getShippingPrice = (option: DeliveryOption) => {
     if (option.price === 0) return 0
     if (option.freeThreshold && cartTotal >= option.freeThreshold) return 0
@@ -152,12 +168,14 @@ export function DeliveryOptions({
     // Compact mode for checkout
     return (
       <div className="space-y-3">
-        <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-          <Package className="h-5 w-5 text-orange-500" />
-          Mode de livraison
-        </h3>
+        {showHeader && (
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <Package className="h-5 w-5 text-orange-500" />
+            {t('modeTitle')}
+          </h3>
+        )}
         <div className="space-y-2">
-          {deliveryOptions.map((option) => {
+          {visibleOptions.map((option) => {
             const Icon = option.icon
             const colors = colorClasses[option.color]
             const isSelected = selected === option.id
@@ -194,9 +212,9 @@ export function DeliveryOptions({
                 </div>
                 <div className="flex items-center gap-3">
                   {isFree ? (
-                    <span className="text-green-600 font-bold">Gratuit</span>
+                    <span className="text-green-600 font-bold">{t('free')}</span>
                   ) : (
-                    <span className="font-bold text-gray-900">{actualPrice.toFixed(2)}€</span>
+                    <span className="font-bold text-gray-900">{formatPrice(actualPrice)}</span>
                   )}
                   <div className={cn(
                     'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all',
@@ -220,7 +238,7 @@ export function DeliveryOptions({
             colorClasses[deliveryOptions.find(o => o.id === selected)?.color || 'blue'].border
           )}>
             <p className="text-sm text-gray-600">
-              <strong>Livraison estimée:</strong>{' '}
+              <strong>{t('estimatedDeliveryLabel')}</strong>{' '}
               {deliveryOptions.find(o => o.id === selected)?.duration}
             </p>
           </div>
@@ -233,9 +251,9 @@ export function DeliveryOptions({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-bold text-gray-900">Choisissez votre mode de livraison</h3>
+        <h3 className="text-xl font-bold text-gray-900">{t('chooseTitle')}</h3>
         {cartTotal > 0 && (
-          <span className="text-sm text-gray-500">Panier: {cartTotal.toFixed(2)}€</span>
+          <span className="text-sm text-gray-500">{t('cartTotal', { total: cartTotal.toFixed(2) })}</span>
         )}
       </div>
       
@@ -271,7 +289,7 @@ export function DeliveryOptions({
 
               {/* Free badge */}
               {isFree && (
-                <div className="absolute -top-3 -left-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                <div className="absolute -top-3 -left-3 bg-turquoise-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
                   GRATUIT
                 </div>
               )}
@@ -299,13 +317,16 @@ export function DeliveryOptions({
               {/* Price */}
               <div className="mb-4">
                 {isFree ? (
-                  <div className="text-2xl font-bold text-green-600">Gratuit</div>
+                  <div className="text-2xl font-bold text-green-600">{t('free')}</div>
                 ) : (
                   <div>
-                    <div className="text-2xl font-bold text-gray-900">{actualPrice.toFixed(2)}€</div>
+                    <div className="text-2xl font-bold text-gray-900">{formatPrice(actualPrice)}</div>
                     {option.freeThreshold && cartTotal < option.freeThreshold && (
                       <div className="text-xs text-gray-500 mt-1">
-                        Gratuit dès {option.freeThreshold}€ • Plus que {(option.freeThreshold - cartTotal).toFixed(2)}€
+                        {t('freeFromAndRemaining', {
+                          threshold: formatPrice(option.freeThreshold),
+                          remaining: formatPrice(option.freeThreshold - cartTotal)
+                        })}
                       </div>
                     )}
                   </div>
@@ -337,5 +358,3 @@ export function DeliveryOptions({
   )
 }
 
-// Export delivery options for use elsewhere
-export { deliveryOptions }

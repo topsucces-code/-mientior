@@ -175,7 +175,7 @@ export function ProductQASection({ productId }: ProductQASectionProps) {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         {answer.isOfficial && (
-                          <Badge variant="default" className="bg-blue-600">
+                          <Badge variant="default" className="bg-turquoise-600">
                             Official Response
                           </Badge>
                         )}

@@ -9,14 +9,32 @@ import Link from 'next/link'
 export function PromotionalBanner() {
     const { isScrolled } = useHeader()
     const [isVisible, setIsVisible] = useState(true)
-    const [countdown, setCountdown] = useState({ days: 2, hours: 18, mins: 46, secs: 32 })
+    const [isMounted, setIsMounted] = useState(false)
+    const [countdown, setCountdown] = useState({ hours: 42, mins: 46, secs: 0 })
 
-    // Countdown timer
+    // Mark as mounted to avoid hydration mismatch
     useEffect(() => {
+        setIsMounted(true)
+    }, [])
+
+    // Countdown timer - ticks every second
+    useEffect(() => {
+        if (!isMounted) return
+
+        // Don't start timer if already at 0
+        if (countdown.hours === 0 && countdown.mins === 0 && countdown.secs === 0) {
+            return
+        }
+
         const timer = setInterval(() => {
             setCountdown(prev => {
-                let { days, hours, mins, secs } = prev
-                
+                let { hours, mins, secs } = prev
+
+                // Already at 0, stop
+                if (hours === 0 && mins === 0 && secs === 0) {
+                    return prev
+                }
+
                 if (secs > 0) {
                     secs--
                 } else if (mins > 0) {
@@ -26,19 +44,14 @@ export function PromotionalBanner() {
                     hours--
                     mins = 59
                     secs = 59
-                } else if (days > 0) {
-                    days--
-                    hours = 23
-                    mins = 59
-                    secs = 59
                 }
-                
-                return { days, hours, mins, secs }
+
+                return { hours, mins, secs }
             })
         }, 1000)
 
         return () => clearInterval(timer)
-    }, [])
+    }, [isMounted, countdown.hours, countdown.mins, countdown.secs])
 
     if (!isVisible || isScrolled) {
         return null
@@ -48,36 +61,29 @@ export function PromotionalBanner() {
         <div
             className="
                 hidden md:block
-                bg-gradient-to-r from-orange-500 to-orange-600 
+                bg-orange-600 
                 text-white relative overflow-hidden
                 animate-[bannerSlideIn_400ms_ease]
             "
             style={{ height: HEADER_CONFIG.heights.promotionalBanner }}
         >
-            {/* Shine animation overlay */}
-            <div className="
-                absolute inset-0 
-                bg-gradient-to-r from-transparent via-white/20 to-transparent
-                animate-[bannerShine_3s_infinite]
-                -translate-x-full
-            " />
-            
             <div className="container mx-auto px-[2%] lg:px-[4%] h-full flex items-center justify-center relative">
                 {/* Promo content */}
-                <div className="flex items-center gap-2 lg:gap-4 text-[13px] lg:text-[15px] font-semibold">
-                    {/* Icon with pulse */}
-                    <span className="text-lg lg:text-xl animate-[iconPulse_1.5s_infinite]">🔥</span>
+                <div className="flex items-center gap-1.5 lg:gap-3 text-[13px] lg:text-[15px] font-semibold">
+                    {/* Icon */}
+                    <span className="text-lg lg:text-xl">🔥</span>
                     
                     <span className="hidden lg:inline">Season Sale Ends In...</span>
                     <span className="lg:hidden">Sale Ends...</span>
-                    
-                    {/* Countdown */}
-                    <div className="flex items-center gap-1 lg:gap-1.5 ml-1 lg:ml-2">
-                        <CountdownUnit value={countdown.days} label="Days" />
-                        <CountdownUnit value={countdown.hours} label="Hours" />
-                        <CountdownUnit value={countdown.mins} label="Mins" />
-                        <CountdownUnit value={countdown.secs} label="Secs" />
-                    </div>
+
+                    {/* Countdown - only render after mount to avoid hydration mismatch */}
+                    {isMounted && (
+                        <div className="flex items-center gap-1 ml-1 lg:ml-2">
+                            <CountdownUnit value={countdown.hours} label="Hours" />
+                            <CountdownUnit value={countdown.mins} label="Mins" />
+                            <CountdownUnit value={countdown.secs} label="Secs" />
+                        </div>
+                    )}
                     
                     {/* CTA Button */}
                     <Link
@@ -85,7 +91,7 @@ export function PromotionalBanner() {
                         className="
                             ml-2 lg:ml-4 px-3 lg:px-5 py-1 lg:py-1.5 rounded-full
                             bg-white text-orange-600 font-bold text-xs lg:text-sm
-                            hover:bg-orange-50 hover:scale-105
+                            hover:bg-orange-50
                             transition-all duration-200
                             flex items-center gap-1 lg:gap-2
                         "
@@ -100,12 +106,11 @@ export function PromotionalBanner() {
                 <button
                     onClick={() => setIsVisible(false)}
                     className="
-                        absolute right-2 lg:right-5 
+                        absolute right-2 lg:right-5
                         w-6 h-6 lg:w-7 lg:h-7 rounded-full
                         bg-white/20 hover:bg-white/30
                         flex items-center justify-center
                         transition-all duration-200
-                        hover:rotate-90
                     "
                     aria-label="Fermer la bannière"
                 >
@@ -134,7 +139,7 @@ function CountdownUnit({ value, label }: CountdownUnitProps) {
             ">
                 {value.toString().padStart(2, '0')}
             </span>
-            <span className="text-[8px] lg:text-[9px] uppercase tracking-wider opacity-80">
+            <span className="text-xs uppercase tracking-wider opacity-80">
                 {label}
             </span>
         </div>

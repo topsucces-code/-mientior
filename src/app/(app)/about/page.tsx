@@ -53,7 +53,7 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-anthracite-800 to-anthracite-900 py-20 text-white">
+      <section className="relative bg-anthracite-800 py-20 text-white">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl font-bold md:text-5xl">About Mientior</h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-platinum-300">
@@ -201,7 +201,7 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-gradient-to-r from-orange-500 to-orange-600 py-16 text-white">
+      <section className="bg-orange-600 py-16 text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold">Ready to Start Shopping?</h2>
           <p className="mx-auto mt-4 max-w-xl text-orange-100">

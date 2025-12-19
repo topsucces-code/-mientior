@@ -70,14 +70,14 @@ const eventIcons: Record<string, React.ElementType> = {
 // Status colors
 const eventColors: Record<TrackingEventType, { bg: string; text: string; border: string }> = {
   ORDER_PLACED: { bg: 'bg-gray-100', text: 'text-gray-600', border: 'border-gray-300' },
-  ORDER_CONFIRMED: { bg: 'bg-blue-100', text: 'text-blue-600', border: 'border-blue-300' },
-  PAYMENT_RECEIVED: { bg: 'bg-emerald-100', text: 'text-emerald-600', border: 'border-emerald-300' },
+  ORDER_CONFIRMED: { bg: 'bg-turquoise-100', text: 'text-turquoise-600', border: 'border-turquoise-300' },
+  PAYMENT_RECEIVED: { bg: 'bg-turquoise-100', text: 'text-turquoise-600', border: 'border-turquoise-300' },
   PROCESSING: { bg: 'bg-amber-100', text: 'text-amber-600', border: 'border-amber-300' },
-  PACKED: { bg: 'bg-purple-100', text: 'text-purple-600', border: 'border-purple-300' },
+  PACKED: { bg: 'bg-turquoise-100', text: 'text-turquoise-600', border: 'border-turquoise-300' },
   SHIPPED: { bg: 'bg-indigo-100', text: 'text-indigo-600', border: 'border-indigo-300' },
   IN_TRANSIT: { bg: 'bg-cyan-100', text: 'text-cyan-600', border: 'border-cyan-300' },
   OUT_FOR_DELIVERY: { bg: 'bg-orange-100', text: 'text-orange-600', border: 'border-orange-300' },
-  DELIVERED: { bg: 'bg-green-100', text: 'text-green-600', border: 'border-green-300' },
+  DELIVERED: { bg: 'bg-turquoise-100', text: 'text-turquoise-600', border: 'border-turquoise-300' },
   DELIVERY_ATTEMPTED: { bg: 'bg-yellow-100', text: 'text-yellow-600', border: 'border-yellow-300' },
   RETURNED_TO_SENDER: { bg: 'bg-red-100', text: 'text-red-600', border: 'border-red-300' },
   CANCELLED: { bg: 'bg-red-100', text: 'text-red-600', border: 'border-red-300' },
@@ -122,7 +122,7 @@ export default function OrderTracking({ orderId, orderNumber, initialData }: Ord
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-turquoise-500" />
       </div>
     );
   }
@@ -134,7 +134,7 @@ export default function OrderTracking({ orderId, orderNumber, initialData }: Ord
         <p className="text-gray-600">{error}</p>
         <button
           onClick={() => fetchTracking()}
-          className="mt-4 text-emerald-600 hover:text-emerald-700 font-medium"
+          className="mt-4 text-turquoise-600 hover:text-turquoise-700 font-medium"
         >
           {t('refresh')}
         </button>
@@ -171,7 +171,7 @@ export default function OrderTracking({ orderId, orderNumber, initialData }: Ord
           <button
             onClick={() => fetchTracking(false)}
             disabled={isRefreshing}
-            className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 text-gray-400 hover:text-turquoise-600 hover:bg-gray-100 rounded-full transition-colors"
             title={t('refresh')}
           >
             <RefreshCw className={cn('h-5 w-5', isRefreshing && 'animate-spin')} />
@@ -190,7 +190,7 @@ export default function OrderTracking({ orderId, orderNumber, initialData }: Ord
             <div
               className={cn(
                 'h-2.5 rounded-full transition-all duration-500',
-                isDelivered ? 'bg-green-500' : 'bg-emerald-500'
+                isDelivered ? 'bg-turquoise-600' : 'bg-turquoise-500'
               )}
               style={{ width: `${progress}%` }}
             />
@@ -210,10 +210,10 @@ export default function OrderTracking({ orderId, orderNumber, initialData }: Ord
 
       {/* Status banner */}
       {isDelivered && (
-        <div className="px-4 py-3 bg-green-50 border-b border-green-100">
+        <div className="px-4 py-3 bg-turquoise-50 border-b border-turquoise-100">
           <div className="flex items-center">
-            <CheckCircle2 className="h-5 w-5 text-green-600 mr-2" />
-            <span className="text-sm font-medium text-green-800">
+            <CheckCircle2 className="h-5 w-5 text-turquoise-600 mr-2" />
+            <span className="text-sm font-medium text-turquoise-800">
               Votre commande a été livrée avec succès !
             </span>
           </div>
@@ -319,7 +319,7 @@ export default function OrderTracking({ orderId, orderNumber, initialData }: Ord
             href={getCarrierTrackingUrl(carrier, trackingNumber)}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+            className="inline-flex items-center text-sm text-turquoise-600 hover:text-turquoise-700 font-medium"
           >
             Suivre sur le site du transporteur
             <ExternalLink className="h-4 w-4 ml-1" />

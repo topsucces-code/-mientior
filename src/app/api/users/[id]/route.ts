@@ -15,7 +15,7 @@ async function handleGET(
   { params, adminSession: _adminSession }: { params: Record<string, string>, adminSession?: import('@/lib/auth-admin').AdminSession | null }
 ) {
   try {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: params.id },
       select: {
         id: true,
@@ -89,7 +89,7 @@ async function handlePUT(
     }
 
     // Check if user exists
-    const existing = await prisma.user.findUnique({
+    const existing = await prisma.users.findUnique({
       where: { id: params.id }
     })
 
@@ -101,7 +101,7 @@ async function handlePUT(
     const before = existing
 
     // Update user
-    const user = await prisma.user.update({
+    const user = await prisma.users.update({
       where: { id: params.id },
       data: {
         firstName: body.firstName,

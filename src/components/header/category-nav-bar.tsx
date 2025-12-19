@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight, MoreHorizontal, Flame } from 'lucide-react'
 import Link from 'next/link'
 import { useRef, useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { HEADER_CONFIG } from '@/lib/constants'
 import { useHeader } from '@/contexts/header-context'
 
@@ -34,6 +35,7 @@ export function CategoryNavBar({ categories = DEFAULT_CATEGORIES }: CategoryNavB
     const [activeCategory, setActiveCategory] = useState<string | null>('new')
     const [showMoreDropdown, setShowMoreDropdown] = useState(false)
     const { isCompact } = useHeader()
+    const t = useTranslations('categories')
 
     const checkScrollability = () => {
         const container = scrollContainerRef.current
@@ -100,7 +102,7 @@ export function CategoryNavBar({ categories = DEFAULT_CATEGORIES }: CategoryNavB
                                 hover:bg-gray-50 transition-all duration-200
                                 border border-gray-100
                             "
-                            aria-label="Défiler vers la gauche"
+                            aria-label={t('scrollLeft')}
                         >
                             <ChevronLeft className="w-4 h-4 text-gray-600" />
                         </button>
@@ -132,7 +134,7 @@ export function CategoryNavBar({ categories = DEFAULT_CATEGORIES }: CategoryNavB
                                     {isActive && (
                                         <span className="
                                             absolute bottom-0 left-0 right-0 h-[3px]
-                                            bg-gradient-to-r from-turquoise-600 to-orange-500
+                                            bg-turquoise-700
                                             rounded-t-full
                                         " />
                                     )}
@@ -144,11 +146,11 @@ export function CategoryNavBar({ categories = DEFAULT_CATEGORIES }: CategoryNavB
                                     <span className={`
                                         text-xs lg:text-sm font-semibold uppercase tracking-[0.05em]
                                         ${category.isHot 
-                                            ? 'bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent animate-pulse' 
+                                            ? 'text-orange-600 animate-pulse' 
                                             : ''
                                         }
                                     `}>
-                                        {category.name}
+                                        {t(category.id)}
                                     </span>
                                     
                                     {category.isHot && (
@@ -170,7 +172,7 @@ export function CategoryNavBar({ categories = DEFAULT_CATEGORIES }: CategoryNavB
                                 hover:bg-gray-50 transition-all duration-200
                                 border border-gray-100
                             "
-                            aria-label="Défiler vers la droite"
+                            aria-label={t('scrollRight')}
                         >
                             <ChevronRight className="w-4 h-4 text-gray-600" />
                         </button>
@@ -188,7 +190,7 @@ export function CategoryNavBar({ categories = DEFAULT_CATEGORIES }: CategoryNavB
                             "
                         >
                             <MoreHorizontal className="w-5 h-5" />
-                            <span className="text-sm font-medium hidden lg:inline">Plus</span>
+                            <span className="text-sm font-medium hidden lg:inline">{t('more')}</span>
                         </button>
 
                         {/* More dropdown */}
@@ -211,7 +213,7 @@ export function CategoryNavBar({ categories = DEFAULT_CATEGORIES }: CategoryNavB
                                             onClick={() => setShowMoreDropdown(false)}
                                         >
                                             <span className="text-lg">{cat.icon}</span>
-                                            <span className="text-sm font-medium text-gray-700">{cat.name}</span>
+                                            <span className="text-sm font-medium text-gray-700">{t(cat.id)}</span>
                                         </Link>
                                     ))}
                                 </div>

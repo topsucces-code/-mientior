@@ -612,7 +612,7 @@ export async function mapVendor(
   }
 
   // Query database
-  const vendor = await prisma.vendor.findFirst({
+  const vendor = await prisma.vendors.findFirst({
     where: { slug: vendorSlug },
     select: { id: true },
   });

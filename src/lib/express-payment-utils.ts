@@ -194,7 +194,7 @@ export async function validateExpressPaymentRequest(
 
   // 4. Amount validation (if order exists)
   if (paymentData.orderId) {
-    const order = await prisma.order.findUnique({
+    const order = await prisma.orders.findUnique({
       where: { id: paymentData.orderId },
       select: { total: true },
     })
@@ -237,7 +237,7 @@ export async function createOrUpdateProvisionalOrder(
 ): Promise<{ orderId: string; orderNumber: string; total: number }> {
   // If orderId provided, update existing order
   if (paymentData.orderId) {
-    const existingOrder = await prisma.order.findUnique({
+    const existingOrder = await prisma.orders.findUnique({
       where: { id: paymentData.orderId },
       select: { id: true, orderNumber: true, total: true },
     })
@@ -296,7 +296,7 @@ export async function completeExpressPaymentOrder(
   method: ExpressPaymentMethod,
   metadata?: Record<string, any>
 ): Promise<void> {
-  await prisma.order.update({
+  await prisma.orders.update({
     where: { id: orderId },
     data: {
       status: 'PROCESSING',
@@ -312,7 +312,7 @@ export async function completeExpressPaymentOrder(
   })
 
   // Create audit log
-  await prisma.auditLog.create({
+  await prisma.audit_logs.create({
     data: {
       action: 'ORDER_PAID',
       resource: 'Order',

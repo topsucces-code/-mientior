@@ -104,7 +104,7 @@ export async function createTrackingEvent(input: CreateTrackingEventInput) {
   });
 
   // Get order details for notification
-  const order = await prisma.order.findUnique({
+  const order = await prisma.orders.findUnique({
     where: { id: orderId },
     select: {
       userId: true,

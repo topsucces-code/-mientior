@@ -52,7 +52,7 @@ async function handleGET(
         }
 
         // Check for failed payments (urgent)
-        const failedPaymentsCount = await prisma.order.count({
+        const failedPaymentsCount = await prisma.orders.count({
           where: {
             paymentStatus: 'FAILED',
             createdAt: {
@@ -74,7 +74,7 @@ async function handleGET(
         }
 
         // Check for pending vendor approvals (attention)
-        const pendingVendorsCount = await prisma.vendor.count({
+        const pendingVendorsCount = await prisma.vendors.count({
           where: { status: 'PENDING' },
         });
 
@@ -91,7 +91,7 @@ async function handleGET(
         }
 
         // Check for pending orders (attention)
-        const pendingOrdersCount = await prisma.order.count({
+        const pendingOrdersCount = await prisma.orders.count({
           where: { status: 'PENDING' },
         });
 
@@ -125,7 +125,7 @@ async function handleGET(
         }
 
         // Check for inactive vendors (info)
-        const inactiveVendorsCount = await prisma.vendor.count({
+        const inactiveVendorsCount = await prisma.vendors.count({
           where: {
             status: 'ACTIVE',
             products: {

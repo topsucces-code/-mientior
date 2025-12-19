@@ -61,7 +61,7 @@ export async function PATCH(
     }
 
     // Fetch the provisional order with items
-    const order = await prisma.order.findUnique({
+    const order = await prisma.orders.findUnique({
       where: { id: params.id },
       include: {
         items: {
@@ -235,7 +235,7 @@ export async function PATCH(
         : updatedOrder.shippingAddress
 
       // Fetch order items with details
-      const orderWithItems = await prisma.order.findUnique({
+      const orderWithItems = await prisma.orders.findUnique({
         where: { id: updatedOrder.id },
         include: {
           items: {

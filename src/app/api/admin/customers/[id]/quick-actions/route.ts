@@ -97,7 +97,7 @@ export async function POST(
     const { id: customerId } = await params
 
     // Validate customer exists
-    const customer = await prisma.user.findUnique({
+    const customer = await prisma.users.findUnique({
       where: { id: customerId },
       select: {
         id: true,

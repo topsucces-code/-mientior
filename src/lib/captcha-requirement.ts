@@ -22,16 +22,21 @@ const TRACKING_WINDOW_SECONDS = 24 * 60 * 60 // 24 hours
  * CAPTCHA is required AFTER 3 successful registrations (on the 4th attempt)
  */
 export async function isCaptchaRequired(ipAddress: string): Promise<boolean> {
+  // Disable CAPTCHA in development mode
+  if (process.env.NODE_ENV === 'development') {
+    return false
+  }
+  
   try {
     const key = `${REGISTRATION_TRACKING_PREFIX}${ipAddress}`
     const now = Date.now()
     const windowStart = now - (TRACKING_WINDOW_SECONDS * 1000)
     
     // Remove expired entries (older than 24 hours)
-    await redis.zremrangebyscore(key, 0, windowStart)
+    await redis?.zremrangebyscore(key, 0, windowStart)
     
     // Count registrations in the last 24 hours
-    const count = await redis.zcount(key, windowStart, now)
+    const count = await redis?.zcount(key, windowStart, now) ?? 0
     
     // Require CAPTCHA if 3 or more registrations already completed
     // This means the 4th attempt and beyond require CAPTCHA
@@ -55,10 +60,10 @@ export async function trackRegistration(ipAddress: string): Promise<void> {
     // Add current timestamp to sorted set with unique member
     // Use timestamp + random string to ensure uniqueness
     const member = `${now}-${Math.random().toString(36).substring(7)}`
-    await redis.zadd(key, now, member)
+    await redis?.zadd(key, now, member)
     
     // Set expiry on the key (25 hours to ensure cleanup)
-    await redis.expire(key, TRACKING_WINDOW_SECONDS + 3600)
+    await redis?.expire(key, TRACKING_WINDOW_SECONDS + 3600)
   } catch (error) {
     console.error('Error tracking registration:', error)
     // Don't fail the registration if tracking fails
@@ -76,10 +81,10 @@ export async function getRegistrationCount(ipAddress: string): Promise<number> {
     const windowStart = now - (TRACKING_WINDOW_SECONDS * 1000)
     
     // Remove expired entries
-    await redis.zremrangebyscore(key, 0, windowStart)
+    await redis?.zremrangebyscore(key, 0, windowStart)
     
     // Count registrations in window
-    return await redis.zcount(key, windowStart, now)
+    return await redis?.zcount(key, windowStart, now) ?? 0
   } catch (error) {
     console.error('Error getting registration count:', error)
     return 0
@@ -116,7 +121,7 @@ export async function getRegistrationCount(ipAddress: string): Promise<number> {
  */
 export async function verifyCaptchaToken(
   token: string,
-  ipAddress: string
+  _ipAddress: string
 ): Promise<boolean> {
   // TODO: Implement actual CAPTCHA verification
   // For now, return true to allow development without CAPTCHA service
@@ -145,7 +150,7 @@ export async function verifyCaptchaToken(
 export async function resetRegistrationTracking(ipAddress: string): Promise<void> {
   try {
     const key = `${REGISTRATION_TRACKING_PREFIX}${ipAddress}`
-    await redis.del(key)
+    await redis?.del(key)
   } catch (error) {
     console.error('Error resetting registration tracking:', error)
   }

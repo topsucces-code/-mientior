@@ -17,7 +17,7 @@ async function handleGET(
   try {
     const { id } = params;
 
-    const adminUser = await prisma.adminUser.findUnique({
+    const adminUser = await prisma.admin_users.findUnique({
       where: { id },
       select: {
         id: true,
@@ -59,7 +59,7 @@ async function handlePUT(
     const body = await request.json();
 
     // Fetch existing admin user for audit log
-    const existingAdminUser = await prisma.adminUser.findUnique({
+    const existingAdminUser = await prisma.admin_users.findUnique({
       where: { id },
     });
 
@@ -94,7 +94,7 @@ async function handlePUT(
     }
 
     // Update admin user
-    const updatedAdminUser = await prisma.adminUser.update({
+    const updatedAdminUser = await prisma.admin_users.update({
       where: { id },
       data: updateData,
       select: {

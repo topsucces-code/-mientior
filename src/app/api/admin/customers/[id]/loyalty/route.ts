@@ -30,7 +30,7 @@ export async function GET(
     }
 
     // Get user with loyalty data
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: customerId },
       select: {
         id: true,

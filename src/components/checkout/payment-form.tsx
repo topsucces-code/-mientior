@@ -557,7 +557,7 @@ export function PaymentForm({
                           <FormLabel>Code postal *</FormLabel>
                           <FormControl>
                             <Input
-                              placeholder="75001"
+                              placeholder="BP 1234"
                               {...field}
                               className="h-12"
                               aria-invalid={!!form.formState.errors.billingPostalCode}
@@ -575,7 +575,7 @@ export function PaymentForm({
                           <FormLabel>Ville *</FormLabel>
                           <FormControl>
                             <Input
-                              placeholder="Paris"
+                              placeholder="Abidjan"
                               {...field}
                               className="h-12"
                               aria-invalid={!!form.formState.errors.billingCity}
@@ -620,7 +620,7 @@ export function PaymentForm({
                         <FormControl>
                           <Input
                             type="tel"
-                            placeholder="+33 6 12 34 56 78"
+                            placeholder="+225 07 07 12 34 56"
                             {...field}
                             className="h-12"
                             aria-invalid={!!form.formState.errors.billingPhone}

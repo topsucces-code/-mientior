@@ -255,7 +255,7 @@ export function NotificationsDropdown() {
                         {totalUnreadCount > 0 && (
                             <button
                                 onClick={handleMarkAllAsRead}
-                                className="text-sm text-emerald-600 hover:underline"
+                                className="text-sm text-turquoise-600 hover:underline"
                                 aria-label={`Marquer toutes les ${totalUnreadCount} notifications comme lues`}
                             >
                                 Tout marquer comme lu
@@ -278,14 +278,14 @@ export function NotificationsDropdown() {
                                                 window.location.href = notification.link
                                             }
                                         }}
-                                        className={`w-full p-4 border-b border-gray-100 hover:bg-gray-50 text-left transition-colors ${!notification.read ? 'bg-emerald-50' : ''
+                                        className={`w-full p-4 border-b border-gray-100 hover:bg-gray-50 text-left transition-colors ${!notification.read ? 'bg-turquoise-50' : ''
                                             }`}
                                         aria-label={`${notification.read ? 'Lue' : 'Non lue'} - ${notification.title}`}
                                     >
                                         <div className="flex gap-3">
-                                            <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${notification.type === 'order' || notification.type === 'ORDER_UPDATE' ? 'bg-green-100 text-green-600' :
+                                            <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${notification.type === 'order' || notification.type === 'ORDER_UPDATE' ? 'bg-turquoise-100 text-turquoise-600' :
                                                 notification.type === 'promo' || notification.type === 'PROMO_OFFER' ? 'bg-yellow-100 text-yellow-600' :
-                                                    notification.type === 'message' || notification.type === 'SUPPORT_UPDATE' ? 'bg-emerald-100 text-emerald-600' :
+                                                    notification.type === 'message' || notification.type === 'SUPPORT_UPDATE' ? 'bg-turquoise-100 text-turquoise-600' :
                                                         'bg-gray-100 text-gray-600'
                                                 }`}
                                                 aria-hidden="true"
@@ -293,7 +293,7 @@ export function NotificationsDropdown() {
                                                 <Icon className="w-5 h-5" />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className={`font-medium ${!notification.read ? 'text-emerald-600' : ''}`}>
+                                                <p className={`font-medium ${!notification.read ? 'text-turquoise-600' : ''}`}>
                                                     {notification.title}
                                                 </p>
                                                 <p className="text-sm text-gray-600 truncate">{notification.message}</p>
@@ -304,7 +304,7 @@ export function NotificationsDropdown() {
                                                 </p>
                                             </div>
                                             {!notification.read && (
-                                                <div className="flex-shrink-0 w-2 h-2 bg-emerald-500 rounded-full mt-2" />
+                                                <div className="flex-shrink-0 w-2 h-2 bg-turquoise-500 rounded-full mt-2" />
                                             )}
                                         </div>
                                     </button>
@@ -322,7 +322,7 @@ export function NotificationsDropdown() {
                         <div className="p-3 border-t border-gray-200 text-center">
                             <a
                                 href="/account/notifications"
-                                className="text-sm text-emerald-600 hover:underline font-medium"
+                                className="text-sm text-turquoise-600 hover:underline font-medium"
                             >
                                 Voir toutes les notifications
                             </a>

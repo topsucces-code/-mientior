@@ -201,6 +201,7 @@
     "react-hook-form": "^7.66.0",
     "react-i18next": "^14.0.0",
     "react-loading-skeleton": "^3.1.0",
+    "react-payment-icons": "^1.2.6",
     "react-paystack": "^3.0.5",
     "recharts": "^2.15.4",
     "resend": "^1.0.0",

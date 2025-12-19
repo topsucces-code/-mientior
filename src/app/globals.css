@@ -104,6 +104,52 @@
   50% { transform: scale(1.15); }
 }
 
+/* Snowfall animation for Christmas theme */
+@keyframes snowfall {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(400px) rotate(360deg);
+    opacity: 0.3;
+  }
+}
+
+.animate-snowfall {
+  animation: snowfall linear infinite;
+}
+
+/* Shimmer effect for countdown and progress bar */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+/* Slide in from right animation */
+@keyframes slide-in-right {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
 @layer base {
   :root {
     /* ============================================
@@ -308,6 +354,7 @@
     }
   }
 
+  /* Removed: bannerShine animation - no longer used after header simplification
   @keyframes bannerShine {
     0% {
       transform: translateX(-100%);
@@ -316,7 +363,9 @@
       transform: translateX(100%);
     }
   }
+  */
 
+  /* Removed: iconPulse animation - no longer used after header simplification
   @keyframes iconPulse {
     0%, 100% {
       transform: scale(1);
@@ -325,6 +374,7 @@
       transform: scale(1.2);
     }
   }
+  */
 
   /* Badge pulse animation */
   @keyframes badgePulse {

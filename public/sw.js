@@ -1,5 +1,4 @@
 // Mientior Service Worker
-const CACHE_NAME = 'mientior-v1';
 const STATIC_CACHE = 'mientior-static-v1';
 const DYNAMIC_CACHE = 'mientior-dynamic-v1';
 const IMAGE_CACHE = 'mientior-images-v1';
@@ -9,8 +8,6 @@ const STATIC_ASSETS = [
   '/',
   '/offline',
   '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
 ];
 
 // Cache strategies
@@ -51,13 +48,20 @@ const CACHE_STRATEGIES = {
   // Stale while revalidate
   staleWhileRevalidate: async (request, cacheName) => {
     const cachedResponse = await caches.match(request);
-    const fetchPromise = fetch(request).then(networkResponse => {
-      if (networkResponse.ok) {
-        const cache = caches.open(cacheName);
-        cache.then(c => c.put(request, networkResponse.clone()));
-      }
-      return networkResponse;
-    }).catch(() => cachedResponse);
+    const fetchPromise = fetch(request)
+      .then(async (networkResponse) => {
+        if (networkResponse && networkResponse.ok) {
+          try {
+            const responseToCache = networkResponse.clone();
+            const cache = await caches.open(cacheName);
+            await cache.put(request, responseToCache);
+          } catch (error) {
+            // Ignore caching errors (e.g. Response body already used)
+          }
+        }
+        return networkResponse;
+      })
+      .catch(() => cachedResponse);
 
     return cachedResponse || fetchPromise;
   },
@@ -161,8 +165,8 @@ self.addEventListener('push', event => {
   let data = {
     title: 'Mientior',
     body: 'Vous avez une nouvelle notification',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/badge-72x72.png',
+    icon: '/images/placeholder.svg',
+    badge: '/images/placeholder.svg',
     tag: 'default',
     data: { url: '/' }
   };

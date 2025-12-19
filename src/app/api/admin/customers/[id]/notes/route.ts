@@ -32,7 +32,7 @@ export async function GET(
     const customerId = params.id
 
     // Verify customer exists
-    const customer = await prisma.user.findUnique({
+    const customer = await prisma.users.findUnique({
       where: { id: customerId },
       select: { id: true },
     })
@@ -120,7 +120,7 @@ export async function POST(
     const customerId = params.id
 
     // Verify customer exists
-    const customer = await prisma.user.findUnique({
+    const customer = await prisma.users.findUnique({
       where: { id: customerId },
       select: { id: true },
     })

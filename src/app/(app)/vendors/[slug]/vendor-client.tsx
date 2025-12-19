@@ -110,8 +110,8 @@ export function VendorPageClient({ vendor }: VendorPageClientProps) {
   return (
     <div>
       {/* Banner */}
-      <div className="relative h-48 bg-gradient-to-r from-anthracite-700 to-anthracite-900 sm:h-64">
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+      <div className="relative h-48 bg-anthracite-800 sm:h-64">
+        <div className="absolute inset-0 bg-black/40" />
       </div>
 
       {/* Vendor Info */}

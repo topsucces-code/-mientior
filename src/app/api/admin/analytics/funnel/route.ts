@@ -63,7 +63,7 @@ async function handleGET(
 
         // Stage 1: Visitors (estimated from users + some multiplier)
         // In a real implementation, this would come from Analytics model or external service
-        const totalUsers = await prisma.user.count({
+        const totalUsers = await prisma.users.count({
           where: startDate ? { createdAt: { gte: startDate } } : undefined,
         });
 
@@ -98,7 +98,7 @@ async function handleGET(
         // Stage 3: Add to Cart
         // In production, track cart additions via Analytics or CartEvent model
         // For now, estimate from orders
-        const ordersCount = await prisma.order.count({
+        const ordersCount = await prisma.orders.count({
           where: whereClause,
         });
 
@@ -150,7 +150,7 @@ async function handleGET(
         const conversionRate = (ordersCompleted / visitors) * 100;
 
         // Calculate average order value
-        const orderStats = await prisma.order.aggregate({
+        const orderStats = await prisma.orders.aggregate({
           where: whereClause,
           _avg: {
             total: true,

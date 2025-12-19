@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const currentSessionToken = extractSessionToken(cookieHeader)
 
     // Get all active sessions for the user
-    const sessions = await prisma.session.findMany({
+    const sessions = await prisma.sessions.findMany({
       where: {
         userId: session.user.id,
         expiresAt: {
@@ -94,7 +94,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Get all session tokens except current before deletion
-    const sessionsToDelete = await prisma.session.findMany({
+    const sessionsToDelete = await prisma.sessions.findMany({
       where: {
         userId: session.user.id,
         token: { not: currentSessionToken },
@@ -103,7 +103,7 @@ export async function DELETE(request: NextRequest) {
     })
 
     // Delete all sessions except current
-    const deleteResult = await prisma.session.deleteMany({
+    const deleteResult = await prisma.sessions.deleteMany({
       where: {
         userId: session.user.id,
         token: { not: currentSessionToken },

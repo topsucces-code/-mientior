@@ -51,9 +51,9 @@ export default function BrandsShowcase({
   const duplicatedBrands = [...brands, ...brands]
 
   return (
-    <section 
+    <section
       ref={sectionRef}
-      className="py-8 sm:py-10 md:py-14 bg-gradient-to-b from-amber-50 via-white to-orange-50 overflow-hidden"
+      className="py-20 md:py-24 bg-amber-50 overflow-hidden"
     >
       <div className="container mx-auto px-3 sm:px-4 lg:px-6">
         {/* Header - Style Temu */}
@@ -65,7 +65,7 @@ export default function BrandsShowcase({
         >
           <div className="flex items-center gap-3 sm:gap-4">
             {/* Icon */}
-            <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg">
+            <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-orange-600 shadow-lg">
               <Award className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
             </div>
 
@@ -95,8 +95,8 @@ export default function BrandsShowcase({
       {/* Marquee Container */}
       <div className="relative w-full overflow-hidden">
         {/* Gradient Fades */}
-        <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-20 md:w-32 bg-gradient-to-r from-amber-50 to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-20 md:w-32 bg-gradient-to-l from-orange-50 to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-20 md:w-32 bg-amber-50/80 z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-20 md:w-32 bg-amber-50/80 z-10 pointer-events-none" />
 
         {/* Scrolling Track */}
         <div className="flex gap-4 sm:gap-6 md:gap-8 animate-marquee-scroll hover:[animation-play-state:paused]">
@@ -141,7 +141,7 @@ export default function BrandsShowcase({
                     {brand.productCount} {t('productsLabel')}
                   </span>
                   {brand.isVerified && (
-                    <span className="flex items-center gap-0.5 text-[10px] sm:text-xs text-amber-600 font-medium">
+                    <span className="flex items-center gap-0.5 text-xs text-amber-600 font-medium">
                       <Verified className="h-3 w-3" />
                       {t('official')}
                     </span>

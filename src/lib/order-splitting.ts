@@ -85,7 +85,7 @@ export async function createMultiVendorOrders(
       ? `${parentOrderNumber}-${i + 1}`
       : parentOrderNumber
     
-    const order = await prisma.order.create({
+    const order = await prisma.orders.create({
       data: {
         orderNumber,
         userId,
@@ -122,7 +122,7 @@ export async function createMultiVendorOrders(
  * Get vendor breakdown for an order
  */
 export async function getOrderVendorBreakdown(orderId: string) {
-  const order = await prisma.order.findUnique({
+  const order = await prisma.orders.findUnique({
     where: { id: orderId },
     include: {
       items: {

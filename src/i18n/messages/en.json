@@ -100,6 +100,29 @@
     "supportHelp": "Support & Help",
     "user": "User"
   },
+  "categories": {
+    "exploreInterests": "EXPLORE YOUR INTERESTS",
+    "seeMore": "See more",
+    "scrollLeft": "Scroll left",
+    "scrollRight": "Scroll right",
+    "more": "More",
+    "all": "Recommended",
+    "1": "Electronics & Tech",
+    "2": "Women's Fashion",
+    "3": "Men's Fashion",
+    "4": "Home & Kitchen",
+    "5": "Beauty & Health",
+    "6": "Sports & Leisure",
+    "7": "Baby & Maternity",
+    "8": "Automotive",
+    "9": "Garden & DIY",
+    "new": "New Arrivals",
+    "clothing": "Clothing",
+    "shoes": "Shoes",
+    "accessories": "Accessories",
+    "brands": "Brands",
+    "sale": "Sale"
+  },
   "footer": {
     "description": "Your premier destination for quality products and exceptional service. We bring you the best selection with unmatched customer care.",
     "shop": "Shop",
@@ -419,6 +442,28 @@
     "priceRange": "Price range",
     "rating": "Rating",
     "availability": "Availability",
+    "category": {
+      "notFound": "Category not found",
+      "defaultDescription": "Discover our selection of {name} products",
+      "productsAvailable": "{count} products available",
+      "quickFilters": {
+        "new": "New Arrivals",
+        "sale": "On Sale",
+        "bestseller": "Bestsellers"
+      },
+      "seo": {
+        "aboutTitle": "About {name}",
+        "discoverCollection": "Discover Our {name} Collection",
+        "defaultContent": "Explore our complete selection of {name} products carefully chosen for their exceptional quality. We work with the best sellers to offer you an unparalleled shopping experience.",
+        "qualityTitle": "Guaranteed Quality",
+        "qualityContent": "All our products are verified and approved by our team before being put on sale. We guarantee customer satisfaction with a flexible return policy.",
+        "deliveryTitle": "Fast Delivery",
+        "deliveryContent": "Enjoy our fast delivery service everywhere. Free delivery for all orders over 30,000 FCFA."
+      },
+      "breadcrumbs": {
+        "home": "Home"
+      }
+    },
     "catalog": {
       "breadcrumbs": {
         "home": "Home",
@@ -505,10 +550,11 @@
       "brand": "Brand:",
       "delivery": "Arrives in",
       "workingDays": "WORKING DAYS OR MORE",
-      "lowStock": "Only {count} left in stock!"
+      "lowStock": "Only {count} left in stock!",
+      "freeShipping": "Free shipping"
     },
     "pdp": {
-      "reviews": "{rating} ({count} reviews)",
+      "reviewsBadge": "{rating} ({count} reviews)",
       "installment": "Or 3x {price}€ interest-free",
       "totalPrice": "Total price: {total}€",
       "outOfStock": "OUT OF STOCK",
@@ -525,6 +571,242 @@
         "freeReturns": "Free returns within 30 days",
         "warranty": "2-year manufacturer warranty",
         "securePayment": "100% secure payment"
+      },
+      "shipping": {
+        "standardName": "Standard",
+        "standardDesc": "Free from {amount} FCFA",
+        "expressName": "Express",
+        "expressDesc": "Fast delivery",
+        "returnPolicy": "Free returns within 30 days"
+      },
+      "client": {
+        "deliveryOptionUpdatedTitle": "Delivery option updated",
+        "productUnavailableTitle": "Product unavailable",
+        "addedToCartTitle": "Added to cart",
+        "addedToCartDesc": "{productName} has been added to your cart",
+        "removedFromWishlistTitle": "Removed from wishlist",
+        "addedToWishlistTitle": "Added to wishlist",
+        "shareText": "Discover {productName} on Mientior!",
+        "linkCopiedTitle": "Link copied!",
+        "trustBadgeFreeShipping": "Free shipping",
+        "trustBadgeReturn30": "30-day returns",
+        "trustBadgeSecurePayment": "Secure payment",
+        "trustBadgeQuality": "Quality guaranteed",
+        "flashSale": "FLASH SALE",
+        "deliveryFreeTitle": "FREE DELIVERY",
+        "deliveryEta": "Arrives in {days} business days",
+        "salesCount": "+{count} sales",
+        "verifiedReviewsLabel": "verified reviews",
+        "peopleViewing": "{count} people are viewing this product",
+        "featuredVendor": "Featured seller",
+        "seeMore": "See more →",
+        "topRankedInCategory": "#10 Top rated in {category}",
+        "payOriginalPrice": "Pay {price}",
+        "today": "today",
+        "freeShippingUpper": "FREE SHIPPING",
+        "delayCreditUpper": "{amount} CREDIT FOR DELAY",
+        "colorLabel": "Color",
+        "sizeLabel": "Size",
+        "sizeGuide": "Size guide",
+        "quantityLabel": "Quantity",
+        "onlyLeftInStock": "Only {count} left in stock!",
+        "totalLabel": "Total",
+        "addToCartCta": "ADD TO CART",
+        "buyNowCta": "BUY NOW",
+        "deliveryOptionsTitle": "Delivery options",
+        "edit": "Edit",
+        "choose": "Choose",
+        "freeUpper": "FREE",
+        "free": "Free",
+        "freeShippingProgress": "Only {remaining} left for free shipping!",
+        "delayCreditPill": "{amount} delay credit",
+        "realtimeTrackingPill": "Real-time tracking",
+        "freeReturnsPill": "Free returns",
+        "codAvailablePill": "Cash on delivery",
+        "smsTrackingPill": "SMS/WhatsApp tracking",
+        "chooseDeliveryTitle": "Choose your delivery",
+        "guaranteeSecurePaymentTitle": "Secure payment",
+        "guaranteeSecurePaymentDesc": "SSL 256-bit",
+        "guaranteeFreeReturnsTitle": "Free returns",
+        "guaranteeFreeReturnsDesc": "30 days",
+        "guaranteeSatisfactionTitle": "Satisfaction",
+        "guaranteeSatisfactionDesc": "100% guaranteed",
+        "guaranteePackagingTitle": "Careful packaging",
+        "guaranteePackagingDesc": "Gift possible",
+        "positiveReviews": "98% positive reviews",
+        "viewStore": "View store",
+        "selectColorAria": "Select color {color}",
+        "decreaseQuantityAria": "Decrease quantity"
+      },
+      "delivery": {
+        "title": "Delivery options",
+        "tabs": {
+          "standard": "Standard",
+          "relay": "Pickup point",
+          "express": "Express"
+        },
+        "banner": {
+          "slogan": "Fast & reliable"
+        },
+        "table": {
+          "delay": "Delivery time",
+          "rate": "Rate",
+          "free": "FREE",
+          "guarantee": "Guarantee",
+          "creditDelay": "credit if delayed",
+          "refundNoUpdate": "Full refund if no tracking update",
+          "refundNoDelivery": "Full refund if not delivered"
+        },
+        "disclaimer": "Order before {date} to receive {credit} if delivery is late.",
+        "fastestDelivery": "Fastest delivery: {days} business days",
+        "comingSoon": "{type} coming soon",
+        "understood": "Got it"
+      },
+      "gallery": {
+        "noImageTitle": "No image available",
+        "noImageDesc": "Product images will be available soon",
+        "viewImageAria": "View image {index}",
+        "customerPhotos": "Customer photos",
+        "viewCustomerPhotoAria": "View customer photo by {userName}"
+      },
+      "deliveryOptions": {
+        "modeTitle": "Delivery method",
+        "free": "Free",
+        "estimatedDeliveryLabel": "Estimated delivery:",
+        "chooseTitle": "Choose your delivery method",
+        "cartTotal": "Cart: {total}",
+        "freeFromAndRemaining": "Free from {threshold} • Only {remaining} left",
+        "options": {
+          "standard": {
+            "name": "Standard delivery",
+            "description": "Home delivery to your neighborhood",
+            "duration": "2-4 days",
+            "features": {
+              "tracking": "SMS/WhatsApp tracking",
+              "relay": "Home or pickup point",
+              "insurance": "Cash on delivery available"
+            }
+          },
+          "express": {
+            "name": "Express delivery",
+            "description": "Guaranteed fast delivery",
+            "duration": "24-48h",
+            "features": {
+              "priority": "Priority shipping",
+              "realtimeTracking": "Real-time tracking",
+              "guarantee": "Delivery guarantee"
+            }
+          },
+          "sameDay": {
+            "name": "Same-day delivery",
+            "description": "Available in major cities",
+            "duration": "Today",
+            "features": {
+              "cutoff": "Order before 12pm",
+              "cities": "Abidjan, Dakar, Douala, Lagos",
+              "slot": "Choose a time slot"
+            }
+          },
+          "pickup": {
+            "name": "Pickup Point",
+            "description": "Free pickup near you",
+            "duration": "2-3 days",
+            "features": {
+              "freePickup": "Free pickup",
+              "ready": "SMS notification",
+              "stores": "Partner shops"
+            }
+          }
+        }
+      },
+      "tabs": {
+        "ariaLabel": "Product tabs",
+        "descriptionAriaLabel": "Description tab",
+        "specsAriaLabel": "Specifications tab",
+        "reviewsAriaLabel": "Reviews tab ({count})",
+        "qaAriaLabel": "Q&A tab ({count})",
+        "shippingAriaLabel": "Shipping and returns tab",
+        "description": "Description",
+        "specs": "Specifications",
+        "reviews": "Reviews ({count})",
+        "qa": "Q&A ({count})",
+        "shipping": "Shipping & Returns",
+        "noDescription": "No description available for this product.",
+        "keyPoints": "Key points",
+        "generalSpecs": "General specifications",
+        "noSpecs": "No technical specifications available for this product.",
+        "shippingOptions": "Shipping options",
+        "estimatedDelivery": "Estimated delivery: {days} business days",
+        "freeShippingThreshold": "Free shipping for orders over {amount} €",
+        "freeReturnsTitle": "Free returns",
+        "returnsPolicy": "Free returns within 30 days",
+        "refundGuarantee": "Full refund guaranteed",
+        "prepaidLabel": "Prepaid return label",
+        "returnInstructions": "Return instructions:",
+        "returnStep1": "Log in to your account and go to your orders",
+        "returnStep2": "Select the item to return and provide a reason",
+        "returnStep3": "Download and print the return label",
+        "returnStep4": "Pack the item in its original packaging",
+        "returnStep5": "Drop off the parcel at a pickup point",
+        "learnMoreReturns": "Learn more about returns",
+        "internationalTitle": "International shipping",
+        "internationalDesc": "We ship to many countries worldwide. Shipping costs and delivery times vary by destination.",
+        "viewCountries": "View countries and rates",
+        "noShippingInfo": "Shipping information not available."
+      },
+      "categories": {
+        "all": "Recommended",
+        "1": "Electronics & Tech",
+        "2": "Women's Fashion",
+        "3": "Men's Fashion",
+        "4": "Home & Kitchen",
+        "5": "Beauty & Health",
+        "6": "Sports & Leisure",
+        "7": "Baby & Maternity",
+        "8": "Automotive",
+        "9": "Garden & DIY",
+        "exploreInterests": "EXPLORE YOUR INTERESTS",
+        "seeMore": "See more"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "markAllRead": "Mark all as read",
+        "markAsRead": "Mark as read",
+        "viewDetails": "View details",
+        "viewAll": "View all notifications",
+        "loading": "Loading notifications...",
+        "noNotifications": "No notifications yet"
+      },
+      "reviews": {
+        "summaryBase": "Based on {count} reviews",
+        "writeReview": "Write a review",
+        "writeReviewTitle": "Write a review for {productName}",
+        "filterBy": "Filter by:",
+        "filterAll": "All",
+        "filterPhotos": "With photos",
+        "filterVideos": "With videos",
+        "filterVerified": "Verified purchase",
+        "sortBy": "Sort by:",
+        "sortRecent": "Most recent",
+        "sortHelpful": "Most helpful",
+        "sortRating": "Highest rating",
+        "showingCount": "Showing {count} of {total} reviews",
+        "noResults": "No reviews match your filters.",
+        "resetFilters": "Reset filters",
+        "noReviews": "No reviews for this product.",
+        "beFirst": "Be the first to review",
+        "helpful": "Helpful ({count})",
+        "loadMore": "Load more reviews",
+        "loading": "Loading...",
+        "errorTitle": "Error",
+        "errorLoadingMore": "Unable to load more reviews",
+        "noResultsFiltersDesc": "Try adjusting your filters to see more reviews."
+      },
+      "qa": {
+        "searchPlaceholder": "Search questions...",
+        "askQuestion": "Ask a question",
+        "noResults": "No questions match your search",
+        "noQuestions": "No questions yet"
       }
     },
     "compare": {
@@ -699,6 +981,8 @@
     "emptyText": "Add products you love to find them easily",
     "continueShopping": "Discover our products",
     "itemCount": "{count} item(s)",
+    "addToWishlist": "Add to wishlist",
+    "removeFromWishlist": "Remove from wishlist",
     "addedToWishlist": "♡ Added to wishlist",
     "addedToWishlistDesc": "{name} has been added to your wishlist",
     "removedFromWishlist": "Removed from wishlist",
@@ -1323,9 +1607,9 @@
       },
       "slides": {
         "1": {
-          "title": "Fall Fashion 2025",
+          "title": "Dry Season Collection 2025",
           "subtitle": "NEW COLLECTION",
-          "description": "Discover the latest trends with our exclusive collection",
+          "description": "Discover African trends with our exclusive collection",
           "discount": "-50%",
           "price": "12,500 F",
           "cta": {
@@ -1340,45 +1624,45 @@
           }
         },
         "2": {
-          "title": "Premium Electronics",
-          "subtitle": "TECH & GADGETS",
-          "description": "The best devices at the best prices",
+          "title": "African Electronics",
+          "subtitle": "TECH & INNOVATION",
+          "description": "Smartphones, tablets and accessories for the African market",
           "discount": "-30%",
           "price": "45,000 F",
           "cta": {
             "text": "View Deals"
           },
           "features": {
-            "securePayment": "Secure Payment",
+            "securePayment": "Mobile Money Payment",
             "expressDelivery": "Express Delivery"
           }
         },
         "3": {
-          "title": "Exclusive Deals",
-          "subtitle": "FLASH SALES",
-          "description": "Take advantage of our exceptional promotions",
+          "title": "Tropical Fashion",
+          "subtitle": "AFRICAN STYLE",
+          "description": "Colorful outfits and wax fabrics for all occasions",
           "discount": "-70%",
           "price": "8,990 F",
           "cta": {
             "text": "View Deals"
           },
           "features": {
-            "exclusiveGifts": "Exclusive Gifts",
-            "installments": "Pay in 4x"
+            "exclusiveGifts": "Authentic Designs",
+            "installments": "Flexible Payment"
           }
         },
         "4": {
-          "title": "Beauty & Wellness",
-          "subtitle": "PREMIUM CARE",
-          "description": "Take care of yourself with our quality products",
+          "title": "Afro Beauty",
+          "subtitle": "HAIR CARE & COSMETICS",
+          "description": "Natural products for afro hair and black skin",
           "discount": "-40%",
           "price": "15,000 F",
           "cta": {
             "text": "Discover"
           },
           "features": {
-            "authentic": "100% Authentic",
-            "natural": "Natural Products"
+            "authentic": "Organic Shea Butter",
+            "natural": "Natural Oils"
           }
         }
       }
@@ -1412,6 +1696,8 @@
       "title": "Featured Products",
       "subtitle": "Our selection of the best products",
       "viewAll": "View all",
+      "tabLabel": "Featured Products",
+      "tabLabelShort": "Featured",
       "tabs": {
         "all": "All",
         "new": "New Arrivals",
@@ -1422,7 +1708,16 @@
     "bestSellers": {
       "title": "Best Sellers",
       "subtitle": "The most popular products in our store",
-      "viewAll": "View all"
+      "viewAll": "View all",
+      "tabLabel": "Best Sellers",
+      "tabLabelShort": "Top Sales",
+      "categories": {
+        "all": "All",
+        "electronics": "Electronics",
+        "fashion": "Fashion",
+        "home": "Home",
+        "beauty": "Beauty"
+      }
     },
     "newArrivals": {
       "title": "New Arrivals",
@@ -1432,7 +1727,9 @@
     "trending": {
       "title": "Trending Now",
       "subtitle": "Products of the moment",
-      "viewAll": "View all"
+      "viewAll": "View all",
+      "tabLabel": "Trending",
+      "tabLabelShort": "Trending"
     },
     "brands": {
       "title": "Our Partner Brands",
@@ -1465,12 +1762,23 @@
       "discount": "-10% on your first order",
       "successTitle": "Thank you for subscribing!",
       "successMessage": "Check your email to confirm.",
+      "emailRequired": "Please enter your email address",
+      "emailInvalid": "Please enter a valid email address",
+      "acceptMarketingRequired": "Please accept to receive our communications",
+      "genericError": "An error occurred",
+      "errorTitle": "Error",
+      "submitting": "Subscribing...",
+      "subscribed": "Subscribed!",
+      "acceptMarketingText": "I agree to receive marketing communications and promotional offers. You can unsubscribe at any time.",
+      "privacyPrefix": "Your data is protected. See our",
+      "privacyLink": "privacy policy",
+      "privacySuffix": ".",
       "scanToDownload": "Scan to download",
       "downloadOn": "Download on"
     },
     "trustBadges": {
       "freeShipping": "Free Shipping",
-      "freeShippingDesc": "On orders over $50",
+      "freeShippingDesc": "On orders over 30,000 FCFA",
       "securePayment": "Secure Payment",
       "securePaymentDesc": "SSL 256-bit encryption",
       "support": "24/7 Support",
@@ -1485,9 +1793,6 @@
       "ordersToday": "🔥 {count} orders today",
       "ratingText": "⭐ {rating} ({count} reviews)",
       "delivery": "🚚 48h delivery",
-      "customersCount": "✓ +{count} customers",
-      "securePayment": "💳 Secure payment",
-      "returns": "↩️ 30-day returns",
       "ariaLabel": "Trust indicators",
       "ariaLabelPaused": "Trust indicators (paused)"
     },

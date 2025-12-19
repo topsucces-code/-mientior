@@ -63,8 +63,8 @@ export function ProfilePageClient({ initialProfile }: ProfilePageClientProps) {
       lastName: initialProfile.lastName || '',
       phone: initialProfile.phone || '',
       locale: (initialProfile.locale as 'fr' | 'en' | 'ar') || 'fr',
-      countryCode: initialProfile.countryCode || 'FR',
-      currency: (initialProfile.currency as any) || 'EUR',
+      countryCode: initialProfile.countryCode || 'CI',
+      currency: (initialProfile.currency as any) || 'XOF',
     },
   })
 
@@ -225,15 +225,21 @@ export function ProfilePageClient({ initialProfile }: ProfilePageClientProps) {
                   {...register('countryCode')}
                   className="w-full px-3 py-2 border border-platinum-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
-                  <option value="FR">France</option>
-                  <option value="SN">Sénégal</option>
                   <option value="CI">Côte d'Ivoire</option>
+                  <option value="SN">Sénégal</option>
                   <option value="CM">Cameroun</option>
-                  <option value="MA">Maroc</option>
                   <option value="NG">Nigeria</option>
+                  <option value="GH">Ghana</option>
+                  <option value="ML">Mali</option>
+                  <option value="BF">Burkina Faso</option>
+                  <option value="TG">Togo</option>
+                  <option value="BJ">Bénin</option>
+                  <option value="MA">Maroc</option>
+                  <option value="TN">Tunisie</option>
+                  <option value="DZ">Algérie</option>
                   <option value="KE">Kenya</option>
                   <option value="ZA">Afrique du Sud</option>
-                  <option value="GH">Ghana</option>
+                  <option value="FR">France</option>
                 </select>
                 {errors.countryCode && (
                   <p className="text-sm text-red-600">
@@ -249,14 +255,14 @@ export function ProfilePageClient({ initialProfile }: ProfilePageClientProps) {
                   {...register('currency')}
                   className="w-full px-3 py-2 border border-platinum-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
-                  <option value="EUR">EUR (€)</option>
                   <option value="XOF">XOF (FCFA)</option>
                   <option value="XAF">XAF (FCFA)</option>
                   <option value="NGN">NGN (₦)</option>
+                  <option value="GHS">GHS (₵)</option>
                   <option value="KES">KES (KSh)</option>
                   <option value="ZAR">ZAR (R)</option>
                   <option value="MAD">MAD (د.م.)</option>
-                  <option value="GHS">GHS (₵)</option>
+                  <option value="EUR">EUR (€)</option>
                 </select>
                 {errors.currency && (
                   <p className="text-sm text-red-600">

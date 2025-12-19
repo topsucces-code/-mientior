@@ -29,7 +29,7 @@ export default async function RegisterPage({
   const params = await searchParams
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-orange-50 via-white to-turquoise-50">
+    <div className="min-h-[calc(100vh-4rem)] bg-turquoise-50">
       <div className="container flex flex-col lg:flex-row items-center justify-center gap-12 py-12 lg:py-16">
         {/* Left side - Benefits */}
         <div className="hidden lg:flex flex-col max-w-md">
@@ -64,7 +64,7 @@ export default async function RegisterPage({
           </div>
 
           {/* Steps */}
-          <div className="p-6 rounded-2xl bg-gradient-to-br from-turquoise-500 to-turquoise-600 text-white">
+          <div className="p-6 rounded-2xl bg-turquoise-600 text-white">
             <h3 className="font-bold text-lg mb-4">C'est simple et rapide :</h3>
             <div className="space-y-3">
               {steps.map((step, index) => (

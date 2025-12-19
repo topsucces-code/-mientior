@@ -299,8 +299,8 @@ function HeroLayout({
               className={cn(
                 'absolute inset-0',
                 isDark
-                  ? 'bg-gradient-to-r from-black/70 via-black/50 to-transparent'
-                  : 'bg-gradient-to-r from-white/70 via-white/50 to-transparent'
+                  ? 'bg-black/60'
+                  : 'bg-white/60'
               )}
             />
 

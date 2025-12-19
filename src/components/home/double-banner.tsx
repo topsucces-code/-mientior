@@ -73,19 +73,19 @@ export default function DoubleBanner({ banners = defaultBanners }: DoubleBannerP
   return (
     <section
       ref={sectionRef}
-      className="py-8 sm:py-10 md:py-14 bg-gradient-to-br from-slate-50 via-white to-gray-50"
+      className="py-4 sm:py-6 md:py-8 bg-slate-50"
     >
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6">
+      <div className="container mx-auto px-2 sm:px-3 lg:px-4">
         {/* Header - Style Temu */}
         <div
           className={cn(
-            'mb-6 sm:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4',
+            'mb-4 sm:mb-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3',
             isVisible && !prefersReducedMotion && 'animate-fade-in-up'
           )}
         >
           <div className="flex items-center gap-3 sm:gap-4">
             {/* Icon */}
-            <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-700 to-slate-900 shadow-lg">
+            <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-md bg-slate-800 shadow-lg">
               <TrendingUp className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
             </div>
 
@@ -104,7 +104,7 @@ export default function DoubleBanner({ banners = defaultBanners }: DoubleBannerP
           {/* View All Link */}
           <Link
             href="/categories"
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-md transition-colors"
           >
             {t('viewAll')}
             <ChevronRight className="h-4 w-4" />
@@ -112,7 +112,7 @@ export default function DoubleBanner({ banners = defaultBanners }: DoubleBannerP
         </div>
 
         {/* Banners Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-5">
           {banners.map((banner, index) => {
             const IconComponent = banner.icon ? iconMap[banner.icon] : Sparkles
             
@@ -121,7 +121,7 @@ export default function DoubleBanner({ banners = defaultBanners }: DoubleBannerP
                 key={banner.id}
                 href={banner.href}
                 className={cn(
-                  "group relative h-[300px] sm:h-[340px] md:h-[380px] rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer",
+                  "group relative h-[280px] sm:h-[320px] md:h-[360px] rounded-md overflow-hidden cursor-pointer",
                   "shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2",
                   isVisible && !prefersReducedMotion && 'animate-fade-in-up'
                 )}
@@ -142,25 +142,25 @@ export default function DoubleBanner({ banners = defaultBanners }: DoubleBannerP
                 <div
                   className={cn(
                     'absolute inset-0 transition-opacity duration-500',
-                    banner.variant === 'turquoise' && 'bg-gradient-to-br from-turquoise-600/90 via-turquoise-500/75 to-cyan-600/80',
-                    banner.variant === 'orange' && 'bg-gradient-to-br from-orange-500/90 via-amber-500/75 to-orange-600/80',
-                    banner.variant === 'green' && 'bg-gradient-to-br from-emerald-500/90 via-emerald-400/75 to-teal-600/80',
-                    banner.variant === 'purple' && 'bg-gradient-to-br from-violet-500/90 via-purple-500/75 to-fuchsia-600/80',
-                    !banner.variant && 'bg-gradient-to-br from-turquoise-600/90 via-turquoise-500/75 to-cyan-600/80'
+                    banner.variant === 'turquoise' && 'bg-turquoise-700/85',
+                    banner.variant === 'orange' && 'bg-orange-600/85',
+                    banner.variant === 'green' && 'bg-emerald-600/85',
+                    banner.variant === 'purple' && 'bg-purple-700/85',
+                    !banner.variant && 'bg-turquoise-700/85'
                   )}
                 />
 
                 {/* Icon Badge */}
                 <div className="absolute top-4 right-4 sm:top-5 sm:right-5">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 backdrop-blur-sm rounded-md flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
                     <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className="relative h-full p-5 sm:p-6 md:p-8 flex flex-col justify-end text-white z-10">
+                <div className="relative h-full p-4 sm:p-5 md:p-6 flex flex-col justify-end text-white z-10">
                   {/* Label */}
-                  <span className="inline-flex items-center gap-1.5 w-fit px-3 py-1 sm:px-4 sm:py-1.5 mb-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-white/20 backdrop-blur-sm rounded-full">
+                  <span className="inline-flex items-center gap-1.5 w-fit px-3 py-1 mb-3 text-xs font-bold uppercase tracking-wider bg-white/20 backdrop-blur-sm rounded-md">
                     <Sparkles className="w-3 h-3" />
                     {banner.label}
                   </span>
@@ -177,7 +177,7 @@ export default function DoubleBanner({ banners = defaultBanners }: DoubleBannerP
 
                   {/* Stats */}
                   {banner.stats && (
-                    <div className="flex gap-4 mb-4">
+                    <div className="flex gap-3 mb-3">
                       {banner.stats.map((stat, i) => (
                         <div key={i} className="flex flex-col">
                           <span className="text-lg sm:text-xl font-black">{stat.value}</span>
@@ -190,7 +190,7 @@ export default function DoubleBanner({ banners = defaultBanners }: DoubleBannerP
                   {/* CTA Button */}
                   <span
                     className={cn(
-                      'inline-flex items-center gap-2 w-fit px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl font-bold text-sm',
+                      'inline-flex items-center gap-2 w-fit px-4 py-2 rounded-md font-bold text-sm',
                       'bg-white shadow-lg transition-all duration-300',
                       'group-hover:translate-x-2 group-hover:shadow-xl',
                       banner.variant === 'turquoise' && 'text-turquoise-600',

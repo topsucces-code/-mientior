@@ -21,28 +21,28 @@ const defaultBadges: TrustBadge[] = [
     icon: <Truck className="h-8 w-8 md:h-10 md:w-10" />,
     title: 'Livraison Gratuite',
     description: 'Dès 50€ d\'achat',
-    gradient: 'from-blue-500 to-blue-600',
+    gradient: 'bg-turquoise-600',
   },
   {
     id: '2',
     icon: <RotateCcw className="h-8 w-8 md:h-10 md:w-10" />,
     title: 'Retours 30 Jours',
     description: 'Satisfait ou remboursé',
-    gradient: 'from-green-500 to-emerald-600',
+    gradient: 'bg-turquoise-600',
   },
   {
     id: '3',
     icon: <CreditCard className="h-8 w-8 md:h-10 md:w-10" />,
     title: 'Paiement Sécurisé',
     description: 'Cryptage SSL 256-bit',
-    gradient: 'from-purple-500 to-purple-600',
+    gradient: 'bg-turquoise-600',
   },
   {
     id: '4',
     icon: <Headphones className="h-8 w-8 md:h-10 md:w-10" />,
     title: 'Support 24/7',
     description: 'Assistance à votre écoute',
-    gradient: 'from-orange-500 to-orange-600',
+    gradient: 'bg-orange-600',
   },
 ]
 
@@ -68,28 +68,28 @@ export default function TrustBadges({
       icon: <Truck className="h-8 w-8 md:h-10 md:w-10" />,
       title: t('freeShipping'),
       description: t('freeShippingDesc'),
-      gradient: 'from-blue-500 to-blue-600',
+      gradient: 'bg-turquoise-600',
     },
     {
       id: '2',
       icon: <RotateCcw className="h-8 w-8 md:h-10 md:w-10" />,
       title: t('returns'),
       description: t('returnsDesc'),
-      gradient: 'from-green-500 to-emerald-600',
+      gradient: 'bg-turquoise-600',
     },
     {
       id: '3',
       icon: <CreditCard className="h-8 w-8 md:h-10 md:w-10" />,
       title: t('securePayment'),
       description: t('securePaymentDesc'),
-      gradient: 'from-purple-500 to-purple-600',
+      gradient: 'bg-turquoise-600',
     },
     {
       id: '4',
       icon: <Headphones className="h-8 w-8 md:h-10 md:w-10" />,
       title: t('support'),
       description: t('supportDesc'),
-      gradient: 'from-orange-500 to-orange-600',
+      gradient: 'bg-orange-600',
     },
   ]
 
@@ -103,8 +103,8 @@ export default function TrustBadges({
     <section
       ref={sectionRef}
       className={cn(
-        'py-8 md:py-12',
-        variant === 'default' ? 'bg-gradient-to-br from-platinum-50 via-white to-platinum-50' : 'bg-white',
+        'py-20 md:py-24',
+        variant === 'default' ? 'bg-platinum-50' : 'bg-white',
         className
       )}
       {...props}
@@ -167,7 +167,7 @@ function TrustBadgeCard({ badge, variant = 'default', className, style, ...props
         {/* Icon with Gradient Background */}
         <div
           className={cn(
-            'mb-4 flex items-center justify-center rounded-full bg-gradient-to-br p-3 shadow-elevation-1 transition-all duration-300',
+            'mb-4 flex items-center justify-center rounded-full p-3 shadow-elevation-1 transition-all duration-300',
             badge.gradient,
             isHovered && 'scale-110 shadow-elevation-2',
             variant === 'compact' ? 'h-14 w-14' : 'h-16 w-16 md:h-20 md:w-20'
@@ -202,7 +202,7 @@ function TrustBadgeCard({ badge, variant = 'default', className, style, ...props
         {/* Hover Effect - Bottom Accent Line */}
         <div
           className={cn(
-            'absolute bottom-0 left-1/2 h-1 -translate-x-1/2 rounded-full bg-gradient-to-r transition-all duration-300',
+            'absolute bottom-0 left-1/2 h-1 -translate-x-1/2 rounded-full transition-all duration-300',
             badge.gradient,
             isHovered ? 'w-full opacity-100' : 'w-0 opacity-0'
           )}

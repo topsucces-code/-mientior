@@ -1,7 +1,8 @@
 import { prisma } from '@/lib/prisma';
-import { AdminUser, Prisma } from '@prisma/client';
+import { admin_users, Prisma } from '@prisma/client'
 import { NextRequest } from 'next/server';
 
+type AdminUser = admin_users;
 type JsonValue = Prisma.JsonValue;
 
 export interface AuditLogParams {
@@ -42,7 +43,7 @@ export async function logAction(params: AuditLogParams): Promise<void> {
     // Verify adminUserId exists if provided
     let validAdminUserId = params.adminUserId;
     if (validAdminUserId) {
-      const adminExists = await prisma.adminUser.findUnique({
+      const adminExists = await prisma.admin_users.findUnique({
         where: { id: validAdminUserId },
         select: { id: true },
       });
@@ -52,8 +53,9 @@ export async function logAction(params: AuditLogParams): Promise<void> {
       }
     }
 
-    await prisma.auditLog.create({
+    await prisma.audit_logs.create({
       data: {
+        id: crypto.randomUUID(),
         action: params.action,
         resource: params.resource,
         resourceId: params.resourceId,

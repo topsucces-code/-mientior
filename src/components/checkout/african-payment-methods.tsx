@@ -24,8 +24,16 @@ interface AfricanPaymentMethodsProps {
   className?: string;
 }
 
+// Payment method IDs type
+type PaymentMethodId = 'orange_money' | 'mtn_momo' | 'mpesa' | 'wave' | 'moov_money' | 'free_money' | 'visa' | 'mastercard' | 'bank_transfer' | 'cod';
+
 // Payment method categories
-const paymentCategories = {
+const paymentCategories: Record<string, {
+  title: string;
+  icon: typeof Smartphone;
+  description: string;
+  methods: PaymentMethodId[];
+}> = {
   mobileMoney: {
     title: 'Mobile Money',
     icon: Smartphone,
@@ -80,7 +88,7 @@ export function AfricanPaymentMethods({
           const CategoryIcon = category.icon;
           const isExpanded = expandedCategory === categoryId;
           const categoryMethods = category.methods.filter(id => availableMethodIds.includes(id));
-          const hasSelectedMethod = categoryMethods.includes(selectedMethod || '');
+          const hasSelectedMethod = categoryMethods.includes(selectedMethod as PaymentMethodId);
 
           return (
             <div
@@ -88,7 +96,7 @@ export function AfricanPaymentMethods({
               className={cn(
                 'border rounded-xl overflow-hidden transition-all',
                 hasSelectedMethod
-                  ? 'border-emerald-500 bg-emerald-50'
+                  ? 'border-turquoise-500 bg-turquoise-50'
                   : 'border-taupe-200 hover:border-taupe-300'
               )}
             >
@@ -100,7 +108,7 @@ export function AfricanPaymentMethods({
                 <div className={cn(
                   'w-12 h-12 rounded-xl flex items-center justify-center',
                   hasSelectedMethod
-                    ? 'bg-emerald-100 text-emerald-600'
+                    ? 'bg-turquoise-100 text-turquoise-600'
                     : 'bg-taupe-100 text-taupe-600'
                 )}>
                   <CategoryIcon className="w-6 h-6" />
@@ -116,7 +124,7 @@ export function AfricanPaymentMethods({
                 </div>
 
                 {hasSelectedMethod && (
-                  <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-turquoise-500 flex items-center justify-center">
                     <Check className="w-4 h-4 text-white" />
                   </div>
                 )}
@@ -131,7 +139,7 @@ export function AfricanPaymentMethods({
               {isExpanded && (
                 <div className="px-4 pb-4 pt-0 space-y-2">
                   {categoryMethods.map(methodId => {
-                    const method = Object.values(africanPaymentMethods).find(m => m.id === methodId);
+                    const method = Object.values(africanPaymentMethods).find(m => m.id === methodId) as { id: string; name: string; icon: string; countries: string[] | 'all' } | undefined;
                     if (!method) return null;
 
                     const isSelected = selectedMethod === methodId;
@@ -143,8 +151,8 @@ export function AfricanPaymentMethods({
                         className={cn(
                           'w-full flex items-center gap-3 p-3 rounded-lg border transition-all',
                           isSelected
-                            ? 'border-emerald-500 bg-white shadow-sm'
-                            : 'border-taupe-200 bg-white hover:border-emerald-300'
+                            ? 'border-turquoise-500 bg-white shadow-sm'
+                            : 'border-taupe-200 bg-white hover:border-turquoise-300'
                         )}
                       >
                         {/* Payment method icon/logo */}
@@ -173,7 +181,7 @@ export function AfricanPaymentMethods({
                         </span>
 
                         {isSelected && (
-                          <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                          <div className="w-5 h-5 rounded-full bg-turquoise-500 flex items-center justify-center">
                             <Check className="w-3 h-3 text-white" />
                           </div>
                         )}

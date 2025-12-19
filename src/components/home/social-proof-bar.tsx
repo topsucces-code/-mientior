@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Shield, Truck, Award, Users, CreditCard, RotateCcw } from 'lucide-react'
+import { Truck, Award, Users } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
@@ -48,21 +48,6 @@ export default function SocialProofBar({
       icon: <Truck className="h-4 w-4" />,
       text: t('delivery'),
     },
-    {
-      id: '4',
-      icon: <Shield className="h-4 w-4" />,
-      text: t('customersCount', { count: '2M' }),
-    },
-    {
-      id: '5',
-      icon: <CreditCard className="h-4 w-4" />,
-      text: t('securePayment'),
-    },
-    {
-      id: '6',
-      icon: <RotateCcw className="h-4 w-4" />,
-      text: t('returns'),
-    },
   ]
 
   const indicators = customIndicators || translatedIndicators
@@ -104,8 +89,8 @@ export default function SocialProofBar({
       {...props}
     >
       {/* Gradient fade on edges */}
-      <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-[rgba(255,107,0,0.05)] to-transparent" />
-      <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-20 bg-gradient-to-l from-[rgba(255,107,0,0.05)] to-transparent" />
+      <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-20 bg-orange-50/50" />
+      <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-20 bg-orange-50/50" />
 
       {/* Scrolling container */}
       <div

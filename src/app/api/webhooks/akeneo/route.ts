@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
       // Check if event already exists using structured pattern
       // We search for a specific prefix pattern to minimize false positives
       const idempotencyKey = `IDEMPOTENCY_KEY:eventId:${eventId}`
-      const existingAuditLog = await prisma.auditLog.findFirst({
+      const existingAuditLog = await prisma.audit_logs.findFirst({
         where: {
           action: 'webhook_akeneo_received',
           metadata: {
@@ -227,7 +227,7 @@ export async function POST(request: NextRequest) {
       // Create idempotency record immediately (awaited to ensure it's written)
       // If this fails, we abort to prevent duplicate processing
       // Place idempotency key as first field for consistent structure
-      auditLog = await prisma.auditLog.create({
+      auditLog = await prisma.audit_logs.create({
         data: {
           action: 'webhook_akeneo_received',
           resource: 'PRODUCT',
@@ -296,7 +296,7 @@ export async function POST(request: NextRequest) {
       console.log(`[Akeneo Webhook] Enqueued job ${jobId} for ${operation} ${productId}`)
 
       // Update audit log with job details (fire-and-forget to avoid blocking response)
-      prisma.auditLog.update({
+      prisma.audit_logs.update({
         where: { id: auditLog.id },
         data: {
           metadata: JSON.stringify({
@@ -323,7 +323,7 @@ export async function POST(request: NextRequest) {
       console.error('[Akeneo Webhook] Failed to enqueue job:', errorMessage)
 
       // Update audit log with failure status (fire-and-forget)
-      prisma.auditLog.update({
+      prisma.audit_logs.update({
         where: { id: auditLog.id },
         data: {
           metadata: JSON.stringify({

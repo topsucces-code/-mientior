@@ -45,7 +45,7 @@ export async function linkOAuthAccount(
     const lastName = nameParts.slice(1).join(' ') || ''
 
     // Check if User record already exists in our custom User table
-    let user = await prisma.user.findUnique({
+    let user = await prisma.users.findUnique({
       where: { email },
     })
 
@@ -55,7 +55,7 @@ export async function linkOAuthAccount(
       // Create new User record for first-time OAuth users
       // Requirement 3.3: Create new User and Customer records for first-time OAuth users
       // User model has firstName/lastName, not name
-      user = await prisma.user.create({
+      user = await prisma.users.create({
         data: {
           email,
           firstName,
@@ -111,7 +111,7 @@ export async function linkOAuthAccount(
  */
 export async function checkUserExists(email: string): Promise<boolean> {
   try {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { email },
       select: { id: true },
     })

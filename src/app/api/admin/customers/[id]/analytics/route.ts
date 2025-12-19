@@ -35,7 +35,7 @@ export async function GET(
     }
 
     // Verify customer exists
-    const customer = await prisma.user.findUnique({
+    const customer = await prisma.users.findUnique({
       where: { id: customerId },
       select: { id: true }
     })

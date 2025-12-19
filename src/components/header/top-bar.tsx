@@ -26,7 +26,7 @@ export function TopBar() {
         <div
             className="
                 hidden md:block
-                bg-gradient-to-r from-turquoise-50 to-[#F0FDFF] 
+                bg-turquoise-50 
                 border-b border-turquoise-600/[0.08] 
                 transition-all duration-300 animate-slide-down
             "
@@ -35,11 +35,11 @@ export function TopBar() {
             <div className="container mx-auto px-[2%] lg:px-[4%] h-full">
                 <div className="flex items-center justify-between h-full">
                     {/* Section Gauche (40%) - Géolocalisation + Message Promo */}
-                    <div className="flex items-center gap-2 lg:gap-4 flex-1 lg:flex-none lg:w-[40%]">
+                    <div className="flex items-center gap-3 lg:gap-5 flex-1 lg:flex-none lg:w-[40%]">
                         <GeolocationSelector />
-                        
+
                         {/* Message Promotionnel Rotatif */}
-                        <div className="hidden lg:flex items-center gap-2 text-[12px] xl:text-[13px] font-medium tracking-[0.02em]">
+                        <div className="hidden xl:flex items-center gap-2 text-[12px] xl:text-[13px] font-medium tracking-[0.02em]">
                             <Package className="w-4 h-4 text-success flex-shrink-0" />
                             <span className="text-gray-500">{t('freeShippingShort')}</span>
                             <span className="text-turquoise-600 font-semibold">{t('freeShippingLabel')}</span>
@@ -53,19 +53,19 @@ export function TopBar() {
                     </div>
 
                     {/* Section Droite (40%) - Liens Utilitaires */}
-                    <div className="flex items-center justify-end gap-0.5 lg:gap-1 flex-1 lg:flex-none lg:w-[40%]">
+                    <div className="flex items-center justify-end gap-1 lg:gap-2 flex-1 lg:flex-none lg:w-[40%]">
                         {/* App Download */}
-                        <UtilityLink href="/app" icon={<Smartphone className="w-4 h-4" />} label={t('app')} />
-                        
-                        <span className="text-gray-300 mx-1 lg:mx-2 hidden lg:inline">│</span>
-                        
+                        <UtilityLink href="/app" icon={<Smartphone className="w-4 h-4" />} label={t('app')} className="hidden lg:flex" />
+
+                        <span className="text-gray-300 mx-1 hidden lg:inline">│</span>
+
                         {/* Support */}
                         <UtilityLink href="/support" icon={<Headphones className="w-4 h-4" />} label={t('support')} className="hidden lg:flex" />
-                        
-                        <span className="text-gray-300 mx-1 lg:mx-2 hidden lg:inline">│</span>
-                        
+
+                        <span className="text-gray-300 mx-1 hidden md:inline">│</span>
+
                         {/* Aide */}
-                        <UtilityLink href="/aide" icon={<HelpCircle className="w-4 h-4" />} label={t('help')} />
+                        <UtilityLink href="/aide" icon={<HelpCircle className="w-4 h-4" />} label={t('help')} className="hidden md:flex" />
                         
                         <span className="text-gray-300 mx-1 lg:mx-2 hidden xl:inline">│</span>
                         
@@ -100,7 +100,7 @@ function UtilityLink({ href, icon, label, className = '' }: UtilityLinkProps) {
         <Link
             href={href}
             className={`
-                inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md
+                inline-flex items-center gap-1.5 px-4 py-2 rounded-md
                 text-[13px] font-medium tracking-[0.02em] text-gray-800
                 transition-all duration-200 ease-smooth
                 hover:bg-turquoise-600/[0.06] hover:text-turquoise-600

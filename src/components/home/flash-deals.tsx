@@ -183,7 +183,7 @@ export default function FlashDeal({
   return (
     <section
       ref={sectionRef}
-      className={cn('py-10 md:py-14 bg-gradient-to-br from-orange-50 via-white to-orange-50', className)}
+      className={cn('py-10 md:py-14 bg-orange-50', className)}
       {...props}
     >
       <div className="container mx-auto px-3 md:px-4 lg:px-6">
@@ -198,7 +198,7 @@ export default function FlashDeal({
           <div className="mb-6 flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
             <div className="flex items-center gap-4">
               {/* Flash Icon */}
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-orange-600 shadow-elevation-2">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-600 shadow-elevation-2">
                 <Zap className="h-8 w-8 fill-white text-white" />
               </div>
 
@@ -291,8 +291,8 @@ export default function FlashDeal({
           )}
 
           {/* Gradient Edges */}
-          <div className="pointer-events-none absolute left-0 top-0 h-full w-12 bg-gradient-to-r from-orange-50 to-transparent" />
-          <div className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-orange-50 to-transparent" />
+          <div className="pointer-events-none absolute left-0 top-0 h-full w-12 bg-orange-50/80" />
+          <div className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-orange-50/80" />
         </div>
 
         {/* Dot Indicators */}
@@ -347,7 +347,7 @@ export default function FlashDeal({
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-platinum-200">
               <div
-                className="h-full bg-gradient-to-r from-orange-500 to-orange-600 transition-all duration-500"
+                className="h-full bg-orange-600 transition-all duration-500"
                 style={{ width: `${stockData.remainingPercentage}%` }}
                 role="progressbar"
                 aria-valuenow={stockData.remaining}

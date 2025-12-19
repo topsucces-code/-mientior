@@ -57,7 +57,7 @@ async function handleGET(
 
     // Fetch admin users
     const [adminUsers, totalCount] = await Promise.all([
-      prisma.adminUser.findMany({
+      prisma.admin_users.findMany({
         skip,
         take,
         where,
@@ -75,7 +75,7 @@ async function handleGET(
           updatedAt: true,
         },
       }),
-      prisma.adminUser.count({ where }),
+      prisma.admin_users.count({ where }),
     ]);
 
     return NextResponse.json(adminUsers, {

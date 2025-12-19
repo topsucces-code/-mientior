@@ -33,21 +33,23 @@ import { type AdminSession } from '@/lib/auth-admin'
 
 import { Prisma } from '@prisma/client'
 
+type JsonValue = Prisma.JsonValue
+
 // Define the exact type returned by the Prisma query
 type ProductWithRelations = Prisma.ProductGetPayload<{
   include: {
     category: true
     images: true
     variants: true
-    tags: {
+    productTags: {
       include: {
-        tag: true
+        tags: true
       }
     }
-    pimMapping: true
+    pimProductMappings: true
     reviews: {
       include: {
-        user: {
+        users: {
           select: {
             id: true
             email: true
@@ -65,9 +67,10 @@ type ProductWithRelations = Prisma.ProductGetPayload<{
 
 async function handleGET(
   request: NextRequest,
-  { params, adminSession: _adminSession }: { params: Record<string, string>, adminSession: AdminSession }
+  { params, adminSession: _adminSession }: { params: Record<string, string> | Promise<Record<string, string>>, adminSession: AdminSession }
 ) {
-  const { id } = params;
+  const resolvedParams = params instanceof Promise ? await params : params;
+  const { id } = resolvedParams;
   
   if (!id) {
     return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
@@ -82,16 +85,16 @@ async function handleGET(
           orderBy: { order: 'asc' }
         },
         variants: true,
-        tags: {
+        productTags: {
           include: {
-            tag: true
+            tags: true
           }
         },
-        pimMapping: true,
+        pimProductMappings: true,
         reviews: {
           where: { status: 'APPROVED' },
           include: {
-            user: {
+            users: {
               select: {
                 id: true,
                 email: true,
@@ -150,18 +153,18 @@ async function handleGET(
         color: v.color || undefined,
         sku: v.sku,
         stock: v.stock,
-        priceModifier: v.priceModifier || undefined
+        priceModifier: v.price_modifier || undefined
       })),
-      tags: product.tags.map(pt => ({
-        id: pt.tag.id,
-        name: pt.tag.name,
-        slug: pt.tag.slug
+      tags: (product.productTags || []).map((pt: { tags: { id: string; name: string; slug: string } }) => ({
+        id: pt.tags.id,
+        name: pt.tags.name,
+        slug: pt.tags.slug
       })),
-      pimMapping: product.pimMapping ? {
-        akeneoProductId: product.pimMapping.akeneoProductId,
-        akeneoSku: product.pimMapping.akeneoSku,
-        lastSyncedAt: product.pimMapping.lastSyncedAt,
-        syncStatus: product.pimMapping.syncStatus
+      pimMapping: product.pimProductMappings ? {
+        akeneoProductId: product.pimProductMappings.akeneo_product_id,
+        akeneoSku: product.pimProductMappings.akeneo_sku,
+        lastSyncedAt: product.pimProductMappings.last_synced_at,
+        syncStatus: product.pimProductMappings.sync_status
       } : undefined,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt
@@ -176,9 +179,10 @@ async function handleGET(
 
 async function handlePUT(
   request: NextRequest,
-  { params, adminSession }: { params: Record<string, string>, adminSession: AdminSession }
+  { params, adminSession }: { params: Record<string, string> | Promise<Record<string, string>>, adminSession: AdminSession }
 ) {
-  const { id } = params;
+  const resolvedParams = params instanceof Promise ? await params : params;
+  const { id } = resolvedParams;
   
   if (!id) {
     return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
@@ -193,7 +197,7 @@ async function handlePUT(
       include: {
         images: true,
         variants: true,
-        tags: true
+        productTags: true
       }
     })
 
@@ -208,7 +212,7 @@ async function handlePUT(
         select: { id: true },
       })
 
-      if (existingSlug && existingSlug.id !== params.id) {
+      if (existingSlug && existingSlug.id !== id) {
         return NextResponse.json(
           { error: `Slug "${body.slug}" is already in use by another product` },
           { status: 400 }
@@ -223,28 +227,28 @@ async function handlePUT(
     const product = await prisma.$transaction(async (tx) => {
       // Delete existing images if new ones provided
       if (body.images) {
-        await tx.productImage.deleteMany({
-          where: { productId: params.id }
+        await tx.product_images.deleteMany({
+          where: { product_id: id }
         })
       }
 
       // Delete existing variants if new ones provided
       if (body.variants) {
-        await tx.productVariant.deleteMany({
-          where: { productId: params.id }
+        await tx.product_variants.deleteMany({
+          where: { product_id: id }
         })
       }
 
       // Delete existing tags if new ones provided
       if (body.tagIds) {
-        await tx.productTag.deleteMany({
-          where: { productId: params.id }
+        await tx.product_tags.deleteMany({
+          where: { productId: id }
         })
       }
 
       // Update product
       return tx.product.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           name: body.name,
           slug: body.slug,
@@ -276,9 +280,10 @@ async function handlePUT(
               priceModifier: v.priceModifier
             }))
           } : undefined,
-          tags: body.tagIds ? {
+          productTags: body.tagIds ? {
             create: body.tagIds.map((tagId: string) => ({
-              tag: {
+              id: crypto.randomUUID(),
+              tags: {
                 connect: { id: tagId }
               }
             }))
@@ -288,12 +293,12 @@ async function handlePUT(
           category: true,
           images: true,
           variants: true,
-          tags: {
+          productTags: {
             include: {
-              tag: true
+              tags: true
             }
           },
-          pimMapping: true
+          pimProductMappings: true
         }
       })
     })
@@ -335,18 +340,18 @@ async function handlePUT(
         color: v.color || undefined,
         sku: v.sku,
         stock: v.stock,
-        priceModifier: v.priceModifier || undefined
+        priceModifier: v.price_modifier || undefined
       })),
-      tags: product.tags.map(pt => ({
-        id: pt.tag.id,
-        name: pt.tag.name,
-        slug: pt.tag.slug
+      tags: (product.productTags || []).map((pt: { tags: { id: string; name: string; slug: string } }) => ({
+        id: pt.tags.id,
+        name: pt.tags.name,
+        slug: pt.tags.slug
       })),
-      pimMapping: product.pimMapping ? {
-        akeneoProductId: product.pimMapping.akeneoProductId,
-        akeneoSku: product.pimMapping.akeneoSku,
-        lastSyncedAt: product.pimMapping.lastSyncedAt,
-        syncStatus: product.pimMapping.syncStatus
+      pimMapping: product.pimProductMappings ? {
+        akeneoProductId: product.pimProductMappings.akeneo_product_id,
+        akeneoSku: product.pimProductMappings.akeneo_sku,
+        lastSyncedAt: product.pimProductMappings.last_synced_at,
+        syncStatus: product.pimProductMappings.sync_status
       } : undefined,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt
@@ -364,9 +369,9 @@ async function handlePUT(
       await logUpdate(
         'product',
         id,
-        before,
-        transformedProduct,
-        adminSession.adminUser as unknown as import('@prisma/client').AdminUser,
+        JSON.parse(JSON.stringify(before)) as Record<string, JsonValue>,
+        JSON.parse(JSON.stringify(transformedProduct)) as Record<string, JsonValue>,
+        adminSession.adminUser as unknown as import('@prisma/client').admin_users,
         request
       )
     }
@@ -380,9 +385,10 @@ async function handlePUT(
 
 async function handleDELETE(
   request: NextRequest,
-  { params, adminSession }: { params: Record<string, string>, adminSession: AdminSession }
+  { params, adminSession }: { params: Record<string, string> | Promise<Record<string, string>>, adminSession: AdminSession }
 ) {
-  const { id } = params;
+  const resolvedParams = params instanceof Promise ? await params : params;
+  const { id } = resolvedParams;
   
   if (!id) {
     return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
@@ -423,9 +429,9 @@ async function handleDELETE(
         await logUpdate(
           'product',
           id,
-          product,
-          updatedProduct,
-          adminSession.adminUser as unknown as import('@prisma/client').AdminUser,
+          JSON.parse(JSON.stringify(product)) as Record<string, JsonValue>,
+          JSON.parse(JSON.stringify(updatedProduct)) as Record<string, JsonValue>,
+          adminSession.adminUser as unknown as import('@prisma/client').admin_users,
           request
         )
       }
@@ -453,8 +459,8 @@ async function handleDELETE(
       await logDelete(
         'product',
         id,
-        product,
-        adminSession.adminUser as unknown as import('@prisma/client').AdminUser,
+        JSON.parse(JSON.stringify(product)) as Record<string, JsonValue>,
+        adminSession.adminUser as unknown as import('@prisma/client').admin_users,
         request
       )
     }
@@ -469,4 +475,5 @@ async function handleDELETE(
 // Export wrapped handlers with permission checks
 export const GET = withPermission(Permission.PRODUCTS_READ, handleGET)
 export const PUT = withPermission(Permission.PRODUCTS_WRITE, handlePUT)
+export const PATCH = withPermission(Permission.PRODUCTS_WRITE, handlePUT)
 export const DELETE = withPermission(Permission.PRODUCTS_DELETE, handleDELETE)

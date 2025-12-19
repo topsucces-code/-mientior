@@ -110,55 +110,61 @@ export function parsePrice(input: string, currencyCode: CurrencyCode = 'XOF'): n
 }
 
 /**
- * Get minimum order amount for free shipping (in EUR)
+ * Get minimum order amount for free shipping (in FCFA - default currency)
+ * Aligned with CART_CONFIG.freeShippingThreshold (30,000 FCFA for SN/CI)
  */
 export function getFreeShippingThreshold(countryCode: string): number {
-  // Different thresholds based on region
+  // Different thresholds based on region (in FCFA)
   const thresholds: Record<string, number> = {
-    // West Africa
-    SN: 30, CI: 30, ML: 35, BF: 35, NE: 40, TG: 30, BJ: 30, GW: 40,
+    // West Africa - aligned with CART_CONFIG (30,000 FCFA)
+    SN: 30000, CI: 30000, ML: 35000, BF: 35000, NE: 40000, TG: 30000, BJ: 30000, GW: 40000,
     // Central Africa
-    CM: 35, GA: 40, CG: 40, TD: 45, CF: 50, GQ: 45,
+    CM: 35000, GA: 40000, CG: 40000, TD: 45000, CF: 50000, GQ: 45000,
     // Other Francophone
-    CD: 40, GN: 40, MG: 50,
-    // Anglophone
-    NG: 35, GH: 35, KE: 40, ZA: 50, TZ: 45, UG: 45, RW: 40,
+    CD: 40000, GN: 40000, MG: 50000,
+    // Anglophone (approximate conversions)
+    NG: 35000, GH: 35000, KE: 40000, ZA: 50000, TZ: 45000, UG: 45000, RW: 40000,
     // North Africa
-    MA: 40, DZ: 45, TN: 40, EG: 45,
+    MA: 40000, DZ: 45000, TN: 40000, EG: 45000,
   };
 
-  return thresholds[countryCode] || 50;
+  return thresholds[countryCode] || 50000;
 }
 
 /**
  * Calculate shipping cost based on country and order total
+ * All values are in FCFA (default currency) to avoid conversion issues
  */
 export function calculateShippingCost(
   orderTotal: number,
   countryCode: string,
   currencyCode: CurrencyCode = 'XOF'
 ): { cost: number; isFree: boolean; threshold: number } {
-  const threshold = getFreeShippingThreshold(countryCode);
-  const isFree = orderTotal >= threshold;
+  // Threshold is now in FCFA (default currency)
+  const thresholdInFCFA = getFreeShippingThreshold(countryCode);
 
-  // Base shipping costs by region (in EUR)
+  // Compare orderTotal (assumed to be in FCFA) with threshold
+  const isFree = orderTotal >= thresholdInFCFA;
+
+  // Base shipping costs by region (in FCFA)
   const baseCosts: Record<string, number> = {
-    // West Africa FCFA zone - lower costs
-    SN: 3, CI: 3, ML: 4, BF: 4, NE: 5, TG: 3, BJ: 3, GW: 5,
+    // West Africa FCFA zone - lower costs (~2000-3000 FCFA)
+    SN: 2000, CI: 2000, ML: 2500, BF: 2500, NE: 3000, TG: 2000, BJ: 2000, GW: 3000,
     // Central Africa
-    CM: 4, GA: 5, CG: 5, TD: 6, CF: 7, GQ: 6,
+    CM: 2500, GA: 3000, CG: 3000, TD: 3500, CF: 4000, GQ: 3500,
     // Other
-    CD: 6, GN: 5, MG: 8,
-    NG: 4, GH: 4, KE: 5, ZA: 7, TZ: 6, UG: 6, RW: 5,
-    MA: 5, DZ: 6, TN: 5, EG: 6,
+    CD: 3500, GN: 3000, MG: 5000,
+    NG: 2500, GH: 2500, KE: 3000, ZA: 4500, TZ: 3500, UG: 3500, RW: 3000,
+    MA: 3000, DZ: 3500, TN: 3000, EG: 3500,
   };
 
-  const baseCost = baseCosts[countryCode] || 5;
-  const cost = isFree ? 0 : baseCost;
+  const baseCostInFCFA = baseCosts[countryCode] || 3000;
+  const costInFCFA = isFree ? 0 : baseCostInFCFA;
 
+  // Convert to target currency if needed
   return {
-    cost: convertPrice(cost, currencyCode),
+    cost: currencyCode === 'XOF' ? costInFCFA : convertPrice(convertToEur(costInFCFA, 'XOF'), currencyCode),
     isFree,
-    threshold: convertPrice(threshold, currencyCode),
+    threshold: currencyCode === 'XOF' ? thresholdInFCFA : convertPrice(convertToEur(thresholdInFCFA, 'XOF'), currencyCode),
   };
 }

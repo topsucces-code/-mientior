@@ -19,7 +19,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const currentToken = cookieStore.get('session_token')?.value;
 
     // Find the session to revoke
-    const session = await prisma.session.findUnique({ where: { id } });
+    const session = await prisma.sessions.findUnique({ where: { id } });
     
     if (!session) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
@@ -30,7 +30,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Cannot revoke current session' }, { status: 400 });
     }
 
-    await prisma.session.delete({ where: { id } });
+    await prisma.sessions.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -114,11 +114,11 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                 onMouseLeave={handleMouseLeaveTrigger}
                 className={`
                     flex items-center gap-2.5 h-12 px-5
-                    bg-gradient-to-r from-turquoise-600 to-turquoise-500
+                    bg-turquoise-700
                     rounded-lg text-white text-sm font-semibold
                     cursor-pointer transition-all duration-250 ease-smooth
                     shadow-[0_2px_8px_rgba(8,145,178,0.2)]
-                    hover:from-turquoise-500 hover:to-turquoise-600
+                    hover:bg-turquoise-600
                     hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(8,145,178,0.3)]
                 `}
                 aria-label={`${t('categories')} - ${t('menu')}`}
@@ -152,7 +152,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                     style={{ animation: 'fadeIn 150ms ease-out' }}
                 >
                     {/* Top accent bar */}
-                    <div className="h-1 bg-gradient-to-r from-turquoise-600 via-orange-500 to-turquoise-500" />
+                    <div className="h-1 bg-turquoise-700" />
                     
                     <div className="flex max-h-[70vh] overflow-hidden">
                         {/* Column 1: Categories List (20%) */}
@@ -161,7 +161,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                             aria-label={t('allCategories')}
                         >
                             <div className="p-4">
-                                <h3 className="text-[11px] font-bold uppercase tracking-[0.1em] text-gray-500 mb-4">
+                                <h3 className="text-xs font-bold uppercase tracking-[0.1em] text-gray-500 mb-4">
                                     {t('allCategories')}
                                 </h3>
                                 <ul className="space-y-1" role="menubar" aria-orientation="vertical">
@@ -191,7 +191,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                                                         transition-all duration-200 ease-smooth
                                                         ${isActive
                                                             ? 'bg-turquoise-600/10 border-l-4 border-turquoise-600 pl-2 text-turquoise-600 font-semibold'
-                                                            : 'hover:bg-gradient-to-r hover:from-turquoise-600/[0.08] hover:to-transparent hover:pl-4'
+                                                            : 'hover:bg-turquoise-50 hover:pl-4'
                                                         }
                                                     `}
                                                     aria-current={isActive ? 'true' : undefined}
@@ -236,7 +236,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                                                                 {item.title}
                                                                 {item.badge && (
                                                                     <span className={`
-                                                                        text-[10px] px-2 py-0.5 rounded-full font-semibold
+                                                                        text-xs px-2.5 py-1 rounded-full font-semibold
                                                                         ${item.badge === 'Nouveau' ? 'bg-turquoise-100 text-turquoise-700' : 'bg-orange-100 text-orange-700'}
                                                                     `}>
                                                                         {item.badge}
@@ -265,7 +265,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                         </div>
 
                         {/* Column 3: Editorial Content (50%) */}
-                        <div className="flex-1 p-6 bg-gradient-to-br from-turquoise-50 to-[#F0FDFF]">
+                        <div className="flex-1 p-6 bg-turquoise-50">
                             {activeCategoryData && (
                                 <>
                                     <div className="mb-6">
@@ -280,8 +280,8 @@ export function MegaMenu({ categories }: MegaMenuProps) {
 
                                     {/* Featured Card */}
                                     {activeCategoryData.image && (
-                                        <Link 
-                                            href={activeCategoryData.link} 
+                                        <Link
+                                            href={activeCategoryData.link}
                                             className="
                                                 block relative rounded-xl overflow-hidden
                                                 shadow-[0_4px_12px_rgba(0,0,0,0.08)]
@@ -289,14 +289,21 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                                                 transition-all duration-300 group
                                             "
                                         >
-                                            <Image
-                                                src={activeCategoryData.image}
-                                                alt={activeCategoryData.title}
-                                                width={800}
-                                                height={200}
-                                                className="w-full h-48 object-cover"
-                                            />
-                                            <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-end p-6">
+                                            <div className="relative w-full h-48">
+                                                <Image
+                                                    src={activeCategoryData.image}
+                                                    alt={activeCategoryData.title}
+                                                    width={800}
+                                                    height={200}
+                                                    className="w-full h-48 object-cover"
+                                                    onError={(e) => {
+                                                        e.currentTarget.style.display = 'none'
+                                                    }}
+                                                />
+                                                {/* Fallback Gradient */}
+                                                <div className="absolute inset-0 -z-10 bg-turquoise-600" />
+                                            </div>
+                                            <div className="absolute inset-0 bg-black/50 flex items-end p-6">
                                                 <div className="text-white">
                                                     <p className="font-bold text-lg mb-1">{t('viewAll')} {activeCategoryData.title}</p>
                                                     <p className="text-sm opacity-90">{t('viewAll')} →</p>

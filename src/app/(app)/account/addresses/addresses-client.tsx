@@ -43,21 +43,26 @@ const emptyForm: AddressFormData = {
   line2: '',
   city: '',
   postalCode: '',
-  country: 'FR',
+  country: 'CI',
   phone: '',
   isDefault: false,
 }
 
 const countries = [
-  { code: 'FR', name: 'France' },
-  { code: 'BE', name: 'Belgium' },
-  { code: 'CH', name: 'Switzerland' },
-  { code: 'DE', name: 'Germany' },
-  { code: 'ES', name: 'Spain' },
-  { code: 'IT', name: 'Italy' },
-  { code: 'GB', name: 'United Kingdom' },
-  { code: 'US', name: 'United States' },
-  { code: 'CA', name: 'Canada' },
+  { code: 'CI', name: "Côte d'Ivoire" },
+  { code: 'SN', name: 'Sénégal' },
+  { code: 'CM', name: 'Cameroun' },
+  { code: 'NG', name: 'Nigeria' },
+  { code: 'GH', name: 'Ghana' },
+  { code: 'ML', name: 'Mali' },
+  { code: 'BF', name: 'Burkina Faso' },
+  { code: 'TG', name: 'Togo' },
+  { code: 'BJ', name: 'Bénin' },
+  { code: 'MA', name: 'Maroc' },
+  { code: 'TN', name: 'Tunisie' },
+  { code: 'DZ', name: 'Algérie' },
+  { code: 'KE', name: 'Kenya' },
+  { code: 'ZA', name: 'Afrique du Sud' },
 ]
 
 export function AddressesPageClient({ initialAddresses }: AddressesPageClientProps) {

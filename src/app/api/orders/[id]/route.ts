@@ -38,7 +38,7 @@ async function handleGET(
     }
 
     // Fetch order with relations
-    const order = await prisma.order.findUnique({
+    const order = await prisma.orders.findUnique({
       where: { id: params.id },
       include: {
         items: {
@@ -120,7 +120,7 @@ async function handlePUT(
     const body = await request.json()
 
     // Check if order exists
-    const existing = await prisma.order.findUnique({
+    const existing = await prisma.orders.findUnique({
       where: { id: params.id },
       include: {
         items: {
@@ -139,7 +139,7 @@ async function handlePUT(
     const before = existing
 
     // Update order
-    const order = await prisma.order.update({
+    const order = await prisma.orders.update({
       where: { id: params.id },
       data: {
         status: body.status?.toUpperCase(),

@@ -47,7 +47,7 @@ export function EmptyCart({ isAuthenticated = false, className }: EmptyCartProps
         <div className="flex flex-col items-center justify-center p-12 text-center">
           {/* Illustration with floating circles */}
           <div className="relative mb-6">
-            <div className="flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-orange-100 to-amber-100">
+            <div className="flex h-32 w-32 items-center justify-center rounded-full bg-orange-100">
               <ShoppingCart className="h-16 w-16 text-orange-500" strokeWidth={1.5} />
             </div>
             {/* Floating decorative circles */}

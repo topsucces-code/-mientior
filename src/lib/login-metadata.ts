@@ -56,7 +56,7 @@ export async function updateLoginMetadata(
   const userAgent = extractUserAgent(request)
 
   // Update the session with device info
-  await prisma.session.update({
+  await prisma.sessions.update({
     where: { token: sessionToken },
     data: {
       ipAddress,
@@ -65,8 +65,8 @@ export async function updateLoginMetadata(
     },
   })
 
-  // Update the better_auth_users updatedAt timestamp
-  await prisma.user.update({
+  // Update the users updatedAt timestamp
+  await prisma.users.update({
     where: { id: userId },
     data: {
       updatedAt: new Date(),

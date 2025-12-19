@@ -8,15 +8,15 @@ const badgeVariants = cva(
     variants: {
       variant: {
         // Tier 1 - Urgence (Orange gradient + pulse)
-        flash: "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-elevation-2 animate-pulse-subtle",
+        flash: "bg-orange-600 text-white shadow-elevation-2 animate-pulse-subtle",
         urgent: "bg-orange-500 text-white shadow-elevation-2",
 
         // Tier 2 - Performance (Bleu + icône)
-        bestseller: "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-elevation-1",
-        trending: "bg-blue-500 text-white shadow-elevation-1",
+        bestseller: "bg-turquoise-600 text-white shadow-elevation-1",
+        trending: "bg-turquoise-500 text-white shadow-elevation-1",
 
         // Tier 3 - Nouveauté (Gradient aurore)
-        new: "bg-gradient-to-r from-aurore-500 to-aurore-600 text-anthracite-500 shadow-elevation-1 animate-shimmer bg-[length:200%_100%]",
+        new: "bg-turquoise-500 text-white shadow-elevation-1",
 
         // Autres variantes
         success: "bg-success text-white",
@@ -26,12 +26,12 @@ const badgeVariants = cva(
         outline: "border border-platinum-400 text-nuanced-500 bg-transparent",
 
         // Compatibilité
-        secondary: "bg-blue-500 text-white",
+        secondary: "bg-turquoise-500 text-white",
         destructive: "bg-error text-white",
       },
       size: {
-        sm: "text-[10px] px-1.5 py-0.5",
-        md: "text-[11px] px-2 py-1",
+        sm: "text-xs px-2 py-1",
+        md: "text-xs px-2.5 py-1",
         lg: "text-xs px-3 py-1.5",
       },
     },

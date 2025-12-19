@@ -24,19 +24,19 @@ const trustFeatures: TrustFeature[] = [
     icon: RotateCcw,
     title: 'Retours gratuits',
     description: 'Retours sous 30 jours sans frais',
-    color: 'text-blue-600 bg-blue-100'
+    color: 'text-turquoise-600 bg-turquoise-100'
   },
   {
     icon: CreditCard,
     title: 'Paiement sécurisé',
     description: 'Cryptage SSL pour vos transactions',
-    color: 'text-green-600 bg-green-100'
+    color: 'text-turquoise-600 bg-turquoise-100'
   },
   {
     icon: Headphones,
     title: 'Support 24/7',
     description: 'Assistance disponible à tout moment',
-    color: 'text-purple-600 bg-purple-100'
+    color: 'text-turquoise-600 bg-turquoise-100'
   }
 ]
 
@@ -46,7 +46,7 @@ interface TrustSectionProps {
 
 export function TrustSection({ className }: TrustSectionProps) {
   return (
-    <div className={cn('rounded-lg bg-gradient-to-br from-platinum-50 to-white p-6', className)}>
+    <div className={cn('rounded-lg bg-platinum-50 p-6', className)}>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {trustFeatures.map((feature) => (
           <Card

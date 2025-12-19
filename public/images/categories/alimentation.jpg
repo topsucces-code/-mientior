@@ -1,0 +1,18 @@
+<svg width="1200" height="900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="categoryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#EF4444;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F97316;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#categoryGradient)"/>
+  <g opacity="0.1">
+    <circle cx="200" cy="200" r="150" fill="#FFFFFF"/>
+    <circle cx="1000" cy="700" r="200" fill="#FFFFFF"/>
+    <circle cx="600" cy="450" r="100" fill="#FFFFFF"/>
+  </g>
+  <g fill="#FFFFFF" opacity="0.9">
+    <path d="M 550 350 L 650 350 L 670 630 L 530 630 Z M 570 370 L 630 370 L 640 610 L 560 610 Z" stroke="#FFFFFF" stroke-width="4"/>
+  </g>
+  <text x="600" y="720" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Alimentation & Boissons</text>
+</svg>

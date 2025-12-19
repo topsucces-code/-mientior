@@ -21,7 +21,7 @@ export interface AuthAuditLogParams {
   email?: string
   ipAddress?: string
   userAgent?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   success: boolean
   errorMessage?: string
 }
@@ -31,8 +31,9 @@ export interface AuthAuditLogParams {
  */
 export async function logAuthEvent(params: AuthAuditLogParams): Promise<void> {
   try {
-    await prisma.auditLog.create({
+    await prisma.audit_logs.create({
       data: {
+        id: crypto.randomUUID(),
         action: params.action,
         resource: 'AUTH',
         resourceId: params.userId,
@@ -44,6 +45,7 @@ export async function logAuthEvent(params: AuthAuditLogParams): Promise<void> {
           success: params.success,
           errorMessage: params.errorMessage,
           ...params.metadata,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any,
       },
     })
@@ -61,7 +63,7 @@ export async function logLoginSuccess(
   email: string,
   ipAddress: string,
   userAgent: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<void> {
   await logAuthEvent({
     action: 'LOGIN_SUCCESS',
@@ -82,7 +84,7 @@ export async function logLoginFailed(
   ipAddress: string,
   userAgent: string,
   errorMessage: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<void> {
   await logAuthEvent({
     action: 'LOGIN_FAILED',
@@ -103,7 +105,7 @@ export async function logPasswordChanged(
   email: string,
   ipAddress: string,
   userAgent: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<void> {
   await logAuthEvent({
     action: 'PASSWORD_CHANGED',
@@ -122,7 +124,7 @@ export async function logPasswordChanged(
 export async function logEmailVerified(
   userId: string,
   email: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<void> {
   await logAuthEvent({
     action: 'EMAIL_VERIFIED',
@@ -141,7 +143,7 @@ export async function logAdminLogin(
   email: string,
   ipAddress: string,
   userAgent: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<void> {
   await logAuthEvent({
     action: 'ADMIN_LOGIN',
@@ -162,7 +164,7 @@ export async function logLogout(
   email: string,
   ipAddress: string,
   userAgent: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<void> {
   await logAuthEvent({
     action: 'LOGOUT',
@@ -183,7 +185,7 @@ export async function logRegistration(
   email: string,
   ipAddress: string,
   userAgent: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<void> {
   await logAuthEvent({
     action: 'REGISTRATION',
@@ -203,7 +205,7 @@ export async function logPasswordResetRequested(
   email: string,
   ipAddress: string,
   userAgent: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<void> {
   await logAuthEvent({
     action: 'PASSWORD_RESET_REQUESTED',
@@ -223,7 +225,7 @@ export async function logPasswordResetCompleted(
   email: string,
   ipAddress: string,
   userAgent: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<void> {
   await logAuthEvent({
     action: 'PASSWORD_RESET_COMPLETED',

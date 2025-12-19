@@ -112,19 +112,19 @@ export const DEFAULT_CURRENCY = 'XOF'
 export const DEFAULT_ROTATING_MESSAGES: RotatingMessage[] = [
     {
         id: '1',
-        text: '🎉 Livraison gratuite pour toutes commandes supérieures à 50€',
+        text: '🎉 Livraison gratuite pour toutes commandes supérieures à 30 000 FCFA',
         type: 'promo',
         link: '/promo/livraison-gratuite'
     },
     {
         id: '2',
-        text: '✨ Nouveautés : Découvrez notre collection printemps',
+        text: '✨ Nouveautés : Découvrez notre collection saison sèche',
         type: 'info',
         link: '/nouveautes'
     },
     {
         id: '3',
-        text: '🔥 Soldes d\'été : Jusqu\'à -70% sur une sélection d\'articles',
+        text: '🔥 Promotions : Jusqu\'à -70% sur une sélection d\'articles',
         type: 'promo',
         link: '/soldes'
     },
@@ -135,7 +135,7 @@ export const DEFAULT_ROTATING_MESSAGES: RotatingMessage[] = [
     },
     {
         id: '5',
-        text: '💳 Paiement en 3x sans frais dès 100€',
+        text: '💳 Paiement en 3x sans frais dès 60 000 FCFA',
         type: 'info',
         link: '/paiement-fractionne'
     }
@@ -167,7 +167,7 @@ export const CART_CONFIG = {
     maxItems: 99,
     minQuantity: 1,
     maxQuantity: 10,
-    freeShippingThreshold: 50
+    freeShippingThreshold: 30000
 }
 
 // ==================== WISHLIST CONFIGURATION ====================
@@ -187,7 +187,7 @@ export const COMPARATOR_CONFIG = {
 
 export const GEOLOCATION_CONFIG = {
     apiUrl: 'https://ipapi.co/json/',
-    defaultCountry: 'France',
+    defaultCountry: 'Sénégal',
     timeout: 10000, // 10 seconds
     enableHighAccuracy: true,
     maximumAge: 300000 // 5 minutes cache
@@ -195,51 +195,8 @@ export const GEOLOCATION_CONFIG = {
 
 // ==================== CITIES AND REGIONS ====================
 
-export interface City {
-    name: string
-    region: string
-    code: string
-    postalCode: string
-}
-
-export const FRENCH_CITIES: City[] = [
-    { name: 'Paris', region: 'Île-de-France', code: 'PAR', postalCode: '75000' },
-    { name: 'Lyon', region: 'Auvergne-Rhône-Alpes', code: 'LYO', postalCode: '69000' },
-    { name: 'Marseille', region: 'Provence-Alpes-Côte d\'Azur', code: 'MAR', postalCode: '13000' },
-    { name: 'Toulouse', region: 'Occitanie', code: 'TOU', postalCode: '31000' },
-    { name: 'Nice', region: 'Provence-Alpes-Côte d\'Azur', code: 'NIC', postalCode: '06000' },
-    { name: 'Nantes', region: 'Pays de la Loire', code: 'NAN', postalCode: '44000' },
-    { name: 'Strasbourg', region: 'Grand Est', code: 'STR', postalCode: '67000' },
-    { name: 'Bordeaux', region: 'Nouvelle-Aquitaine', code: 'BOR', postalCode: '33000' },
-    { name: 'Lille', region: 'Hauts-de-France', code: 'LIL', postalCode: '59000' },
-    { name: 'Rennes', region: 'Bretagne', code: 'REN', postalCode: '35000' },
-    { name: 'Reims', region: 'Grand Est', code: 'REI', postalCode: '51100' },
-    { name: 'Le Havre', region: 'Normandie', code: 'HAV', postalCode: '76600' },
-    { name: 'Saint-Étienne', region: 'Auvergne-Rhône-Alpes', code: 'STE', postalCode: '42000' },
-    { name: 'Toulon', region: 'Provence-Alpes-Côte d\'Azur', code: 'TLN', postalCode: '83000' },
-    { name: 'Grenoble', region: 'Auvergne-Rhône-Alpes', code: 'GRE', postalCode: '38000' },
-    { name: 'Dijon', region: 'Bourgogne-Franche-Comté', code: 'DIJ', postalCode: '21000' },
-    { name: 'Angers', region: 'Pays de la Loire', code: 'ANG', postalCode: '49000' },
-    { name: 'Nîmes', region: 'Occitanie', code: 'NIM', postalCode: '30000' },
-    { name: 'Villeurbanne', region: 'Auvergne-Rhône-Alpes', code: 'VIL', postalCode: '69100' },
-    { name: 'Clermont-Ferrand', region: 'Auvergne-Rhône-Alpes', code: 'CLE', postalCode: '63000' },
-]
-
-export const FRENCH_REGIONS = [
-    'Auvergne-Rhône-Alpes',
-    'Bourgogne-Franche-Comté',
-    'Bretagne',
-    'Centre-Val de Loire',
-    'Corse',
-    'Grand Est',
-    'Hauts-de-France',
-    'Île-de-France',
-    'Normandie',
-    'Nouvelle-Aquitaine',
-    'Occitanie',
-    'Pays de la Loire',
-    'Provence-Alpes-Côte d\'Azur',
-]
+// Note: African cities are available in src/lib/african-cities.ts
+// FRENCH_CITIES and FRENCH_REGIONS have been removed as they are not used in the codebase
 
 
 // ==================== ANIMATION DURATIONS ====================

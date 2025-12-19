@@ -25,7 +25,7 @@ export async function GET(
     const { id } = await params;
 
     // Verify order belongs to user
-    const order = await prisma.order.findUnique({
+    const order = await prisma.orders.findUnique({
       where: { id },
       select: {
         id: true,

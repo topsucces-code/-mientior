@@ -27,7 +27,7 @@ export async function DELETE(
     const sessionId = params.id
 
     // Get the session to delete
-    const sessionToDelete = await prisma.session.findUnique({
+    const sessionToDelete = await prisma.sessions.findUnique({
       where: { id: sessionId },
     })
 
@@ -58,7 +58,7 @@ export async function DELETE(
     }
 
     // Delete the session from database
-    await prisma.session.delete({
+    await prisma.sessions.delete({
       where: { id: sessionId },
     })
 

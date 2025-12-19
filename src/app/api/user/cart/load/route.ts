@@ -20,7 +20,7 @@ export async function GET() {
     const userId = session.user.id
 
     // Fetch user's cart from database
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: userId },
       select: { cart: true }
     })

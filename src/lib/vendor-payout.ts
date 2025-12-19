@@ -21,7 +21,7 @@ export async function calculateVendorPayout(
   periodEnd: Date
 ): Promise<PayoutSummary> {
   // Get all completed orders in period
-  const orders = await prisma.order.findMany({
+  const orders = await prisma.orders.findMany({
     where: {
       vendorId,
       status: 'DELIVERED',
@@ -87,7 +87,7 @@ export async function generateMonthlyPayouts(
   const periodEnd = endOfMonth(targetMonth)
   
   // Get all active vendors
-  const vendors = await prisma.vendor.findMany({
+  const vendors = await prisma.vendors.findMany({
     where: { status: 'ACTIVE' }
   })
   
@@ -120,7 +120,7 @@ export async function generateMonthlyPayouts(
     })
     
     // Create payout items for each order
-    const orders = await prisma.order.findMany({
+    const orders = await prisma.orders.findMany({
       where: {
         vendorId: vendor.id,
         status: 'DELIVERED',
@@ -200,7 +200,7 @@ export async function processPayoutPayment(
     })
     
     // Create vendor transaction
-    const vendor = await prisma.vendor.findUnique({
+    const vendor = await prisma.vendors.findUnique({
       where: { id: payout.vendorId },
       select: { balance: true, pendingBalance: true }
     })
@@ -220,7 +220,7 @@ export async function processPayoutPayment(
       })
       
       // Update vendor balances
-      await prisma.vendor.update({
+      await prisma.vendors.update({
         where: { id: payout.vendorId },
         data: {
           pendingBalance: {

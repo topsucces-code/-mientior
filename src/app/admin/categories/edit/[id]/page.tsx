@@ -83,7 +83,7 @@ export default function CategoryEdit({ params }: { params: Promise<{ id: string 
         </Popconfirm>
       </div>
 
-      <Form {...formProps} layout="vertical">
+      <Form {...formProps} form={form} layout="vertical">
         <Form.Item
           label="Name"
           name="name"

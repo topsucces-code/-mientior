@@ -48,7 +48,7 @@ async function handleGET(request: NextRequest, { adminSession: _adminSession }: 
 
     // Fetch users with aggregations
     const [users, totalCount] = await Promise.all([
-      prisma.user.findMany({
+      prisma.users.findMany({
         skip,
         take,
         where,
@@ -71,7 +71,7 @@ async function handleGET(request: NextRequest, { adminSession: _adminSession }: 
           }
         }
       }),
-      prisma.user.count({ where })
+      prisma.users.count({ where })
     ])
 
     // Transform to match frontend User type

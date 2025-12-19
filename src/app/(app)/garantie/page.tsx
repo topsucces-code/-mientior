@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 
 export default function WarrantyPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-green-600 to-green-700 text-white py-16">
+      <section className="bg-turquoise-700 text-white py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-white/10 rounded-full mb-6 backdrop-blur-sm">
@@ -40,7 +40,7 @@ export default function WarrantyPage() {
 
             <div className="grid md:grid-cols-3 gap-8">
               {/* Legal Warranty */}
-              <div className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl p-8 border-2 border-green-200">
+              <div className="bg-turquoise-50 rounded-xl p-8 border-2 border-turquoise-200">
                 <div className="w-16 h-16 bg-green-600 text-white rounded-full flex items-center justify-center mb-6 mx-auto">
                   <Shield className="w-8 h-8" />
                 </div>
@@ -67,7 +67,7 @@ export default function WarrantyPage() {
               </div>
 
               {/* Extended Warranty */}
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-8 border-2 border-blue-200">
+              <div className="bg-turquoise-50 rounded-xl p-8 border-2 border-turquoise-200">
                 <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center mb-6 mx-auto">
                   <Award className="w-8 h-8" />
                 </div>
@@ -94,7 +94,7 @@ export default function WarrantyPage() {
               </div>
 
               {/* Satisfaction Guarantee */}
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl p-8 border-2 border-purple-200">
+              <div className="bg-orange-50 rounded-xl p-8 border-2 border-orange-200">
                 <div className="w-16 h-16 bg-purple-600 text-white rounded-full flex items-center justify-center mb-6 mx-auto">
                   <CheckCircle className="w-8 h-8" />
                 </div>
@@ -159,7 +159,7 @@ export default function WarrantyPage() {
 
             <div className="grid md:grid-cols-2 gap-8">
               {/* Step 1 */}
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl p-6 border border-blue-200">
+              <div className="bg-turquoise-50 rounded-xl p-6 border border-turquoise-200">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
                     1
@@ -180,7 +180,7 @@ export default function WarrantyPage() {
               </div>
 
               {/* Step 2 */}
-              <div className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl p-6 border border-green-200">
+              <div className="bg-turquoise-50 rounded-xl p-6 border border-turquoise-200">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
                     2
@@ -202,7 +202,7 @@ export default function WarrantyPage() {
               </div>
 
               {/* Step 3 */}
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl p-6 border border-purple-200">
+              <div className="bg-orange-50 rounded-xl p-6 border border-orange-200">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
                     3
@@ -223,7 +223,7 @@ export default function WarrantyPage() {
               </div>
 
               {/* Step 4 */}
-              <div className="bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl p-6 border border-orange-200">
+              <div className="bg-orange-50 rounded-xl p-6 border border-orange-200">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-12 h-12 bg-orange-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
                     4

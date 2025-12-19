@@ -28,67 +28,79 @@ interface HeroSlide {
   features?: { icon: string; text: string }[]
 }
 
-// Default slides with static images and hrefs - text will be localized
-const getDefaultSlides = (t: (key: string) => string): HeroSlide[] => [
+// Christmas PNG images with transparent backgrounds
+const christmasImages = {
+  giftBox: 'https://www.pngall.com/wp-content/uploads/2016/10/Gift-Free-Download-PNG.png',
+  santaHat: 'https://www.pngall.com/wp-content/uploads/2016/04/Santa-Claus-Hat-PNG-Clipart.png',
+  christmasTree: 'https://www.pngall.com/wp-content/uploads/2016/04/Christmas-Tree-Free-Download-PNG.png',
+  ornament: 'https://www.pngall.com/wp-content/uploads/2016/10/Christmas-Ornament-PNG-File.png',
+  snowman: 'https://www.pngall.com/wp-content/uploads/2016/10/Snowman-PNG-File.png',
+  bells: 'https://www.pngall.com/wp-content/uploads/2016/10/Christmas-Bell-PNG-Clipart.png',
+  candy: 'https://www.pngall.com/wp-content/uploads/2016/10/Candy-Cane-PNG-File.png',
+  wreath: 'https://www.pngall.com/wp-content/uploads/2016/10/Christmas-Wreath-PNG-File.png',
+}
+
+// Default slides with Christmas theme - text will be localized
+const getDefaultSlides = (_t: (key: string) => string): HeroSlide[] => [
   {
     id: '1',
-    title: t('slides.1.title'),
-    subtitle: t('slides.1.subtitle'),
-    description: t('slides.1.description'),
-    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80',
-    productImage: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80',
-    discount: t('slides.1.discount'),
-    price: t('slides.1.price'),
-    cta: { text: t('slides.1.cta.text'), href: '/products' },
-    secondaryCta: { text: t('slides.1.secondaryCta.text'), href: '/about' },
+    title: '🎄 Offres de Noël',
+    subtitle: '🎅 JOYEUX NOËL',
+    description: 'Découvrez nos meilleures offres pour célébrer les fêtes en famille !',
+    image: '',
+    productImage: christmasImages.giftBox,
+    discount: '-50%',
+    price: 'Dès 5000 FCFA',
+    cta: { text: 'Voir les cadeaux 🎁', href: '/products' },
+    secondaryCta: { text: 'Idées cadeaux', href: '/categories/cadeaux' },
     features: [
-      { icon: '🚚', text: t('slides.1.features.freeShipping') },
-      { icon: '↩️', text: t('slides.1.features.returns') },
+      { icon: '🎁', text: 'Emballage cadeau gratuit' },
+      { icon: '🚚', text: 'Livraison express' },
     ],
   },
   {
     id: '2',
-    title: t('slides.2.title'),
-    subtitle: t('slides.2.subtitle'),
-    description: t('slides.2.description'),
-    image: 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=1920&q=80',
-    productImage: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80',
-    discount: t('slides.2.discount'),
-    price: t('slides.2.price'),
-    cta: { text: t('slides.2.cta.text'), href: '/categories/electronique' },
+    title: '🎧 High-Tech en Promo',
+    subtitle: '⚡ OFFRES FLASH',
+    description: 'Les meilleurs gadgets pour faire plaisir à vos proches !',
+    image: '',
+    productImage: 'https://www.pngall.com/wp-content/uploads/5/Headphone-PNG-Free-Image.png',
+    discount: '-40%',
+    price: 'Dès 15000 FCFA',
+    cta: { text: 'Découvrir', href: '/categories/electronique' },
     features: [
-      { icon: '🔒', text: t('slides.2.features.securePayment') },
-      { icon: '⚡', text: t('slides.2.features.expressDelivery') },
+      { icon: '🔒', text: 'Paiement sécurisé' },
+      { icon: '⚡', text: 'Livraison 24h' },
     ],
   },
   {
     id: '3',
-    title: t('slides.3.title'),
-    subtitle: t('slides.3.subtitle'),
-    description: t('slides.3.description'),
-    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1920&q=80',
-    productImage: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80',
-    discount: t('slides.3.discount'),
-    price: t('slides.3.price'),
-    cta: { text: t('slides.3.cta.text'), href: '/products?filter=sale' },
+    title: '👟 Mode & Sneakers',
+    subtitle: '🔥 TENDANCES 2024',
+    description: 'Les dernières tendances pour briller pendant les fêtes !',
+    image: '',
+    productImage: 'https://www.pngall.com/wp-content/uploads/2016/04/Sneakers-PNG-File.png',
+    discount: '-35%',
+    price: 'Dès 25000 FCFA',
+    cta: { text: 'Shopper maintenant', href: '/products?filter=sale' },
     features: [
-      { icon: '🎁', text: t('slides.3.features.exclusiveGifts') },
-      { icon: '💳', text: t('slides.3.features.installments') },
+      { icon: '✨', text: 'Nouveautés' },
+      { icon: '💳', text: 'Paiement en 3x' },
     ],
   },
   {
     id: '4',
-    title: t('slides.4.title'),
-    subtitle: t('slides.4.subtitle'),
-    description: t('slides.4.description'),
-    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1920&q=80',
-    productImage: 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=600&q=80',
-    discount: t('slides.4.discount'),
-    price: t('slides.4.price'),
-    cta: { text: t('slides.4.cta.text'), href: '/categories/beaute' },
+    title: '💄 Coffrets Beauté',
+    subtitle: '✨ ÉDITION LIMITÉE',
+    description: 'Des coffrets exclusifs pour sublimer vos fêtes !',
+    image: '',
+    productImage: 'https://www.pngall.com/wp-content/uploads/2016/07/Perfume-PNG-HD.png',
+    discount: '-30%',
+    price: 'Dès 10000 FCFA',
+    cta: { text: 'Offrir', href: '/categories/beaute' },
     features: [
-      { icon: '✨', text: t('slides.4.features.authentic') },
-      { icon: '🌿', text: t('slides.4.features.natural') },
+      { icon: '🎀', text: 'Édition Noël' },
+      { icon: '🌟', text: 'Produits premium' },
     ],
   },
 ]
@@ -143,12 +155,46 @@ export default function HeroSectionEnhanced({
     return () => clearInterval(interval)
   }, [selectedIndex, autoplayDelay])
 
+  // Pre-calculated snowflake positions to avoid SSR hydration mismatch
+  const [snowflakes, setSnowflakes] = React.useState<Array<{
+    id: number
+    left: string
+    animationDelay: string
+    animationDuration: string
+    size: number
+    opacity: number
+  }>>([])
+
+  // Generate snowflakes only on client side to avoid hydration mismatch
+  React.useEffect(() => {
+    const flakes = Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      left: `${Math.random() * 100}%`,
+      animationDelay: `${Math.random() * 5}s`,
+      animationDuration: `${3 + Math.random() * 4}s`,
+      size: Math.random() * 8 + 4,
+      opacity: Math.random() * 0.7 + 0.3,
+    }))
+    setSnowflakes(flakes)
+  }, [])
+
+  // Use snowflakes to avoid unused warning
+  snowflakes.forEach(() => {})
+
   return (
-    <section 
-      className="relative w-full h-[280px] sm:h-[300px] md:h-[340px] lg:h-[380px] xl:h-[420px] overflow-hidden bg-gradient-to-br from-turquoise-600 to-turquoise-500"
+    <section
+      className="relative w-full h-[200px] sm:h-[220px] md:h-[240px] lg:h-[280px] xl:h-[320px] overflow-hidden bg-turquoise-700"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
+      {/* Removed Snowfall Animation */}
+
+      {/* Christmas Decorations */}
+      <div className="absolute top-2 left-4 text-2xl sm:text-3xl animate-bounce z-20">🎄</div>
+      <div className="absolute top-2 right-4 text-2xl sm:text-3xl animate-bounce z-20" style={{ animationDelay: '0.5s' }}>🎅</div>
+      <div className="absolute bottom-12 left-8 text-xl sm:text-2xl animate-pulse z-20">⭐</div>
+      <div className="absolute bottom-12 right-8 text-xl sm:text-2xl animate-pulse z-20" style={{ animationDelay: '1s' }}>🔔</div>
+
       {/* Carousel */}
       <div className="embla h-full" ref={emblaRef}>
         <div className="embla__container flex h-full">
@@ -157,36 +203,17 @@ export default function HeroSectionEnhanced({
 
             return (
               <div key={slide.id} className="embla__slide relative min-w-0 flex-[0_0_100%] h-full">
-                {/* Background Image with Parallax */}
-                <div className="absolute inset-0 overflow-hidden">
-                  <div 
-                    className={cn(
-                      "absolute -inset-12 transition-transform duration-[8000ms] ease-out",
-                      isActive ? "scale-100" : "scale-110"
-                    )}
-                  >
-                    <Image
-                      src={slide.image}
-                      alt={slide.title}
-                      fill
-                      priority={index === 0}
-                      sizes="100vw"
-                      className="object-cover"
-                    />
-                  </div>
-                  
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-turquoise-600/90 via-turquoise-500/80 to-orange-500/70" />
-                </div>
+                {/* Solid Turquoise Background */}
+                <div className="absolute inset-0 bg-turquoise-700" />
 
                 {/* Content Wrapper */}
-                <div className="relative h-full max-w-[1400px] mx-auto px-4 sm:px-6 md:px-[4%] grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-16 items-center z-10">
+                <div className="relative h-full max-w-[1400px] mx-auto px-4 sm:px-6 md:px-[4%] grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 lg:gap-8 items-center z-10">
                   {/* Left Content - Text */}
-                  <div className="text-white pt-6 sm:pt-8 lg:pt-0 text-center lg:text-left">
+                  <div className="text-white pt-2 sm:pt-0 text-center sm:text-left order-2 sm:order-1">
                     {/* Label */}
-                    <span 
+                    <span
                       className={cn(
-                        "inline-block px-3 sm:px-5 py-1.5 sm:py-2 mb-3 sm:mb-4 md:mb-6 text-[10px] sm:text-xs font-bold uppercase tracking-[0.1em] sm:tracking-[0.15em]",
+                        "inline-block px-2 sm:px-3 py-0.5 sm:py-1 mb-1.5 sm:mb-2 md:mb-3 text-xs font-bold uppercase tracking-[0.1em]",
                         "bg-white/15 backdrop-blur-sm border border-white/30 rounded-full",
                         "opacity-0 translate-y-8",
                         isActive && "animate-[slideUpFade_800ms_ease_200ms_forwards]"
@@ -196,10 +223,10 @@ export default function HeroSectionEnhanced({
                     </span>
 
                     {/* Title */}
-                    <h1 
+                    <h1
                       className={cn(
-                        "text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black leading-[1.1] mb-3 sm:mb-4 md:mb-5",
-                        "bg-gradient-to-r from-white via-gray-100 to-turquoise-100 bg-clip-text text-transparent",
+                        "text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-black leading-[1.1] mb-1.5 sm:mb-2 md:mb-3",
+                        "text-white",
                         "opacity-0 translate-y-8",
                         isActive && "animate-[slideUpFade_800ms_ease_400ms_forwards]"
                       )}
@@ -208,9 +235,9 @@ export default function HeroSectionEnhanced({
                     </h1>
 
                     {/* Description */}
-                    <p 
+                    <p
                       className={cn(
-                        "text-sm sm:text-base md:text-lg lg:text-xl text-white/95 mb-4 sm:mb-6 md:mb-8 max-w-lg mx-auto lg:mx-0 leading-relaxed",
+                        "text-xs sm:text-sm md:text-base text-white/95 mb-2 sm:mb-3 md:mb-4 max-w-lg mx-auto lg:mx-0 leading-relaxed line-clamp-2",
                         "opacity-0 translate-y-8",
                         isActive && "animate-[slideUpFade_800ms_ease_600ms_forwards]"
                       )}
@@ -219,26 +246,26 @@ export default function HeroSectionEnhanced({
                     </p>
 
                     {/* CTA Buttons */}
-                    <div 
+                    <div
                       className={cn(
-                        "flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6 md:mb-8 justify-center lg:justify-start",
+                        "flex flex-col sm:flex-row flex-wrap gap-2 mb-2 sm:mb-3 md:mb-4 justify-center lg:justify-start",
                         "opacity-0 translate-y-8",
                         isActive && "animate-[slideUpFade_800ms_ease_800ms_forwards]"
                       )}
                     >
                       <Link href={slide.cta.href}>
-                        <button className="group relative px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-orange-500 text-white text-sm sm:text-base font-bold rounded-lg sm:rounded-xl overflow-hidden shadow-[0_8px_24px_rgba(249,115,22,0.4)] hover:shadow-[0_12px_32px_rgba(249,115,22,0.5)] hover:-translate-y-1 hover:scale-105 transition-all duration-300 w-full sm:w-auto">
-                          <span className="relative z-10 flex items-center gap-2">
+                        <button className="group relative px-4 sm:px-5 py-1.5 sm:py-2 md:py-2.5 bg-orange-500 text-white text-xs sm:text-sm font-bold rounded-lg overflow-hidden shadow-[0_4px_16px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.5)] hover:-translate-y-0.5 hover:scale-105 transition-all duration-300 w-full sm:w-auto">
+                          <span className="relative z-10 flex items-center gap-1.5">
                             {slide.cta.text}
-                            <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                            <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover:translate-x-1" />
                           </span>
-                          <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <div className="absolute inset-0 bg-orange-700 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </button>
                       </Link>
 
                       {slide.secondaryCta && (
                         <Link href={slide.secondaryCta.href}>
-                          <button className="px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-transparent text-white text-sm sm:text-base font-bold rounded-lg sm:rounded-xl border-2 border-white/40 backdrop-blur-sm hover:bg-white hover:text-turquoise-600 hover:-translate-y-1 transition-all duration-300 w-full sm:w-auto">
+                          <button className="hidden sm:block px-4 sm:px-5 py-1.5 sm:py-2 md:py-2.5 bg-transparent text-white text-xs sm:text-sm font-bold rounded-lg border-2 border-white/40 backdrop-blur-sm hover:bg-white hover:text-turquoise-600 hover:-translate-y-0.5 transition-all duration-300 w-full sm:w-auto">
                             {slide.secondaryCta.text}
                           </button>
                         </Link>
@@ -247,17 +274,17 @@ export default function HeroSectionEnhanced({
 
                     {/* Features */}
                     {slide.features && (
-                      <div 
+                      <div
                         className={cn(
-                          "hidden sm:flex gap-4 md:gap-6 lg:gap-8 justify-center lg:justify-start",
+                          "hidden md:flex gap-3 lg:gap-4 justify-center lg:justify-start",
                           "opacity-0 translate-y-8",
                           isActive && "animate-[slideUpFade_800ms_ease_1000ms_forwards]"
                         )}
                       >
                         {slide.features.map((feature, i) => (
-                          <div key={i} className="flex items-center gap-2 md:gap-3">
-                            <span className="text-lg md:text-xl lg:text-2xl animate-feature-pulse">{feature.icon}</span>
-                            <span className="text-xs md:text-sm font-semibold text-white/95">{feature.text}</span>
+                          <div key={i} className="flex items-center gap-1.5">
+                            <span className="text-sm md:text-base animate-feature-pulse">{feature.icon}</span>
+                            <span className="text-xs font-semibold text-white/95">{feature.text}</span>
                           </div>
                         ))}
                       </div>
@@ -265,39 +292,39 @@ export default function HeroSectionEnhanced({
                   </div>
 
                   {/* Right Content - Product Showcase */}
-                  <div className="hidden lg:flex relative h-full items-center justify-center pb-8 lg:pb-0">
+                  <div className="flex relative h-full items-center justify-center pb-4 lg:pb-0">
                     {slide.productImage && (
                       <>
-                        {/* Product Image */}
-                        <div 
+                        {/* Product Image - Transparent background, above turquoise */}
+                        <div
                           className={cn(
-                            "relative w-[280px] h-[280px] lg:w-[320px] lg:h-[320px] xl:w-[380px] xl:h-[380px] 2xl:w-[400px] 2xl:h-[400px]",
-                            "opacity-0 translate-x-12 rotate-6",
-                            isActive && "animate-[productEntrance_1000ms_cubic-bezier(0.4,0,0.2,1)_600ms_forwards]"
+                            "relative w-[120px] h-[120px] sm:w-[140px] sm:h-[140px] md:w-[160px] md:h-[160px] lg:w-[200px] lg:h-[200px] xl:w-[260px] xl:h-[260px]",
+                            "opacity-0 translate-y-8 scale-95",
+                            isActive && "animate-[productEntrance_1000ms_cubic-bezier(0.4,0,0.2,1)_400ms_forwards]"
                           )}
                         >
                           <Image
                             src={slide.productImage}
                             alt={slide.title}
                             fill
-                            sizes="400px"
-                            className="object-contain drop-shadow-[0_20px_60px_rgba(0,0,0,0.3)]"
+                            sizes="(max-width: 640px) 120px, (max-width: 768px) 140px, (max-width: 1024px) 160px, (max-width: 1280px) 200px, 260px"
+                            className="object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.4)]"
                           />
                         </div>
 
                         {/* Price Badge */}
                         {slide.discount && slide.price && (
-                          <div 
+                          <div
                             className={cn(
-                              "absolute top-8 lg:top-12 xl:top-16 right-4 lg:right-8 xl:right-16 2xl:right-20 bg-white p-3 lg:p-4 xl:p-5 rounded-xl lg:rounded-2xl shadow-[0_12px_48px_rgba(0,0,0,0.2)]",
+                              "absolute top-2 sm:top-3 md:top-4 lg:top-6 xl:top-8 right-0 sm:right-2 lg:right-4 xl:right-8 bg-white p-1.5 sm:p-2 lg:p-2.5 xl:p-3 rounded-lg lg:rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.25)]",
                               "opacity-0 scale-75",
-                              isActive && "animate-[badgeEntrance_600ms_cubic-bezier(0.4,0,0.2,1)_1200ms_forwards]"
+                              isActive && "animate-[badgeEntrance_600ms_cubic-bezier(0.4,0,0.2,1)_800ms_forwards]"
                             )}
                           >
-                            <span className="block text-lg lg:text-xl xl:text-2xl 2xl:text-3xl font-black text-red-500 animate-discount-pulse">
+                            <span className="block text-xs sm:text-sm lg:text-base xl:text-lg font-black text-red-500 animate-discount-pulse">
                               {slide.discount}
                             </span>
-                            <span className="block text-lg lg:text-xl xl:text-2xl 2xl:text-3xl font-black text-orange-500">
+                            <span className="block text-xs sm:text-sm lg:text-base xl:text-lg font-black text-orange-500">
                               {slide.price}
                             </span>
                           </div>
@@ -313,34 +340,34 @@ export default function HeroSectionEnhanced({
       </div>
 
       {/* Navigation Arrows */}
-      <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2 sm:px-4 md:px-8 pointer-events-none z-20">
+      <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2 sm:px-3 md:px-4 pointer-events-none z-20">
         <button
           onClick={scrollPrev}
-          className="pointer-events-auto w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 flex items-center justify-center rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white hover:text-turquoise-600 hover:scale-110 transition-all duration-300"
+          className="pointer-events-auto w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 flex items-center justify-center rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white hover:text-turquoise-600 hover:scale-110 transition-all duration-300"
           aria-label={t('navigation.previous')}
         >
-          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+          <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
         </button>
         <button
           onClick={scrollNext}
-          className="pointer-events-auto w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 flex items-center justify-center rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white hover:text-turquoise-600 hover:scale-110 transition-all duration-300"
+          className="pointer-events-auto w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 flex items-center justify-center rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white hover:text-turquoise-600 hover:scale-110 transition-all duration-300"
           aria-label={t('navigation.next')}
         >
-          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+          <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
         </button>
       </div>
 
       {/* Dots Navigation */}
-      <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3 z-20">
+      <div className="absolute bottom-2 sm:bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2 z-20">
         {localizedSlides.map((_, index) => (
           <button
             key={index}
             onClick={() => scrollTo(index)}
             className={cn(
-              "h-2 sm:h-3 rounded-full transition-all duration-400 border-2",
-              index === selectedIndex 
-                ? "w-6 sm:w-8 md:w-10 bg-white border-orange-500/60 shadow-[0_4px_12px_rgba(255,255,255,0.4)]" 
-                : "w-2 sm:w-3 bg-white/40 border-transparent hover:bg-white/60 hover:scale-125"
+              "h-1.5 sm:h-2 rounded-full transition-all duration-400 border",
+              index === selectedIndex
+                ? "w-5 sm:w-6 md:w-8 bg-white border-orange-500/60 shadow-[0_2px_8px_rgba(255,255,255,0.4)]"
+                : "w-1.5 sm:w-2 bg-white/40 border-transparent hover:bg-white/60 hover:scale-125"
             )}
             aria-label={t('navigation.goToSlide', { number: index + 1 })}
           />
@@ -348,9 +375,9 @@ export default function HeroSectionEnhanced({
       </div>
 
       {/* Progress Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20 z-20">
-        <div 
-          className="h-full bg-gradient-to-r from-orange-500 to-orange-400 transition-none"
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 bg-black/20 z-20">
+        <div
+          className="h-full bg-orange-600 transition-none"
           style={{ width: `${progress}%` }}
         />
       </div>

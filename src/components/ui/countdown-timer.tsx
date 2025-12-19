@@ -112,7 +112,7 @@ function TimeCard({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col items-center">
       <div
-        className="text-price-lg flex h-16 w-14 items-center justify-center rounded-md bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-elevation-2 transition-transform"
+        className="text-price-lg flex h-16 w-14 items-center justify-center rounded-md bg-orange-600 text-white shadow-elevation-2 transition-transform"
         style={{
           fontVariantNumeric: 'tabular-nums',
         }}
@@ -127,7 +127,7 @@ function TimeCard({ value, label }: { value: number; label: string }) {
 function TimeCardSkeleton() {
   return (
     <div className="flex flex-col items-center">
-      <div className="flex h-16 w-14 items-center justify-center rounded-md bg-gradient-to-br from-orange-500/50 to-orange-600/50 text-white shadow-elevation-2 animate-pulse">
+      <div className="flex h-16 w-14 items-center justify-center rounded-md bg-orange-600/50 text-white shadow-elevation-2 animate-pulse">
         <span className="text-price-lg">--</span>
       </div>
       <span className="mt-1 text-xs text-nuanced-500">-</span>

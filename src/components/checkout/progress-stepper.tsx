@@ -151,7 +151,7 @@ export function ProgressStepper({
       {/* Linear Progress Bar */}
       <div className="mt-6 h-1 w-full overflow-hidden rounded-full bg-platinum-200">
         <div
-          className="h-full bg-gradient-to-r from-orange-400 to-orange-600 transition-all duration-500 ease-out"
+          className="h-full bg-orange-600 transition-all duration-500 ease-out"
           style={{ width: `${progressPercentage}%` }}
           role="progressbar"
           aria-valuenow={progressPercentage}

@@ -64,10 +64,10 @@ function generateMockRelayPoints(
   const basePoints = [
     {
       id: "relay-1",
-      name: "Relay Point - Bureau de Tabac",
+      name: "Point Relais - Boutique Orange Money",
       address: "15 Rue de la République",
-      city: city || "Paris",
-      postalCode: postalCode || "75001",
+      city: city || "Abidjan",
+      postalCode: postalCode || "BP 1234",
       distance: 0.5,
       openingHours: [
         "Lun-Ven: 08:00-19:00",
@@ -81,10 +81,10 @@ function generateMockRelayPoints(
     },
     {
       id: "relay-2",
-      name: "Mondial Relay - Supermarché",
+      name: "Point Relais - Supermarché Carrefour",
       address: "42 Avenue des Champs",
-      city: city || "Paris",
-      postalCode: postalCode || "75001",
+      city: city || "Abidjan",
+      postalCode: postalCode || "BP 1234",
       distance: 0.8,
       openingHours: [
         "Lun-Sam: 07:00-21:00",

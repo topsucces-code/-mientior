@@ -373,7 +373,7 @@ export default {
                 'pulse-ring': 'pulse-ring 2s cubic-bezier(0.4, 0.0, 0.2, 1) infinite',
                 'float': 'float 3s ease-in-out infinite',
                 'marquee-scroll': 'marquee-scroll 30s linear infinite',
-                'banner-shine': 'bannerShine 3s infinite',
+                // 'banner-shine': 'bannerShine 3s infinite', // Removed: no longer used after header simplification
                 'separator-blink': 'separatorBlink 1s infinite',
                 'icon-rotate': 'iconRotate 2s infinite',
                 'badge-shake': 'badgeShake 0.5s infinite',

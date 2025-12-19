@@ -26,6 +26,7 @@ interface VariantInput {
   sku: string
   stock?: number
   priceModifier?: number
+  price_modifier?: number
   image?: string
 }
 
@@ -107,12 +108,12 @@ async function handleGET(request: NextRequest, { adminSession: _adminSession }: 
             orderBy: { order: 'asc' }
           },
           variants: true,
-          tags: {
+          productTags: {
             include: {
-              tag: true
+              tags: true
             }
           },
-          pimMapping: true,
+          pimProductMappings: true,
           _count: {
             select: { reviews: true }
           }
@@ -158,18 +159,18 @@ async function handleGET(request: NextRequest, { adminSession: _adminSession }: 
         color: v.color || undefined,
         sku: v.sku,
         stock: v.stock,
-        priceModifier: v.priceModifier || undefined
+        priceModifier: v.price_modifier || undefined
       })),
-      tags: product.tags.map((pt) => ({
-        id: pt.tag.id,
-        name: pt.tag.name,
-        slug: pt.tag.slug
+      tags: product.productTags.map((pt: { tags: { id: string; name: string; slug: string } }) => ({
+        id: pt.tags.id,
+        name: pt.tags.name,
+        slug: pt.tags.slug
       })),
-      pimMapping: product.pimMapping ? {
-        akeneoProductId: product.pimMapping.akeneoProductId,
-        akeneoSku: product.pimMapping.akeneoSku,
-        lastSyncedAt: product.pimMapping.lastSyncedAt,
-        syncStatus: product.pimMapping.syncStatus
+      pimMapping: product.pimProductMappings ? {
+        akeneoProductId: product.pimProductMappings.akeneo_product_id,
+        akeneoSku: product.pimProductMappings.akeneo_sku,
+        lastSyncedAt: product.pimProductMappings.last_synced_at,
+        syncStatus: product.pimProductMappings.sync_status
       } : undefined,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt
@@ -201,6 +202,7 @@ async function handlePOST(request: NextRequest, { adminSession }: { params?: unk
     // Create product with nested relations
     const product = await prisma.product.create({
       data: {
+        id: crypto.randomUUID(),
         name: body.name,
         slug: body.slug,
         description: body.description,
@@ -213,9 +215,13 @@ async function handlePOST(request: NextRequest, { adminSession }: { params?: unk
         status: body.status || 'ACTIVE',
         specifications: body.specifications,
         seo: body.seo,
-        categoryId: body.categoryId,
+        updatedAt: new Date(),
+        category: {
+          connect: { id: body.categoryId }
+        },
         images: {
           create: (body.images as ImageInput[] || []).map((img, index: number) => ({
+            id: crypto.randomUUID(),
             url: img.url,
             alt: img.alt,
             type: img.type === '360' ? 'THREE_SIXTY' : img.type.toUpperCase(),
@@ -224,16 +230,19 @@ async function handlePOST(request: NextRequest, { adminSession }: { params?: unk
         },
         variants: {
           create: (body.variants as VariantInput[] || []).map((v) => ({
+            id: crypto.randomUUID(),
             size: v.size,
             color: v.color,
             sku: v.sku,
             stock: v.stock || 0,
-            priceModifier: v.priceModifier || 0
+            price_modifier: v.price_modifier || v.priceModifier || 0,
+            updated_at: new Date()
           }))
         },
-        tags: {
+        productTags: {
           create: (body.tagIds || []).map((tagId: string) => ({
-            tag: {
+            id: crypto.randomUUID(),
+            tags: {
               connect: { id: tagId }
             }
           }))
@@ -243,9 +252,9 @@ async function handlePOST(request: NextRequest, { adminSession }: { params?: unk
         category: true,
         images: true,
         variants: true,
-        tags: {
+        productTags: {
           include: {
-            tag: true
+            tags: true
           }
         }
       }
@@ -288,12 +297,12 @@ async function handlePOST(request: NextRequest, { adminSession }: { params?: unk
         color: v.color || undefined,
         sku: v.sku,
         stock: v.stock,
-        priceModifier: v.priceModifier || undefined
+        priceModifier: v.price_modifier || undefined
       })),
-      tags: product.tags.map((pt) => ({
-        id: pt.tag.id,
-        name: pt.tag.name,
-        slug: pt.tag.slug,
+      tags: product.productTags.map((pt: { tags: { id: string; name: string; slug: string } }) => ({
+        id: pt.tags.id,
+        name: pt.tags.name,
+        slug: pt.tags.slug,
       })),
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,

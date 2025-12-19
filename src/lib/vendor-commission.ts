@@ -1,5 +1,5 @@
-import { prisma } from './prisma'
-import type { Order, OrderItem, Vendor } from '@prisma/client'
+// import { prisma } from './prisma' // Commented out as not currently used
+import type { OrderItem, Vendor } from '@prisma/client'
 
 interface CommissionCalculation {
   orderId: string
@@ -39,9 +39,19 @@ export async function calculateCommission(
 /**
  * Process commission for completed order
  * Creates vendor transaction and updates balances
+ * 
+ * NOTE: This function is currently disabled as it requires additional database schema changes.
+ * The following fields need to be added to the schema:
+ * - OrderItem: vendorId, commissionRate, commissionAmount, vendorAmount
+ * - Vendor: balance, pendingBalance
+ * - VendorTransaction model needs to be created
  */
-export async function processOrderCommission(orderId: string): Promise<void> {
-  const order = await prisma.order.findUnique({
+export async function processOrderCommission(_orderId: string): Promise<void> {
+  console.warn('processOrderCommission is disabled - requires schema updates')
+  
+  // TODO: Uncomment and implement when schema is updated
+  /*
+  const order = await prisma.orders.findUnique({
     where: { id: orderId },
     include: {
       items: {
@@ -72,8 +82,9 @@ export async function processOrderCommission(orderId: string): Promise<void> {
   }
   
   // Process each vendor's items
-  for (const [vendorId, items] of vendorItems) {
-    const vendor = items[0].product.vendor
+  const vendorEntries = Array.from(vendorItems.entries())
+  for (const [vendorId, items] of vendorEntries) {
+    const vendor = items[0]?.product.vendor
     if (!vendor) continue
     
     let totalSales = 0
@@ -85,76 +96,36 @@ export async function processOrderCommission(orderId: string): Promise<void> {
       totalSales += calc.itemTotal
       totalCommission += calc.commissionAmount
       totalVendorAmount += calc.vendorAmount
-      
-      // Update order item with commission details
-      await prisma.orderItem.update({
-        where: { id: item.id },
-        data: {
-          vendorId,
-          commissionRate: calc.commissionRate,
-          commissionAmount: calc.commissionAmount,
-          vendorAmount: calc.vendorAmount
-        }
-      })
     }
     
-    // Get current vendor balance
-    const currentVendor = await prisma.vendor.findUnique({
-      where: { id: vendorId },
-      select: { balance: true, pendingBalance: true }
-    })
-    
-    if (!currentVendor) continue
-    
-    // Create vendor transaction for sale
-    await prisma.vendorTransaction.create({
-      data: {
-        vendorId,
-        type: 'SALE',
-        amount: totalSales,
-        description: `Sale from order ${order.orderNumber}`,
-        orderId: order.id,
-        balanceBefore: currentVendor.pendingBalance,
-        balanceAfter: currentVendor.pendingBalance + totalVendorAmount
-      }
-    })
-    
-    // Create transaction for commission
-    await prisma.vendorTransaction.create({
-      data: {
-        vendorId,
-        type: 'COMMISSION',
-        amount: -totalCommission,
-        description: `Platform commission (${vendor.commissionRate}%) for order ${order.orderNumber}`,
-        orderId: order.id,
-        balanceBefore: currentVendor.pendingBalance + totalVendorAmount,
-        balanceAfter: currentVendor.pendingBalance + totalVendorAmount
-      }
-    })
-    
-    // Update vendor pending balance
-    await prisma.vendor.update({
+    // Update vendor total sales
+    await prisma.vendors.update({
       where: { id: vendorId },
       data: {
-        pendingBalance: {
-          increment: totalVendorAmount
-        },
         totalSales: {
           increment: totalSales
         }
       }
     })
   }
+  */
 }
 
 /**
  * Recalculate commission if vendor rate changes
+ * 
+ * NOTE: This function is currently disabled as it requires additional database schema changes.
+ * The OrderItem model needs the following fields: commissionRate, commissionAmount, vendorAmount
  */
 export async function recalculateOrderCommission(
-  orderId: string,
-  newCommissionRate: number
+  _orderId: string,
+  _newCommissionRate: number
 ): Promise<void> {
-  const order = await prisma.order.findUnique({
+  console.warn('recalculateOrderCommission is disabled - requires schema updates')
+  
+  // TODO: Uncomment and implement when schema is updated
+  /*
+  const order = await prisma.orders.findUnique({
     where: { id: orderId },
     include: {
       items: true,
@@ -171,13 +142,15 @@ export async function recalculateOrderCommission(
     const commissionAmount = (itemTotal * newCommissionRate) / 100
     const vendorAmount = itemTotal - commissionAmount
     
-    await prisma.orderItem.update({
-      where: { id: item.id },
-      data: {
-        commissionRate: newCommissionRate,
-        commissionAmount,
-        vendorAmount
-      }
-    })
+    // This would work once the schema is updated
+    // await prisma.orderItem.update({
+    //   where: { id: item.id },
+    //   data: {
+    //     commissionRate: newCommissionRate,
+    //     commissionAmount,
+    //     vendorAmount
+    //   }
+    // })
   }
+  */
 }

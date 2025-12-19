@@ -13,6 +13,7 @@ import { Product360Viewer } from '@/components/products/product-360-viewer'
 import { ProductVideoPlayer } from '@/components/products/product-video-player'
 import { ARPreviewButton } from '@/components/products/ar-preview-button'
 import type { ProductImage } from '@/types'
+import { useTranslations } from 'next-intl'
 
 interface ProductGalleryProps {
   images: ProductImage[]
@@ -31,6 +32,7 @@ export function ProductGallery({
   userPhotos = [],
   arModelUrl,
 }: ProductGalleryProps) {
+  const t = useTranslations('products.pdp.gallery')
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
   const [zoomLevel, setZoomLevel] = useState<1 | 2 | 4>(1)
@@ -204,8 +206,8 @@ export function ProductGallery({
         <div className="flex-1">
           <div className="relative aspect-square bg-platinum-100 rounded-lg overflow-hidden flex items-center justify-center">
             <div className="text-center text-nuanced-500">
-              <p className="text-lg font-medium mb-2">Aucune image disponible</p>
-              <p className="text-sm">Les images de ce produit seront bientôt disponibles</p>
+              <p className="text-lg font-medium mb-2">{t('noImageTitle')}</p>
+              <p className="text-sm">{t('noImageDesc')}</p>
             </div>
           </div>
         </div>
@@ -227,7 +229,7 @@ export function ProductGallery({
                 ? 'border-orange-500 ring-2 ring-orange-500/20'
                 : 'border-platinum-300 hover:border-orange-300'
             }`}
-            aria-label={`View image ${index + 1}`}
+            aria-label={t('viewImageAria', { index: index + 1 })}
           >
             <Image
               src={image.thumbnail || image.url}
@@ -256,16 +258,16 @@ export function ProductGallery({
         {/* User Photos Section */}
         {userPhotos.length > 0 && (
           <div className="border-t pt-2 mt-2">
-            <p className="text-xs text-nuanced-600 font-medium mb-2">Photos clients</p>
+            <p className="text-xs text-nuanced-600 font-medium mb-2">{t('customerPhotos')}</p>
             {userPhotos.slice(0, 3).map((photo, index) => (
               <button
                 key={index}
-                className="relative w-20 h-20 lg:w-24 lg:h-24 rounded-lg border border-platinum-300 hover:border-orange-300 overflow-hidden mb-2 transition-all"
-                aria-label={`Customer photo by ${photo.userName}`}
+                className="relative flex-shrink-0 w-20 h-20 rounded-lg border border-platinum-300 overflow-hidden"
+                aria-label={t('viewCustomerPhotoAria', { userName: photo.userName })}
               >
                 <Image 
                   src={photo.url} 
-                  alt={`Photo by ${photo.userName}`} 
+                  alt={`${photo.userName} photo`} 
                   fill 
                   className="object-cover" 
                   sizes="96px"

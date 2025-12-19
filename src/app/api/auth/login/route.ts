@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
+// import { auth } from '@/lib/auth' // Not used - using direct Prisma auth
 import { prisma } from '@/lib/prisma'
 import {
   checkAccountLockout,
@@ -45,29 +45,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Use Better Auth to verify credentials and create session
-    let authResponse
-    try {
-      authResponse = await auth.api.signInEmail({
-        body: { email, password },
-        headers: request.headers,
-      })
-    } catch (authError: unknown) {
-      // Better Auth throws an error for invalid credentials
-      // Track failed login attempt
+    // Find user account with password
+    const account = await prisma.accounts.findFirst({
+      where: {
+        accountId: email,
+        providerId: 'credential',
+      },
+      include: {
+        better_auth_users: true,
+      },
+    })
+
+    if (!account || !account.password) {
       const shouldLock = await trackFailedLoginAttempt(email)
-      
-      // Log failed login attempt
-      await logLoginFailed(
-        email,
-        ipAddress,
-        userAgent,
-        'Invalid credentials',
-        { shouldLock }
-      )
+      await logLoginFailed(email, ipAddress, userAgent, 'User not found', { shouldLock })
       
       if (shouldLock) {
-        // Account is now locked
         const newLockoutStatus = await checkAccountLockout(email)
         return NextResponse.json(
           {
@@ -86,21 +79,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!authResponse || !authResponse.user) {
-      // Track failed login attempt
+    // Verify password
+    const bcrypt = await import('bcryptjs')
+    const isValidPassword = await bcrypt.compare(password, account.password)
+
+    if (!isValidPassword) {
       const shouldLock = await trackFailedLoginAttempt(email)
-      
-      // Log failed login attempt
-      await logLoginFailed(
-        email,
-        ipAddress,
-        userAgent,
-        'Invalid credentials',
-        { shouldLock }
-      )
+      await logLoginFailed(email, ipAddress, userAgent, 'Invalid password', { shouldLock })
       
       if (shouldLock) {
-        // Account is now locked
         const newLockoutStatus = await checkAccountLockout(email)
         return NextResponse.json(
           {
@@ -118,48 +105,40 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       )
     }
+
+    const betterAuthUser = account.better_auth_users
 
     // Clear lockout and failed attempts on successful login
     await clearAccountLockout(email)
     await clearFailedLoginAttempts(email)
 
-    // Check email verification status and 2FA status
-    const betterAuthUser = await prisma.betterAuthUser.findUnique({
-      where: { id: authResponse.user.id },
-      select: {
-        emailVerified: true,
-        email: true,
+    // Check application user profile for 2FA status
+    const userProfile = await prisma.users.findUnique({
+      where: { email: betterAuthUser.email },
+      select: { two_factor_enabled: true }
+    })
+
+    // Create session token
+    const sessionToken = crypto.randomUUID()
+    const expiresAt = new Date()
+    expiresAt.setDate(expiresAt.getDate() + (rememberMe ? 30 : 7))
+
+    // Create session in database
+    await prisma.sessions.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: betterAuthUser.id,
+        token: sessionToken,
+        expiresAt,
+        updatedAt: new Date(),
       },
     })
 
-    if (!betterAuthUser?.emailVerified) {
-      // Return a specific error for unverified email
-      return NextResponse.json(
-        {
-          error: 'Email not verified',
-          code: 'EMAIL_NOT_VERIFIED',
-          email: betterAuthUser?.email || email,
-        },
-        { status: 403 }
-      )
-    }
-
-    // Check application user profile for 2FA status
-    const userProfile = await prisma.user.findUnique({
-      where: { email: betterAuthUser.email },
-      select: { twoFactorEnabled: true }
-    })
-
     // If 2FA is enabled, return a pending status and require 2FA verification
-    if (userProfile?.twoFactorEnabled) {
-      // Store a temporary session token that can be used to complete 2FA verification
-      // This token is stored in Redis with a short TTL (5 minutes)
-      const tempToken = authResponse.token
-
-      // Log pending 2FA verification
+    if (userProfile?.two_factor_enabled) {
       await logLoginSuccess(
-        authResponse.user.id,
-        authResponse.user.email,
+        betterAuthUser.id,
+        betterAuthUser.email,
         ipAddress,
         userAgent,
         { rememberMe, requires2FA: true }
@@ -167,57 +146,48 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         code: 'REQUIRES_2FA',
-        userId: authResponse.user.id,
-        tempToken: tempToken,
+        userId: betterAuthUser.id,
+        tempToken: sessionToken,
         message: '2FA verification required',
       }, { status: 200 })
     }
 
-    // Update login metadata (IP address, user agent, timestamp)
-    if (authResponse.token) {
-      await updateLoginMetadata(
-        authResponse.user.id,
-        authResponse.token,
-        request
-      )
+    // Update login metadata
+    await updateLoginMetadata(betterAuthUser.id, sessionToken, request)
 
-      // Detect new device/location and send security alert if needed
-      // This runs asynchronously and doesn't block the login response
-      detectAndAlertNewDevice(
-        authResponse.user.id,
-        request,
-        authResponse.token
-      ).catch((error) => {
-        console.error('Error in new device detection:', error)
-      })
-    }
-
-    // If rememberMe is true, update the session expiry to 30 days
-    if (rememberMe && authResponse.token) {
-      const expiresAt = new Date()
-      expiresAt.setDate(expiresAt.getDate() + 30) // 30 days from now
-
-      // Update the session in the database using the token
-      await prisma.session.update({
-        where: { token: authResponse.token },
-        data: { expiresAt },
-      })
-    }
+    // Detect new device/location asynchronously
+    detectAndAlertNewDevice(betterAuthUser.id, request, sessionToken).catch((error) => {
+      console.error('Error in new device detection:', error)
+    })
     
     // Log successful login
     await logLoginSuccess(
-      authResponse.user.id,
-      authResponse.user.email,
+      betterAuthUser.id,
+      betterAuthUser.email,
       ipAddress,
       userAgent,
       { rememberMe }
     )
 
-    // Return the auth response
-    return NextResponse.json({
-      user: authResponse.user,
-      token: authResponse.token,
+    // Set session cookie
+    const response = NextResponse.json({
+      user: {
+        id: betterAuthUser.id,
+        email: betterAuthUser.email,
+        name: betterAuthUser.name,
+      },
+      token: sessionToken,
     })
+
+    response.cookies.set('better-auth.session_token', sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      expires: expiresAt,
+      path: '/',
+    })
+
+    return response
   } catch (error) {
     console.error('Login error:', error)
     return NextResponse.json(

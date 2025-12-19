@@ -436,8 +436,8 @@ export function QuickViewModal({ productId, isOpen, onClose, onAddToCart }: Quic
 
               {/* Stock Status */}
               {product.inStock && (
-                <div className="mt-4 flex items-center gap-2 text-sm text-green-600">
-                  <div className="h-2 w-2 rounded-full bg-green-600" />
+                <div className="mt-4 flex items-center gap-2 text-sm text-turquoise-600">
+                  <div className="h-2 w-2 rounded-full bg-turquoise-600" />
                   En stock - Expédition sous 24h
                 </div>
               )}

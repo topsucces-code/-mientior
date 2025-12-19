@@ -61,8 +61,8 @@ export async function POST(request: NextRequest) {
       transactionInfo: {
         totalPriceStatus: 'FINAL',
         totalPrice: (amount / 100).toFixed(2),
-        currencyCode: 'EUR',
-        countryCode: 'FR',
+        currencyCode: 'XOF',
+        countryCode: 'CI',
         displayItems: items.map((item: { name?: string; productName?: string; price: number; quantity: number }) => ({
           label: item.name || item.productName,
           type: 'LINE_ITEM',
@@ -106,7 +106,7 @@ export async function PATCH(request: NextRequest) {
     // const paymentToken = JSON.parse(paymentData.paymentMethodData.tokenizationData.token)
 
     // Update order status
-    // const order = await prisma.order.update({
+    // const order = await prisma.orders.update({
     //   where: { id: orderId },
     //   data: {
     //     status: 'PROCESSING',

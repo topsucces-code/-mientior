@@ -94,7 +94,7 @@ export async function GET(request: NextRequest, { params }: Props) {
     const { format, ...exportOptions } = validatedQuery
     
     // Check if customer exists
-    const customer = await prisma.user.findUnique({
+    const customer = await prisma.users.findUnique({
       where: { id: customerId },
       select: { id: true, email: true, firstName: true, lastName: true }
     })

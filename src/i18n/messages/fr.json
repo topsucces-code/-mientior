@@ -100,6 +100,29 @@
     "supportHelp": "Support & Aide",
     "user": "Utilisateur"
   },
+  "categories": {
+    "exploreInterests": "EXPLOREZ VOS CENTRES D'INTÉRÊT",
+    "seeMore": "Voir plus",
+    "scrollLeft": "Défiler à gauche",
+    "scrollRight": "Défiler à droite",
+    "more": "Plus",
+    "all": "Recommandé",
+    "1": "Électronique & Tech",
+    "2": "Mode Femme",
+    "3": "Mode Homme",
+    "4": "Maison & Cuisine",
+    "5": "Beauté & Santé",
+    "6": "Sport & Loisirs",
+    "7": "Bébés & Maternité",
+    "8": "Automobile",
+    "9": "Jardin & Bricolage",
+    "new": "Nouveautés",
+    "clothing": "Vêtements",
+    "shoes": "Chaussures",
+    "accessories": "Accessoires",
+    "brands": "Marques",
+    "sale": "Soldes"
+  },
   "footer": {
     "description": "Votre destination premium pour des produits de qualité et un service exceptionnel. Nous vous offrons la meilleure sélection avec un service client inégalé.",
     "shop": "Boutique",
@@ -273,6 +296,17 @@
       "selectCountry": "Sélectionner un pays",
       "selectCategory": "Sélectionner une catégorie"
     },
+    "categories": {
+      "new": "Nouveautés",
+      "clothing": "Vêtements",
+      "shoes": "Chaussures",
+      "accessories": "Accessoires",
+      "brands": "Marques",
+      "sale": "Soldes",
+      "scrollLeft": "Défiler à gauche",
+      "scrollRight": "Défiler à droite",
+      "more": "Plus"
+    },
     "success": {
       "title": "Demande envoyée avec succès !",
       "message": "Merci pour votre intérêt à rejoindre Mientior. Notre équipe examinera votre demande et vous contactera sous 24-48 heures.",
@@ -419,6 +453,28 @@
     "priceRange": "Fourchette de prix",
     "rating": "Note",
     "availability": "Disponibilité",
+    "category": {
+      "notFound": "Catégorie non trouvée",
+      "defaultDescription": "Découvrez notre sélection de produits {name}",
+      "productsAvailable": "{count} produits disponibles",
+      "quickFilters": {
+        "new": "Nouveautés",
+        "sale": "En promotion",
+        "bestseller": "Bestsellers"
+      },
+      "seo": {
+        "aboutTitle": "À propos de {name}",
+        "discoverCollection": "Découvrez Notre Collection {name}",
+        "defaultContent": "Explorez notre sélection complète de produits {name} soigneusement choisis pour leur qualité exceptionnelle. Nous travaillons avec les meilleurs vendeurs pour vous offrir une expérience d'achat incomparable.",
+        "qualityTitle": "Qualité Garantie",
+        "qualityContent": "Tous nos produits sont vérifiés et approuvés par notre équipe avant d'être mis en vente. Nous garantissons la satisfaction de nos clients avec une politique de retour flexible.",
+        "deliveryTitle": "Livraison Rapide",
+        "deliveryContent": "Profitez de notre service de livraison rapide partout. La livraison est gratuite pour toute commande supérieure à 30 000 FCFA."
+      },
+      "breadcrumbs": {
+        "home": "Accueil"
+      }
+    },
     "catalog": {
       "breadcrumbs": {
         "home": "Accueil",
@@ -505,7 +561,8 @@
       "brand": "Marque :",
       "delivery": "Arrive en",
       "workingDays": "JOURS OUVRÉS OU PLUS",
-      "lowStock": "Plus que {count} en stock !"
+      "lowStock": "Plus que {count} en stock !",
+      "freeShipping": "Livraison gratuite"
     },
     "pdp": {
       "reviewsBadge": "{rating} ({count} avis)",
@@ -526,30 +583,152 @@
         "warranty": "Garantie 2 ans constructeur",
         "securePayment": "Paiement 100% sécurisé"
       },
+      "shipping": {
+        "standardName": "Standard",
+        "standardDesc": "Gratuit dès {amount} FCFA",
+        "expressName": "Express",
+        "expressDesc": "Livraison rapide",
+        "returnPolicy": "Retours gratuits sous 30 jours"
+      },
+      "client": {
+        "deliveryOptionUpdatedTitle": "Option de livraison mise à jour",
+        "productUnavailableTitle": "Produit indisponible",
+        "addedToCartTitle": "Ajouté au panier",
+        "addedToCartDesc": "{productName} a été ajouté à votre panier",
+        "removedFromWishlistTitle": "Retiré des favoris",
+        "addedToWishlistTitle": "Ajouté aux favoris",
+        "shareText": "Découvrez {productName} sur Mientior!",
+        "linkCopiedTitle": "Lien copié!",
+        "trustBadgeFreeShipping": "Livraison gratuite",
+        "trustBadgeReturn30": "Retour 30 jours",
+        "trustBadgeSecurePayment": "Paiement sécurisé",
+        "trustBadgeQuality": "Qualité garantie",
+        "flashSale": "VENTE FLASH",
+        "deliveryFreeTitle": "LIVRAISON GRATUITE",
+        "deliveryEta": "Arrive en {days} jours ouvrables",
+        "salesCount": "+{count} ventes",
+        "verifiedReviewsLabel": "avis vérifiés",
+        "peopleViewing": "{count} personnes regardent ce produit",
+        "featuredVendor": "Vendeur vedette",
+        "seeMore": "Voir plus →",
+        "topRankedInCategory": "#10 Mieux noté dans {category}",
+        "payOriginalPrice": "Payez {price}",
+        "today": "aujourd'hui",
+        "freeShippingUpper": "LIVRAISON GRATUITE",
+        "delayCreditUpper": "{amount} CRÉDIT POUR RETARD",
+        "colorLabel": "Couleur",
+        "sizeLabel": "Taille",
+        "sizeGuide": "Guide des tailles",
+        "quantityLabel": "Quantité",
+        "onlyLeftInStock": "Plus que {count} en stock!",
+        "totalLabel": "Total",
+        "addToCartCta": "AJOUTER AU PANIER",
+        "buyNowCta": "ACHETER MAINTENANT",
+        "deliveryOptionsTitle": "Options de livraison",
+        "edit": "Modifier",
+        "choose": "Choisir",
+        "freeUpper": "GRATUIT",
+        "free": "Gratuit",
+        "freeShippingProgress": "Plus que {remaining} pour la livraison gratuite!",
+        "delayCreditPill": "{amount} crédit retard",
+        "realtimeTrackingPill": "Suivi en temps réel",
+        "freeReturnsPill": "Retour gratuit",
+        "codAvailablePill": "Paiement à la livraison",
+        "smsTrackingPill": "Suivi SMS/WhatsApp",
+        "chooseDeliveryTitle": "Choisissez votre livraison",
+        "guaranteeSecurePaymentTitle": "Paiement sécurisé",
+        "guaranteeSecurePaymentDesc": "SSL 256-bit",
+        "guaranteeFreeReturnsTitle": "Retour gratuit",
+        "guaranteeFreeReturnsDesc": "30 jours",
+        "guaranteeSatisfactionTitle": "Satisfaction",
+        "guaranteeSatisfactionDesc": "100% garantie",
+        "guaranteePackagingTitle": "Emballage soigné",
+        "guaranteePackagingDesc": "Cadeau possible",
+        "positiveReviews": "98% avis positifs",
+        "viewStore": "Voir boutique",
+        "selectColorAria": "Sélectionner la couleur {color}",
+        "decreaseQuantityAria": "Diminuer la quantité"
+      },
       "delivery": {
-        "title": "Livraison",
+        "title": "Options de livraison",
         "tabs": {
-            "standard": "Standard",
-            "relay": "Point Relais",
-            "express": "Express"
+          "standard": "Standard",
+          "relay": "Point relais",
+          "express": "Express"
         },
         "banner": {
-            "partner": "Mientior x Colissimo",
-            "slogan": "Pour une meilleure livraison ensemble"
+          "slogan": "Rapide & fiable"
         },
         "table": {
-            "delay": "Délai de livraison",
-            "rate": "Tarifs",
-            "guarantee": "Garantie d'expédition",
-            "free": "GRATUIT",
-            "creditDelay": "{amount} de crédit en cas de retard",
-            "refundNoUpdate": "Remboursement pour absence de mise à jour pendant 15 jours",
-            "refundNoDelivery": "Remboursement pour non livraison sous 30 jours"
+          "delay": "Délai",
+          "rate": "Tarifs",
+          "free": "GRATUIT",
+          "guarantee": "Garantie",
+          "creditDelay": "de crédit en cas de retard",
+          "refundNoUpdate": "Remboursement si pas de mise à jour",
+          "refundNoDelivery": "Remboursement si non livré"
         },
-        "disclaimer": "Ce qui précède ne concerne que les articles qui ne sont pas expédiés par les entrepôts locaux. Si livré après le {date}, vous recevrez {credit} de crédit dans les 48 heures.",
-        "fastestDelivery": "Livraison la plus rapide en {days} jours ouvrés",
-        "comingSoon": "Les options de livraison {type} seront bientôt disponibles.",
-        "understood": "Compris"
+        "disclaimer": "Commandez avant le {date} pour recevoir {credit} si la livraison est en retard.",
+        "fastestDelivery": "Livraison la plus rapide : {days} jours ouvrés",
+        "comingSoon": "{type} bientôt disponible",
+        "understood": "J'ai compris"
+      },
+      "gallery": {
+        "noImageTitle": "Aucune image disponible",
+        "noImageDesc": "Les images de ce produit seront bientôt disponibles",
+        "viewImageAria": "Voir l'image {index}",
+        "customerPhotos": "Photos clients",
+        "viewCustomerPhotoAria": "Voir la photo client de {userName}"
+      },
+      "deliveryOptions": {
+        "modeTitle": "Mode de livraison",
+        "free": "Gratuit",
+        "estimatedDeliveryLabel": "Livraison estimée:",
+        "chooseTitle": "Choisissez votre mode de livraison",
+        "cartTotal": "Panier: {total}",
+        "freeFromAndRemaining": "Gratuit dès {threshold} • Plus que {remaining}",
+        "options": {
+          "standard": {
+            "name": "Livraison Standard",
+            "description": "Livraison à domicile dans votre quartier",
+            "duration": "2-4 jours",
+            "features": {
+              "tracking": "Suivi par SMS/WhatsApp",
+              "relay": "Livraison à domicile ou point relais",
+              "insurance": "Paiement à la livraison possible"
+            }
+          },
+          "express": {
+            "name": "Livraison Express",
+            "description": "Livraison rapide garantie",
+            "duration": "24-48h",
+            "features": {
+              "priority": "Livraison prioritaire",
+              "realtimeTracking": "Suivi en temps réel",
+              "guarantee": "Garantie de livraison"
+            }
+          },
+          "sameDay": {
+            "name": "Livraison Jour Même",
+            "description": "Disponible dans les grandes villes",
+            "duration": "Aujourd'hui",
+            "features": {
+              "cutoff": "Commande avant 12h",
+              "cities": "Abidjan, Dakar, Douala, Lagos",
+              "slot": "Créneau horaire au choix"
+            }
+          },
+          "pickup": {
+            "name": "Retrait en Point Relais",
+            "description": "Retrait gratuit près de chez vous",
+            "duration": "2-3 jours",
+            "features": {
+              "freePickup": "Retrait gratuit",
+              "ready": "Notification par SMS",
+              "stores": "Boutiques partenaires"
+            }
+          }
+        }
       },
       "fbt": {
         "title": "Complétez votre look",
@@ -565,6 +744,12 @@
         "bundleOffer": "Offre Bundle: -{discount}%"
       },
       "tabs": {
+        "ariaLabel": "Onglets du produit",
+        "descriptionAriaLabel": "Onglet description",
+        "specsAriaLabel": "Onglet caractéristiques",
+        "reviewsAriaLabel": "Onglet avis ({count})",
+        "qaAriaLabel": "Onglet questions et réponses ({count})",
+        "shippingAriaLabel": "Onglet livraison et retours",
         "description": "Description",
         "specs": "Caractéristiques",
         "reviews": "Avis ({count})",
@@ -611,6 +796,7 @@
         "resetFilters": "Réinitialiser les filtres",
         "noReviews": "Aucun avis pour ce produit.",
         "beFirst": "Soyez le premier à donner votre avis",
+        "helpful": "Utile ({count})",
         "loadMore": "Voir plus d'avis",
         "loading": "Chargement...",
         "errorTitle": "Erreur",
@@ -796,6 +982,7 @@
     "emptyText": "Ajoutez des produits que vous aimez pour les retrouver facilement",
     "continueShopping": "Découvrir nos produits",
     "itemCount": "{count} produit(s)",
+    "addToWishlist": "Ajouter aux favoris",
     "addedToWishlist": "♡ Ajouté aux favoris",
     "addedToWishlistDesc": "{name} a été ajouté à vos favoris",
     "removedFromWishlist": "Retiré des favoris",
@@ -1420,9 +1607,9 @@
       },
       "slides": {
         "1": {
-          "title": "Mode Automne 2025",
+          "title": "Collection Saison Sèche 2025",
           "subtitle": "NOUVELLE COLLECTION",
-          "description": "Découvrez les dernières tendances avec notre collection exclusive",
+          "description": "Découvrez les tendances africaines avec notre collection exclusive",
           "discount": "-50%",
           "price": "12 500 F",
           "cta": {
@@ -1437,45 +1624,45 @@
           }
         },
         "2": {
-          "title": "Électronique Premium",
-          "subtitle": "TECH & GADGETS",
-          "description": "Les meilleurs appareils aux meilleurs prix",
+          "title": "Électronique Africaine",
+          "subtitle": "TECH & INNOVATION",
+          "description": "Smartphones, tablettes et accessoires adaptés au marché africain",
           "discount": "-30%",
           "price": "45 000 F",
           "cta": {
             "text": "Voir les offres"
           },
           "features": {
-            "securePayment": "Paiement sécurisé",
+            "securePayment": "Paiement Mobile Money",
             "expressDelivery": "Livraison express"
           }
         },
         "3": {
-          "title": "Offres Exclusives",
-          "subtitle": "VENTES FLASH",
-          "description": "Profitez de nos promotions exceptionnelles",
+          "title": "Mode Tropicale",
+          "subtitle": "FASHION AFRICAINE",
+          "description": "Tenues colorées et tissus wax pour toutes occasions",
           "discount": "-70%",
           "price": "8 990 F",
           "cta": {
             "text": "Voir les offres"
           },
           "features": {
-            "exclusiveGifts": "Cadeaux exclusifs",
-            "installments": "Paiement en 4x"
+            "exclusiveGifts": "Designs authentiques",
+            "installments": "Paiement flexible"
           }
         },
         "4": {
-          "title": "Beauté & Bien-être",
-          "subtitle": "SOINS PREMIUM",
-          "description": "Prenez soin de vous avec nos produits de qualité",
+          "title": "Beauté Afro",
+          "subtitle": "SOINS CAPILLAIRES & COSMÉTIQUES",
+          "description": "Produits naturels pour cheveux afro et peaux noires",
           "discount": "-40%",
           "price": "15 000 F",
           "cta": {
             "text": "Découvrir"
           },
           "features": {
-            "authentic": "100% Authentique",
-            "natural": "Produits naturels"
+            "authentic": "Beurre de karité bio",
+            "natural": "Huiles naturelles"
           }
         }
       }
@@ -1509,6 +1696,8 @@
       "title": "Produits Vedettes",
       "subtitle": "Notre sélection des meilleurs produits",
       "viewAll": "Voir tout",
+      "tabLabel": "Produits Vedettes",
+      "tabLabelShort": "Vedettes",
       "tabs": {
         "all": "Tout",
         "new": "Nouveautés",
@@ -1519,7 +1708,16 @@
     "bestSellers": {
       "title": "Meilleures Ventes",
       "subtitle": "Les produits les plus populaires de notre boutique",
-      "viewAll": "Voir tout"
+      "viewAll": "Voir tout",
+      "tabLabel": "Meilleures Ventes",
+      "tabLabelShort": "Top Ventes",
+      "categories": {
+        "all": "Tous",
+        "electronics": "Électronique",
+        "fashion": "Mode",
+        "home": "Maison",
+        "beauty": "Beauté"
+      }
     },
     "newArrivals": {
       "title": "Nouveautés",
@@ -1529,7 +1727,9 @@
     "trending": {
       "title": "Tendances",
       "subtitle": "Les produits du moment",
-      "viewAll": "Voir tout"
+      "viewAll": "Voir tout",
+      "tabLabel": "Tendances",
+      "tabLabelShort": "Tendances"
     },
     "brands": {
       "title": "Nos Marques Partenaires",
@@ -1562,12 +1762,23 @@
       "discount": "-10% sur votre première commande",
       "successTitle": "Merci pour votre inscription !",
       "successMessage": "Vérifiez votre boîte mail pour confirmer.",
+      "emailRequired": "Veuillez entrer votre adresse email",
+      "emailInvalid": "Veuillez entrer une adresse email valide",
+      "acceptMarketingRequired": "Veuillez accepter de recevoir nos communications",
+      "genericError": "Une erreur est survenue",
+      "errorTitle": "Erreur",
+      "submitting": "Inscription...",
+      "subscribed": "Inscrit !",
+      "acceptMarketingText": "J'accepte de recevoir les communications marketing et les offres promotionnelles. Vous pouvez vous désabonner à tout moment.",
+      "privacyPrefix": "Vos données sont protégées. Consultez notre",
+      "privacyLink": "politique de confidentialité",
+      "privacySuffix": ".",
       "scanToDownload": "Scanner pour télécharger",
       "downloadOn": "Télécharger sur"
     },
     "trustBadges": {
       "freeShipping": "Livraison Gratuite",
-      "freeShippingDesc": "Dès 50€ d'achat",
+      "freeShippingDesc": "Dès 30 000 FCFA d'achat",
       "securePayment": "Paiement Sécurisé",
       "securePaymentDesc": "Cryptage SSL 256-bit",
       "support": "Support 24/7",
@@ -1576,15 +1787,9 @@
       "returnsDesc": "Satisfait ou remboursé"
     },
     "socialProof": {
-      "customers": "clients satisfaits",
-      "orders": "commandes livrées",
-      "rating": "note moyenne",
       "ordersToday": "🔥 {count} commandes aujourd'hui",
       "ratingText": "⭐ {rating} ({count} avis)",
       "delivery": "🚚 Livraison 48h",
-      "customersCount": "✓ +{count} clients",
-      "securePayment": "💳 Paiement sécurisé",
-      "returns": "↩️ Retours 30j",
       "ariaLabel": "Indicateurs de confiance",
       "ariaLabelPaused": "Indicateurs de confiance (en pause)"
     },

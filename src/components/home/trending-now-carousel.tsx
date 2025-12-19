@@ -8,6 +8,7 @@ import { ProductCardUnified } from '@/components/ui/product-card-unified'
 import { cn } from '@/lib/utils'
 import { useIntersectionObserver } from '@/hooks/use-intersection-observer'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
+import { useTranslations } from 'next-intl'
 
 interface TrendingProduct {
   id: string
@@ -38,8 +39,8 @@ interface TrendingNowCarouselProps extends React.HTMLAttributes<HTMLElement> {
 
 export default function TrendingNowCarousel({
   products,
-  title = 'Tendances du Moment',
-  subtitle = 'Les produits les plus populaires cette semaine',
+  title,
+  subtitle,
   autoplayDelay = 4000,
   className,
   ...props
@@ -53,6 +54,10 @@ export default function TrendingNowCarousel({
   const [isPaused, setIsPaused] = React.useState(false)
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
+  const t = useTranslations('home.trending')
+
+  const displayTitle = title || t('title')
+  const displaySubtitle = subtitle || t('subtitle')
 
   const scrollPrev = React.useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev()
@@ -81,28 +86,34 @@ export default function TrendingNowCarousel({
     <section
       ref={sectionRef}
       className={cn(
-        'py-8 sm:py-10 md:py-14 bg-gradient-to-br from-purple-50 via-white to-orange-50',
+        'relative py-20 md:py-24 overflow-hidden',
         className
       )}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       {...props}
     >
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6">
+      {/* Background avec motifs */}
+      <div className="absolute inset-0 bg-orange-50/20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(244,63,94,0.06),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(236,72,153,0.05),transparent_50%)]" />
+      </div>
+
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 relative">
         {/* Header - Style Temu */}
         <div
           className={cn(
-            'mb-6 sm:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4',
+            'mb-4 sm:mb-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3',
             isVisible && !prefersReducedMotion && 'animate-fade-in-up'
           )}
         >
           <div className="flex items-center gap-3 sm:gap-4">
             {/* Trending Icon with Animation */}
             <div className="relative">
-              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 shadow-lg">
+              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gray-900 shadow-lg">
                 <Flame className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
               </div>
-              <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white animate-bounce">
+              <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white animate-bounce">
                 HOT
               </div>
             </div>
@@ -111,11 +122,11 @@ export default function TrendingNowCarousel({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
-                  {title}
+                  {displayTitle}
                 </h2>
-                <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500" />
+                <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-gray-500" />
               </div>
-              <p className="text-sm sm:text-base text-gray-500 mt-0.5">{subtitle}</p>
+              <p className="text-sm sm:text-base text-gray-500 mt-0.5">{displaySubtitle}</p>
             </div>
           </div>
 
@@ -123,22 +134,22 @@ export default function TrendingNowCarousel({
           <div className="flex items-center gap-3">
             <Link
               href="/products?sort=trending"
-              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
             >
               <Sparkles className="h-4 w-4" />
-              Voir tout
+              {t('viewAll')}
             </Link>
             <div className="flex items-center gap-2">
               <button
                 onClick={scrollPrev}
-                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition-all shadow-sm"
+                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all shadow-sm"
                 aria-label="Précédent"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
                 onClick={scrollNext}
-                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-purple-500 hover:text-white hover:border-purple-500 transition-all shadow-sm"
+                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all shadow-sm"
                 aria-label="Suivant"
               >
                 <ChevronRight className="h-5 w-5" />
@@ -184,13 +195,13 @@ export default function TrendingNowCarousel({
         </div>
 
         {/* Mobile View All */}
-        <div className="mt-6 text-center sm:hidden">
+        <div className="mt-5 text-center sm:hidden">
           <Link
             href="/products?sort=trending"
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-semibold rounded-full hover:shadow-lg transition-all"
+            className="inline-flex items-center gap-2 px-5 py-2 bg-black text-white text-sm font-semibold rounded-full hover:shadow-lg transition-all"
           >
             <Sparkles className="h-4 w-4" />
-            Voir toutes les tendances
+            {t('viewAll')}
           </Link>
         </div>
       </div>

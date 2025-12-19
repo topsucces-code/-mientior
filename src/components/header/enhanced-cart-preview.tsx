@@ -9,10 +9,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useCurrency } from '@/hooks/use-currency'
 
-const FREE_SHIPPING_THRESHOLD = 15000 // 15,000 FCFA
+const FREE_SHIPPING_THRESHOLD = 4000 // 40€ = ~25,000 FCFA (en centimes EUR)
 
 export function EnhancedCartPreview() {
-    const { items, removeItem, getTotalPrice, getTotalItems, updateQuantity } = useCartStore()
+    const { items, removeItem, getSubtotal, getTotalItems, updateQuantity } = useCartStore()
     const { activeDropdown, setActiveDropdown } = useHeader()
     const containerRef = useRef<HTMLDivElement>(null)
     const buttonRef = useRef<HTMLButtonElement>(null)
@@ -61,12 +61,12 @@ export function EnhancedCartPreview() {
     }, [isOpen, setActiveDropdown])
 
     const totalItems = mounted ? getTotalItems() : 0
-    const totalPrice = mounted ? getTotalPrice() : 0
+    const subtotal = mounted ? getSubtotal() : 0
     const recentItems = mounted ? items.slice(0, 5) : []
     
-    // Free shipping progress
-    const shippingProgress = Math.min((totalPrice / FREE_SHIPPING_THRESHOLD) * 100, 100)
-    const remainingForFreeShipping = Math.max(FREE_SHIPPING_THRESHOLD - totalPrice, 0)
+    // Free shipping progress (subtotal is in EUR cents, threshold is in EUR cents too)
+    const shippingProgress = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100)
+    const remainingForFreeShipping = Math.max(FREE_SHIPPING_THRESHOLD - subtotal, 0)
 
     // Use a timeout to allow mouse to move to dropdown
     const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -141,14 +141,14 @@ export function EnhancedCartPreview() {
                 )}
                 
                 {/* Total amount indicator */}
-                {totalPrice > 0 && (
+                {subtotal > 0 && (
                     <span className="
                         absolute -bottom-1.5 left-1/2 -translate-x-1/2
-                        whitespace-nowrap text-[10px] font-bold
+                        whitespace-nowrap text-xs font-bold
                         text-orange-500 bg-white px-2 py-0.5
                         rounded-full shadow-sm
                     ">
-                        {formatPrice(totalPrice)}
+                        {formatPrice(subtotal)}
                     </span>
                 )}
             </button>
@@ -191,11 +191,11 @@ export function EnhancedCartPreview() {
                     </div>
                     
                     {/* Free Shipping Progress */}
-                    {totalPrice > 0 && (
-                        <div className="px-5 py-4 bg-gradient-to-r from-turquoise-50 to-[#F0FDFF] border-b border-turquoise-100/50">
+                    {subtotal > 0 && (
+                        <div className="px-5 py-4 bg-turquoise-50 border-b border-turquoise-100/50">
                             <div className="relative h-2 bg-turquoise-200/50 rounded-full overflow-hidden mb-2">
                                 <div 
-                                    className="h-full bg-gradient-to-r from-turquoise-600 to-success rounded-full transition-all duration-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+                                    className="h-full bg-turquoise-600 rounded-full transition-all duration-500"
                                     style={{ width: `${shippingProgress}%` }}
                                 />
                             </div>
@@ -306,7 +306,7 @@ export function EnhancedCartPreview() {
                             <div className="space-y-2 mb-4">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-gray-500">{t('subtotal')}</span>
-                                    <span className="text-gray-800">{formatPrice(totalPrice)}</span>
+                                    <span className="text-gray-800">{formatPrice(subtotal)}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-gray-500">{t('shipping')}</span>
@@ -317,7 +317,7 @@ export function EnhancedCartPreview() {
                                 <div className="flex justify-between pt-3 border-t border-gray-200">
                                     <span className="text-lg font-bold text-gray-800">{t('total')}</span>
                                     <span className="text-lg font-bold text-orange-500">
-                                        {formatPrice(totalPrice)}
+                                        {formatPrice(subtotal)}
                                     </span>
                                 </div>
                             </div>
@@ -332,7 +332,7 @@ export function EnhancedCartPreview() {
                                 </Link>
                                 <Link
                                     href="/checkout"
-                                    className="py-3 px-5 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-center rounded-lg font-semibold shadow-[0_4px_12px_rgba(249,115,22,0.3)] hover:from-orange-600 hover:to-orange-700 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                                    className="py-3 px-5 bg-orange-600 text-white text-center rounded-lg font-semibold shadow-md hover:bg-orange-700 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
                                 >
                                     {t('checkout')}
                                     <ArrowRight className="w-4 h-4" />
@@ -341,15 +341,15 @@ export function EnhancedCartPreview() {
                             
                             {/* Trust Badges */}
                             <div className="flex justify-around mt-4 pt-4 border-t border-gray-200">
-                                <div className="flex flex-col items-center gap-1 text-[11px] text-gray-500">
+                                <div className="flex flex-col items-center gap-1 text-xs text-gray-500">
                                     <Truck className="w-5 h-5 text-success" />
                                     <span>{t('fastDelivery')}</span>
                                 </div>
-                                <div className="flex flex-col items-center gap-1 text-[11px] text-gray-500">
+                                <div className="flex flex-col items-center gap-1 text-xs text-gray-500">
                                     <Shield className="w-5 h-5 text-success" />
                                     <span>{t('securePayment')}</span>
                                 </div>
-                                <div className="flex flex-col items-center gap-1 text-[11px] text-gray-500">
+                                <div className="flex flex-col items-center gap-1 text-xs text-gray-500">
                                     <RotateCcw className="w-5 h-5 text-success" />
                                     <span>{t('freeReturns')}</span>
                                 </div>

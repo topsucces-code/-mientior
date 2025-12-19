@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
 
     // Create provisional order for tracking
     const orderNumber = generateOrderNumber()
-    const provisionalOrder = await prisma.order.create({
+    const provisionalOrder = await prisma.orders.create({
       data: {
         orderNumber,
         userId: session?.user?.id || null,
@@ -221,7 +221,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Store PayPal order ID for later capture
-    await prisma.order.update({
+    await prisma.orders.update({
       where: { id: provisionalOrder.id },
       data: {
         paymentReference: paypalData.id,
@@ -305,7 +305,7 @@ export async function GET(request: NextRequest) {
     */
 
     // Update order to completed
-    await prisma.order.update({
+    await prisma.orders.update({
       where: { id: orderId },
       data: {
         status: 'PROCESSING',
@@ -315,7 +315,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Track conversion
-    const order = await prisma.order.findUnique({
+    const order = await prisma.orders.findUnique({
       where: { id: orderId },
       select: { total: true },
     })

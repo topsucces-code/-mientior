@@ -104,7 +104,7 @@ export function CountryCurrencySelector({ className }: CountryCurrencySelectorPr
               className={cn(
                 'flex-1 px-4 py-3 text-sm font-medium transition-colors',
                 activeTab === 'country'
-                  ? 'text-emerald-600 border-b-2 border-emerald-600 bg-emerald-50'
+                  ? 'text-turquoise-600 border-b-2 border-turquoise-600 bg-turquoise-50'
                   : 'text-taupe-600 hover:bg-taupe-50'
               )}
             >
@@ -115,7 +115,7 @@ export function CountryCurrencySelector({ className }: CountryCurrencySelectorPr
               className={cn(
                 'flex-1 px-4 py-3 text-sm font-medium transition-colors',
                 activeTab === 'language'
-                  ? 'text-emerald-600 border-b-2 border-emerald-600 bg-emerald-50'
+                  ? 'text-turquoise-600 border-b-2 border-turquoise-600 bg-turquoise-50'
                   : 'text-taupe-600 hover:bg-taupe-50'
               )}
             >
@@ -134,7 +134,7 @@ export function CountryCurrencySelector({ className }: CountryCurrencySelectorPr
                     placeholder="Rechercher un pays..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-taupe-200 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2 border border-taupe-200 rounded-lg text-sm focus:ring-2 focus:ring-turquoise-500 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -154,7 +154,7 @@ export function CountryCurrencySelector({ className }: CountryCurrencySelectorPr
                           className={cn(
                             'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left',
                             isSelected
-                              ? 'bg-emerald-50 text-emerald-700'
+                              ? 'bg-turquoise-50 text-turquoise-700'
                               : 'hover:bg-taupe-50'
                           )}
                         >
@@ -166,7 +166,7 @@ export function CountryCurrencySelector({ className }: CountryCurrencySelectorPr
                             </div>
                           </div>
                           {isSelected && (
-                            <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                            <Check className="w-4 h-4 text-turquoise-600 flex-shrink-0" />
                           )}
                         </button>
                       );
@@ -193,7 +193,7 @@ export function CountryCurrencySelector({ className }: CountryCurrencySelectorPr
                     className={cn(
                       'w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-colors text-left',
                       isSelected
-                        ? 'bg-emerald-50 text-emerald-700'
+                        ? 'bg-turquoise-50 text-turquoise-700'
                         : 'hover:bg-taupe-50'
                     )}
                   >
@@ -202,7 +202,7 @@ export function CountryCurrencySelector({ className }: CountryCurrencySelectorPr
                       <div className="font-medium">{localeNames[locale]}</div>
                     </div>
                     {isSelected && (
-                      <Check className="w-4 h-4 text-emerald-600" />
+                      <Check className="w-4 h-4 text-turquoise-600" />
                     )}
                   </button>
                 );

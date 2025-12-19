@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     )
 
     if (currentSessionToken) {
-      await prisma.session.deleteMany({
+      await prisma.sessions.deleteMany({
         where: {
           userId: session.user.id,
           token: { not: currentSessionToken },

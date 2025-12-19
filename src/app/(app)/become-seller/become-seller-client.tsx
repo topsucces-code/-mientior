@@ -138,7 +138,7 @@ export function BecomeSellerClient() {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-turquoise-50 to-white">
+      <div className="min-h-screen bg-turquoise-50">
         <div className="container mx-auto px-4 py-16">
           <div className="mx-auto max-w-2xl text-center">
             <div className="mb-8 flex justify-center">
@@ -170,9 +170,9 @@ export function BecomeSellerClient() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-turquoise-50 to-white">
+    <div className="min-h-screen bg-turquoise-50">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-r from-turquoise-600 to-turquoise-700 py-16 text-white md:py-24">
+      <section className="relative overflow-hidden bg-turquoise-700 py-16 text-white md:py-24">
         <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-10" />
         <div className="container relative mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center">
@@ -374,7 +374,7 @@ export function BecomeSellerClient() {
                             <FormItem>
                               <FormLabel>{t('form.fields.firstName')} *</FormLabel>
                               <FormControl>
-                                <Input placeholder="Jean" {...field} />
+                                <Input placeholder="Amadou" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -388,7 +388,7 @@ export function BecomeSellerClient() {
                             <FormItem>
                               <FormLabel>{t('form.fields.lastName')} *</FormLabel>
                               <FormControl>
-                                <Input placeholder="Dupont" {...field} />
+                                <Input placeholder="Diallo" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -404,7 +404,7 @@ export function BecomeSellerClient() {
                             <FormItem>
                               <FormLabel>{t('form.fields.email')} *</FormLabel>
                               <FormControl>
-                                <Input type="email" placeholder="jean@exemple.com" {...field} />
+                                <Input type="email" placeholder="amadou@exemple.com" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>

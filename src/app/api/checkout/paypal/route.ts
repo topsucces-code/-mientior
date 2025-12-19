@@ -150,7 +150,7 @@ export async function PATCH(request: NextRequest) {
     // )
 
     // Update order status
-    // const order = await prisma.order.update({
+    // const order = await prisma.orders.update({
     //   where: { id: orderId },
     //   data: {
     //     status: 'PROCESSING',

@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const validatedData = applySchema.parse(body)
 
     // Get user from database
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { email: session.user.email },
     })
 
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if there's already a pending vendor application
-    const existingVendor = await prisma.vendor.findUnique({
+    const existingVendor = await prisma.vendors.findUnique({
       where: { userId: user.id },
     })
 
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       }
       if (existingVendor.status === 'ACTIVE') {
         // Update user role to VENDOR if not already
-        await prisma.user.update({
+        await prisma.users.update({
           where: { id: user.id },
           data: { role: 'VENDOR' },
         })
@@ -85,13 +85,13 @@ export async function POST(request: NextRequest) {
 
     // Generate unique slug
     let slug = generateSlug(validatedData.businessName)
-    const existingSlug = await prisma.vendor.findUnique({ where: { slug } })
+    const existingSlug = await prisma.vendors.findUnique({ where: { slug } })
     if (existingSlug) {
       slug = `${slug}-${Date.now().toString(36)}`
     }
 
     // Create vendor application
-    const vendor = await prisma.vendor.create({
+    const vendor = await prisma.vendors.create({
       data: {
         userId: user.id,
         businessName: validatedData.businessName,
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
 
     // Update user phone if not set
     if (!user.phone) {
-      await prisma.user.update({
+      await prisma.users.update({
         where: { id: user.id },
         data: { phone: validatedData.phone },
       })

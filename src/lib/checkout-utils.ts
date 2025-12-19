@@ -1,4 +1,5 @@
 import { addBusinessDays } from "date-fns";
+import type { PrismaClient } from "@prisma/client";
 
 /**
  * Calculate shipping cost based on subtotal, option, and country
@@ -6,23 +7,23 @@ import { addBusinessDays } from "date-fns";
 export function calculateShipping(
   subtotal: number,
   option: string,
-  country: string = "FR"
+  country: string = "CI"
 ): number {
-  // Free shipping threshold for France
-  const freeShippingThreshold = 50;
+  // Free shipping threshold for Ivory Coast (in XOF)
+  const freeShippingThreshold = 25000;
 
-  if (country === "FR") {
+  if (country === "CI") {
     if (option === "standard" && subtotal >= freeShippingThreshold) {
       return 0;
     }
-    if (option === "standard") return 4.99;
-    if (option === "express") return 9.99;
-    if (option === "relay") return 3.99;
+    if (option === "standard") return 2500;
+    if (option === "express") return 5000;
+    if (option === "relay") return 2000;
   }
 
   // International shipping (simplified)
-  if (option === "standard") return 12.99;
-  if (option === "express") return 24.99;
+  if (option === "standard") return 6500;
+  if (option === "express") return 12500;
 
   return 0;
 }
@@ -32,12 +33,12 @@ export function calculateShipping(
  */
 export function calculateTax(
   subtotal: number,
-  country: string = "FR"
+  country: string = "CI"
 ): number {
-  if (country === "FR") {
-    return subtotal * 0.2; // 20% TVA in France
+  if (country === "CI") {
+    return subtotal * 0.18; // 18% TVA in Côte d'Ivoire
   }
-  // EU countries would have different rates
+  // Other African countries would have different rates
   return 0;
 }
 
@@ -157,33 +158,65 @@ export function calculateEstimatedDelivery(
 }
 
 /**
- * Validate French phone number
+ * Validate African phone number (supports multiple countries)
  */
-export function validateFrenchPhone(phone: string): boolean {
+export function validateAfricanPhone(phone: string): boolean {
   // Remove spaces, dots, and dashes
   const cleaned = phone.replace(/[\s.-]/g, "");
 
-  // Check for +33 or 0 prefix
-  const regex = /^(?:\+33|0)[1-9](?:\d{8})$/;
-  return regex.test(cleaned);
+  // Support multiple African country codes
+  const patterns = [
+    /^(?:\+225|0)[0-9]{10}$/,  // Côte d'Ivoire
+    /^(?:\+221|0)[0-9]{9}$/,   // Sénégal
+    /^(?:\+237|0)[0-9]{9}$/,   // Cameroun
+    /^(?:\+234|0)[0-9]{10}$/,  // Nigeria
+    /^(?:\+233|0)[0-9]{9}$/,   // Ghana
+  ];
+
+  return patterns.some(pattern => pattern.test(cleaned));
 }
 
 /**
- * Format French phone number
+ * Format African phone number
  */
-export function formatFrenchPhone(phone: string): string {
+export function formatAfricanPhone(phone: string): string {
   const cleaned = phone.replace(/[\s.-]/g, "");
 
-  if (cleaned.startsWith("+33")) {
-    const number = cleaned.slice(3);
-    return `+33 ${number.slice(0, 1)} ${number.slice(1, 3)} ${number.slice(3, 5)} ${number.slice(5, 7)} ${number.slice(7, 9)}`;
+  // Côte d'Ivoire format: +225 07 07 12 34 56
+  if (cleaned.startsWith("+225")) {
+    const number = cleaned.slice(4);
+    return `+225 ${number.slice(0, 2)} ${number.slice(2, 4)} ${number.slice(4, 6)} ${number.slice(6, 8)} ${number.slice(8, 10)}`;
   }
 
-  if (cleaned.startsWith("0")) {
-    return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 4)} ${cleaned.slice(4, 6)} ${cleaned.slice(6, 8)} ${cleaned.slice(8, 10)}`;
+  // Sénégal format: +221 77 123 45 67
+  if (cleaned.startsWith("+221")) {
+    const number = cleaned.slice(4);
+    return `+221 ${number.slice(0, 2)} ${number.slice(2, 5)} ${number.slice(5, 7)} ${number.slice(7, 9)}`;
+  }
+
+  // Cameroun format: +237 6 55 12 34 56
+  if (cleaned.startsWith("+237")) {
+    const number = cleaned.slice(4);
+    return `+237 ${number.slice(0, 1)} ${number.slice(1, 3)} ${number.slice(3, 5)} ${number.slice(5, 7)} ${number.slice(7, 9)}`;
   }
 
   return phone;
+}
+
+/**
+ * Legacy function name for backward compatibility
+ * @deprecated Use validateAfricanPhone instead
+ */
+export function validateFrenchPhone(phone: string): boolean {
+  return validateAfricanPhone(phone);
+}
+
+/**
+ * Legacy function name for backward compatibility
+ * @deprecated Use formatAfricanPhone instead
+ */
+export function formatFrenchPhone(phone: string): string {
+  return formatAfricanPhone(phone);
 }
 
 /**
@@ -287,7 +320,7 @@ export interface ComputeOrderTotalsResult {
  */
 export async function computeOrderTotals(
   options: ComputeOrderTotalsOptions,
-  prisma: any // Prisma client instance
+  prisma: PrismaClient
 ): Promise<ComputeOrderTotalsResult> {
   const { items, shippingOption = 'standard', promoCode } = options
 
@@ -302,19 +335,10 @@ export async function computeOrderTotals(
   for (const item of items) {
     const product = await prisma.product.findUnique({
       where: { id: item.productId },
-      select: {
-        id: true,
-        name: true,
-        price: true,
-        stock: true,
+      include: {
         variants: item.variantId
           ? {
               where: { id: item.variantId },
-              select: {
-                id: true,
-                priceModifier: true,
-                stock: true,
-              },
             }
           : false,
       },
@@ -325,9 +349,10 @@ export async function computeOrderTotals(
     }
 
     // Check stock availability
-    const availableStock = item.variantId && product.variants && product.variants.length > 0
-      ? product.variants[0].stock
-      : product.stock
+    const variant = item.variantId && product.variants && product.variants.length > 0
+      ? product.variants[0]
+      : null
+    const availableStock = variant ? variant.stock : product.stock
 
     if (availableStock < item.quantity) {
       throw new Error(`Stock insuffisant pour ${product.name}`)
@@ -335,11 +360,8 @@ export async function computeOrderTotals(
 
     // Calculate item price
     let itemPrice = Math.round(product.price * 100) // Convert to cents
-    if (item.variantId && product.variants && product.variants.length > 0) {
-      const variant = product.variants[0]
-      if (variant.priceModifier) {
-        itemPrice += Math.round(variant.priceModifier * 100)
-      }
+    if (variant && variant.price_modifier) {
+      itemPrice += Math.round(variant.price_modifier * 100)
     }
 
     const lineSubtotal = itemPrice * item.quantity

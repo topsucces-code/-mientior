@@ -51,7 +51,7 @@ const defaultSettings: PaymentSettings = {
   paystackTestMode: true,
   paystackPublicKey: '',
   paystackSecretKey: '',
-  defaultCurrency: 'EUR',
+  defaultCurrency: 'XOF',
   allowedCurrencies: ['EUR', 'USD', 'XOF'],
   minimumOrderAmount: 1,
   maximumOrderAmount: 10000,
@@ -65,7 +65,7 @@ const defaultSettings: PaymentSettings = {
 
 export async function GET() {
   try {
-    const setting = await prisma.setting.findUnique({
+    const setting = await prisma.settings.findUnique({
       where: { key: 'payments' },
     });
 
@@ -97,7 +97,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
 
     // Get existing settings to preserve masked values
-    const existing = await prisma.setting.findUnique({
+    const existing = await prisma.settings.findUnique({
       where: { key: 'payments' },
     });
 
@@ -123,7 +123,7 @@ export async function PUT(request: NextRequest) {
       });
     }
 
-    await prisma.setting.upsert({
+    await prisma.settings.upsert({
       where: { key: 'payments' },
       update: {
         value: JSON.stringify(settingsToSave),

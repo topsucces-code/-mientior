@@ -24,6 +24,7 @@ interface CartItemProps {
 }
 
 export function CartItem({ item, className, showActions = true }: CartItemProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const t = useTranslations('cart.item')
   const { removeItem: optimisticRemove, saveForLater: optimisticSave } = useOptimisticCart()
   const { trackRemoveFromCart } = useCartAnalytics()
@@ -137,7 +138,7 @@ export function CartItem({ item, className, showActions = true }: CartItemProps)
             {/* Stock Status & Free Shipping */}
             <div className="mt-1 flex flex-wrap gap-2">
               {item.inStock ? (
-                <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                <Badge variant="outline" className="text-xs bg-turquoise-50 text-turquoise-700 border-turquoise-200">
                   En stock
                 </Badge>
               ) : (
@@ -146,7 +147,7 @@ export function CartItem({ item, className, showActions = true }: CartItemProps)
                 </Badge>
               )}
               {item.freeShipping && (
-                <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                <Badge variant="outline" className="text-xs bg-turquoise-50 text-turquoise-700 border-turquoise-200">
                   <Truck className="h-3 w-3 mr-1" />
                   Livraison gratuite
                 </Badge>

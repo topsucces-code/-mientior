@@ -175,7 +175,7 @@ export function FortuneWheel({
 
         {/* Center Button */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-orange-600 shadow-elevation-3">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-600 shadow-elevation-3">
             <Gift className="h-8 w-8 text-white" />
           </div>
         </div>
@@ -222,7 +222,7 @@ export function FortuneWheel({
 
       {/* Result Display */}
       {result && !isSpinning && (
-        <div className="animate-scale-in rounded-lg bg-gradient-to-r from-aurore-500 to-aurore-600 p-6 text-center shadow-elevation-3">
+        <div className="animate-scale-in rounded-lg bg-aurore-600 p-6 text-center shadow-elevation-3">
           <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-anthracite-500">
             Félicitations !
           </p>

@@ -49,8 +49,8 @@ export function ExpressCheckout({
     try {
       // Create Apple Pay payment request
       const paymentRequest: ApplePayJS.ApplePayPaymentRequest = {
-        countryCode: "FR",
-        currencyCode: "EUR",
+        countryCode: "CI",
+        currencyCode: "XOF",
         supportedNetworks: ["visa", "masterCard", "amex"],
         merchantCapabilities: ["supports3DS"],
         total: {
@@ -158,8 +158,8 @@ export function ExpressCheckout({
         transactionInfo: {
           totalPriceStatus: "FINAL",
           totalPrice: total.toFixed(2),
-          currencyCode: "EUR",
-          countryCode: "FR",
+          currencyCode: "XOF",
+          countryCode: "CI",
         },
       };
 

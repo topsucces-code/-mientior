@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { Mail, CheckCircle2, Loader2, Gift } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -18,9 +19,9 @@ interface NewsletterSubscriptionProps {
 }
 
 export default function NewsletterSubscription({
-  title = 'Restez Informé',
-  subtitle = 'Inscrivez-vous à notre newsletter et recevez nos dernières offres',
-  incentive = '-10% sur votre première commande',
+  title,
+  subtitle,
+  incentive,
   onSubmit,
   className,
 }: NewsletterSubscriptionProps) {
@@ -32,6 +33,11 @@ export default function NewsletterSubscription({
   const { ref: sectionRef, isIntersecting: isVisible } = useIntersectionObserver({ threshold: 0.1 })
   const prefersReducedMotion = useReducedMotion()
   const { toast } = useToast()
+  const t = useTranslations('home.newsletter')
+
+  const displayTitle = title || t('title')
+  const displaySubtitle = subtitle || t('subtitle')
+  const displayIncentive = incentive || t('discount')
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -44,17 +50,17 @@ export default function NewsletterSubscription({
 
     // Validation
     if (!email) {
-      setError('Veuillez entrer votre adresse email')
+      setError(t('emailRequired'))
       return
     }
 
     if (!validateEmail(email)) {
-      setError('Veuillez entrer une adresse email valide')
+      setError(t('emailInvalid'))
       return
     }
 
     if (!acceptMarketing) {
-      setError('Veuillez accepter de recevoir nos communications')
+      setError(t('acceptMarketingRequired'))
       return
     }
 
@@ -72,7 +78,7 @@ export default function NewsletterSubscription({
         }).then(async (res) => {
           if (!res.ok) {
             const data = await res.json()
-            throw new Error(data.message || 'Une erreur est survenue')
+            throw new Error(data.message || t('genericError'))
           }
         })
       }
@@ -82,8 +88,8 @@ export default function NewsletterSubscription({
       setAcceptMarketing(false)
 
       toast({
-        title: 'Inscription réussie ! 🎉',
-        description: 'Vous recevrez bientôt votre code promo par email.',
+        title: t('successTitle'),
+        description: t('successMessage'),
         variant: 'default',
       })
 
@@ -92,10 +98,10 @@ export default function NewsletterSubscription({
         setIsSuccess(false)
       }, 5000)
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue'
+      const errorMessage = err instanceof Error ? err.message : t('genericError')
       setError(errorMessage)
       toast({
-        title: 'Erreur',
+        title: t('errorTitle'),
         description: errorMessage,
         variant: 'destructive',
       })
@@ -113,7 +119,7 @@ export default function NewsletterSubscription({
       )}
     >
       {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-orange-600 to-red-600" />
+      <div className="absolute inset-0 bg-orange-600" />
       <div className="absolute inset-0 bg-[url('/patterns/dots.svg')] opacity-10" />
 
       <div className="container relative mx-auto px-3 md:px-4 lg:px-6">
@@ -134,18 +140,18 @@ export default function NewsletterSubscription({
 
             {/* Title */}
             <h2 className="mb-3 font-display text-display-md md:text-display-lg text-white">
-              {title}
+              {displayTitle}
             </h2>
 
             {/* Subtitle */}
             <p className="mb-4 text-lg text-white/90">
-              {subtitle}
+              {displaySubtitle}
             </p>
 
             {/* Incentive Badge */}
             <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 backdrop-blur-sm">
               <Gift className="h-5 w-5 text-white" />
-              <span className="font-semibold text-white">{incentive}</span>
+              <span className="font-semibold text-white">{displayIncentive}</span>
             </div>
           </div>
 
@@ -163,7 +169,7 @@ export default function NewsletterSubscription({
                   <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-nuanced-400" />
                   <Input
                     type="email"
-                    placeholder="votre@email.com"
+                    placeholder={t('placeholder')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isLoading || isSuccess}
@@ -190,15 +196,15 @@ export default function NewsletterSubscription({
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Inscription...
+                      {t('submitting')}
                     </>
                   ) : isSuccess ? (
                     <>
                       <CheckCircle2 className="mr-2 h-5 w-5" />
-                      Inscrit !
+                      {t('subscribed')}
                     </>
                   ) : (
-                    "S'inscrire"
+                    t('button')
                   )}
                 </Button>
               </div>
@@ -229,8 +235,7 @@ export default function NewsletterSubscription({
                   )}
                 />
                 <span>
-                  J'accepte de recevoir les communications marketing et les offres promotionnelles.
-                  Vous pouvez vous désabonner à tout moment.
+                  {t('acceptMarketingText')}
                 </span>
               </label>
             </form>
@@ -243,14 +248,14 @@ export default function NewsletterSubscription({
               )}
               style={{ animationDelay: '400ms' }}
             >
-              Vos données sont protégées. Consultez notre{' '}
+              {t('privacyPrefix')}{' '}
               <a
                 href="/privacy"
                 className="underline transition-colors hover:text-white"
               >
-                politique de confidentialité
+                {t('privacyLink')}
               </a>
-              .
+              {t('privacySuffix')}
             </p>
           </div>
         </div>

@@ -136,7 +136,7 @@ export function AskQuestionModal({
                 </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+              <div className="bg-turquoise-50 border border-turquoise-200 rounded-lg p-3 text-sm text-turquoise-800">
                 <p className="font-medium mb-1">Before you ask:</p>
                 <ul className="list-disc list-inside space-y-1 text-xs">
                   <li>Check if your question has already been answered</li>

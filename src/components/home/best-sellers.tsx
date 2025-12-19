@@ -68,25 +68,31 @@ export default function BestSellers({
   const scrollNext = React.useCallback(() => emblaApi?.scrollNext(), [emblaApi])
 
   return (
-    <section 
+    <section
       ref={sectionRef}
-      className="py-8 sm:py-10 md:py-14 bg-gradient-to-br from-amber-50 via-white to-yellow-50"
+      className="relative py-20 md:py-24 overflow-hidden"
     >
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6">
+      {/* Background avec motifs */}
+      <div className="absolute inset-0 bg-amber-50/20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(251,191,36,0.06),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(245,158,11,0.05),transparent_50%)]" />
+      </div>
+
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 relative">
         {/* Header - Style Temu */}
         <div
           className={cn(
-            'mb-6 sm:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4',
+            'mb-4 sm:mb-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3',
             isVisible && !prefersReducedMotion && 'animate-fade-in-up'
           )}
         >
           <div className="flex items-center gap-3 sm:gap-4">
             {/* Icon with Animation */}
             <div className="relative">
-              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-yellow-500 shadow-lg">
+              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gray-900 shadow-lg">
                 <Trophy className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
               </div>
-              <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white animate-pulse">
+              <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white animate-pulse">
                 #1
               </div>
             </div>
@@ -97,7 +103,7 @@ export default function BestSellers({
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
                   {displayTitle}
                 </h2>
-                <Crown className="h-5 w-5 sm:h-6 sm:w-6 text-amber-500" />
+                <Crown className="h-5 w-5 sm:h-6 sm:w-6 text-gray-500" />
               </div>
               <p className="text-sm sm:text-base text-gray-500 mt-0.5">{displaySubtitle}</p>
             </div>
@@ -107,7 +113,7 @@ export default function BestSellers({
           <div className="flex items-center gap-3">
             <Link
               href="/products?sort=bestselling"
-              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
             >
               <Flame className="h-4 w-4" />
               {t('viewAll')}
@@ -115,14 +121,14 @@ export default function BestSellers({
             <div className="flex items-center gap-2">
               <button
                 onClick={scrollPrev}
-                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-all shadow-sm"
+                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all shadow-sm"
                 aria-label="Précédent"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
                 onClick={scrollNext}
-                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-all shadow-sm"
+                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all shadow-sm"
                 aria-label="Suivant"
               >
                 <ChevronRight className="h-5 w-5" />
@@ -132,17 +138,17 @@ export default function BestSellers({
         </div>
 
         {/* Filter Tabs */}
-        <div className="mb-5 sm:mb-6 overflow-x-auto hide-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0">
+        <div className="mb-4 sm:mb-5 overflow-x-auto hide-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0">
           <div className="flex gap-2 sm:gap-3 w-max sm:w-auto">
             {filterCategories.map((filter) => (
               <button
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
                 className={cn(
-                  'flex items-center gap-1.5 px-4 sm:px-5 py-2 sm:py-2.5 text-sm font-semibold rounded-full transition-all duration-300 whitespace-nowrap',
+                  'flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 text-sm font-semibold rounded-full transition-all duration-300 whitespace-nowrap',
                   activeFilter === filter.id
-                    ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-lg shadow-amber-500/30'
-                    : 'bg-white text-gray-600 border border-gray-200 hover:border-amber-300 hover:text-amber-600'
+                    ? 'bg-black text-white shadow-md'
+                    : 'bg-white text-gray-700 border border-gray-200 hover:border-gray-400 hover:bg-gray-50'
                 )}
               >
                 <span>{filter.icon}</span>
@@ -165,9 +171,8 @@ export default function BestSellers({
                   {index < 3 && (
                     <div className={cn(
                       "absolute -top-2 -left-2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-black text-sm shadow-lg",
-                      index === 0 && "bg-gradient-to-br from-yellow-400 to-amber-500 text-white",
-                      index === 1 && "bg-gradient-to-br from-gray-300 to-gray-400 text-white",
-                      index === 2 && "bg-gradient-to-br from-amber-600 to-amber-700 text-white"
+                      index === 0 && "bg-red-500 text-white",
+                      index !== 0 && "bg-gray-900 text-white"
                     )}>
                       #{index + 1}
                     </div>
@@ -200,10 +205,10 @@ export default function BestSellers({
         </div>
 
         {/* Mobile View All */}
-        <div className="mt-6 text-center sm:hidden">
+        <div className="mt-5 text-center sm:hidden">
           <Link
             href="/products?sort=bestselling"
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-sm font-semibold rounded-full hover:shadow-lg transition-all"
+            className="inline-flex items-center gap-2 px-5 py-2 bg-black text-white text-sm font-semibold rounded-full hover:shadow-lg transition-all"
           >
             <Trophy className="h-4 w-4" />
             Voir les meilleures ventes

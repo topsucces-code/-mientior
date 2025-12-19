@@ -9,7 +9,7 @@ import { type AdminSession } from '@/lib/auth-admin';
 
 // GET /api/vendors/[id] - Get single vendor
 const handleGET = async (req: NextRequest, { params }: { params: Record<string, string> }) => {
-  const vendor = await prisma.vendor.findUnique({
+  const vendor = await prisma.vendors.findUnique({
     where: { id: params.id },
     include: {
       products: {
@@ -47,7 +47,7 @@ const handlePATCH = async (req: NextRequest, { params, adminSession }: { params:
   const body = await req.json();
 
   // Get old vendor data for audit log
-  const oldVendor = await prisma.vendor.findUnique({
+  const oldVendor = await prisma.vendors.findUnique({
     where: { id: params.id },
   });
 
@@ -56,7 +56,7 @@ const handlePATCH = async (req: NextRequest, { params, adminSession }: { params:
   }
 
   // Update vendor
-  const vendor = await prisma.vendor.update({
+  const vendor = await prisma.vendors.update({
     where: { id: params.id },
     data: {
       businessName: body.businessName,
@@ -112,7 +112,7 @@ export const PATCH = withPermission(Permission.VENDORS_WRITE, handlePATCH);
 const handleDELETE = async (req: NextRequest, { params, adminSession }: { params: Record<string, string>, adminSession: AdminSession }) => {
   const adminUser = adminSession.adminUser;
   // Check if vendor has active orders
-  const activeOrders = await prisma.order.count({
+  const activeOrders = await prisma.orders.count({
     where: {
       vendorId: params.id,
       status: {
@@ -129,7 +129,7 @@ const handleDELETE = async (req: NextRequest, { params, adminSession }: { params
   }
 
   // Soft delete by setting status to BANNED
-  const vendor = await prisma.vendor.update({
+  const vendor = await prisma.vendors.update({
     where: { id: params.id },
     data: { status: 'BANNED' },
   });

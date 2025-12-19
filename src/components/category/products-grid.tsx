@@ -223,8 +223,8 @@ export function ProductsGrid({
                             className={cn(
                               "h-10 w-10 p-0 flex items-center justify-center transition-all duration-300",
                               addedProducts.has(product.id)
-                                ? "bg-green-500 hover:bg-green-500 scale-110 shadow-lg"
-                                : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
+                                ? "bg-turquoise-500 hover:bg-turquoise-500 scale-110 shadow-lg"
+                                : "bg-orange-600 hover:bg-orange-700"
                             )}
                             aria-label={addedProducts.has(product.id) ? "Ajouté au panier" : "Ajouter au panier"}
                             onClick={(e) => {

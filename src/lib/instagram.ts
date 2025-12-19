@@ -135,14 +135,14 @@ export function setCachedPosts(posts: InstagramPost[]): void {
 }
 
 /**
- * Get fallback posts (static placeholder data)
+ * Get fallback posts (static placeholder data with African context)
  */
 export function getFallbackPosts(): InstagramPost[] {
   return [
     {
       id: 'fallback-1',
-      imageUrl: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&q=80',
-      caption: 'Découvrez notre nouvelle collection',
+      imageUrl: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&q=80',
+      caption: 'Style africain moderne ✨',
       likes: 1234,
       comments: 56,
       permalink: 'https://instagram.com',
@@ -150,8 +150,8 @@ export function getFallbackPosts(): InstagramPost[] {
     },
     {
       id: 'fallback-2',
-      imageUrl: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=400&q=80',
-      caption: 'Les tendances de la saison',
+      imageUrl: 'https://images.unsplash.com/photo-1589156280159-27698a70f29e?w=400&q=80',
+      caption: 'Mode Dakar 🌍',
       likes: 2341,
       comments: 78,
       permalink: 'https://instagram.com',
@@ -159,8 +159,8 @@ export function getFallbackPosts(): InstagramPost[] {
     },
     {
       id: 'fallback-3',
-      imageUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&q=80',
-      caption: 'Offres exclusives',
+      imageUrl: 'https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=400&q=80',
+      caption: 'Ankara vibes 🧡',
       likes: 3456,
       comments: 92,
       permalink: 'https://instagram.com',
@@ -168,8 +168,8 @@ export function getFallbackPosts(): InstagramPost[] {
     },
     {
       id: 'fallback-4',
-      imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80',
-      caption: 'Style et élégance',
+      imageUrl: 'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?w=400&q=80',
+      caption: 'African print love 💚',
       likes: 4567,
       comments: 123,
       permalink: 'https://instagram.com',
@@ -177,8 +177,8 @@ export function getFallbackPosts(): InstagramPost[] {
     },
     {
       id: 'fallback-5',
-      imageUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=400&q=80',
-      caption: 'Nouveautés du mois',
+      imageUrl: 'https://images.unsplash.com/photo-1590735213920-68192a487bc2?w=400&q=80',
+      caption: 'Élégance traditionnelle 👑',
       likes: 5678,
       comments: 145,
       permalink: 'https://instagram.com',
@@ -186,8 +186,8 @@ export function getFallbackPosts(): InstagramPost[] {
     },
     {
       id: 'fallback-6',
-      imageUrl: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&q=80',
-      caption: 'Inspirations mode',
+      imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80',
+      caption: 'Beauty in diversity 🌸',
       likes: 6789,
       comments: 167,
       permalink: 'https://instagram.com',

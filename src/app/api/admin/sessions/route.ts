@@ -13,7 +13,7 @@ export async function GET(_request: NextRequest) {
     const cookieStore = await cookies();
     const currentToken = cookieStore.get('session_token')?.value;
 
-    const sessions = await prisma.session.findMany({
+    const sessions = await prisma.sessions.findMany({
       include: {
         user: {
           select: {

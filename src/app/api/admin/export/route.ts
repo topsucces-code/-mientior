@@ -229,7 +229,7 @@ async function handlePOST(
         break;
 
       case 'orders':
-        data = await prisma.order.findMany({
+        data = await prisma.orders.findMany({
           where: filters || {},
           include: {
             user: {
@@ -257,7 +257,7 @@ async function handlePOST(
         break;
 
       case 'users':
-        data = await prisma.user.findMany({
+        data = await prisma.users.findMany({
           where: filters || {},
           select: {
             id: true,

@@ -316,7 +316,7 @@ export async function sendPimAlert(
       : 'info';
 
     // Get active admin users
-    const adminUsers = await prisma.adminUser.findMany({
+    const adminUsers = await prisma.admin_users.findMany({
       where: {
         isActive: true,
         role: {
@@ -348,7 +348,7 @@ export async function sendPimAlert(
       read: false,
     };
 
-    await prisma.notification.createMany({
+    await prisma.notifications.createMany({
       data: adminUsers.map(admin => ({
         ...notificationData,
         adminUserId: admin.id,

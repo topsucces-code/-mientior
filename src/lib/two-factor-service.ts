@@ -98,7 +98,7 @@ export async function enable2FA(userId: string): Promise<{
   backupCodes: string[];
 }> {
   // Get user email
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: userId },
     select: { email: true },
   });
@@ -115,7 +115,7 @@ export async function enable2FA(userId: string): Promise<{
 
   // Store encrypted secret (in production, use proper encryption)
   // For now, we'll store it directly - in production, encrypt with a key
-  await prisma.user.update({
+  await prisma.users.update({
     where: { id: userId },
     data: {
       twoFactorSecret: secret,
@@ -131,7 +131,7 @@ export async function enable2FA(userId: string): Promise<{
  * Verify and activate 2FA
  */
 export async function verify2FASetup(userId: string, code: string): Promise<boolean> {
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: userId },
     select: { twoFactorSecret: true },
   });
@@ -143,7 +143,7 @@ export async function verify2FASetup(userId: string, code: string): Promise<bool
   const isValid = verifyTOTP(user.twoFactorSecret, code);
 
   if (isValid) {
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: userId },
       data: { twoFactorEnabled: true },
     });
@@ -159,7 +159,7 @@ export async function verify2FALogin(
   userId: string,
   code: string
 ): Promise<{ success: boolean; usedBackupCode?: boolean }> {
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: userId },
     select: {
       twoFactorSecret: true,
@@ -186,7 +186,7 @@ export async function verify2FALogin(
     const updatedCodes = [...backupCodes];
     updatedCodes.splice(backupCodeIndex, 1);
 
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: userId },
       data: { twoFactorBackupCodes: updatedCodes },
     });
@@ -207,7 +207,7 @@ export async function disable2FA(userId: string, code: string): Promise<boolean>
     return false;
   }
 
-  await prisma.user.update({
+  await prisma.users.update({
     where: { id: userId },
     data: {
       twoFactorEnabled: false,
@@ -235,7 +235,7 @@ export async function regenerateBackupCodes(
   const backupCodes = generateBackupCodes();
   const hashedBackupCodes = hashBackupCodes(backupCodes);
 
-  await prisma.user.update({
+  await prisma.users.update({
     where: { id: userId },
     data: { twoFactorBackupCodes: hashedBackupCodes },
   });
@@ -247,7 +247,7 @@ export async function regenerateBackupCodes(
  * Check if user has 2FA enabled
  */
 export async function has2FAEnabled(userId: string): Promise<boolean> {
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: userId },
     select: { twoFactorEnabled: true },
   });
@@ -259,7 +259,7 @@ export async function has2FAEnabled(userId: string): Promise<boolean> {
  * Get remaining backup codes count
  */
 export async function getBackupCodesCount(userId: string): Promise<number> {
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: userId },
     select: { twoFactorBackupCodes: true },
   });

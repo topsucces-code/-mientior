@@ -12,7 +12,7 @@ export async function GET(
 ) {
   try {
     // Find order by order number using Prisma
-    const order = await prisma.order.findUnique({
+    const order = await prisma.orders.findUnique({
       where: {
         orderNumber: params.orderNumber,
       },

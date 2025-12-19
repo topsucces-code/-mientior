@@ -337,7 +337,7 @@ function NewsletterBlock({
   return (
     <section 
       className={cn(
-        'py-12 px-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white',
+        'py-12 px-4 bg-orange-600 text-white',
         settings?.className as string
       )}
     >

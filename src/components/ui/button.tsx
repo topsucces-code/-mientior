@@ -9,9 +9,9 @@ const buttonVariants = cva(
     {
         variants: {
             variant: {
-                default: "bg-emerald-600 text-white hover:bg-emerald-700",
-                gradient: "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white hover:from-emerald-700 hover:to-emerald-800 shadow-elevation-2 hover:shadow-elevation-3",
-                copper: "bg-gradient-to-r from-copper-500 to-copper-600 text-white hover:from-copper-600 hover:to-copper-700 shadow-elevation-2 hover:shadow-elevation-3",
+                default: "bg-turquoise-600 text-white hover:bg-turquoise-700",
+                gradient: "bg-turquoise-700 text-white hover:bg-turquoise-800 shadow-elevation-2 hover:shadow-elevation-3",
+                copper: "bg-copper-600 text-white hover:bg-copper-700 shadow-elevation-2 hover:shadow-elevation-3",
                 destructive:
                     "bg-destructive text-destructive-foreground hover:bg-destructive/90",
                 outline:
@@ -19,7 +19,7 @@ const buttonVariants = cva(
                 secondary:
                     "bg-taupe-100 text-taupe-700 hover:bg-taupe-200",
                 ghost: "hover:bg-taupe-100 hover:text-taupe-700",
-                link: "text-emerald-600 underline-offset-4 hover:underline hover:text-emerald-700",
+                link: "text-turquoise-600 underline-offset-4 hover:underline hover:text-turquoise-700",
             },
             size: {
                 default: "h-10 px-4 py-2",

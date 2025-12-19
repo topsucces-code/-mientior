@@ -60,11 +60,11 @@ export function LoyaltyPageClient({ data }: LoyaltyPageClientProps) {
 
   const getTierColor = (tierName: string) => {
     switch (tierName.toLowerCase()) {
-      case 'bronze': return 'from-amber-600 to-amber-800'
-      case 'silver': return 'from-gray-400 to-gray-600'
-      case 'gold': return 'from-yellow-400 to-yellow-600'
-      case 'platinum': return 'from-purple-400 to-purple-600'
-      default: return 'from-orange-400 to-orange-600'
+      case 'bronze': return 'bg-amber-700'
+      case 'silver': return 'bg-gray-500'
+      case 'gold': return 'bg-yellow-500'
+      case 'platinum': return 'bg-purple-600'
+      default: return 'bg-orange-600'
     }
   }
 
@@ -93,7 +93,7 @@ export function LoyaltyPageClient({ data }: LoyaltyPageClientProps) {
       </div>
 
       {/* Points Card */}
-      <div className={`mb-8 rounded-2xl bg-gradient-to-br ${getTierColor(data.level)} p-6 text-white shadow-lg`}>
+      <div className={`mb-8 rounded-2xl ${getTierColor(data.level)} p-6 text-white shadow-lg`}>
         <div className="flex items-start justify-between">
           <div>
             <p className="text-sm opacity-80">{t('points.your')}</p>

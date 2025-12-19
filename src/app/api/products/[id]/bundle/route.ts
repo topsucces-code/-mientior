@@ -40,7 +40,7 @@ export async function GET(
 
     // Strategy: Find products frequently bought together based on order history
     // 1. Get orders containing this product
-    const ordersWithProduct = await prisma.order.findMany({
+    const ordersWithProduct = await prisma.orders.findMany({
       where: {
         items: {
           some: { productId: id },

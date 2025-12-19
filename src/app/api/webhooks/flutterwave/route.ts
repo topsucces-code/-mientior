@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Find order by payment reference (tx_ref)
-      let order = await prisma.order.findFirst({
+      let order = await prisma.orders.findFirst({
         where: { paymentReference: tx_ref },
         include: {
           items: {
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
           const metadata = body.data.meta || body.data.metadata || {}
 
           if (metadata.orderId) {
-            order = await prisma.order.findUnique({
+            order = await prisma.orders.findUnique({
               where: { id: metadata.orderId },
               include: {
                 items: {
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
 
             // Update the order with the payment reference if found
             if (order) {
-              order = await prisma.order.update({
+              order = await prisma.orders.update({
                 where: { id: order.id },
                 data: { paymentReference: tx_ref },
                 include: {
@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
 
       // Log to audit trail
       try {
-        await prisma.auditLog.create({
+        await prisma.audit_logs.create({
           data: {
             action: 'webhook_flutterwave_success',
             resource: 'ORDER',
@@ -197,12 +197,12 @@ export async function POST(request: NextRequest) {
     if (event === 'charge.failed') {
       const { tx_ref } = body.data
 
-      const order = await prisma.order.findFirst({
+      const order = await prisma.orders.findFirst({
         where: { paymentReference: tx_ref },
       })
 
       if (order) {
-        await prisma.order.update({
+        await prisma.orders.update({
           where: { id: order.id },
           data: { paymentStatus: 'FAILED' },
         })

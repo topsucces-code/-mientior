@@ -76,7 +76,7 @@ export async function getCustomer360View(
 async function getCustomerProfile(
   customerId: string
 ): Promise<CustomerProfile> {
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: customerId },
     include: {
       savedAddresses: {
@@ -121,7 +121,7 @@ async function getCustomerProfile(
 export async function getCustomerMetrics(
   customerId: string
 ): Promise<CustomerMetrics> {
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: customerId },
     select: {
       createdAt: true,
@@ -135,7 +135,7 @@ export async function getCustomerMetrics(
   }
 
   // Get order data for more detailed metrics
-  const orders = await prisma.order.findMany({
+  const orders = await prisma.orders.findMany({
     where: {
       userId: customerId,
       status: { in: ['DELIVERED', 'COMPLETED'] }, // Only count completed orders
@@ -200,7 +200,7 @@ export async function calculateHealthScore(
   }
 
   // Engagement score: based on loyalty level and points
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { id: customerId },
     select: { loyaltyLevel: true, loyaltyPoints: true },
   })

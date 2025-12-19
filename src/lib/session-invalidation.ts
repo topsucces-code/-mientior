@@ -17,7 +17,7 @@ export async function invalidateUserSessions(
 ): Promise<number> {
   try {
     // Get all session tokens for the user before deletion
-    const sessionsToDelete = await prisma.session.findMany({
+    const sessionsToDelete = await prisma.sessions.findMany({
       where: {
         userId,
         ...(currentSessionToken ? { token: { not: currentSessionToken } } : {}),
@@ -26,7 +26,7 @@ export async function invalidateUserSessions(
     })
 
     // Delete sessions from database
-    const deleteResult = await prisma.session.deleteMany({
+    const deleteResult = await prisma.sessions.deleteMany({
       where: {
         userId,
         ...(currentSessionToken ? { token: { not: currentSessionToken } } : {}),

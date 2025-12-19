@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { auth } from '@/lib/auth'
+// import { auth } from '@/lib/auth' // Not used - using direct Prisma auth
 import { generateVerificationToken } from '@/lib/verification-token'
 import { sendVerificationEmail } from '@/lib/email'
 import { validatePassword, isPasswordBreached } from '@/lib/password-validation'
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.users.findUnique({
       where: { email },
     })
 
@@ -104,35 +104,48 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Use Better Auth to create the user
-    // Now that tables are merged, this will create the User record directly
-    let userId: string
-    try {
-      const signUpResult = await auth.api.signUpEmail({
-        body: {
-          email,
-          password,
-          name,
-        },
-      })
-      
-      if (signUpResult && signUpResult.user) {
-        userId = signUpResult.user.id
-      } else {
-        throw new Error('Failed to get user ID from signup')
-      }
-    } catch (authError: unknown) {
-      console.error('Better Auth signup error:', authError)
-      throw new Error('Failed to create user account')
-    }
-
-    // Create corresponding User record for the application with our custom schema
-    // Update the User record with firstName/lastName
-    await prisma.user.update({
-      where: { id: userId },
+    // Create user directly with Prisma
+    const bcrypt = await import('bcryptjs')
+    const hashedPassword = await bcrypt.hash(password, 12)
+    const nameParts = name.split(' ')
+    const firstName = nameParts[0] || name
+    const lastName = nameParts.slice(1).join(' ') || ''
+    
+    const userId = crypto.randomUUID()
+    
+    // Create better_auth_users entry (required for accounts foreign key)
+    await prisma.better_auth_users.create({
       data: {
-        firstName: name.split(' ')[0] || name,
-        lastName: name.split(' ').slice(1).join(' ') || '',
+        id: userId,
+        email,
+        name,
+        emailVerified: false,
+        updatedAt: new Date(),
+      },
+    })
+    
+    // Create users entry for application data
+    await prisma.users.create({
+      data: {
+        id: userId,
+        email,
+        name,
+        firstName,
+        lastName,
+        email_verified: false,
+        updatedAt: new Date(),
+      },
+    })
+    
+    // Store password hash in accounts table
+    await prisma.accounts.create({
+      data: {
+        id: crypto.randomUUID(),
+        userId: userId,
+        providerId: 'credential',
+        accountId: email,
+        password: hashedPassword,
+        updatedAt: new Date(),
       },
     })
 

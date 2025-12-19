@@ -250,6 +250,49 @@ export default function ProductEdit({ params }: { params: Promise<{ id: string }
           <Input placeholder="e.g., New, Limited, Exclusive" />
         </Form.Item>
 
+        <h3>Translations (English)</h3>
+        <Form.Item label="Name (English)" name="nameEn">
+          <Input placeholder="Product name in English" />
+        </Form.Item>
+
+        <Form.Item label="Description (English)" name="descriptionEn">
+          <TextArea rows={3} placeholder="Product description in English" />
+        </Form.Item>
+
+        <h3>SEO & Metadata</h3>
+        <Form.Item label="Meta Title" name={["seo", "metaTitle"]}>
+          <Input placeholder="SEO meta title" />
+        </Form.Item>
+
+        <Form.Item label="Meta Description" name={["seo", "metaDescription"]}>
+          <TextArea rows={2} placeholder="SEO meta description" />
+        </Form.Item>
+
+        <Form.Item label="Focus Keyword" name={["seo", "focusKeyword"]}>
+          <Input placeholder="Primary SEO keyword" />
+        </Form.Item>
+
+        <h3>Additional Settings</h3>
+        <Form.Item label="Processing Days" name="processingDays">
+          <InputNumber min={1} max={30} placeholder="2" style={{ width: 150 }} />
+        </Form.Item>
+
+        <Form.Item label="AR Model URL" name="arModelUrl">
+          <Input placeholder="URL to 3D/AR model file" />
+        </Form.Item>
+
+        <Form.Item label="Approval Status" name="approvalStatus">
+          <Select>
+            <Select.Option value="PENDING">Pending</Select.Option>
+            <Select.Option value="APPROVED">Approved</Select.Option>
+            <Select.Option value="REJECTED">Rejected</Select.Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item label="Rejection Reason" name="rejectionReason">
+          <TextArea rows={2} placeholder="Reason for rejection (if applicable)" />
+        </Form.Item>
+
         <h3>
           Variants
           {hasPimMapping && <span style={{ fontSize: "14px", color: "#888", marginLeft: "8px" }}>({t("products.managedInAkeneo", "Managed in Akeneo")})</span>}

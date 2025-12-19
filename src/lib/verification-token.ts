@@ -14,12 +14,14 @@ export async function generateVerificationToken(email: string): Promise<string> 
   const expiresAt = new Date()
   expiresAt.setHours(expiresAt.getHours() + 24)
   
-  // Store token in Verification table
-  await prisma.verification.create({
+  // Store token in verifications table
+  await prisma.verifications.create({
     data: {
+      id: crypto.randomUUID(),
       identifier: email,
       value: token,
       expiresAt,
+      updatedAt: new Date(),
     },
   })
   
@@ -31,7 +33,7 @@ export async function generateVerificationToken(email: string): Promise<string> 
  * @param email - User's email address
  */
 export async function invalidateVerificationTokens(email: string): Promise<void> {
-  await prisma.verification.deleteMany({
+  await prisma.verifications.deleteMany({
     where: {
       identifier: email,
     },
@@ -44,7 +46,7 @@ export async function invalidateVerificationTokens(email: string): Promise<void>
  * @returns The email associated with the token if valid, null otherwise
  */
 export async function validateVerificationToken(token: string): Promise<string | null> {
-  const verification = await prisma.verification.findFirst({
+  const verification = await prisma.verifications.findFirst({
     where: {
       value: token,
       expiresAt: {
@@ -65,7 +67,7 @@ export async function validateVerificationToken(token: string): Promise<string |
  * @param token - The token to delete
  */
 export async function deleteVerificationToken(token: string): Promise<void> {
-  await prisma.verification.deleteMany({
+  await prisma.verifications.deleteMany({
     where: {
       value: token,
     },
@@ -85,12 +87,14 @@ export async function generatePasswordResetToken(email: string): Promise<string>
   const expiresAt = new Date()
   expiresAt.setHours(expiresAt.getHours() + 1)
   
-  // Store token in Verification table
-  await prisma.verification.create({
+  // Store token in verifications table
+  await prisma.verifications.create({
     data: {
+      id: crypto.randomUUID(),
       identifier: email,
       value: token,
       expiresAt,
+      updatedAt: new Date(),
     },
   })
   
@@ -102,7 +106,7 @@ export async function generatePasswordResetToken(email: string): Promise<string>
  * @param email - User's email address
  */
 export async function invalidatePasswordResetTokens(email: string): Promise<void> {
-  await prisma.verification.deleteMany({
+  await prisma.verifications.deleteMany({
     where: {
       identifier: email,
     },
@@ -115,7 +119,7 @@ export async function invalidatePasswordResetTokens(email: string): Promise<void
  * @returns The email associated with the token if valid, null otherwise
  */
 export async function validatePasswordResetToken(token: string): Promise<string | null> {
-  const verification = await prisma.verification.findFirst({
+  const verification = await prisma.verifications.findFirst({
     where: {
       value: token,
       expiresAt: {
@@ -136,7 +140,7 @@ export async function validatePasswordResetToken(token: string): Promise<string 
  * @param token - The token to delete
  */
 export async function deletePasswordResetToken(token: string): Promise<void> {
-  await prisma.verification.deleteMany({
+  await prisma.verifications.deleteMany({
     where: {
       value: token,
     },

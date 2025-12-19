@@ -424,7 +424,7 @@ export async function calculateUserPreferences(
     }
 
     // Save to database
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: userId },
       data: { preferences: preferences as any },
     })
@@ -476,7 +476,7 @@ export async function batchCalculatePreferences(
     }
 
     // Get total count
-    const total = await prisma.user.count({ where: whereClause })
+    const total = await prisma.users.count({ where: whereClause })
 
     if (total === 0) {
       return {
@@ -502,7 +502,7 @@ export async function batchCalculatePreferences(
     let cursor: string | undefined
 
     while (processed < total) {
-      const users = await prisma.user.findMany({
+      const users = await prisma.users.findMany({
         where: whereClause,
         select: { id: true },
         take: batchSize,
@@ -590,10 +590,10 @@ export async function batchCalculatePreferences(
 export async function getPreferenceStatistics(): Promise<PersonalizationStatistics> {
   try {
     // Get total users
-    const totalUsers = await prisma.user.count()
+    const totalUsers = await prisma.users.count()
 
     // Get users with preferences
-    const usersWithPreferences = await prisma.user.count({
+    const usersWithPreferences = await prisma.users.count({
       where: { preferences: { not: null } },
     })
 
@@ -706,7 +706,7 @@ export async function getPreferenceStatistics(): Promise<PersonalizationStatisti
  */
 export async function getUserPreferences(userId: string): Promise<UserPreferences | null> {
   try {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: userId },
       select: { preferences: true },
     })
@@ -727,7 +727,7 @@ export async function getUserPreferences(userId: string): Promise<UserPreference
 export async function invalidateUserPreferences(userId: string): Promise<void> {
   try {
     // Update database
-    await prisma.user.update({
+    await prisma.users.update({
       where: { id: userId },
       data: { preferences: null },
     })

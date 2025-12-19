@@ -26,7 +26,7 @@ export async function getUserWithRole(): Promise<UserWithRole | null> {
     return null
   }
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma.users.findUnique({
     where: { email: session.user.email },
     select: {
       id: true,
@@ -101,7 +101,7 @@ export async function updateUserRole(
   userId: string,
   newRole: UserRole
 ): Promise<UserWithRole> {
-  const user = await prisma.user.update({
+  const user = await prisma.users.update({
     where: { id: userId },
     data: { role: newRole },
     select: {

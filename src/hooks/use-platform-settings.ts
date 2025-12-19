@@ -72,7 +72,6 @@ const defaultSettings: PlatformSettings = {
   countries: [
     { code: 'SN', name: 'Senegal', nameLocal: 'Sénégal', currency: 'XOF', language: 'fr' },
     { code: 'CI', name: "Côte d'Ivoire", nameLocal: "Côte d'Ivoire", currency: 'XOF', language: 'fr' },
-    { code: 'FR', name: 'France', nameLocal: 'France', currency: 'EUR', language: 'fr' },
   ],
   defaultCurrency: 'XOF',
   defaultLanguage: 'fr',

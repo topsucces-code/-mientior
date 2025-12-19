@@ -207,7 +207,7 @@ export function ProductInfo({
       <div className="flex items-center gap-3">
         <StarRating rating={product.rating} size="lg" />
         <span className="text-sm text-nuanced-600">
-          {t('reviews', { rating: product.rating, count: product.reviewCount })}
+          {t('reviewsBadge', { rating: product.rating, count: product.reviewCount })}
         </span>
       </div>
 
@@ -292,7 +292,7 @@ export function ProductInfo({
               <RippleButton
                 onClick={handleAddToCart}
                 disabled={isAddingToCart || !isVariantSelectionComplete || currentStock === 0}
-                className="w-full h-14 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                className="w-full h-14 bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                 aria-label={currentStock === 0 ? t('outOfStock') : isAddingToCart ? t('adding') : t('addToCart')}
               >
                 <ShoppingCart className="w-6 h-6" />

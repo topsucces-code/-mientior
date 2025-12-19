@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
 
     // If orderId provided, update existing provisional order
     if (orderId) {
-      const existingOrder = await prisma.order.findUnique({
+      const existingOrder = await prisma.orders.findUnique({
         where: { id: orderId },
       })
 
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
       )
 
       // Update the provisional order
-      const updatedOrder = await prisma.order.update({
+      const updatedOrder = await prisma.orders.update({
         where: { id: orderId },
         data: {
           subtotal: (totals?.subtotal ?? totalsResult.subtotal) / 100, // Convert cents to euros for DB
@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
     const orderNumber = generateOrderNumber()
 
     // Create provisional order
-    const order = await prisma.order.create({
+    const order = await prisma.orders.create({
       data: {
         orderNumber,
         userId: session?.user?.id || null,

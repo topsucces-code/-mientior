@@ -239,7 +239,7 @@ export async function POST(
     }
 
     // Check if user has purchased this product (verified purchase)
-    const purchasedOrder = await prisma.order.findFirst({
+    const purchasedOrder = await prisma.orders.findFirst({
       where: {
         userId: session.user.id,
         paymentStatus: 'PAID',
@@ -329,7 +329,7 @@ export async function POST(
     }
 
     // Get user info
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { id: session.user.id },
       select: { email: true, firstName: true, lastName: true },
     })

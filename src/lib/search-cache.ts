@@ -11,7 +11,7 @@ import {
 } from './cache-config'
 import crypto from 'crypto'
 import type { SearchResults, SearchSuggestion, CacheMetrics } from '@/types'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/prisma-client'
 import { search, suggest, facets } from '@/lib/search-service'
 
 /**

@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
     let loyaltyDiscount = 0
 
     // Check if this is user's first order
-    const previousOrderCount = await prisma.order.count({
+    const previousOrderCount = await prisma.orders.count({
       where: {
         userId,
         status: { notIn: ['CANCELLED'] },
@@ -274,7 +274,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create order in Prisma with nested order items
-    const order = await prisma.order.create({
+    const order = await prisma.orders.create({
       data: {
         orderNumber,
         userId,
@@ -327,7 +327,7 @@ export async function POST(request: NextRequest) {
       const pointsResult = await awardOrderPoints(userId, total / 100, isFirstOrder)
       
       // Update order count and total spent
-      await prisma.user.update({
+      await prisma.users.update({
         where: { id: userId },
         data: {
           totalOrders: { increment: 1 },
@@ -337,7 +337,7 @@ export async function POST(request: NextRequest) {
 
       // Trigger Customer 360 real-time update for loyalty points
       if (pointsResult.success && pointsResult.pointsEarned > 0) {
-        const user = await prisma.user.findUnique({
+        const user = await prisma.users.findUnique({
           where: { id: userId },
           select: { loyaltyPoints: true },
         })

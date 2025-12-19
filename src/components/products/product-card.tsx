@@ -25,6 +25,9 @@ export interface ProductCardProps {
   image?: string
   rating?: number
   reviewCount?: number
+  salesCount?: number
+  freeShipping?: boolean
+  deliveryDays?: number
   badge?: {
     text: string
     variant: 'new' | 'sale' | 'featured' | 'limited'
@@ -36,7 +39,7 @@ export interface ProductCardProps {
 }
 
 const badgeStyles = {
-  new: 'bg-blue-500 text-white',
+  new: 'bg-turquoise-500 text-white',
   sale: 'bg-error text-white',
   featured: 'bg-aurore-500 text-anthracite-700',
   limited: 'bg-orange-500 text-white',
@@ -51,6 +54,9 @@ export function ProductCard({
   image,
   rating = 0,
   reviewCount = 0,
+  salesCount,
+  freeShipping,
+  deliveryDays,
   badge,
   stock = 0,
   showCartButtonInInfo = false,
@@ -59,6 +65,8 @@ export function ProductCard({
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = React.useState(false)
   const [imageLoaded, setImageLoaded] = React.useState(false)
+  const [imageError, setImageError] = React.useState(false)
+  const [isMounted, setIsMounted] = React.useState(false)
   const prefersReducedMotion = useReducedMotion()
   const { ref: cardRef, isIntersecting: isVisible } = useIntersectionObserver<HTMLDivElement>({ threshold: 0.1 })
   const t = useTranslations('wishlist')
@@ -67,12 +75,31 @@ export function ProductCard({
   const addToCart = useCartStore((state) => state.addItem)
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore()
 
-  const inWishlist = isInWishlist(id)
+  const PLACEHOLDER_IMAGE = '/images/placeholder.svg'
+
+  const normalizeImageSrc = (src: string) => {
+    if (src.startsWith('http://') || src.startsWith('https://')) return src
+    if (src.startsWith('/')) return src
+    return `/${src}`
+  }
+
+  React.useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  // Avoid hydration mismatch: SSR/first client render should not depend on client stores.
+  const inWishlist = isMounted ? isInWishlist(id) : false
   const isOutOfStock = stock === 0
   const hasDiscount = compareAtPrice && compareAtPrice > price
   const discountPercentage = hasDiscount
     ? Math.round(((compareAtPrice - price) / compareAtPrice) * 100)
     : 0
+
+  const soldLabel = (() => {
+    if (!salesCount || salesCount <= 0) return undefined
+    if (salesCount >= 1000) return `${Math.floor(salesCount / 100) / 10}k+ vendus`
+    return `${salesCount} vendus`
+  })()
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -84,7 +111,7 @@ export function ProductCard({
       productId: id,
       productName: name,
       productSlug: slug,
-      productImage: image || '/placeholder-product.jpg',
+      productImage: image || PLACEHOLDER_IMAGE,
       price,
       quantity: 1,
       stock,
@@ -128,9 +155,9 @@ export function ProductCard({
       ref={cardRef}
       data-testid="product-card"
       className={cn(
-        'group relative flex flex-col overflow-hidden rounded-lg bg-white transition-all duration-300',
-        'border border-platinum-300 hover:border-platinum-400',
-        'hover:shadow-elevation-3',
+        'group relative flex flex-col overflow-hidden rounded-[3px] bg-white transition-all duration-200',
+        'border border-platinum-200 hover:border-platinum-300',
+        'hover:shadow-sm',
         !prefersReducedMotion && isVisible && 'animate-fade-in-up',
         className
       )}
@@ -142,7 +169,7 @@ export function ProductCard({
         <div className="absolute left-3 top-3 z-10">
           <span
             className={cn(
-              'inline-block rounded-md px-2 py-1 text-xs font-semibold uppercase tracking-wide',
+              'inline-block rounded-[3px] px-2 py-1 text-xs font-semibold uppercase tracking-wide',
               badgeStyles[badge.variant]
             )}
           >
@@ -153,8 +180,8 @@ export function ProductCard({
 
       {/* Discount Badge */}
       {hasDiscount && (
-        <div className="absolute right-3 top-3 z-10">
-          <span className="inline-block rounded-full bg-error px-2 py-1 text-xs font-bold text-white">
+        <div className="absolute left-2 top-2 z-10">
+          <span className="inline-block rounded-[3px] bg-error px-2 py-1 text-xs font-semibold text-white">
             -{discountPercentage}%
           </span>
         </div>
@@ -164,10 +191,10 @@ export function ProductCard({
       <button
         onClick={handleToggleWishlist}
         className={cn(
-          'absolute right-3 top-12 z-10 flex h-9 w-9 items-center justify-center rounded-full',
+          'absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-[3px]',
           'bg-white/90 backdrop-blur-sm transition-all duration-300',
           'hover:bg-white hover:scale-110',
-          'opacity-0 group-hover:opacity-100',
+          'opacity-100 md:opacity-0 md:group-hover:opacity-100',
           inWishlist && 'opacity-100'
         )}
         aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
@@ -181,36 +208,52 @@ export function ProductCard({
       </button>
 
       {/* Image Container */}
-      <Link href={`/products/${slug}`} className="relative aspect-square overflow-hidden bg-platinum-100">
-        {image ? (
+      <Link href={`/products/${slug}`} className="relative block aspect-square w-full overflow-hidden bg-platinum-100">
+        {image && !imageError ? (
           <>
             <Image
-              src={image}
+              src={normalizeImageSrc(image)}
               alt={name}
-              fill
+              width={400}
+              height={400}
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               className={cn(
-                'object-cover transition-all duration-500',
-                'group-hover:scale-110',
-                imageLoaded ? 'opacity-100' : 'opacity-0'
+                'h-full w-full object-cover transition-all duration-500',
+                'group-hover:scale-110'
               )}
               onLoad={() => setImageLoaded(true)}
+              onError={() => setImageError(true)}
+              unoptimized={true}
             />
             {!imageLoaded && (
-              <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-platinum-200 via-platinum-300 to-platinum-200 bg-[length:200%_100%]" />
+              <div className="absolute inset-0 bg-platinum-200 animate-pulse" />
             )}
           </>
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-platinum-200">
-            <span className="text-sm text-nuanced-500">No image</span>
+          <Image
+            src={PLACEHOLDER_IMAGE}
+            alt={name}
+            width={400}
+            height={400}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="h-full w-full object-contain p-6"
+            unoptimized={true}
+          />
+        )}
+
+        {freeShipping && (
+          <div className="absolute bottom-2 left-2 z-10">
+            <span className="rounded-[3px] bg-white/90 px-2 py-1 text-xs font-semibold text-anthracite-800 backdrop-blur-sm">
+              Livraison offerte
+            </span>
           </div>
         )}
 
         {/* Quick Actions Overlay */}
         <div
           className={cn(
-            'absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 bg-gradient-to-t from-black/60 to-transparent p-4 transition-all duration-300',
-            isHovered && !prefersReducedMotion ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
+            'absolute bottom-2 right-2 z-10 flex items-center gap-2 transition-all duration-200',
+            isHovered && !prefersReducedMotion ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'
           )}
         >
           <Tooltip>
@@ -219,7 +262,7 @@ export function ProductCard({
                 <RippleButton
                   size="sm"
                   variant="gradient"
-                  className="h-9 w-9 p-0"
+                  className="h-9 w-9 rounded-[3px] p-0"
                   onClick={handleAddToCart}
                   disabled={isOutOfStock}
                   aria-label={isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
@@ -236,7 +279,7 @@ export function ProductCard({
           {onQuickView && (
             <button
               onClick={handleQuickView}
-              className="flex h-9 w-9 items-center justify-center rounded-md bg-white/90 backdrop-blur-sm transition-all hover:bg-white hover:scale-110"
+              className="flex h-9 w-9 items-center justify-center rounded-[3px] bg-white/90 backdrop-blur-sm transition-all hover:bg-white hover:scale-110"
               aria-label="Quick view"
             >
               <Eye className="h-4 w-4 text-anthracite-600" />
@@ -247,7 +290,7 @@ export function ProductCard({
         {/* Out of Stock Overlay */}
         {isOutOfStock && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm">
-            <span className="rounded-md bg-anthracite-600 px-4 py-2 text-sm font-semibold text-white">
+            <span className="rounded-[3px] bg-anthracite-600 px-4 py-2 text-sm font-semibold text-white">
               Out of Stock
             </span>
           </div>
@@ -255,15 +298,24 @@ export function ProductCard({
       </Link>
 
       {/* Product Info */}
-      <div className="flex flex-1 flex-col gap-2 p-4">
+      <div className="flex flex-1 flex-col gap-2 p-3">
         {/* Rating */}
-        {rating > 0 && (
-          <StarRating rating={rating} reviewCount={reviewCount} size="sm" showCount={reviewCount > 0} />
+        {(rating > 0 || soldLabel) && (
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              {rating > 0 && (
+                <StarRating rating={rating} reviewCount={reviewCount} size="sm" showCount={reviewCount > 0} />
+              )}
+            </div>
+            {soldLabel && (
+              <span className="shrink-0 text-xs font-medium text-nuanced-600">{soldLabel}</span>
+            )}
+          </div>
         )}
 
         {/* Title */}
         <Link href={`/products/${slug}`} className="group/title">
-          <h3 className="line-clamp-2 text-sm font-medium text-anthracite-700 transition-colors group-hover/title:text-orange-500">
+          <h3 className="line-clamp-2 text-[13px] font-medium leading-snug text-anthracite-800 transition-colors group-hover/title:text-orange-500">
             {name}
           </h3>
         </Link>
@@ -274,11 +326,11 @@ export function ProductCard({
           showCartButtonInInfo ? "flex items-center justify-between gap-2" : "flex items-baseline gap-2"
         )}>
           <div className="flex items-baseline gap-2">
-            <span className="text-lg font-bold text-orange-500">
+            <span className="text-base font-extrabold text-anthracite-800">
               {formatPrice(price)}
             </span>
             {hasDiscount && (
-              <span className="text-sm text-nuanced-500 line-through">
+              <span className="text-xs text-nuanced-500 line-through">
                 {formatPrice(compareAtPrice)}
               </span>
             )}
@@ -307,6 +359,12 @@ export function ProductCard({
             </Tooltip>
           )}
         </div>
+
+        {(deliveryDays || deliveryDays === 0) && (
+          <p className="text-xs font-medium text-nuanced-600">
+            Livraison sous {Math.max(1, deliveryDays)} j
+          </p>
+        )}
 
         {/* Stock Indicator */}
         {!isOutOfStock && stock < 10 && (

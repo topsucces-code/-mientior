@@ -63,7 +63,7 @@ export function AdvancedSearchBar() {
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [showHistory, setShowHistory] = useState(false)
     const [isListening, setIsListening] = useState(false)
-    const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
+    const [, setIsLoadingSuggestions] = useState(false)
     const inputRef = useRef<HTMLInputElement>(null)
     const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
     const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistory()
@@ -171,7 +171,7 @@ export function AdvancedSearchBar() {
             }
 
             // Transform API suggestions to component format
-            const transformedSuggestions: SearchSuggestion[] = (data.suggestions || []).map((s: any) => ({
+            const transformedSuggestions: SearchSuggestion[] = (data.suggestions || []).map((s: { type?: string; text?: string; title?: string; query?: string }) => ({
                 type: s.type || 'product',
                 title: s.text || s.title || s.query || '',
                 link: `/search?q=${encodeURIComponent(s.text || s.query || s.title || '')}`
@@ -238,7 +238,7 @@ export function AdvancedSearchBar() {
                         }, 200)
                     }}
                     placeholder={t('search')}
-                    className="w-full h-12 pl-12 pr-32 rounded-full border-2 border-gray-200 focus:border-emerald-500 focus:outline-none transition-colors"
+                    className="w-full h-12 pl-12 pr-32 rounded-full border-2 border-gray-200 focus:border-turquoise-500 focus:outline-none transition-colors"
                 />
 
                 {searchQuery && (
@@ -319,7 +319,7 @@ export function AdvancedSearchBar() {
                     ))}
                     <button
                         onClick={clearHistory}
-                        className="w-full px-4 py-2 text-sm text-emerald-600 hover:bg-emerald-50 text-left transition-colors border-t border-gray-100 mt-1"
+                        className="w-full px-4 py-2 text-sm text-turquoise-600 hover:bg-turquoise-50 text-left transition-colors border-t border-gray-100 mt-1"
                     >
                         Effacer l&apos;historique
                     </button>

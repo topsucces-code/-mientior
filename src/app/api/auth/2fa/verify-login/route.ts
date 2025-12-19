@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user profile with 2FA settings using email
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { email: authUser.email },
       select: {
         id: true,
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify the session token exists
-    const session = await prisma.session.findUnique({
+    const session = await prisma.sessions.findUnique({
       where: { token: tempToken },
       select: { userId: true, expiresAt: true },
     })
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
         (code: string) => code !== usedBackupCode
       )
 
-      await prisma.user.update({
+      await prisma.users.update({
         where: { id: user.id },
         data: {
           twoFactorBackupCodes: JSON.stringify(updatedBackupCodes),
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
       const expiresAt = new Date()
       expiresAt.setDate(expiresAt.getDate() + 30)
 
-      await prisma.session.update({
+      await prisma.sessions.update({
         where: { token: tempToken },
         data: { expiresAt },
       })

@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
         line2: line2 || null,
         city,
         postalCode,
-        country: country || 'FR',
+        country: country || 'CI',
         phone,
         isDefault: isDefault || false,
       },

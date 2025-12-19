@@ -49,7 +49,7 @@ export function AppliedPromotionsPanel({
             key={promo.id} 
             className={cn(
               "p-3 border transition-all animate-in fade-in slide-in-from-bottom-2",
-              promo.type === 'manual' ? 'border-green-200 bg-green-50/30' : 'border-platinum-200 bg-white'
+              promo.type === 'manual' ? 'border-turquoise-200 bg-turquoise-50/30' : 'border-platinum-200 bg-white'
             )}
             style={{ animationDelay: `${index * 100}ms` }}
           >
@@ -86,7 +86,7 @@ export function AppliedPromotionsPanel({
               </div>
 
               <div className="flex flex-col items-end gap-1">
-                <span className="font-bold text-green-600 whitespace-nowrap">
+                <span className="font-bold text-orange-600 whitespace-nowrap">
                   -{formatCurrency(promo.discount)}
                 </span>
                 
@@ -111,12 +111,12 @@ export function AppliedPromotionsPanel({
       })}
 
       {/* Total Savings Summary */}
-      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
-        <div className="flex items-center gap-2 text-green-700">
+      <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-100">
+        <div className="flex items-center gap-2 text-orange-700">
           <TrendingDown className="w-4 h-4" />
           <span className="font-medium text-sm">Total des économies</span>
         </div>
-        <span className="text-lg font-bold text-green-700">
+        <span className="text-lg font-bold text-orange-700">
           -{formatCurrency(totalSavings)}
         </span>
       </div>

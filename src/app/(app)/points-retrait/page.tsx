@@ -81,7 +81,7 @@ export default function PointsRetraitPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-turquoise-600 to-turquoise-500 text-white py-16 md:py-20">
+      <section className="bg-turquoise-700 text-white py-16 md:py-20">
         <div className="max-w-[1200px] mx-auto px-4 md:px-[4%] text-center">
           <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <MapPin className="w-8 h-8" />
@@ -257,7 +257,7 @@ export default function PointsRetraitPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+      <section className="py-16 bg-orange-600 text-white">
         <div className="max-w-[800px] mx-auto px-4 md:px-[4%] text-center">
           <h2 className="text-2xl md:text-3xl font-black mb-4">
             Vous êtes commerçant ?

@@ -47,8 +47,8 @@ const defaultSettings: GeneralSettings = {
   storeLogo: '',
   favicon: '',
   defaultLanguage: 'fr',
-  defaultCurrency: 'EUR',
-  timezone: 'Europe/Paris',
+  defaultCurrency: 'XOF',
+  timezone: 'Africa/Dakar',
   dateFormat: 'DD/MM/YYYY',
   primaryColor: '#f97316',
   secondaryColor: '#3b82f6',
@@ -75,7 +75,7 @@ const defaultSettings: GeneralSettings = {
 export async function GET() {
   try {
     // Try to get settings from database
-    const setting = await prisma.setting.findUnique({
+    const setting = await prisma.settings.findUnique({
       where: { key: 'general' },
     });
 
@@ -107,7 +107,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Upsert settings
-    await prisma.setting.upsert({
+    await prisma.settings.upsert({
       where: { key: 'general' },
       update: {
         value: JSON.stringify(body),

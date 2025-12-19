@@ -63,7 +63,7 @@ export default async function VendorsPage() {
                 className="group overflow-hidden rounded-lg border border-platinum-200 bg-white transition-shadow hover:shadow-lg"
               >
                 {/* Logo */}
-                <div className="relative h-32 bg-gradient-to-br from-platinum-100 to-platinum-200">
+                <div className="relative h-32 bg-platinum-100">
                   <div className="absolute inset-0 flex items-center justify-center">
                     {vendor.logo ? (
                       <div className="relative h-20 w-20 overflow-hidden rounded-full border-4 border-white shadow-md">

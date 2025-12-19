@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import Link from 'next/link'
-import { toast } from 'sonner'
+// toast import removed - using redirect to success page instead
 import { Loader2, Mail, Lock, User, Eye, EyeOff, Shield, Truck, Gift } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -306,20 +306,8 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
             setError(`${result.error}. ${result.suggestion}`)
           }
         } else {
-          // Registration successful - show success toast with email and resend action
-          // Requirements: 1.1, 1.2, 1.3, 1.4, 1.5
-          
-          // Show success message with email (Requirement 1.3) and resend action (Requirement 1.4)
-          toast.success('Inscription réussie !', {
-            description: `Votre compte a été créé avec succès. Un email de vérification a été envoyé à ${email}. Veuillez vérifier votre boîte de réception.`,
-            duration: 5000, // Auto-dismiss after 5 seconds (Requirement 1.5)
-            className: 'auth-toast auth-toast-success',
-            action: {
-              label: 'Renvoyer l\'email',
-              onClick: () => handleResendVerification(email),
-            },
-            closeButton: true,
-          })
+          // Registration successful - redirect to success page
+          window.location.href = `/register/success?email=${encodeURIComponent(email)}`
         }
       }
     } catch (err) {
@@ -361,7 +349,7 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
       <div className="rounded-2xl bg-white p-8 shadow-xl border border-gray-100">
         {/* Header */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-turquoise-500 to-turquoise-600 shadow-lg">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-turquoise-600 shadow-lg">
             {isLogin ? (
               <Lock className="h-8 w-8 text-white" />
             ) : (

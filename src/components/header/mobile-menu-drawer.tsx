@@ -103,12 +103,12 @@ export function MobileMenuDrawer() {
                 <div className="
                     flex items-center justify-between
                     p-4 border-b border-gray-100
-                    bg-gradient-to-r from-turquoise-50 to-white
+                    bg-turquoise-50
                 ">
                     <div className="flex items-center gap-2">
                         <div className="
                             w-10 h-10 rounded-full
-                            bg-gradient-to-br from-turquoise-600 to-turquoise-500
+                            bg-turquoise-700
                             flex items-center justify-center
                         ">
                             <User className="w-5 h-5 text-white" />
@@ -143,7 +143,7 @@ export function MobileMenuDrawer() {
                     {/* Promo Banner */}
                     <div className="
                         mx-4 mt-4 p-3 rounded-xl
-                        bg-gradient-to-r from-orange-500 to-orange-600
+                        bg-orange-600
                         text-white
                     ">
                         <div className="flex items-center gap-2">
@@ -188,7 +188,7 @@ export function MobileMenuDrawer() {
                                             <span className="
                                                 px-2 py-0.5 rounded-full
                                                 bg-turquoise-100 text-turquoise-700
-                                                text-[10px] font-bold uppercase
+                                                text-xs font-bold uppercase
                                             ">
                                                 New
                                             </span>

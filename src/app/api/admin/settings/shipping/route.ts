@@ -94,7 +94,7 @@ const defaultSettings: ShippingSettings = {
 
 export async function GET() {
   try {
-    const setting = await prisma.setting.findUnique({
+    const setting = await prisma.settings.findUnique({
       where: { key: 'shipping' },
     });
 
@@ -115,7 +115,7 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
 
-    await prisma.setting.upsert({
+    await prisma.settings.upsert({
       where: { key: 'shipping' },
       update: {
         value: JSON.stringify(body),

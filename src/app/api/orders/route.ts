@@ -4,7 +4,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { Prisma, AdminUser } from '@prisma/client'
+import { Prisma, admin_users } from '@prisma/client'
+
+type AdminUser = admin_users
 import { Permission } from '@/lib/permissions'
 import { prisma } from '@/lib/prisma'
 import { withPermission } from '@/middleware/admin-auth'
@@ -28,7 +30,7 @@ async function handleGET(request: NextRequest, { adminSession: _adminSession }: 
     const _order = searchParams.get('_order') || 'desc'
 
     // Build where clause for filtering
-    const where: Prisma.OrderWhereInput = {}
+    const where: Prisma.ordersWhereInput = {}
 
     // Filter by status
     const status = searchParams.get('status')
@@ -62,27 +64,27 @@ async function handleGET(request: NextRequest, { adminSession: _adminSession }: 
     }
 
     // Build orderBy clause
-    const orderBy: Prisma.OrderOrderByWithRelationInput = {
+    const orderBy: Prisma.ordersOrderByWithRelationInput = {
       [_sort]: _order as 'asc' | 'desc'
     }
 
     // Fetch orders with relations
     const [orders, totalCount] = await Promise.all([
-      prisma.order.findMany({
+      prisma.orders.findMany({
         skip,
         take,
         where,
         orderBy,
         include: {
-          items: {
+          order_items: {
             include: {
-              product: true
+              products: true
             }
           },
-          user: true
+          users: true
         }
       }),
-      prisma.order.count({ where })
+      prisma.orders.count({ where })
     ])
 
     // Transform to match frontend Order type
@@ -101,10 +103,10 @@ async function handleGET(request: NextRequest, { adminSession: _adminSession }: 
       shippingAddress: order.shippingAddress,
       billingAddress: order.billingAddress,
       notes: order.notes || undefined,
-      items: order.items.map(item => ({
+      items: order.order_items.map((item: { id: string; productId: string; products: { name: string }; quantity: number; price: number }) => ({
         id: item.id,
         productId: item.productId,
-        productName: item.product.name,
+        productName: item.products.name,
         quantity: item.quantity,
         price: item.price
       })),

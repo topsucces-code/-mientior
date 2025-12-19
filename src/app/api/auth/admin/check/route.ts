@@ -27,7 +27,7 @@ export async function GET() {
     }
 
     // Check if admin user exists and is active
-    const adminUser = await prisma.adminUser.findFirst({
+    const adminUser = await prisma.admin_users.findFirst({
       where: {
         OR: [
           { email: basicSession.user.email },

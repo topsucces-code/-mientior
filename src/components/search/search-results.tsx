@@ -123,7 +123,7 @@ export function SearchResults({
 
       {/* Spell Correction Message */}
       {correctedQuery && originalQuery && (
-        <Card className="border-blue-200 bg-blue-50">
+        <Card className="border-turquoise-200 bg-turquoise-50">
           <CardContent className="py-3">
             <p className="text-sm text-anthracite-700">
               Résultats pour{' '}
@@ -131,7 +131,7 @@ export function SearchResults({
               {' '}·{' '}
               <button
                 onClick={() => onQueryChange?.(originalQuery)}
-                className="text-blue-600 hover:text-blue-700 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 rounded"
+                className="text-turquoise-600 hover:text-turquoise-700 hover:underline focus:outline-none focus:ring-2 focus:ring-turquoise-500 focus:ring-offset-1 rounded"
               >
                 Rechercher plutôt &ldquo;{originalQuery}&rdquo;
               </button>

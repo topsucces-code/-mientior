@@ -4,7 +4,18 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/use-reduced-motion'
+import { useTranslations } from 'next-intl'
 import type { QuickFilter } from '@/types'
+
+// Separate component to use translations hook
+function ProductCountText({ count }: { count: number }) {
+  const t = useTranslations('products.category')
+  return (
+    <p className="text-sm text-white/80">
+      {t('productsAvailable', { count })}
+    </p>
+  )
+}
 
 export interface CategoryHeroBannerProps {
   title: string
@@ -85,9 +96,7 @@ export function CategoryHeroBanner({
           )}
 
           {productCount !== undefined && (
-            <p className="text-sm text-white/80">
-              {productCount.toLocaleString('fr-FR')} produits disponibles
-            </p>
+            <ProductCountText count={productCount} />
           )}
         </div>
 

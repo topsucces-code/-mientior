@@ -2,7 +2,7 @@
 
 import { User, LogOut, Package, Heart, Settings, CreditCard, MapPin, MessageCircle, Shield } from 'lucide-react'
 import { useHeader } from '@/contexts/header-context'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '@/hooks/use-auth'
@@ -11,9 +11,14 @@ export function UserAccountDropdown() {
     const { activeDropdown, setActiveDropdown } = useHeader()
     const { session, isLoading, signOut } = useAuth()
     const dropdownRef = useRef<HTMLDivElement>(null)
+    const [isMounted, setIsMounted] = useState(false)
     const t = useTranslations('header')
 
     const isOpen = activeDropdown === 'account'
+
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -38,7 +43,9 @@ export function UserAccountDropdown() {
         }
     }
 
-    if (isLoading) {
+    // Prevent SSR/client hydration mismatch by rendering a stable placeholder
+    // until the component is mounted and auth state is settled.
+    if (!isMounted || isLoading) {
         return (
             <button className="p-2 hover:bg-gray-100 rounded-full transition-colors" aria-label={t('account')}>
                 <User className="w-6 h-6 animate-pulse" />
@@ -50,7 +57,7 @@ export function UserAccountDropdown() {
         return (
             <Link
                 href="/login"
-                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-full hover:bg-emerald-700 transition-colors font-medium"
+                className="flex items-center gap-2 px-4 py-2 bg-turquoise-600 text-white rounded-full hover:bg-turquoise-700 transition-colors font-medium"
             >
                 <User className="w-5 h-5" />
                 <span className="hidden lg:inline">{t('login')}</span>
@@ -71,9 +78,9 @@ export function UserAccountDropdown() {
 
             {isOpen && (
                 <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 z-[110] animate-slide-down">
-                    <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-emerald-50 to-taupe-50">
+                    <div className="p-4 border-b border-gray-200 bg-turquoise-50">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            <div className="w-12 h-12 bg-turquoise-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
                                 {session.user.name?.[0]?.toUpperCase() || session.user.email?.[0]?.toUpperCase() || 'U'}
                             </div>
                             <div className="flex-1 min-w-0">

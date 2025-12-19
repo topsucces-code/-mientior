@@ -97,7 +97,7 @@ export function DynamicBanner({
   const style: React.CSSProperties = {
     background: banner.backgroundImage 
       ? `url(${banner.backgroundImage}) center/cover`
-      : banner.backgroundColor || 'linear-gradient(to right, #2563eb, #4f46e5, #7c3aed)',
+      : banner.backgroundColor || '#0891B2',
     color: banner.textColor || '#ffffff'
   }
 

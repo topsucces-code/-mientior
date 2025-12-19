@@ -74,7 +74,7 @@ export default function InstallPrompt() {
       >
         <div className={cn(
           'flex items-center justify-center py-2 px-4 text-sm font-medium',
-          isOnline ? 'bg-green-500 text-white' : 'bg-amber-500 text-white'
+          isOnline ? 'bg-turquoise-500 text-white' : 'bg-amber-500 text-white'
         )}>
           {isOnline ? (
             <>
@@ -93,17 +93,17 @@ export default function InstallPrompt() {
       {/* Update available banner */}
       {isUpdateAvailable && (
         <div className="fixed bottom-20 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 z-50">
-          <div className="bg-emerald-600 text-white rounded-lg shadow-lg p-4">
+          <div className="bg-turquoise-600 text-white rounded-lg shadow-lg p-4">
             <div className="flex items-start">
               <RefreshCw className="h-5 w-5 mr-3 mt-0.5 flex-shrink-0" />
               <div className="flex-1">
                 <p className="font-medium">{t('update.title')}</p>
-                <p className="text-sm text-emerald-100 mt-1">
+                <p className="text-sm text-turquoise-100 mt-1">
                   {t('update.description')}
                 </p>
                 <button
                   onClick={updateApp}
-                  className="mt-3 w-full bg-white text-emerald-600 py-2 px-4 rounded-md text-sm font-medium hover:bg-emerald-50 transition-colors"
+                  className="mt-3 w-full bg-white text-turquoise-600 py-2 px-4 rounded-md text-sm font-medium hover:bg-turquoise-50 transition-colors"
                 >
                   {t('update.button')}
                 </button>
@@ -126,8 +126,8 @@ export default function InstallPrompt() {
               </button>
 
               <div className="flex items-start">
-                <div className="flex-shrink-0 p-2 bg-emerald-100 rounded-lg">
-                  <Smartphone className="h-6 w-6 text-emerald-600" />
+                <div className="flex-shrink-0 p-2 bg-turquoise-100 rounded-lg">
+                  <Smartphone className="h-6 w-6 text-turquoise-600" />
                 </div>
                 <div className="ml-4 flex-1">
                   <h3 className="text-sm font-semibold text-gray-900">
@@ -148,7 +148,7 @@ export default function InstallPrompt() {
                 </button>
                 <button
                   onClick={handleInstall}
-                  className="flex-1 py-2 px-4 bg-emerald-600 text-white rounded-md text-sm font-medium hover:bg-emerald-700 transition-colors flex items-center justify-center"
+                  className="flex-1 py-2 px-4 bg-turquoise-600 text-white rounded-md text-sm font-medium hover:bg-turquoise-700 transition-colors flex items-center justify-center"
                 >
                   <Download className="h-4 w-4 mr-2" />
                   {t('install.button')}
@@ -160,15 +160,15 @@ export default function InstallPrompt() {
             <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
               <ul className="text-xs text-gray-500 space-y-1">
                 <li className="flex items-center">
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2" />
+                  <span className="w-1.5 h-1.5 bg-turquoise-500 rounded-full mr-2" />
                   {t('install.features.quickAccess')}
                 </li>
                 <li className="flex items-center">
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2" />
+                  <span className="w-1.5 h-1.5 bg-turquoise-500 rounded-full mr-2" />
                   {t('install.features.notifications')}
                 </li>
                 <li className="flex items-center">
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2" />
+                  <span className="w-1.5 h-1.5 bg-turquoise-500 rounded-full mr-2" />
                   {t('install.features.offline')}
                 </li>
               </ul>

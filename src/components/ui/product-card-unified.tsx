@@ -3,13 +3,14 @@
 import * as React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Heart, ShoppingCart, Star, Check, Eye, Flame } from 'lucide-react'
+import { Heart, ShoppingCart, Star, Check, Eye, Flame, Truck } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { useCartStore } from '@/stores/cart.store'
 import { useWishlistStore } from '@/stores/wishlist.store'
 import { toast } from '@/hooks/use-toast'
 import { useCurrency } from '@/hooks/use-currency'
+import type { Product } from '@/types/product'
 
 export interface ProductCardUnifiedProps {
   id: string
@@ -35,46 +36,63 @@ export interface ProductCardUnifiedProps {
   className?: string
   onQuickView?: (id: string) => void
   priority?: boolean
+  /** Alternative: pass a product object instead of individual props */
+  product?: Product
 }
 
 const badgeStyles: Record<string, string> = {
-  local: 'bg-orange-500 text-white',
-  new: 'bg-turquoise-500 text-white',
+  local: 'bg-red-500 text-white',
+  new: 'bg-red-500 text-white',
   hot: 'bg-red-500 text-white',
   sale: 'bg-red-600 text-white',
-  featured: 'bg-amber-500 text-white',
-  limited: 'bg-purple-500 text-white',
-  bestseller: 'bg-gradient-to-r from-orange-500 to-red-500 text-white',
-  trending: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white',
+  featured: 'bg-red-500 text-white',
+  limited: 'bg-red-500 text-white',
+  bestseller: 'bg-red-500 text-white',
+  trending: 'bg-red-500 text-white',
 }
 
-export function ProductCardUnified({
-  id,
-  name,
-  slug,
-  price,
-  compareAtPrice,
-  image,
-  images = [],
-  rating = 0,
-  reviewCount = 0,
-  salesCount = 0,
-  badge,
-  brand,
-  isVerifiedSeller = false,
-  isOfficialStore = false,
-  stock = 10,
-  freeShipping: _freeShipping = false,
-  deliveryDays,
-  className,
-  onQuickView,
-  priority = false,
-}: ProductCardUnifiedProps) {
+export function ProductCardUnified(props: ProductCardUnifiedProps) {
+  // Support both individual props and product object
+  const {
+    product,
+    className,
+    onQuickView,
+    priority = false,
+  } = props
+
+  // Extract values from product object or individual props
+  const id = product?.id ?? props.id ?? ''
+  const name = product?.name ?? props.name ?? ''
+  const slug = product?.slug ?? props.slug ?? ''
+  const price = product?.price ?? props.price ?? 0
+  const compareAtPrice = product?.compareAtPrice ?? props.compareAtPrice
+  const image = product?.image ?? props.image
+  const images = product?.images ?? props.images ?? []
+  const rating = product?.rating ?? props.rating ?? 0
+  const reviewCount = product?.reviewCount ?? props.reviewCount ?? 0
+  const salesCount = product?.salesCount ?? props.salesCount ?? 0
+  const badge = product?.badge ?? props.badge
+    const isVerifiedSeller = product?.isVerifiedSeller ?? props.isVerifiedSeller ?? false
+  const isOfficialStore = product?.isOfficialStore ?? props.isOfficialStore ?? false
+  const stock = product?.stockCount ?? props.stock ?? 10
+  const freeShipping = product?.freeShipping ?? props.freeShipping ?? false
+  void freeShipping // Suppress unused warning - reserved for future use
+  const deliveryDays = product?.deliveryDays ?? props.deliveryDays
+
   const [isHovered, setIsHovered] = React.useState(false)
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0)
   const [imageLoaded, setImageLoaded] = React.useState(false)
+  const [imageError, setImageError] = React.useState(false)
   const [isAddingToCart, setIsAddingToCart] = React.useState(false)
   const [isMounted, setIsMounted] = React.useState(false)
+
+  const PLACEHOLDER_IMAGE = '/images/placeholder.svg'
+
+  const normalizeImageSrc = (src: string) => {
+    if (src.startsWith('http://') || src.startsWith('https://')) return src
+    if (src.startsWith('/')) return src
+    return `/${src}`
+  }
 
   const t = useTranslations('products.card')
   const tw = useTranslations('wishlist')
@@ -94,9 +112,29 @@ export function ProductCardUnified({
     ? Math.round(((compareAtPrice - price) / compareAtPrice) * 100)
     : 0
 
+  const getPrimaryBadge = () => {
+    // Priority: Flash > Sale% > New > others
+    // 1. Flash badge (highest priority)
+    if (badge?.variant === 'sale' || badge?.text?.toLowerCase().includes('flash')) {
+      return badge
+    }
+    // 2. Discount percentage (auto-generated)
+    if (hasDiscount) {
+      return { text: `-${discountPercentage}%`, variant: 'sale' as const }
+    }
+    // 3. New badge
+    if (badge?.variant === 'new' || badge?.text?.toLowerCase().includes('nouveau')) {
+      return badge
+    }
+    // 4. Any other badge
+    return badge
+  }
+
+  const primaryBadge = getPrimaryBadge()
+
   const allImages = [image, ...images].filter(Boolean) as string[]
-  const placeholderImage = `https://picsum.photos/seed/${slug}/400/400`
-  const displayImage = allImages[currentImageIndex] || placeholderImage
+  const displayImage = allImages[currentImageIndex] || allImages[0] || PLACEHOLDER_IMAGE
+  const resolvedImage = imageError ? PLACEHOLDER_IMAGE : normalizeImageSrc(displayImage)
 
   // Rotate images on hover
   React.useEffect(() => {
@@ -107,6 +145,7 @@ export function ProductCardUnified({
       return () => clearInterval(interval)
     } else {
       setCurrentImageIndex(0)
+      return undefined
     }
   }, [isHovered, allImages.length])
 
@@ -128,7 +167,7 @@ export function ProductCardUnified({
       productId: id,
       productName: name,
       productSlug: slug,
-      productImage: image || '/placeholder-product.jpg',
+      productImage: image || PLACEHOLDER_IMAGE,
       price,
       quantity: 1,
       stock,
@@ -177,7 +216,7 @@ export function ProductCardUnified({
   return (
     <div
       className={cn(
-        'group relative flex flex-col bg-white rounded-xl overflow-hidden',
+        'group relative flex flex-col bg-white rounded-[3px] overflow-hidden',
         'transition-all duration-300 hover:shadow-xl',
         isOutOfStock && 'opacity-70',
         className
@@ -188,25 +227,25 @@ export function ProductCardUnified({
       {/* Image Container */}
       <Link 
         href={`/products/${slug}`} 
-        className="relative block w-full overflow-hidden bg-gray-50 rounded-t-xl"
+        className="relative block w-full overflow-hidden bg-gray-50 rounded-t-[3px]"
         style={{ paddingBottom: '100%' }}
       >
         {/* Badge Top Left - Style Temu */}
-        {badge && (
+        {primaryBadge && (
           <span className={cn(
-            'absolute left-0 top-2 z-10 px-2 py-0.5 text-[10px] font-bold rounded-r-md shadow-sm',
-            badgeStyles[badge.variant] || badgeStyles.local
+            'absolute left-0 top-2 z-10 px-2 py-1 text-xs font-semibold rounded-r-md shadow-sm',
+            badgeStyles[primaryBadge.variant] || badgeStyles.local
           )}>
-            {badge.text}
+            {primaryBadge.text}
           </span>
         )}
 
         {/* Wishlist & Quick View - Top Right */}
-        <div className="absolute right-2 top-2 z-10 flex flex-col gap-1.5">
+        <div className="absolute right-2 top-2 z-10 flex flex-col gap-1">
           <button
             onClick={handleToggleWishlist}
             className={cn(
-              'w-7 h-7 flex items-center justify-center rounded-full',
+              'w-7 h-7 flex items-center justify-center rounded-[3px]',
               'bg-white shadow-md border border-gray-100',
               'transition-all duration-200 hover:scale-110',
               inWishlist && 'bg-red-50 border-red-200'
@@ -223,7 +262,7 @@ export function ProductCardUnified({
           {onQuickView && (
             <button
               onClick={handleQuickView}
-              className="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow-md border border-gray-100 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
+              className="w-7 h-7 flex items-center justify-center rounded-[3px] bg-white shadow-md border border-gray-100 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
               aria-label={t('quickView')}
             >
               <Eye className="w-3.5 h-3.5 text-gray-400" />
@@ -233,7 +272,7 @@ export function ProductCardUnified({
 
         {/* Product Image */}
         <Image
-          src={displayImage}
+          src={resolvedImage}
           alt={name}
           fill
           className={cn(
@@ -242,7 +281,14 @@ export function ProductCardUnified({
             imageLoaded ? 'opacity-100' : 'opacity-0'
           )}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-          onLoad={() => setImageLoaded(true)}
+          onLoad={() => {
+            setImageLoaded(true)
+            setImageError(false)
+          }}
+          onError={() => {
+            setImageLoaded(true)
+            setImageError(true)
+          }}
           priority={priority}
         />
 
@@ -254,7 +300,7 @@ export function ProductCardUnified({
         {/* Out of Stock Overlay */}
         {isOutOfStock && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
-            <span className="px-3 py-1.5 bg-gray-900/90 text-white text-xs font-semibold rounded-full">
+            <span className="px-3 py-1.5 bg-gray-900/90 text-white text-xs font-semibold rounded-[3px]">
               {t('outOfStock')}
             </span>
           </div>
@@ -267,7 +313,7 @@ export function ProductCardUnified({
               <span
                 key={idx}
                 className={cn(
-                  'w-1 h-1 rounded-full transition-colors',
+                  'w-1 h-1 rounded-[3px] transition-colors',
                   idx === currentImageIndex ? 'bg-orange-500' : 'bg-gray-300'
                 )}
               />
@@ -281,10 +327,10 @@ export function ProductCardUnified({
           disabled={isOutOfStock || isAddingToCart}
           className={cn(
             'absolute right-2 bottom-2 z-10',
-            'w-8 h-8 flex items-center justify-center rounded-full shadow-lg',
+            'w-8 h-8 flex items-center justify-center rounded-[3px] shadow-lg',
             'transition-all duration-200',
             isAddingToCart
-              ? 'bg-green-500 text-white'
+              ? 'bg-turquoise-500 text-white'
               : 'bg-white border border-gray-200 text-gray-600 hover:bg-orange-500 hover:text-white hover:border-orange-500',
             'hover:scale-110 active:scale-95',
             'disabled:opacity-50 disabled:cursor-not-allowed'
@@ -300,67 +346,56 @@ export function ProductCardUnified({
       </Link>
 
       {/* Product Info - Temu Style */}
-      <div className="flex flex-col gap-1 p-2.5 pt-2">
-        {/* Product Name with Badge inline */}
+      <div className="flex flex-col gap-2 p-3 pt-2">
+        {/* Product Name */}
         <Link href={`/products/${slug}`}>
           <h3 className="text-[12px] leading-[1.3] text-gray-700 line-clamp-2 hover:text-orange-600 transition-colors min-h-[32px]">
-            {badge && (
-              <span className={cn(
-                'inline-block mr-1 px-1 py-0.5 text-[9px] font-bold rounded align-middle',
-                badgeStyles[badge.variant] || badgeStyles.local
-              )}>
-                {badge.text}
-              </span>
-            )}
             {name}
           </h3>
         </Link>
 
         {/* Price Row - Temu Style */}
         <div className="flex items-baseline gap-1.5 flex-wrap">
-          <span className="text-[18px] font-black text-orange-600 leading-none">
+          <span className="text-[18px] font-black text-anthracite-800 leading-none">
             {formatPrice(price)}
           </span>
-          {hasDiscount && (
-            <>
-              <span className="text-[11px] text-gray-400 line-through">
-                {formatPrice(compareAtPrice)}
-              </span>
-              <span className="text-[10px] font-semibold text-green-600">
-                -{discountPercentage}%
-              </span>
-            </>
+          {hasDiscount && !primaryBadge?.text.includes('%') && (
+            <span className="text-[11px] text-gray-400 line-through">
+              {formatPrice(compareAtPrice)}
+            </span>
           )}
         </div>
 
-        {/* Sales Count - Temu Style */}
-        {salesCount > 0 && (
-          <span className="text-[11px] text-gray-500">
-            <Flame className="inline w-3 h-3 text-orange-400 mr-0.5" />
-            {formatSalesCount(salesCount)}
-          </span>
-        )}
-
-        {/* Rating - Temu Style */}
-        {rating > 0 && (
-          <div className="flex items-center gap-1">
-            <div className="flex items-center">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                  key={i}
-                  className={cn(
-                    'w-2.5 h-2.5',
-                    i < Math.floor(rating)
-                      ? 'fill-amber-400 text-amber-400'
-                      : 'text-gray-200 fill-gray-200'
-                  )}
-                />
-              ))}
-            </div>
-            {reviewCount > 0 && (
-              <span className="text-[10px] text-gray-400">
-                {reviewCount > 1000 ? `${(reviewCount / 1000).toFixed(1)}k` : reviewCount}
+        {(salesCount > 0 || rating > 0) && (
+          <div className="flex items-center justify-between gap-2">
+            {salesCount > 0 && (
+              <span className="min-w-0 truncate text-[11px] text-gray-500">
+                <Flame className="inline w-3 h-3 text-gray-400 mr-0.5" />
+                {formatSalesCount(salesCount)}
               </span>
+            )}
+
+            {rating > 0 && (
+              <div className="shrink-0 flex items-center gap-1">
+                <div className="flex items-center">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className={cn(
+                        'w-2.5 h-2.5',
+                        i < Math.floor(rating)
+                          ? 'fill-amber-400 text-amber-400'
+                          : 'text-gray-200 fill-gray-200'
+                      )}
+                    />
+                  ))}
+                </div>
+                {reviewCount > 0 && (
+                  <span className="text-xs text-gray-400">
+                    {reviewCount > 1000 ? `${(reviewCount / 1000).toFixed(1)}k` : reviewCount}
+                  </span>
+                )}
+              </div>
             )}
           </div>
         )}
@@ -368,35 +403,36 @@ export function ProductCardUnified({
         {/* Seller Badges Row - Temu Style */}
         <div className="flex flex-wrap items-center gap-1 mt-0.5">
           {isVerifiedSeller && (
-            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-orange-50 text-orange-600 text-[9px] font-semibold rounded border border-orange-200">
-              <Check className="w-2 h-2" />
+            <span className="inline-flex items-center gap-0.5 px-2 py-1 bg-purple-50 text-purple-700 text-xs font-semibold rounded-md border border-purple-200">
+              <Check className="w-2 h-2 text-purple-500" />
               {t('verifiedSeller')}
             </span>
           )}
           {isOfficialStore && (
-            <span className="inline-flex items-center px-1.5 py-0.5 bg-blue-50 text-blue-600 text-[9px] font-semibold rounded border border-blue-200">
+            <span className="inline-flex items-center px-2 py-1 bg-purple-50 text-purple-700 text-xs font-semibold rounded-md border border-purple-200">
               {t('officialStore')}
             </span>
           )}
         </div>
 
-        {/* Brand - Temu Style */}
-        {brand && (
-          <span className="text-[10px] text-gray-500">
-            {t('brand')} <span className="text-blue-600 hover:underline cursor-pointer">{brand}</span>
-          </span>
+        {/* Free Shipping */}
+        {freeShipping && (
+          <div className="flex items-center gap-1 text-xs text-green-700 font-medium mt-0.5">
+            <Truck className="w-3 h-3 text-green-600" />
+            <span>{t('freeShipping')}</span>
+          </div>
         )}
 
         {/* Delivery Info - Temu Style */}
         {deliveryDays && (
-          <div className="text-[10px] text-gray-600 mt-0.5">
-            {t('delivery')} <span className="text-orange-600 font-bold">{deliveryDays} {t('workingDays')}</span>
+          <div className="text-xs text-green-700 mt-0.5">
+            {t('delivery')} <span className="text-green-800 font-semibold">{deliveryDays} {t('workingDays')}</span>
           </div>
         )}
 
         {/* Low Stock Warning */}
         {!isOutOfStock && stock > 0 && stock <= 5 && (
-          <span className="text-[10px] text-red-500 font-medium">
+          <span className="text-xs text-red-500 font-medium">
             ⚡ {t('lowStock', { count: stock })}
           </span>
         )}

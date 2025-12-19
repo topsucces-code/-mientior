@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/prisma-simple';
 
 // Public API to fetch platform settings for the frontend
 // Only returns enabled currencies, languages, and countries
@@ -64,7 +64,6 @@ const defaultPublicSettings: PublicPlatformSettings = {
   countries: [
     { code: 'SN', name: 'Senegal', nameLocal: 'Sénégal', currency: 'XOF', language: 'fr' },
     { code: 'CI', name: "Côte d'Ivoire", nameLocal: "Côte d'Ivoire", currency: 'XOF', language: 'fr' },
-    { code: 'FR', name: 'France', nameLocal: 'France', currency: 'EUR', language: 'fr' },
   ],
   defaultCurrency: 'XOF',
   defaultLanguage: 'fr',
@@ -89,7 +88,7 @@ const defaultPublicSettings: PublicPlatformSettings = {
 
 export async function GET() {
   try {
-    const setting = await prisma.setting.findUnique({
+    const setting = await prisma.settings.findUnique({
       where: { key: 'platform' },
     });
 

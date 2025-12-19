@@ -77,12 +77,29 @@ export function usePWA(): UsePWAReturn {
 
   // Register service worker
   useEffect(() => {
+    const swUrl = process.env.NODE_ENV === 'development' ? '/sw.js?v=2' : '/sw.js';
+
     if ('serviceWorker' in navigator) {
+      // In development, unregister older SW registrations to avoid stale sw.js staying active
+      if (process.env.NODE_ENV === 'development') {
+        navigator.serviceWorker.getRegistrations().then((regs) => {
+          regs.forEach((r) => {
+            const scriptUrl = r.active?.scriptURL || r.installing?.scriptURL || r.waiting?.scriptURL;
+            if (scriptUrl && scriptUrl.includes('/sw.js') && !scriptUrl.includes('v=2')) {
+              r.unregister();
+            }
+          });
+        });
+      }
+
       navigator.serviceWorker
-        .register('/sw.js')
+        .register(swUrl)
         .then(reg => {
           setRegistration(reg);
           console.log('Service Worker registered');
+
+          // Ask the browser to check for updates right away
+          reg.update().catch(() => undefined);
 
           // Check for updates
           reg.addEventListener('updatefound', () => {

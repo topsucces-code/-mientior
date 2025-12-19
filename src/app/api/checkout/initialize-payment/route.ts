@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     if (orderId) {
       // Fetch provisional order
-      const order = await prisma.order.findUnique({
+      const order = await prisma.orders.findUnique({
         where: { id: orderId },
         select: {
           subtotal: true,
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
 
       // Update provisional order with payment reference if orderId provided
       if (orderId && paymentData.reference) {
-        await prisma.order.update({
+        await prisma.orders.update({
           where: { id: orderId },
           data: {
             paymentReference: paymentData.reference as string,
@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
 
       // Update provisional order with payment reference if orderId provided
       if (orderId && paymentData.tx_ref) {
-        await prisma.order.update({
+        await prisma.orders.update({
           where: { id: orderId },
           data: {
             paymentReference: paymentData.tx_ref as string,

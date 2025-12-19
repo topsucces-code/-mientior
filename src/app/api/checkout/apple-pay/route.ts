@@ -54,8 +54,8 @@ export async function POST(request: NextRequest) {
       data: {
         merchantSession,
         paymentRequest: {
-          countryCode: 'FR',
-          currencyCode: 'EUR',
+          countryCode: 'CI',
+          currencyCode: 'XOF',
           supportedNetworks: ['visa', 'masterCard', 'amex'],
           merchantCapabilities: ['supports3DS'],
           total: {
@@ -97,7 +97,7 @@ export async function PATCH(request: NextRequest) {
     // In production, send to payment processor
     
     // Update order status
-    // const order = await prisma.order.update({
+    // const order = await prisma.orders.update({
     //   where: { id: orderId },
     //   data: {
     //     status: 'PROCESSING',

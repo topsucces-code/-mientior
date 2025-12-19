@@ -92,7 +92,7 @@ export default function CategoriesNav({
   return (
     <section
       ref={sectionRef}
-      className={cn('py-10 md:py-14 bg-platinum-50', className)}
+      className={cn('py-20 md:py-24 bg-platinum-50', className)}
       {...props}
     >
       <div className="container mx-auto px-3 md:px-4 lg:px-6">
@@ -167,7 +167,7 @@ const CategoryCard = ({ category, index, onKeyDown, className, style }: Category
       {/* Icon or Image Container */}
       <div className="relative aspect-[4/3] overflow-hidden bg-platinum-100">
         {category.icon ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-orange-100 via-orange-50 to-blue-50">
+          <div className="absolute inset-0 flex items-center justify-center bg-orange-50">
             <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm transition-all duration-300 group-hover:scale-110 group-hover:rotate-6 shadow-lg">
               <div className="text-orange-500 transition-all duration-300 group-hover:scale-125" style={{ width: '48px', height: '48px' }}>
                 {category.icon}
@@ -195,12 +195,12 @@ const CategoryCard = ({ category, index, onKeyDown, className, style }: Category
             />
 
             {/* Fallback Gradient (if image fails to load) */}
-            <div className="absolute inset-0 -z-10 bg-gradient-to-br from-orange-200 via-orange-300 to-blue-300" />
+            <div className="absolute inset-0 -z-10 bg-orange-200" />
           </>
         )}
 
         {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-black/50" />
 
         {/* Category Info */}
         <div className="absolute inset-x-0 bottom-0 p-4">

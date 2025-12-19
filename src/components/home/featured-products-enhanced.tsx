@@ -74,25 +74,31 @@ export default function FeaturedProductsEnhanced({
   }, [products, activeTab])
 
   return (
-    <section 
+    <section
       ref={sectionRef}
-      className="py-8 sm:py-10 md:py-14 bg-gradient-to-br from-violet-50 via-white to-fuchsia-50"
+      className="relative py-20 md:py-24 overflow-hidden"
     >
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6">
+      {/* Background avec motifs */}
+      <div className="absolute inset-0 bg-turquoise-50/30">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(6,182,212,0.08),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(99,102,241,0.06),transparent_50%)]" />
+      </div>
+
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 relative">
         {/* Header - Style Temu */}
         <div
           className={cn(
-            'mb-6 sm:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4',
+            'mb-4 sm:mb-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3',
             isVisible && !prefersReducedMotion && 'animate-fade-in-up'
           )}
         >
           <div className="flex items-center gap-3 sm:gap-4">
             {/* Icon with Animation */}
             <div className="relative">
-              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 shadow-lg">
+              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gray-900 shadow-lg">
                 <Star className="h-6 w-6 sm:h-7 sm:w-7 text-white fill-white" />
               </div>
-              <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-yellow-400 text-[10px] font-bold text-yellow-900 animate-bounce">
+              <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white animate-bounce">
                 ⭐
               </div>
             </div>
@@ -103,7 +109,7 @@ export default function FeaturedProductsEnhanced({
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
                   {displayTitle}
                 </h2>
-                <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-violet-500" />
+                <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-gray-500" />
               </div>
               <p className="text-sm sm:text-base text-gray-500 mt-0.5">{displaySubtitle}</p>
             </div>
@@ -113,7 +119,7 @@ export default function FeaturedProductsEnhanced({
           <div className="flex items-center gap-3">
             <Link
               href="/products"
-              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-violet-600 hover:text-violet-700 hover:bg-violet-50 rounded-lg transition-colors"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
             >
               <Sparkles className="h-4 w-4" />
               {t('viewAll')}
@@ -121,14 +127,14 @@ export default function FeaturedProductsEnhanced({
             <div className="flex items-center gap-2">
               <button
                 onClick={scrollPrev}
-                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-violet-500 hover:text-white hover:border-violet-500 transition-all shadow-sm"
+                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all shadow-sm"
                 aria-label="Précédent"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
                 onClick={scrollNext}
-                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-violet-500 hover:text-white hover:border-violet-500 transition-all shadow-sm"
+                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all shadow-sm"
                 aria-label="Suivant"
               >
                 <ChevronRight className="h-5 w-5" />
@@ -138,17 +144,17 @@ export default function FeaturedProductsEnhanced({
         </div>
 
         {/* Tabs */}
-        <div className="mb-5 sm:mb-6 overflow-x-auto hide-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0">
+        <div className="mb-4 sm:mb-5 overflow-x-auto hide-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0">
           <div className="flex gap-2 sm:gap-3 w-max sm:w-auto">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "flex items-center gap-1.5 px-4 sm:px-5 py-2 sm:py-2.5 text-sm font-semibold rounded-full transition-all duration-300 whitespace-nowrap",
+                  "flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 text-sm font-semibold rounded-full transition-all duration-300 whitespace-nowrap",
                   activeTab === tab.id
-                    ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-lg shadow-violet-500/30"
-                    : "bg-white text-gray-600 border border-gray-200 hover:border-violet-300 hover:text-violet-600"
+                    ? "bg-black text-white shadow-md"
+                    : "bg-white text-gray-700 border border-gray-200 hover:border-gray-400 hover:bg-gray-50"
                 )}
               >
                 <span>{tab.icon}</span>
@@ -195,10 +201,10 @@ export default function FeaturedProductsEnhanced({
         </div>
 
         {/* Mobile View All */}
-        <div className="mt-6 text-center sm:hidden">
+        <div className="mt-5 text-center sm:hidden">
           <Link
             href="/products"
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-sm font-semibold rounded-full hover:shadow-lg transition-all"
+            className="inline-flex items-center gap-2 px-5 py-2 bg-black text-white text-sm font-semibold rounded-full hover:shadow-lg transition-all"
           >
             <Star className="h-4 w-4" />
             {t('viewAll')}

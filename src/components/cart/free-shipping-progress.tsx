@@ -20,15 +20,15 @@ export function FreeShippingProgress({ currentTotal, threshold, className }: Fre
     <div
       className={cn(
         'rounded-lg p-6 shadow-elevation-2 transition-all duration-300',
-        unlocked ? 'bg-gradient-to-r from-green-50 to-emerald-50' : 'bg-gradient-to-r from-orange-50 to-amber-50',
+        unlocked ? 'bg-turquoise-50' : 'bg-orange-50',
         className
       )}
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           {unlocked ? (
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
-              <Check className="h-5 w-5 text-green-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-turquoise-100">
+              <Check className="h-5 w-5 text-turquoise-600" />
             </div>
           ) : (
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100">
@@ -37,7 +37,7 @@ export function FreeShippingProgress({ currentTotal, threshold, className }: Fre
           )}
           <div>
             {unlocked ? (
-              <p className="text-sm font-semibold text-green-700">Livraison gratuite débloquée !</p>
+              <p className="text-sm font-semibold text-turquoise-700">Livraison gratuite débloquée !</p>
             ) : (
               <p className="text-sm font-semibold text-gray-900">
                 Plus que {formatPrice(remaining)} pour la livraison gratuite
@@ -54,8 +54,8 @@ export function FreeShippingProgress({ currentTotal, threshold, className }: Fre
           className={cn(
             'h-full transition-all duration-500 ease-out',
             unlocked
-              ? 'bg-gradient-to-r from-green-500 to-emerald-600'
-              : 'bg-gradient-to-r from-orange-500 to-orange-600 animate-shimmer'
+              ? 'bg-turquoise-600'
+              : 'bg-orange-600'
           )}
           style={{ width: `${percentage}%` }}
         />

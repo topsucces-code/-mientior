@@ -29,9 +29,26 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
+  user: {
+    modelName: 'users', // Use the existing users model
+    fields: {
+      email: 'email',
+      name: 'name',
+      emailVerified: 'email_verified',
+      image: 'image',
+      createdAt: 'createdAt',
+      updatedAt: 'updatedAt',
+    },
+  },
+  account: {
+    modelName: 'accounts',
+  },
+  session: {
+    modelName: 'sessions',
+  },
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: false, // Disable for development
   },
   socialProviders: {
     google: {
@@ -45,15 +62,7 @@ export const auth = betterAuth({
       enabled: !!process.env.FACEBOOK_CLIENT_ID,
     },
   },
-  session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days (604800 seconds) - default
-    updateAge: 60 * 60 * 24, // Update session if older than 1 day
-    cookieCache: {
-      enabled: true,
-      maxAge: 60 * 5, // 5 minutes
-    },
-  },
-  advanced: {
+    advanced: {
     // CSRF Protection: ONLY disabled in development, ALWAYS enabled in production
     disableCSRFCheck,
     // Secure cookies: ONLY in production (HTTPS required)

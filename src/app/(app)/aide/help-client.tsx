@@ -97,7 +97,7 @@ export default function HelpClient() {
   return (
     <div className="min-h-screen bg-platinum-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-blue-600 text-white py-16">
+      <div className="bg-orange-600 text-white py-16">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-display font-bold mb-4 text-center">
             Comment pouvons-nous vous aider ?
@@ -154,7 +154,7 @@ export default function HelpClient() {
                   </div>
                   <div>
                     <p className="font-medium text-sm text-anthracite-700">Téléphone</p>
-                    <p className="text-xs text-nuanced-600">01 23 45 67 89</p>
+                    <p className="text-xs text-nuanced-600">27 20 00 00 00</p>
                   </div>
                 </Link>
 

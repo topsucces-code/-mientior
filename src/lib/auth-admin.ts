@@ -68,7 +68,7 @@ export async function getAdminSession(): Promise<AdminSession | null> {
     }
 
     // Find admin user by email or authUserId
-    const adminUser = await prisma.adminUser.findFirst({
+    const adminUser = await prisma.admin_users.findFirst({
       where: {
         OR: [
           { email: session.user.email },
@@ -87,7 +87,7 @@ export async function getAdminSession(): Promise<AdminSession | null> {
 
     if (!adminUser.lastLoginAt || adminUser.lastLoginAt < fiveMinutesAgo) {
       // Update asynchronously without blocking
-      prisma.adminUser.update({
+      prisma.admin_users.update({
         where: { id: adminUser.id },
         data: { lastLoginAt: now },
       }).catch(err => console.error('Failed to update lastLoginAt:', err));

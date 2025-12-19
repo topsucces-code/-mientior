@@ -45,7 +45,7 @@ export async function detectAndAlertNewDevice(
       // Get user info for email
       // User model has firstName/lastName, BetterAuthUser has name
       const [user, authUser] = await Promise.all([
-        prisma.user.findUnique({
+        prisma.users.findUnique({
           where: { id: userId },
           select: { firstName: true, lastName: true, email: true },
         }),
@@ -105,7 +105,7 @@ async function isNewDeviceOrLocation(
   currentSessionToken: string
 ): Promise<boolean> {
   // Look for any previous sessions with the same IP or user agent
-  const previousSessions = await prisma.session.findMany({
+  const previousSessions = await prisma.sessions.findMany({
     where: {
       userId,
       token: { not: currentSessionToken },

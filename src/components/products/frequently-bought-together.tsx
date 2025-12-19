@@ -4,9 +4,10 @@ import { useState, useMemo } from 'react';
 import { Plus, Check, ShoppingBag, Sparkles, Tag } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useCartStore } from '@/stores/cart.store';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { cn, formatPrice } from '@/lib/utils';
 import type { Product, BundleProduct, BundleProductInfo } from '@/types';
 
 interface FrequentlyBoughtTogetherProps {
@@ -111,7 +112,7 @@ export function FrequentlyBoughtTogether({
       <div className="bg-white rounded-[2rem] border border-cyan-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
         
         {/* Header Section */}
-        <div className="px-6 py-6 md:px-8 md:py-7 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-cyan-50 bg-gradient-to-b from-cyan-50/30 to-white">
+        <div className="px-6 py-6 md:px-8 md:py-7 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-cyan-50 bg-cyan-50">
           <div className="flex items-start gap-4">
              <div className="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center shrink-0 shadow-sm border border-cyan-100">
                <Sparkles className="h-6 w-6" />
@@ -260,7 +261,7 @@ function BundleProductCard({
         {/* Status Badge */}
         {isMainProduct ? (
             <div className="absolute top-3 left-3 z-20">
-                <span className="bg-cyan-600/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm">
+                <span className="bg-cyan-600/90 backdrop-blur-sm text-white text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-sm">
                     Ce produit
                 </span>
             </div>

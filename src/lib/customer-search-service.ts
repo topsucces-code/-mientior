@@ -322,14 +322,14 @@ export class CustomerSearchService {
     }
 
     const [customers, totalCount] = await Promise.all([
-      prisma.user.findMany({
+      prisma.users.findMany({
         where,
         include,
         orderBy: { [params.sortBy]: params.sortOrder },
         skip,
         take: params.limit
       }),
-      prisma.user.count({ where })
+      prisma.users.count({ where })
     ])
 
     return {
@@ -361,13 +361,13 @@ export class CustomerSearchService {
     if (params.clvMax !== undefined) where.totalSpent = { ...where.totalSpent, lte: params.clvMax }
 
     const [customers, totalCount] = await Promise.all([
-      prisma.user.findMany({
+      prisma.users.findMany({
         where,
         orderBy: { [params.sortBy]: params.sortOrder },
         skip,
         take: params.limit
       }),
-      prisma.user.count({ where })
+      prisma.users.count({ where })
     ])
 
     return {

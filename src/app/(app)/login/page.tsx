@@ -23,7 +23,7 @@ export default async function LoginPage({
   const params = await searchParams
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-turquoise-50 via-white to-orange-50">
+    <div className="min-h-[calc(100vh-4rem)] bg-turquoise-50">
       <div className="container flex flex-col lg:flex-row items-center justify-center gap-12 py-12 lg:py-20">
         {/* Left side - Branding */}
         <div className="hidden lg:flex flex-col max-w-md">
@@ -67,7 +67,7 @@ export default async function LoginPage({
               "Mientior a changé ma façon de faire du shopping. Livraison rapide et produits de qualité !"
             </p>
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-turquoise-400 to-turquoise-600 flex items-center justify-center text-white font-bold">
+              <div className="h-10 w-10 rounded-full bg-turquoise-600 flex items-center justify-center text-white font-bold">
                 F
               </div>
               <div>

@@ -241,10 +241,10 @@ export function CartSummary({
                   <span className="font-medium">Réduction</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-green-600 bg-green-50 px-1.5 py-0.5 rounded">
+                  <span className="text-xs font-medium text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded">
                     -{calculateDiscountPercentage(subtotal, subtotal - discount)}%
                   </span>
-                  <span className="font-bold text-green-600">
+                  <span className="font-bold text-orange-600">
                     -{formatCurrency(discount)}
                   </span>
                 </div>
@@ -262,7 +262,7 @@ export function CartSummary({
                 {formatCurrency(total)}
               </span>
               {discount > 0 && (
-                <span className="text-[10px] text-green-600 font-medium mt-1 block">
+                <span className="text-xs text-green-600 font-medium mt-1 block">
                   Vous économisez {formatCurrency(discount)}
                 </span>
               )}

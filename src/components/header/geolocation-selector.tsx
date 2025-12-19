@@ -3,7 +3,7 @@
 import { MapPin, ChevronDown, Search, Loader2, Clock } from 'lucide-react'
 import { useGeolocation } from '@/hooks/use-geolocation'
 import { usePreferencesStore } from '@/stores/preferences.store'
-import { FRENCH_CITIES } from '@/lib/constants'
+import { africanCities, type AfricanCity } from '@/lib/african-cities'
 import { useState, useRef, useEffect } from 'react'
 
 export function GeolocationSelector() {
@@ -16,6 +16,9 @@ export function GeolocationSelector() {
     const dropdownRef = useRef<HTMLDivElement>(null)
 
     const displayLocation = location || data?.city || data?.country || 'Bouaké'
+
+    // Flatten all African cities into a single array
+    const allCities: AfricanCity[] = Object.values(africanCities).flat()
 
     // Load recent locations from localStorage
     useEffect(() => {
@@ -38,7 +41,7 @@ export function GeolocationSelector() {
     }, [])
 
     // Filter cities based on search query
-    const filteredCities = FRENCH_CITIES.filter(
+    const filteredCities = allCities.filter(
         (city) =>
             city.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             city.region.toLowerCase().includes(searchQuery.toLowerCase())
@@ -149,7 +152,7 @@ export function GeolocationSelector() {
                     {/* Recent Locations */}
                     {recentLocations.length > 0 && !searchQuery && (
                         <div className="mb-4">
-                            <h4 className="text-[11px] font-bold uppercase tracking-[0.1em] text-gray-500 mb-2">
+                            <h4 className="text-xs font-bold uppercase tracking-[0.1em] text-gray-500 mb-2">
                                 Récent
                             </h4>
                             <div className="space-y-1">
@@ -181,9 +184,9 @@ export function GeolocationSelector() {
                     <div className="max-h-60 overflow-y-auto custom-scrollbar">
                         {filteredCities.length > 0 ? (
                             <div className="space-y-1">
-                                {filteredCities.slice(0, 8).map((city) => (
+                                {filteredCities.slice(0, 8).map((city, index) => (
                                     <button
-                                        key={city.code}
+                                        key={`${city.countryCode}-${city.name}-${index}`}
                                         onClick={() => handleCitySelect(city.name)}
                                         className={`
                                             w-full flex items-start gap-3 px-3 py-2.5 rounded-lg

@@ -18,7 +18,7 @@ export async function POST(_request: NextRequest) {
     }
 
     // Delete all sessions except current
-    const result = await prisma.session.deleteMany({
+    const result = await prisma.sessions.deleteMany({
       where: {
         token: { not: currentToken },
       },

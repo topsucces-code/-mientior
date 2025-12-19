@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { usePathname } from "next/navigation";
 import { Refine } from "@refinedev/core";
 import { useNotificationProvider } from "@refinedev/antd";
 import routerProvider from "@refinedev/nextjs-router";
@@ -23,6 +24,8 @@ const { useBreakpoint } = Grid;
 
 // Inner component that uses theme context
 function AdminLayoutInner({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isLoginPage = pathname === "/admin/login";
   const { isDark } = useTheme();
   const themeConfig = useAntdTheme();
   const screens = useBreakpoint();
@@ -174,38 +177,46 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
               warnWhenUnsavedChanges: true,
             }}
           >
-            <Layout style={{ minHeight: "100vh" }}>
-              <AdminSidebar 
-                collapsed={collapsed} 
-                onCollapse={setCollapsed}
-                mobileOpen={mobileOpen}
-                onMobileToggle={setMobileOpen}
-              />
-              <Layout 
-                className="admin-main-layout"
-                style={{ 
-                  marginLeft: isMobile ? 0 : (collapsed ? 80 : 260), 
-                  transition: "margin-left 0.3s",
-                }}
-              >
-                <AdminHeader 
-                  onSearchOpen={() => setSearchOpen(true)} 
-                  onMobileMenuToggle={() => setMobileOpen(true)}
-                />
-                <Content
-                  style={{
-                    margin: isMobile ? "12px" : "24px",
-                    padding: isMobile ? "16px" : "24px",
-                    background: isDark ? '#141414' : '#fff',
-                    borderRadius: "8px",
-                    minHeight: "calc(100vh - 112px)",
-                  }}
-                >
-                  {children}
-                </Content>
-              </Layout>
-            </Layout>
-            <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
+            {isLoginPage ? (
+              <div style={{ minHeight: "100vh" }}>
+                {children}
+              </div>
+            ) : (
+              <>
+                <Layout style={{ minHeight: "100vh" }}>
+                  <AdminSidebar 
+                    collapsed={collapsed} 
+                    onCollapse={setCollapsed}
+                    mobileOpen={mobileOpen}
+                    onMobileToggle={setMobileOpen}
+                  />
+                  <Layout 
+                    className="admin-main-layout"
+                    style={{ 
+                      marginLeft: isMobile ? 0 : (collapsed ? 80 : 260), 
+                      transition: "margin-left 0.3s",
+                    }}
+                  >
+                    <AdminHeader 
+                      onSearchOpen={() => setSearchOpen(true)} 
+                      onMobileMenuToggle={() => setMobileOpen(true)}
+                    />
+                    <Content
+                      style={{
+                        margin: isMobile ? "12px" : "24px",
+                        padding: isMobile ? "16px" : "24px",
+                        background: isDark ? '#141414' : '#fff',
+                        borderRadius: "8px",
+                        minHeight: "calc(100vh - 112px)",
+                      }}
+                    >
+                      {children}
+                    </Content>
+                  </Layout>
+                </Layout>
+                <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
+              </>
+            )}
           </Refine>
         </I18nReady>
       </AntdApp>

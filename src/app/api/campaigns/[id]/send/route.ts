@@ -111,7 +111,7 @@ async function handlePOST(
     }
 
     // Query recipients
-    const recipients = await prisma.user.findMany({
+    const recipients = await prisma.users.findMany({
       where,
       select: {
         id: true,

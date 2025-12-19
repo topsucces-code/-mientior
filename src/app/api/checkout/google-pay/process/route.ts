@@ -256,7 +256,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Update order to failed status
-      await prisma.order.update({
+      await prisma.orders.update({
         where: { id: order.orderId },
         data: {
           paymentStatus: 'FAILED',

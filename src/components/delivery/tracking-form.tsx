@@ -51,7 +51,7 @@ export function DeliveryTrackingForm() {
             {
               date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR'),
               status: 'Commande confirmée',
-              location: 'Mientior - Paris',
+              location: 'Mientior - Abidjan',
               completed: true,
             },
             {
@@ -116,7 +116,7 @@ export function DeliveryTrackingForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-turquoise-600 hover:bg-turquoise-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'Recherche en cours...' : 'Suivre ma commande'}
         </button>
@@ -126,7 +126,7 @@ export function DeliveryTrackingForm() {
       {trackingData && (
         <div className="mt-8 space-y-6 animate-slide-down">
           {/* Status Summary */}
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100/50 rounded-xl p-6 border border-blue-200">
+          <div className="bg-turquoise-50 rounded-xl p-6 border border-turquoise-200">
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-lg font-bold text-gray-900 mb-1">
@@ -136,7 +136,7 @@ export function DeliveryTrackingForm() {
               </div>
               <div className="text-right">
                 <div className="text-sm text-gray-600 mb-1">Livraison estimée</div>
-                <div className="text-lg font-bold text-blue-600">
+                <div className="text-lg font-bold text-turquoise-600">
                   {trackingData.estimatedDelivery}
                 </div>
               </div>
@@ -156,7 +156,7 @@ export function DeliveryTrackingForm() {
                   <div
                     className={`relative z-10 flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${
                       event.completed
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-turquoise-600 text-white'
                         : 'bg-gray-200 text-gray-400'
                     }`}
                   >
@@ -186,8 +186,8 @@ export function DeliveryTrackingForm() {
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
             <p className="text-sm text-gray-600">
               <strong>Besoin d'aide ?</strong> Contactez notre service client au{' '}
-              <a href="tel:+33123456789" className="text-blue-600 hover:underline">
-                01 23 45 67 89
+              <a href="tel:+22527200000" className="text-blue-600 hover:underline">
+                27 20 00 00 00
               </a>{' '}
               ou par{' '}
               <a href="mailto:support@mientior.com" className="text-blue-600 hover:underline">
