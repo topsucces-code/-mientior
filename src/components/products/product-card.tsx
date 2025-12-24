@@ -188,61 +188,70 @@ export function ProductCard({
       )}
 
       {/* Wishlist Button */}
-      <button
-        onClick={handleToggleWishlist}
-        className={cn(
-          'absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-[3px]',
-          'bg-white/90 backdrop-blur-sm transition-all duration-300',
-          'hover:bg-white hover:scale-110',
-          'opacity-100 md:opacity-0 md:group-hover:opacity-100',
-          inWishlist && 'opacity-100'
-        )}
-        aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
-      >
-        <Heart
-          className={cn(
-            'h-5 w-5 transition-all',
-            inWishlist ? 'fill-error text-error scale-110' : 'text-anthracite-500'
-          )}
-        />
-      </button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={handleToggleWishlist}
+            className={cn(
+              'absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-[3px]',
+              'bg-white/90 backdrop-blur-sm transition-all duration-300',
+              'hover:bg-white hover:scale-110',
+              'opacity-100 md:opacity-0 md:group-hover:opacity-100',
+              inWishlist && 'opacity-100'
+            )}
+            aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+          >
+            <Heart
+              className={cn(
+                'h-5 w-5 transition-all',
+                inWishlist ? 'fill-error text-error scale-110' : 'text-anthracite-500'
+              )}
+            />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}</p>
+        </TooltipContent>
+      </Tooltip>
 
       {/* Image Container */}
-      <Link href={`/products/${slug}`} className="relative block aspect-square w-full overflow-hidden bg-platinum-100">
-        {image && !imageError ? (
-          <>
+      <div className="relative aspect-square w-full overflow-hidden bg-platinum-100">
+        <Link href={`/products/${slug}`} className="block h-full w-full">
+          {image && !imageError ? (
+            <>
+              <Image
+                src={normalizeImageSrc(image)}
+                alt={name}
+                width={400}
+                height={400}
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                className={cn(
+                  'h-full w-full object-cover transition-all duration-500',
+                  'group-hover:scale-110'
+                )}
+                onLoad={() => setImageLoaded(true)}
+                onError={() => setImageError(true)}
+                unoptimized={true}
+              />
+              {!imageLoaded && (
+                <div className="absolute inset-0 bg-platinum-200 animate-pulse" />
+              )}
+            </>
+          ) : (
             <Image
-              src={normalizeImageSrc(image)}
+              src={PLACEHOLDER_IMAGE}
               alt={name}
               width={400}
               height={400}
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className={cn(
-                'h-full w-full object-cover transition-all duration-500',
-                'group-hover:scale-110'
-              )}
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageError(true)}
+              className="h-full w-full object-contain p-6"
               unoptimized={true}
             />
-            {!imageLoaded && (
-              <div className="absolute inset-0 bg-platinum-200 animate-pulse" />
-            )}
-          </>
-        ) : (
-          <Image
-            src={PLACEHOLDER_IMAGE}
-            alt={name}
-            width={400}
-            height={400}
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="h-full w-full object-contain p-6"
-            unoptimized={true}
-          />
-        )}
+          )}
+        </Link>
 
         {freeShipping && (
-          <div className="absolute bottom-2 left-2 z-10">
+          <div className="absolute bottom-2 left-2 z-10 pointer-events-none">
             <span className="rounded-[3px] bg-white/90 px-2 py-1 text-xs font-semibold text-anthracite-800 backdrop-blur-sm">
               Livraison offerte
             </span>
@@ -277,25 +286,32 @@ export function ProductCard({
           </Tooltip>
 
           {onQuickView && (
-            <button
-              onClick={handleQuickView}
-              className="flex h-9 w-9 items-center justify-center rounded-[3px] bg-white/90 backdrop-blur-sm transition-all hover:bg-white hover:scale-110"
-              aria-label="Quick view"
-            >
-              <Eye className="h-4 w-4 text-anthracite-600" />
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleQuickView}
+                  className="flex h-9 w-9 items-center justify-center rounded-[3px] bg-white/90 backdrop-blur-sm transition-all hover:bg-white hover:scale-110"
+                  aria-label="Quick view"
+                >
+                  <Eye className="h-4 w-4 text-anthracite-600" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Quick view</p>
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
 
         {/* Out of Stock Overlay */}
         {isOutOfStock && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm pointer-events-none">
             <span className="rounded-[3px] bg-anthracite-600 px-4 py-2 text-sm font-semibold text-white">
               Out of Stock
             </span>
           </div>
         )}
-      </Link>
+      </div>
 
       {/* Product Info */}
       <div className="flex flex-1 flex-col gap-2 p-3">
