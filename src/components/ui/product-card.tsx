@@ -277,7 +277,7 @@ export function ProductCard({
               'transition-all duration-200 hover:scale-110',
               inWishlist && 'bg-red-50 border-red-200'
             )}
-            aria-label={inWishlist ? tw('removedFromWishlist') : tw('addToWishlist')}
+            aria-label={inWishlist ? `${tw('removedFromWishlist')} ${name}` : `${tw('addToWishlist')} ${name}`}
           >
             <Heart
               className={cn(
@@ -290,7 +290,7 @@ export function ProductCard({
             <button
               onClick={handleQuickView}
               className="w-7 h-7 flex items-center justify-center rounded-[3px] bg-white shadow-md border border-gray-100 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
-              aria-label={t('quickView')}
+              aria-label={`${t('quickView')} ${name}`}
             >
               <Eye className="w-3.5 h-3.5 text-gray-400" />
             </button>
@@ -362,7 +362,7 @@ export function ProductCard({
             'hover:scale-110 active:scale-95',
             'disabled:opacity-50 disabled:cursor-not-allowed'
           )}
-          aria-label={isAddingToCart ? t('added') : t('addToCart')}
+          aria-label={isAddingToCart ? `${t('added')} ${name}` : `${t('addToCart')} ${name}`}
         >
           {isAddingToCart ? (
             <Check className="w-4 h-4" />
