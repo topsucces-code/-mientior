@@ -252,6 +252,7 @@ export function EnhancedCartPreview() {
                                                     updateQuantity(item.id, Math.max(1, item.quantity - 1))
                                                 }}
                                                 className="w-6 h-6 border border-gray-200 rounded flex items-center justify-center hover:border-turquoise-600 hover:text-turquoise-600 transition-colors"
+                                                aria-label={t('item.decreaseQuantity')}
                                             >
                                                 <Minus className="w-3 h-3" />
                                             </button>
@@ -265,6 +266,7 @@ export function EnhancedCartPreview() {
                                                     updateQuantity(item.id, item.quantity + 1)
                                                 }}
                                                 className="w-6 h-6 border border-gray-200 rounded flex items-center justify-center hover:border-turquoise-600 hover:text-turquoise-600 transition-colors"
+                                                aria-label={t('item.increaseQuantity')}
                                             >
                                                 <Plus className="w-3 h-3" />
                                             </button>
