@@ -147,6 +147,7 @@ export function SavedForLater({ items, onMoveToCart, onRemove, className }: Save
                   size="icon"
                   className="text-nuanced-500 hover:text-red-600"
                   onClick={() => handleRemove(item)}
+                  aria-label="Supprimer l'article"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
