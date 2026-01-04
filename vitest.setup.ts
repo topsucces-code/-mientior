@@ -1,9 +1,8 @@
 // Vitest setup file
 import { beforeAll, afterAll } from 'vitest'
-import * as dotenv from 'dotenv'
 
 // Load environment variables from .env file first
-dotenv.config()
+// Vitest loads .env automatically
 
 // Set up test environment variables (only if not already set)
 process.env.NODE_ENV = 'test'
