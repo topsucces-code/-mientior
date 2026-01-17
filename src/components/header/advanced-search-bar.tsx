@@ -1,8 +1,8 @@
 'use client'
 
-import { Search, Mic, Camera, X, Clock } from 'lucide-react'
+import { Search, Mic, Camera, X, Clock, Loader2 } from 'lucide-react'
 import { useHeader } from '@/contexts/header-context'
-import { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import type { SearchSuggestion } from '@/types'
 import { useSearchHistory } from '@/hooks/use-search-history'
@@ -63,7 +63,7 @@ export function AdvancedSearchBar() {
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [showHistory, setShowHistory] = useState(false)
     const [isListening, setIsListening] = useState(false)
-    const [, setIsLoadingSuggestions] = useState(false)
+    const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
     const inputRef = useRef<HTMLInputElement>(null)
     const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
     const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistory()
@@ -211,9 +211,13 @@ export function AdvancedSearchBar() {
     }
 
     return (
-        <form onSubmit={handleSearch} className="relative flex-1 max-w-2xl">
+        <form onSubmit={handleSearch} className="relative flex-1 max-w-2xl" role="search">
             <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                {isLoadingSuggestions ? (
+                    <Loader2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 animate-spin" />
+                ) : (
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                )}
 
                 <input
                     ref={inputRef}
@@ -238,6 +242,9 @@ export function AdvancedSearchBar() {
                         }, 200)
                     }}
                     placeholder={t('search')}
+                    aria-label={t('search')}
+                    aria-expanded={showSuggestions || showHistory}
+                    aria-controls={showSuggestions ? 'search-suggestions' : showHistory ? 'search-history' : undefined}
                     className="w-full h-12 pl-12 pr-32 rounded-full border-2 border-gray-200 focus:border-turquoise-500 focus:outline-none transition-colors"
                 />
 
@@ -287,7 +294,7 @@ export function AdvancedSearchBar() {
 
             {/* Search History */}
             {showHistory && history.length > 0 && (
-                <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-[110] animate-slide-down">
+                <div id="search-history" className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-[110] animate-slide-down">
                     {history.map((query, index) => (
                         <div
                             key={`history-${index}`}
@@ -328,7 +335,7 @@ export function AdvancedSearchBar() {
 
             {/* Search Suggestions */}
             {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-[110] animate-slide-down">
+                <div id="search-suggestions" className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-[110] animate-slide-down">
                     {suggestions.map((suggestion, index) => (
                         <button
                             key={`${suggestion.type}-${index}`}
