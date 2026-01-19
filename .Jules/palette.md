@@ -1,0 +1,3 @@
+## 2024-05-23 - [Button Loading State and Slot Compatibility]
+**Learning:** When using Radix UI `Slot` (via `asChild` prop), the component must render exactly one child. Adding a loading spinner conditionally along with `children` breaks this if `asChild` is true.
+**Action:** Always check `!asChild` before rendering auxiliary elements (like spinners or icons) inside a component that supports `Slot`. If `asChild` is true, delegate control fully to the child element or wrap it if possible (though wrapping breaks the `Slot` behavior of merging props). For `Button`, simply don't render the spinner if `asChild` is true, or document that `isLoading` is visual-only for non-slot buttons.
