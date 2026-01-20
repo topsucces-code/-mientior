@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ShoppingCart, Trash2, Heart } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { formatCurrency } from '@/lib/currency'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -25,8 +26,8 @@ export function SavedForLater({ items, onMoveToCart, onRemove, className }: Save
     if (!item.inStock) {
       toast({
         title: 'Article en rupture de stock',
-        description: 'Cet article n\'est pas disponible actuellement.',
-        variant: 'destructive'
+        description: "Cet article n'est pas disponible actuellement.",
+        variant: 'destructive',
       })
       return
     }
@@ -34,7 +35,7 @@ export function SavedForLater({ items, onMoveToCart, onRemove, className }: Save
     toast({
       title: 'Article ajouté au panier',
       description: `${item.productName} a été déplacé vers votre panier.`,
-      variant: 'default'
+      variant: 'default',
     })
   }
 
@@ -43,7 +44,7 @@ export function SavedForLater({ items, onMoveToCart, onRemove, className }: Save
     toast({
       title: 'Article supprimé',
       description: `${item.productName} a été retiré de vos articles sauvegardés.`,
-      variant: 'default'
+      variant: 'default',
     })
   }
 
@@ -55,19 +56,19 @@ export function SavedForLater({ items, onMoveToCart, onRemove, className }: Save
     <div className={cn('space-y-4', className)}>
       <div className="flex items-center gap-2">
         <Heart className="h-5 w-5 text-orange-500" />
-        <h2 className="text-lg font-semibold text-anthracite-700">
+        <h2 className="text-anthracite-700 text-lg font-semibold">
           Articles sauvegardés ({items.length})
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {items.map((item) => (
-          <Card key={item.id} className="p-4 hover:shadow-elevation-2 transition-shadow">
+          <Card key={item.id} className="p-4 transition-shadow hover:shadow-elevation-2">
             <div className="space-y-3">
               {/* Product Image */}
               <Link
                 href={`/products/${item.productSlug}`}
-                className="relative block aspect-square w-full overflow-hidden rounded-md bg-platinum-100"
+                className="aspect-square relative block w-full overflow-hidden rounded-md bg-platinum-100"
               >
                 {item.productImage ? (
                   <Image
@@ -79,11 +80,11 @@ export function SavedForLater({ items, onMoveToCart, onRemove, className }: Save
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center">
-                    <span className="text-xs text-nuanced-500">No image</span>
+                    <span className="text-nuanced-500 text-xs">No image</span>
                   </div>
                 )}
                 {item.badge && (
-                  <Badge className="absolute top-2 left-2 text-xs" variant="secondary">
+                  <Badge className="absolute left-2 top-2 text-xs" variant="secondary">
                     {item.badge}
                   </Badge>
                 )}
@@ -93,14 +94,14 @@ export function SavedForLater({ items, onMoveToCart, onRemove, className }: Save
               <div className="space-y-2">
                 <Link
                   href={`/products/${item.productSlug}`}
-                  className="text-sm font-medium text-anthracite-700 hover:text-orange-500 transition-colors line-clamp-2"
+                  className="text-anthracite-700 line-clamp-2 text-sm font-medium transition-colors hover:text-orange-500"
                 >
                   {item.productName}
                 </Link>
 
                 {/* Variant Info */}
                 {item.variant && (
-                  <div className="flex flex-wrap gap-1 text-xs text-nuanced-600">
+                  <div className="text-nuanced-600 flex flex-wrap gap-1 text-xs">
                     {item.variant.size && <span>Taille: {item.variant.size}</span>}
                     {item.variant.color && <span>• Couleur: {item.variant.color}</span>}
                   </div>
@@ -108,11 +109,17 @@ export function SavedForLater({ items, onMoveToCart, onRemove, className }: Save
 
                 {/* Stock Badge */}
                 {item.inStock ? (
-                  <Badge variant="outline" className="text-xs bg-turquoise-50 text-turquoise-700 border-turquoise-200">
+                  <Badge
+                    variant="outline"
+                    className="border-turquoise-200 bg-turquoise-50 text-xs text-turquoise-700"
+                  >
                     En stock
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="text-xs bg-red-50 text-red-700 border-red-200">
+                  <Badge
+                    variant="outline"
+                    className="border-red-200 bg-red-50 text-xs text-red-700"
+                  >
                     Rupture de stock
                   </Badge>
                 )}
@@ -120,11 +127,11 @@ export function SavedForLater({ items, onMoveToCart, onRemove, className }: Save
                 {/* Price */}
                 <div className="flex items-center gap-2">
                   <span className="text-base font-semibold text-orange-500">
-                    ${(item.price / 100).toFixed(2)}
+                    {formatCurrency(item.price)}
                   </span>
                   {item.compareAtPrice && item.compareAtPrice > item.price && (
-                    <span className="text-xs text-nuanced-500 line-through">
-                      ${(item.compareAtPrice / 100).toFixed(2)}
+                    <span className="text-nuanced-500 text-xs line-through">
+                      {formatCurrency(item.compareAtPrice)}
                     </span>
                   )}
                 </div>
@@ -139,7 +146,7 @@ export function SavedForLater({ items, onMoveToCart, onRemove, className }: Save
                   onClick={() => handleMoveToCart(item)}
                   disabled={!item.inStock}
                 >
-                  <ShoppingCart className="h-4 w-4 mr-1" />
+                  <ShoppingCart className="mr-1 h-4 w-4" />
                   Ajouter au panier
                 </Button>
                 <Button
@@ -147,6 +154,7 @@ export function SavedForLater({ items, onMoveToCart, onRemove, className }: Save
                   size="icon"
                   className="text-nuanced-500 hover:text-red-600"
                   onClick={() => handleRemove(item)}
+                  aria-label="Supprimer l'article"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
