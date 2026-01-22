@@ -8,6 +8,11 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import type { SavedForLaterItem } from '@/types'
 import { useToast } from '@/hooks/use-toast'
 
@@ -138,18 +143,27 @@ export function SavedForLater({ items, onMoveToCart, onRemove, className }: Save
                   className="flex-1"
                   onClick={() => handleMoveToCart(item)}
                   disabled={!item.inStock}
+                  aria-label={`Ajouter ${item.productName} au panier`}
                 >
                   <ShoppingCart className="h-4 w-4 mr-1" />
                   Ajouter au panier
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-nuanced-500 hover:text-red-600"
-                  onClick={() => handleRemove(item)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-nuanced-500 hover:text-red-600"
+                      onClick={() => handleRemove(item)}
+                      aria-label={`Supprimer ${item.productName}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Supprimer</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
           </Card>
