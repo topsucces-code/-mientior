@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import Link from 'next/link'
 // toast import removed - using redirect to success page instead
-import { Loader2, Mail, Lock, User, Eye, EyeOff, Shield, Truck, Gift } from 'lucide-react'
+import { Mail, Lock, User, Eye, EyeOff, Shield, Truck, Gift } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -95,10 +95,12 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
       if (event.key === 'Escape') {
         // Dismiss all toast messages
         dismissMessage()
-        
+
         // Return focus to the form if a message was dismissed
         if (formRef.current) {
-          const firstInput = formRef.current.querySelector('input:not([disabled])') as HTMLInputElement
+          const firstInput = formRef.current.querySelector(
+            'input:not([disabled])'
+          ) as HTMLInputElement
           if (firstInput) {
             firstInput.focus()
           }
@@ -137,9 +139,7 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
 
       if (!data.isValid && data.errors) {
         // Find breach-specific error
-        const breachErr = data.errors.find((err: string) =>
-          err.includes('violation de données')
-        )
+        const breachErr = data.errors.find((err: string) => err.includes('violation de données'))
         if (breachErr) {
           setBreachError(breachErr)
         }
@@ -208,7 +208,7 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
     try {
       if (isLogin) {
         const { email, password, rememberMe } = data as LoginFormData
-        
+
         // Call login API directly to avoid immediate redirect
         const response = await fetch('/api/auth/login', {
           method: 'POST',
@@ -239,20 +239,20 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
           if (result.code === 'EMAIL_NOT_VERIFIED') {
             showMessage('EMAIL_NOT_VERIFIED', {
               action: {
-                label: 'Renvoyer l\'email',
+                label: "Renvoyer l'email",
                 onClick: () => handleResendVerification(result.email || email),
               },
             })
             setIsSubmitting(false)
             return
           }
-          
+
           // Requirement 4.3: Handle account lockout with duration display
           if (result.code === 'ACCOUNT_LOCKED' && result.lockedUntil) {
             const lockedUntil = new Date(result.lockedUntil)
             const now = new Date()
             const durationMinutes = Math.ceil((lockedUntil.getTime() - now.getTime()) / (1000 * 60))
-            
+
             showMessage('ACCOUNT_LOCKED', {
               duration: durationMinutes,
               attempts: result.attempts,
@@ -261,21 +261,21 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
             setIsSubmitting(false)
             return
           }
-          
+
           // Requirement 4.1: Handle invalid credentials
           if (response.status === 401) {
             showMessage('INVALID_CREDENTIALS')
             setIsSubmitting(false)
             return
           }
-          
+
           // Requirement 4.4: Handle network errors
           if (response.status >= 500) {
             showMessage('SERVER_ERROR')
             setIsSubmitting(false)
             return
           }
-          
+
           // Generic error fallback
           setError(result.error || 'Échec de la connexion')
           setIsSubmitting(false)
@@ -285,14 +285,14 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
         // Login successful - show success message (Requirements 3.1, 3.2, 3.3, 3.4)
         // Requirement 3.1: Display success message after successful login
         showMessage('LOGIN_SUCCESS')
-        
+
         // Requirement 3.2: Display for 2 seconds before redirect
         // Requirement 3.3: Keep loading indicator during redirect
         // Requirement 3.4: Redirect to intended page or account dashboard
         setTimeout(() => {
           window.location.href = redirectTo || '/account'
         }, 2000) // 2 second delay before redirect
-        
+
         // Keep isSubmitting true to show loading indicator during redirect
       } else {
         const { email, password, name } = data as RegisterFormData
@@ -301,7 +301,7 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
         const result = await signUp(email, password, name, redirectTo)
 
         if (!result.success) {
-          setError(result.error || 'Échec de l\'inscription')
+          setError(result.error || "Échec de l'inscription")
           if (result.suggestion) {
             setError(`${result.error}. ${result.suggestion}`)
           }
@@ -346,7 +346,7 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
   return (
     <div className="mx-auto w-full max-w-md">
       {/* Card Container */}
-      <div className="rounded-2xl bg-white p-8 shadow-xl border border-gray-100">
+      <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-xl">
         {/* Header */}
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-turquoise-600 shadow-lg">
@@ -371,19 +371,30 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
           <Button
             type="button"
             variant="outline"
-            className="w-full h-12 text-base font-medium border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all"
+            className="h-12 w-full border-gray-200 text-base font-medium transition-all hover:border-gray-300 hover:bg-gray-50"
             onClick={handleGoogleSignIn}
-            disabled={isSubmitting || !!lockoutUntil}
+            disabled={!!lockoutUntil}
+            loading={isSubmitting}
           >
-            {isSubmitting ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
+            {!isSubmitting && (
               <>
                 <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  />
                 </svg>
                 Continuer avec Google
               </>
@@ -393,16 +404,18 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
           <Button
             type="button"
             variant="outline"
-            className="w-full h-12 text-base font-medium border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all"
+            className="h-12 w-full border-gray-200 text-base font-medium transition-all hover:border-gray-300 hover:bg-gray-50"
             onClick={handleFacebookSignIn}
-            disabled={isSubmitting || !!lockoutUntil}
+            disabled={!!lockoutUntil}
+            loading={isSubmitting}
           >
-            {isSubmitting ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
+            {!isSubmitting && (
               <>
                 <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
-                  <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                  <path
+                    fill="#1877F2"
+                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                  />
                 </svg>
                 Continuer avec Facebook
               </>
@@ -416,18 +429,16 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
             <span className="w-full border-t border-gray-200" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-white px-4 text-gray-400">
-              ou avec votre email
-            </span>
+            <span className="bg-white px-4 text-gray-400">ou avec votre email</span>
           </div>
         </div>
 
         {/* Form */}
-        <form 
+        <form
           ref={formRef}
-          onSubmit={handleSubmit(onSubmit)} 
+          onSubmit={handleSubmit(onSubmit)}
           className="space-y-4"
-          aria-label={isLogin ? 'Formulaire de connexion' : 'Formulaire d\'inscription'}
+          aria-label={isLogin ? 'Formulaire de connexion' : "Formulaire d'inscription"}
         >
           {error && (
             <Alert variant="destructive" role="alert" aria-live="assertive" className="rounded-xl">
@@ -462,8 +473,8 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
                   type="text"
                   placeholder="Amadou Diallo"
                   className={cn(
-                    "h-12 pl-11 rounded-xl border-gray-200 focus:border-turquoise-500 focus:ring-turquoise-500",
-                    'name' in errors && errors.name && "border-red-500"
+                    'h-12 rounded-xl border-gray-200 pl-11 focus:border-turquoise-500 focus:ring-turquoise-500',
+                    'name' in errors && errors.name && 'border-red-500'
                   )}
                   {...register('name' as keyof (LoginFormData | RegisterFormData))}
                   disabled={isSubmitting}
@@ -491,8 +502,8 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
                 type="email"
                 placeholder="vous@exemple.com"
                 className={cn(
-                  "h-12 pl-11 rounded-xl border-gray-200 focus:border-turquoise-500 focus:ring-turquoise-500",
-                  errors.email && "border-red-500"
+                  'h-12 rounded-xl border-gray-200 pl-11 focus:border-turquoise-500 focus:ring-turquoise-500',
+                  errors.email && 'border-red-500'
                 )}
                 {...register('email')}
                 disabled={isSubmitting}
@@ -529,8 +540,8 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
                 className={cn(
-                  "h-12 pl-11 pr-11 rounded-xl border-gray-200 focus:border-turquoise-500 focus:ring-turquoise-500",
-                  (errors.password || breachError) && "border-red-500"
+                  'h-12 rounded-xl border-gray-200 pl-11 pr-11 focus:border-turquoise-500 focus:ring-turquoise-500',
+                  (errors.password || breachError) && 'border-red-500'
                 )}
                 {...register('password', {
                   onChange: (e) => setPasswordValue(e.target.value),
@@ -538,18 +549,18 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
                     if (!isLogin) {
                       checkPasswordBreach(e.target.value)
                     }
-                  }
+                  },
                 })}
                 disabled={isSubmitting}
                 aria-invalid={errors.password || breachError ? 'true' : 'false'}
                 aria-describedby={
-                  errors.password 
-                    ? 'password-error' 
-                    : breachError 
-                    ? 'password-breach-error' 
-                    : !isLogin && passwordValue 
-                    ? 'password-strength' 
-                    : undefined
+                  errors.password
+                    ? 'password-error'
+                    : breachError
+                      ? 'password-breach-error'
+                      : !isLogin && passwordValue
+                        ? 'password-strength'
+                        : undefined
                 }
               />
               <button
@@ -596,13 +607,19 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
                   type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   className={cn(
-                    "h-12 pl-11 pr-11 rounded-xl border-gray-200 focus:border-turquoise-500 focus:ring-turquoise-500",
-                    'confirmPassword' in errors && errors.confirmPassword && "border-red-500"
+                    'h-12 rounded-xl border-gray-200 pl-11 pr-11 focus:border-turquoise-500 focus:ring-turquoise-500',
+                    'confirmPassword' in errors && errors.confirmPassword && 'border-red-500'
                   )}
                   {...register('confirmPassword' as keyof (LoginFormData | RegisterFormData))}
                   disabled={isSubmitting}
-                  aria-invalid={'confirmPassword' in errors && errors.confirmPassword ? 'true' : 'false'}
-                  aria-describedby={'confirmPassword' in errors && errors.confirmPassword ? 'confirmPassword-error' : undefined}
+                  aria-invalid={
+                    'confirmPassword' in errors && errors.confirmPassword ? 'true' : 'false'
+                  }
+                  aria-describedby={
+                    'confirmPassword' in errors && errors.confirmPassword
+                      ? 'confirmPassword-error'
+                      : undefined
+                  }
                 />
                 <button
                   type="button"
@@ -610,7 +627,11 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   tabIndex={-1}
                 >
-                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
                 </button>
               </div>
               {'confirmPassword' in errors && errors.confirmPassword && (
@@ -633,11 +654,11 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
                   }
                 }}
                 disabled={isSubmitting}
-                className="border-gray-300 data-[state=checked]:bg-turquoise-600 data-[state=checked]:border-turquoise-600"
+                className="border-gray-300 data-[state=checked]:border-turquoise-600 data-[state=checked]:bg-turquoise-600"
               />
               <Label
                 htmlFor="rememberMe"
-                className="text-sm font-normal text-gray-600 cursor-pointer"
+                className="cursor-pointer text-sm font-normal text-gray-600"
               >
                 Rester connecté pendant 30 jours
               </Label>
@@ -645,23 +666,21 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
           )}
 
           {/* Submit Button */}
-          <Button 
-            type="submit" 
-            className="w-full h-12 text-base font-semibold bg-orange-500 hover:bg-orange-600 rounded-xl shadow-lg shadow-orange-500/25 transition-all hover:shadow-xl hover:shadow-orange-500/30"
-            disabled={isSubmitting || !!lockoutUntil}
+          <Button
+            type="submit"
+            className="h-12 w-full rounded-xl bg-orange-500 text-base font-semibold shadow-lg shadow-orange-500/25 transition-all hover:bg-orange-600 hover:shadow-xl hover:shadow-orange-500/30"
+            disabled={!!lockoutUntil}
+            loading={isSubmitting}
           >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                {isLogin ? 'Connexion...' : 'Création du compte...'}
-              </>
-            ) : lockoutUntil ? (
-              'Compte verrouillé'
-            ) : isLogin ? (
-              'Se connecter'
-            ) : (
-              'Créer mon compte'
-            )}
+            {lockoutUntil
+              ? 'Compte verrouillé'
+              : isSubmitting
+                ? isLogin
+                  ? 'Connexion...'
+                  : 'Création du compte...'
+                : isLogin
+                  ? 'Se connecter'
+                  : 'Créer mon compte'}
           </Button>
         </form>
 
@@ -670,14 +689,20 @@ export function AuthForm({ mode, redirectTo }: AuthFormProps) {
           {isLogin ? (
             <>
               Pas encore de compte ?{' '}
-              <Link href="/register" className="font-semibold text-turquoise-600 hover:text-turquoise-700">
+              <Link
+                href="/register"
+                className="font-semibold text-turquoise-600 hover:text-turquoise-700"
+              >
                 Créer un compte
               </Link>
             </>
           ) : (
             <>
               Déjà un compte ?{' '}
-              <Link href="/login" className="font-semibold text-turquoise-600 hover:text-turquoise-700">
+              <Link
+                href="/login"
+                className="font-semibold text-turquoise-600 hover:text-turquoise-700"
+              >
                 Se connecter
               </Link>
             </>
