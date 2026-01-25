@@ -416,8 +416,12 @@ export function ProductCard({
 
         {/* Rating - Temu Style */}
         {rating > 0 && (
-          <div className="flex items-center gap-1">
-            <div className="flex items-center">
+          <div
+            className="flex items-center gap-1"
+            role="img"
+            aria-label={`Rated ${rating} out of 5 stars${reviewCount > 0 ? `, based on ${reviewCount} reviews` : ''}`}
+          >
+            <div className="flex items-center" aria-hidden="true">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
@@ -431,7 +435,7 @@ export function ProductCard({
               ))}
             </div>
             {reviewCount > 0 && (
-              <span className="text-[10px] text-gray-400">
+              <span className="text-[10px] text-gray-400" aria-hidden="true">
                 {reviewCount > 1000 ? `${(reviewCount / 1000).toFixed(1)}k` : reviewCount}
               </span>
             )}
