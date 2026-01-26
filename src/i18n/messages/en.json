@@ -543,6 +543,7 @@
       "addedToCart": "Added to cart",
       "addToWishlist": "Add to wishlist",
       "removeFromWishlist": "Remove from wishlist",
+      "ratedOutOf5": "Rated {rating} out of {max} stars",
       "quickView": "Quick view",
       "sales": "sales",
       "verifiedSeller": "Featured Seller",
