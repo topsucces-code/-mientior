@@ -417,10 +417,11 @@ export function ProductCard({
         {/* Rating - Temu Style */}
         {rating > 0 && (
           <div className="flex items-center gap-1">
-            <div className="flex items-center">
+            <div className="flex items-center" role="img" aria-label={t('ratedOutOf5', { rating, max: 5 })}>
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
+                  aria-hidden="true"
                   className={cn(
                     'w-2.5 h-2.5',
                     i < Math.floor(rating)
